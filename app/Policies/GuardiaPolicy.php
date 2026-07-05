@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\Guard;
+use App\Models\User;
+
+
+class GuardiaPolicy
+{
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(User $user): bool
+    {
+        return $user->rol?->name !== 'visitante';
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(User $user, Guard $guard): bool
+    {
+        return true;
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create(User $user): bool
+    {
+        return $user->HasPermisos('crear_guardia');
+    }
+
+    public function cerrar(User $user, Guard $guardia): bool
+    {
+        if ($guardia->status === 'closed') {
+            return false;
+        }
+        //Capitan de guardia
+        if ($guardia->capitan_id === $user->id) {
+            return $user->HasPermisos('cerrar_guardia');
+        }
+        //Oficiales de guardia
+        if ($guardia->oficer_id === $user->id) {
+            return $user->HasPermisos('cerrar_guardia');
+        }
+
+        return $user->isAdmin();
+    }
+    public function reactivar(User $user, Guard $guardia): bool
+    {
+        if ($guardia->status === 'open') {
+            return false;
+        }
+        return $guardia->captain_id === $user->id
+            || $guardia->oficer_id === $user->id
+            || $user->isAdmin();
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, Guard $guard): bool
+    {
+        return $user->isAdmin();
+    }
+    /**
+     * Determine whether the user can view trashed guards.
+     */
+    public function viewTrashed(User $user): bool
+    {
+        return $user->isSuperAdmin() || $user->isAdmin();
+    }
+
+    /**
+     * Determine whether the user can restore a trashed guard.
+     */
+    public function restore(User $user, Guard $guard): bool
+    {
+        return $user->isSuperAdmin() || $user->isAdmin();
+    }
+
+    /**
+     * Determine whether the user can permanently delete a guard.
+     */
+    public function forceDelete(User $user, Guard $guard): bool
+    {
+        return $user->isSuperAdmin();
+    }
+
+    /**
+     * Determine whether the user can delete the model (soft delete).
+     */
+    public function delete(User $user, Guard $guard): bool
+    {
+        // Solo Super Admin o Admin pueden eliminar
+        // y solo si la guardia está cerrada
+        return ($user->isSuperAdmin() || $user->isAdmin()) && $guard->status === 'closed';
+    }
+}

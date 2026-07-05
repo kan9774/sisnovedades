@@ -1,0 +1,143 @@
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\PasskeyUser;
+use Laravel\Fortify\PasskeyAuthenticatable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\database\Eloquent\SoftDeletes;
+
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property Carbon|null $email_verified_at
+ * @property string $password
+ * @property string|null $two_factor_secret
+ * @property string|null $two_factor_recovery_codes
+ * @property Carbon|null $two_factor_confirmed_at
+ * @property string|null $remember_token
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
+#[Fillable(['name', 'last_name', 'grade', 'email', 'password', 'rol_id', 'status', 'is_super_admin'])]
+#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+class User extends Authenticatable implements PasskeyUser
+{
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, softDeletes;
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'is_super_admin' => 'boolean',
+        ];
+    }
+    protected $with = ['rol.permisos', 'permisosDirectos'];
+
+    /**
+     * Get the user's initials
+     */
+    public function initials(): string
+    {
+        $initials = Str::initials($this->name, true);
+
+        return Str::length($initials) > 1
+            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
+            : $initials;
+    }
+    public function rol(): BelongsTo
+    {
+        return $this->belongsTo(Rol::class, 'rol_id');
+    }
+
+    /**
+     * Permisos asignados directamente al usuario, además de los de su rol.
+     */
+    public function permisosDirectos(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'user_permission');
+    }
+
+    public function guardians(): HasMany
+    {
+        return $this->hasMany(Guard::class, 'oficer_id');
+    }
+    public function guardiasComoCapitan(): HasMany
+    {
+        return $this->hasMany(Guard::class, 'captain_id');
+    }
+    public function novedades(): HasMany
+    {
+        return $this->hasMany(News::class, 'escribiente_id');
+    }
+
+      /**
+     * Verificar si el usuario es Super Admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->is_super_admin === true;
+    }
+
+    /**
+     * Verificar si el usuario es Admin (incluye Super Admin)
+     */
+    public function isAdmin(): bool
+    {
+        return $this->rol?->name === 'admin' || $this->isSuperAdmin();
+    }
+
+    /**
+     * Verificar si el usuario es Oficial de Día
+     */
+    public function isOficialDia(): bool
+    {
+        return $this->rol?->name === 'oficial_de_dia';
+    }
+
+    /**
+     * Verificar si el usuario es Capitán
+     */
+    public function isCapitan(): bool
+    {
+        return $this->rol?->name === 'capitan_de_servicio';
+    }
+
+    /**
+     * Verificar si el usuario es Escribiente
+     */
+    public function isEscribiente(): bool
+    {
+        return $this->rol?->name === 'escribiente';
+    }
+
+    /**
+     * Verificar si el usuario tiene un permiso específico,
+     * ya sea heredado de su rol o asignado directamente.
+     */
+    public function HasPermisos(string $permiso): bool
+    {
+        return $this->rol?->permisos->contains('name', $permiso)
+            || $this->permisosDirectos->contains('name', $permiso);
+    }
+}

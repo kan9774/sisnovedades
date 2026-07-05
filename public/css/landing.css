@@ -1,0 +1,686 @@
+/* ======================================================
+   landing.css - Estilos para la landing page
+   ====================================================== */
+
+/* ----- FUENTE GLOBAL ----- */
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+/* ======================================================
+   NAVBAR PERSONALIZADA (integrada)
+   ====================================================== */
+
+.navbar-custom {
+    background: rgba(10, 30, 50, 0.95);
+    backdrop-filter: blur(5px);
+    border-bottom: 2px solid #f0c040;
+    padding: 10px 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-custom .navbar-brand {
+    color: #fff !important;
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-custom .navbar-brand:hover {
+    color: #fff !important;
+}
+
+.navbar-custom .navbar-brand span {
+    color: #fff;
+}
+
+.navbar-custom .nav-link {
+    color: #fff !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 8px 16px !important;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.navbar-custom .nav-link:hover {
+    color: #f0c040 !important;
+}
+
+.navbar-custom .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #f0c040;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.navbar-custom .nav-link:hover::after,
+.navbar-custom .nav-link.active::after {
+    width: 60%;
+}
+
+.navbar-custom .nav-link.active {
+    color: #f0c040 !important;
+}
+
+/* ======================================================
+   BOTONES DE LOGIN / REGISTER (visibles y con contraste)
+   ====================================================== */
+
+/* Botón Iniciar sesión - versión clara y visible */
+.btn-login {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    padding: 6px 18px;
+    border-radius: 50px;
+}
+
+.btn-login:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.7) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.btn-login i {
+    margin-right: 6px;
+}
+
+/* Botón Registrarse - estilo dorado visible */
+.btn-register {
+    background: rgba(240, 192, 64, 0.25) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(240, 192, 64, 0.5) !important;
+    color: #f0c040 !important;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    padding: 6px 18px;
+    border-radius: 50px;
+}
+
+.btn-register:hover {
+    background: rgba(240, 192, 64, 0.4) !important;
+    border-color: rgba(240, 192, 64, 0.8) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(240, 192, 64, 0.3);
+}
+
+.btn-register i {
+    margin-right: 6px;
+}
+
+/* Ajustes para móvil */
+@media (max-width: 991.98px) {
+
+    .btn-login,
+    .btn-register {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        padding: 8px 16px;
+        margin: 4px 0 !important;
+        border-radius: 8px;
+    }
+
+    .btn-login {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .btn-register {
+        background: rgba(240, 192, 64, 0.2) !important;
+        border-color: rgba(240, 192, 64, 0.4) !important;
+    }
+}
+
+/* Dropdown usuario */
+.navbar-custom .dropdown-menu {
+    background: #fff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 8px 0;
+    min-width: 220px;
+}
+
+.navbar-custom .dropdown-menu .dropdown-item {
+    padding: 8px 20px;
+    color: #333;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.navbar-custom .dropdown-menu .dropdown-item:hover {
+    background: #f0f4f8;
+    color: #0d6efd;
+}
+
+.navbar-custom .dropdown-menu .dropdown-item i {
+    width: 20px;
+    margin-right: 8px;
+    text-align: center;
+}
+
+.navbar-custom .dropdown-menu .dropdown-item.text-danger:hover {
+    background: #f8d7da;
+    color: #dc3545 !important;
+}
+
+.navbar-custom .dropdown-menu .dropdown-divider {
+    margin: 5px 0;
+}
+
+/* Info usuario en dropdown */
+.user-info-dropdown {
+    cursor: default;
+    background: #f8f9fa !important;
+    border-bottom: 1px solid #dee2e6 !important;
+    padding: 12px 20px !important;
+}
+
+.user-info-dropdown .user-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.user-info-dropdown .user-role {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.user-info-dropdown .user-email {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+/* Avatar en navbar */
+.avatar-circle {
+    display: inline-block;
+    text-align: center;
+    border-radius: 50%;
+    background: #0d6efd;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+/* ======================================================
+   HERO SECTION
+   ====================================================== */
+
+.hero-section {
+    background: linear-gradient(rgba(0, 40, 80, 0.4), rgba(0, 20, 50, 0.6)),
+        url('../images/hero-comunicaciones.jpg') no-repeat center center/cover;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    position: relative;
+    padding-top: 80px;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-weight: 900;
+    font-size: 3.5rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+    font-weight: 300;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    margin-top: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-hero {
+    background: #f0c040;
+    color: #1a2a3a;
+    border: none;
+    padding: 12px 35px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(240, 192, 64, 0.3);
+}
+
+.btn-hero:hover {
+    background: #ffd966;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(240, 192, 64, 0.5);
+    color: #1a2a3a;
+}
+
+/* ======================================================
+   SECCIONES
+   ====================================================== */
+
+.section-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #1a3a5a;
+    position: relative;
+    padding-bottom: 15px;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: #f0c040;
+    border-radius: 2px;
+}
+
+.section-title.text-left::after {
+    left: 0;
+    transform: none;
+}
+
+/* ======================================================
+   TARJETAS DE SERVICIOS
+   ====================================================== */
+
+.service-card {
+    border: none;
+    border-radius: 15px;
+    padding: 2rem 1.5rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    height: 100%;
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+.service-icon {
+    font-size: 3rem;
+    color: #1a3a5a;
+    margin-bottom: 1rem;
+}
+
+.service-card h5 {
+    font-weight: 700;
+    color: #1a3a5a;
+}
+
+/* ======================================================
+   SECCIÓN VALORES (fondo claro)
+   ====================================================== */
+
+.values-section {
+    background: #f0f4f8;
+    padding: 4rem 0;
+}
+
+.value-item {
+    text-align: center;
+    padding: 30px 20px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.value-item:hover {
+    background: #fff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    transform: translateY(-5px);
+}
+
+.value-item i {
+    font-size: 2.5rem;
+    color: #1a3a5a;
+    margin-bottom: 1rem;
+}
+
+.value-item h5 {
+    font-weight: 700;
+    color: #1a3a5a;
+}
+
+/* ======================================================
+   FOOTER
+   ====================================================== */
+
+.footer {
+    background: #0a1a2a;
+    color: #b0c4d9;
+    padding: 3rem 0 1.5rem;
+}
+
+.footer h5,
+.footer h6 {
+    color: #fff;
+}
+
+.footer a {
+    color: #f0c040;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.footer a:hover {
+    color: #ffd966;
+}
+
+.footer hr {
+    border-color: #2a3a4a;
+}
+
+/* ======================================================
+   RESPONSIVE - MEDIA QUERIES
+   ====================================================== */
+
+/* ----- TABLETS Y MÓVILES GRANDES (hasta 991px) ----- */
+@media (max-width: 991.98px) {
+
+    /* Navbar */
+    .navbar-custom .navbar-nav .nav-item {
+        text-align: center;
+        padding: 3px 0;
+    }
+
+    .navbar-custom .navbar-nav .nav-link {
+        display: inline-block;
+        padding: 6px 12px !important;
+    }
+
+    .navbar-custom .navbar-nav .nav-link::after {
+        bottom: 0;
+    }
+
+    .navbar-custom .navbar-nav .btn {
+        width: 100%;
+        margin: 4px 0 !important;
+        justify-content: center;
+        padding: 8px 16px;
+    }
+
+    .navbar-custom .navbar-nav .btn+.btn {
+        margin-left: 0 !important;
+    }
+
+    .navbar-custom .navbar-nav .dropdown-menu {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.98);
+    }
+
+    .navbar-custom .navbar-nav .dropdown-menu .dropdown-item {
+        text-align: center;
+        padding: 10px 20px;
+    }
+
+    .navbar-custom .navbar-nav .dropdown-menu .user-info-dropdown {
+        text-align: center;
+    }
+
+    /* Toggle del navbar */
+    .navbar-custom .navbar-toggler {
+        border-color: rgba(255, 255, 255, 0.3);
+        padding: 8px 12px;
+    }
+
+    .navbar-custom .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    .navbar-custom .navbar-collapse {
+        background: rgba(10, 30, 50, 0.98);
+        backdrop-filter: blur(10px);
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-top: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .navbar-custom .dropdown-menu {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        margin: 5px 0;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .navbar-custom .nav-link.dropdown-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    /* Hero */
+    .hero-title {
+        font-size: 2.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+}
+
+/* ----- MÓVILES MEDIANOS (hasta 768px) ----- */
+@media (max-width: 768px) {
+
+    /* Navbar */
+    .navbar-custom .navbar-brand span {
+        font-size: 0.9rem;
+    }
+
+    .navbar-custom .navbar-brand img {
+        max-height: 32px !important;
+    }
+
+    .navbar-custom .nav-link.dropdown-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .navbar-custom .dropdown-menu {
+        min-width: 180px;
+    }
+
+    /* Hero */
+    .hero-title {
+        font-size: 2.2rem;
+        letter-spacing: 1px;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .btn-hero {
+        padding: 10px 25px;
+        font-size: 0.9rem;
+    }
+
+    /* Secciones */
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .section-title::after {
+        width: 60px;
+    }
+
+    .service-card {
+        padding: 1.5rem 1rem;
+    }
+
+    .service-icon {
+        font-size: 2.2rem;
+    }
+}
+
+/* ----- MÓVILES PEQUEÑOS (hasta 400px) ----- */
+@media (max-width: 400px) {
+    .navbar-custom .navbar-brand span {
+        font-size: 0.75rem;
+    }
+
+    .navbar-custom .navbar-brand img {
+        max-height: 28px !important;
+    }
+
+    .navbar-custom .btn {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+    }
+
+    .navbar-custom .dropdown-menu .dropdown-item {
+        font-size: 0.8rem;
+        padding: 8px 15px;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+
+    /* ======================================================
+   OVERRIDE: Botones de login/register (FORZADO)
+   ====================================================== */
+
+    /* Forzar visibilidad de los botones */
+    .navbar-custom .navbar-nav .nav-item .btn-login,
+    .navbar-custom .navbar-nav .nav-item .btn-register {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Botón Iniciar sesión */
+    .navbar-custom .navbar-nav .nav-item .btn-login {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        color: #ffffff !important;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        padding: 6px 18px;
+        border-radius: 50px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar-custom .navbar-nav .nav-item .btn-login:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.8) !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .navbar-custom .navbar-nav .nav-item .btn-login i {
+        margin-right: 6px;
+    }
+
+    /* Botón Registrarse */
+    .navbar-custom .navbar-nav .nav-item .btn-register {
+        background: rgba(240, 192, 64, 0.25) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(240, 192, 64, 0.6) !important;
+        color: #f0c040 !important;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        padding: 6px 18px;
+        border-radius: 50px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar-custom .navbar-nav .nav-item .btn-register:hover {
+        background: rgba(240, 192, 64, 0.4) !important;
+        border-color: rgba(240, 192, 64, 0.9) !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(240, 192, 64, 0.4);
+    }
+
+    .navbar-custom .navbar-nav .nav-item .btn-register i {
+        margin-right: 6px;
+    }
+
+    /* ======================================================
+   OVERRIDE: Ajustes para móvil
+   ====================================================== */
+
+    @media (max-width: 991.98px) {
+
+        .navbar-custom .navbar-nav .nav-item .btn-login,
+        .navbar-custom .navbar-nav .nav-item .btn-register {
+            width: 100% !important;
+            text-align: center !important;
+            justify-content: center !important;
+            padding: 10px 16px !important;
+            margin: 4px 0 !important;
+            border-radius: 8px !important;
+            display: block !important;
+        }
+
+        .navbar-custom .navbar-nav .nav-item .btn-login {
+            background: rgba(255, 255, 255, 0.12) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .navbar-custom .navbar-nav .nav-item .btn-register {
+            background: rgba(240, 192, 64, 0.2) !important;
+            border-color: rgba(240, 192, 64, 0.4) !important;
+        }
+    }
+
+    /* ======================================================
+   OVERRIDE: Forzar que los li no oculten los botones
+   ====================================================== */
+
+    .navbar-custom .navbar-nav .nav-item.d-lg-inline-block {
+        display: inline-block !important;
+    }
+
+    @media (max-width: 991.98px) {
+        .navbar-custom .navbar-nav .nav-item.d-lg-inline-block {
+            display: block !important;
+            width: 100% !important;
+        }
+    }
+}
