@@ -304,7 +304,13 @@ return [
             'type'         => 'fullscreen-widget',
             'topnav_right' => true,
         ],
-
+        [ 'header' => 'I N I C I O' ],
+        [
+            'text'=> 'Inicio',
+            'url'=>'admin',
+            'icon'=> 'fa-solid fa-house-chimney',
+            'active'=> ['admin']
+        ],
         // Guardias — todos pueden ver
         ['header' => 'G U A R D I A S'],
         [
@@ -386,18 +392,23 @@ return [
             'can'    => 'viewAny-user', // solo admin
         ],
         // Palomar
-        ['header' => 'P A L O M A R'],
+        [
+            'header' => 'P A L O M A R',
+            'can'    => 'viewAny-rol'
+        ],
         [
             'text'   => 'Palomares',
             'url'    => 'admin/palomar/palomares',
             'icon'   => 'fas fa-home',
             'active' => ['admin/palomar/palomares*'],
+            'can'    => 'viewAny-user'
         ],
         [
             'text'   => 'Palomas',
             'url'    => 'admin/palomar/palomas',
             'icon'   => 'fas fa-dove',
             'active' => ['admin/palomar/palomas*'],
+            'can'    => 'viewAny-user'
         ],
         [
             'text'   => 'Vuelos',
@@ -411,9 +422,13 @@ return [
             'url'    => 'admin/palomar/estados-paloma',
             'icon'   => 'fas fa-tags',
             'active' => ['admin/palomar/estados-paloma*'],
+            'can'    => 'viewAny-user'
         ],
         // Documentos
-        ['header' => 'D O C U M E N T O S'],
+        [
+            'header' => 'D O C U M E N T O S',
+            'can'    => 'viewAny-rol'
+        ],
         [
             'text'   => 'Documentos',
             'url'    => 'admin/documentos',
@@ -422,12 +437,12 @@ return [
             'can'    => 'viewAny-documento',
         ],
         // Configuración
-        ['header' => 'C U E N T A'],
-        [
-            'text' => 'Perfil',
-            'url'  => 'admin/settings',
-            'icon' => 'fas fa-fw fa-user',
-        ],
+        // ['header' => 'C U E N T A'],
+        // [
+        //     'text' => 'Perfil',
+        //     'url'  => 'admin/settings',
+        //     'icon' => 'fas fa-fw fa-user',
+        // ],
     ],
 
     /*

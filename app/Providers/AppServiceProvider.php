@@ -34,6 +34,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -54,11 +55,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $host = request()->getHost();
+
+        if (!in_array($host, ['novedades.test', 'localhost', '127.0.0.1'])) {
+            URL::forceRootUrl(config('app.url'));
+            // No forzamos https porque No-IP anda por http sin certificado SSL
+        }
+
         // Use Bootstrap for pagination views
         Paginator::useBootstrap();
 
         $this->configureDefaults();
-        
+
         //Gates para el sidebar de AdminLTE
         Gate::define('viewAny-user', fn($user) => $user->isAdmin());
         Gate::define('viewAny-rol', fn($user) => $user->isAdmin());
@@ -67,8 +75,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-vuelo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_vuelo'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
-        
-        
+
+
         // Registrar políticas 
         Gate::policy(Guard::class, GuardiaPolicy::class);
         Gate::policy(News::class, NovedadPolicy::class);

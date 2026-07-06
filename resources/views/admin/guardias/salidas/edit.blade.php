@@ -12,7 +12,7 @@
                 <i class="fas fa-truck text-primary"></i> Editar Salida de Vehículo
             </h3>
             <div class="card-tools">
-                <a href="{{ route('admin.guardias.novedades.show', $guardia) }}"
+                <a href="{{ route('admin.guardias.show', $guardia) }}"
                    class="btn btn-outline-secondary btn-sm"
                    style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);"
                    aria-label="Volver a la novedad">
@@ -191,7 +191,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a href="{{ route('admin.guardias.show', [$guardia, $novedad]) }}"
+                    <a href="{{ route('admin.guardias.show', $guardia) }}"
                        class="btn btn-outline-secondary btn-sm"
                        style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
                         <i class="fas fa-times"></i> Cancelar

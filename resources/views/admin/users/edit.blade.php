@@ -116,6 +116,22 @@
                         </div>
                     @endif
 
+                    @if (auth()->user()->isSuperAdmin())
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="is_super_admin"
+                                name="is_super_admin" value="1"
+                                {{ old('is_super_admin', $user->is_super_admin) ? 'checked' : '' }}
+                                {{ $user->id === auth()->id() ? 'disabled' : '' }}>
+                            <label class="form-check-label" for="is_super_admin">
+                                Este usuario es SuperAdmin
+                            </label>
+                            @if ($user->id === auth()->id())
+                                <input type="hidden" name="is_super_admin" value="1">
+                                <small class="text-muted d-block">No podés quitarte el rol de SuperAdmin a vos mismo.</small>
+                            @endif
+                        </div>
+                    @endif
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">

@@ -18,11 +18,21 @@ class UserPolicy
 
     public function update(User $user, User $model): bool
     {
+        // Un admin normal no puede editar a un SuperAdmin.
+        if ($model->isSuperAdmin() && !$user->isSuperAdmin()) {
+            return false;
+        }
+
         return $user->isAdmin();
     }
 
     public function delete(User $user, User $model): bool
     {
+        // Un admin normal no puede eliminar a un SuperAdmin.
+        if ($model->isSuperAdmin() && !$user->isSuperAdmin()) {
+            return false;
+        }
+
         return $user->isAdmin();
     }
 }

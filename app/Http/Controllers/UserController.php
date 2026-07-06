@@ -19,9 +19,16 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::with('rol')
-            ->whereHas('rol', fn($q) => $q->where('name', '!=', 'admin'))
-            ->get();
+        if (auth()->user()->isSuperAdmin()) {
+            // El SuperAdmin ve a todos, incluidos admins y a sí mismo.
+            $users = User::with('rol')->get();
+        } else {
+            // Un admin normal no ve admins ni SuperAdmins.
+            $users = User::with('rol')
+                ->whereHas('rol', fn($q) => $q->where('name', '!=', 'admin'))
+                ->where('is_super_admin', false)
+                ->get();
+        }
 
         return view('admin.users.index', compact('users'));
     }
@@ -59,7 +66,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        
         $this->authorize('delete', $user);
 
         if ($user->isAdmin()) {
@@ -82,7 +88,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', User::class);
-        // Validate the request 
+        // Validate the request
         $data = $request->validate([
             'name'      => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -92,14 +98,19 @@ class UserController extends Controller
             'rol_id'    => 'required|exists:rols,id',
         ]);
 
+        // Solo un SuperAdmin puede crear a otro SuperAdmin.
+        // Si el request trae ese flag pero quien lo crea no es SuperAdmin, se ignora.
+        $isSuperAdmin = $request->boolean('is_super_admin') && auth()->user()->isSuperAdmin();
+
         User::create([
-            'name'      => $data['name'],
-            'last_name' => $data['last_name'],
-            'grade'     => $data['grade'],
-            'email'     => $data['email'],
-            'password'  => Hash::make($data['password']),
-            'rol_id'    => $data['rol_id'],
-            'status'    => 'active',
+            'name'           => $data['name'],
+            'last_name'      => $data['last_name'],
+            'grade'          => $data['grade'],
+            'email'          => $data['email'],
+            'password'       => Hash::make($data['password']),
+            'rol_id'         => $data['rol_id'],
+            'status'         => 'active',
+            'is_super_admin' => $isSuperAdmin,
         ]);
 
         return redirect()->route('admin.users.index')
@@ -146,6 +157,12 @@ class UserController extends Controller
 
         if ($request->filled('password')) {
             $user->password = Hash::make($data['password']);
+        }
+
+        // Solo un SuperAdmin puede otorgar o quitar el flag de SuperAdmin a otro usuario.
+        // Nadie puede quitarse el flag a sí mismo (evita quedarse sin acceso por error).
+        if (auth()->user()->isSuperAdmin() && $user->id !== auth()->id()) {
+            $user->is_super_admin = $request->boolean('is_super_admin');
         }
 
         $user->save();

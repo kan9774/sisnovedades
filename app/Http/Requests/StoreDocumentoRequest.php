@@ -27,7 +27,7 @@ class StoreDocumentoRequest extends FormRequest
            'categoria_documento_id' => 'required|exists:categorias_documentos,id',
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'archivo' => 'required|file|mimes:pdf,docx,doc|max:20480', // 20MB máx
+            'archivo' => 'required|file|mimes:pdf,docx,doc,txt|max:100000', // 20MB máx
         ];
     }
     #[Override]

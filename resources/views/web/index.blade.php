@@ -133,6 +133,20 @@
                                     </a>
                                 @endcan
 
+                                {{-- Admin, capitán y oficial ven documentos --}}
+                                @can('viewAny', App\Models\Documento::class)
+                                    <a class="dropdown-item" href="{{ route('admin.documentos.index') }}">
+                                        <i class="fas fa-file-alt"></i> Documentos
+                                    </a>
+                                @endcan
+
+                                {{-- Admin y encargados ven el palomar --}}
+                                @can('viewAny', App\Models\Palomar::class)
+                                    <a class="dropdown-item" href="{{ route('admin.palomares.index') }}">
+                                        <i class="fas fa-dove"></i> Palomar
+                                    </a>
+                                @endcan
+
                                 {{-- Solo admin ve organismos --}}
                                 @can('viewAny', App\Models\User::class)
                                     <a class="dropdown-item" href="{{ route('admin.organismos.index') }}">
@@ -143,7 +157,7 @@
                                 {{-- Visitante solo ve guardias cerradas --}}
                                 @if (Auth::user()->rol?->name === 'visitante')
                                     <a class="dropdown-item" href="{{ route('novedades-publicas') }}">
-                                        <i class="fas fa-newspaper"></i> Novedades
+                                        <i class="fas fa-newspaper"></i> Novedades-Cerradas
                                     </a>
                                 @endif
 
@@ -266,12 +280,11 @@
                     <h2 class="section-title text-left" style="text-align:left !important;">
                         <span style="display:inline-block;">Contacto</span>
                     </h2>
-                    <p class="text-muted">Ponte en contacto con la unidad de comunicaciones para más información.</p>
+                    <p class="text-muted">Ponte en contacto con las Unidades de Comunicaciones para más información.</p>
                     <ul class="list-unstyled mt-4">
-                        <li><i class="fas fa-map-marker-alt text-primary mr-2"></i> Cuartel General, Ciudad de Buenos
-                            Aires</li>
-                        <li><i class="fas fa-phone text-primary mr-2"></i> +54 11 1234-5678</li>
-                        <li><i class="fas fa-envelope text-primary mr-2"></i> comunicaciones@ejercito.mil.ar</li>
+                        <li><i class="fas fa-map-marker-alt text-primary mr-2"></i> Cuartel en Peñarol, Ciudad de Montevideo</li>
+                        <li><i class="fas fa-phone text-primary mr-2"></i> +598 2358-8304</li>
+                        <li><i class="fas fa-envelope text-primary mr-2"></i> bcom1@ejercito.mil.uy</li>
                         <li><i class="fas fa-clock text-primary mr-2"></i> Lunes a Viernes 08:00 - 17:00</li>
                     </ul>
                 </div>

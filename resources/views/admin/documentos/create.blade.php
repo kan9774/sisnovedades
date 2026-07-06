@@ -47,7 +47,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Archivo (PDF o Word, máx. 20MB)</label>
+                    <label>Archivo (PDF, Word o Txt máx. 100MB)</label>
                     <div class="custom-file">
                         <input type="file" name="archivo" class="custom-file-input" id="archivo" accept=".pdf,.docx,.doc">
                         <label class="custom-file-label" for="archivo">Elegir archivo...</label>

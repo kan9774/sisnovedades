@@ -95,6 +95,16 @@
                     </div>
                 </div>
 
+                @if(auth()->user()->isSuperAdmin())
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="is_super_admin"
+                               name="is_super_admin" value="1" {{ old('is_super_admin') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="is_super_admin">
+                            Este usuario es SuperAdmin
+                        </label>
+                    </div>
+                @endif
+
                 <div class="d-flex justify-content-between">
                     <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Volver

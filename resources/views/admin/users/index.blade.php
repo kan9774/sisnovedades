@@ -57,6 +57,9 @@
                                     <span class="badge badge-info">
                                         {{ $user->rol->name ?? '-' }}
                                     </span>
+                                    @if($user->isSuperAdmin())
+                                        <span class="badge badge-dark">SuperAdmin</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if ($user->status === 'active')
