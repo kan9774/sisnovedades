@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('image/logo/Heraldica.png') }}">
+    <link rel="shortcut icon" href="{{ asset('image/logo/Heraldica.png') }}">
 </head>
 <body>
 

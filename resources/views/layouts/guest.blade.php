@@ -7,6 +7,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name', 'SIS-Novedades'))</title>
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('image/logo/Heraldica.png') }}">
+    <link rel="shortcut icon" href="{{ asset('image/logo/Heraldica.png') }}">
+
     {{-- AdminLTE / Bootstrap CSS --}}
     <link rel="stylesheet" href="{{ asset('vendor/adminlte/dist/css/adminlte.min.css') }}">
 
