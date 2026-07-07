@@ -37,6 +37,13 @@ class PermisoSeeder extends Seeder
             ['name' => 'crear_documento', 'description' => 'Subir documentos'],
             ['name' => 'eliminar_documento', 'description' => 'Eliminar documentos'],
 
+            //Permisos para mantenimiento de vehículos
+            ['name' => 'ver_mantenimientos_vehiculos', 'description' => 'Ver mantenimientos de vehiculos'],
+            ['name' => 'ver_mantenimientos', 'description' => 'Ver mantenimiento de vehiculo'],
+            ['name' => 'crear_mantenimiento_vehiculo', 'description' => 'Crear mantenimiento de vehiculo'],
+            ['name' => 'editar_mantenimiento_vehiculo', 'description' => 'Editar mantenimiento de vehiculo'],
+            ['name' => 'eliminar_mantenimiento_vehiculo', 'description' => 'Eliminar mantenimiento de vehiculo'],
+
             ['name' => 'registrar_novedad', 'description' => 'Permiso para registrar novedades'],
             ['name' => 'registrar_novedad_propia', 'description' => 'Permiso para registrar novedades propias'],
             ['name' => 'ver_novedad', 'description' => 'Permiso para ver novedades'],

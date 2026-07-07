@@ -23,6 +23,7 @@ class Conductor extends Model
         'lugar_carne_salud',
         'fecha_vencimiento_carne_salud',
         'lugar_carne_habilitante',
+        'numero_carne_habilitante',
         'fecha_vencimiento_carne_habilitante',
         'tipo_vehiculo_habilitado',
         'observaciones',

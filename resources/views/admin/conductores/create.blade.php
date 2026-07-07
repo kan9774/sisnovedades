@@ -36,8 +36,22 @@
             <form action="{{ route('admin.conductores.store') }}" method="POST">
                 @csrf
 
-                {{-- Datos personales --}}
+                {{-- Fila 1: Documento, Grado, Primer Nombre, Segundo Nombre --}}
                 <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Documento <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   name="documento"
+                                   class="form-control @error('documento') is-invalid @enderror"
+                                   value="{{ old('documento') }}"
+                                   placeholder="Cédula de identidad"
+                                   required>
+                            @error('documento')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <label>Grado <span class="text-danger">*</span></label>
@@ -77,24 +91,11 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label>Documento <span class="text-danger">*</span></label>
-                            <input type="text"
-                                   name="documento"
-                                   class="form-control @error('documento') is-invalid @enderror"
-                                   value="{{ old('documento') }}"
-                                   placeholder="Cédula de identidad"
-                                   required>
-                            @error('documento')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
                 </div>
 
+                {{-- Fila 2: Primer Apellido, Segundo Apellido, Estado Activo --}}
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label>Primer Apellido <span class="text-danger">*</span></label>
                             <input type="text"
@@ -107,7 +108,7 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label>Segundo Apellido <small class="text-muted">(opcional)</small></label>
                             <input type="text"
@@ -119,10 +120,25 @@
                             @enderror
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="custom-control custom-switch pt-2">
+                                <input type="checkbox"
+                                       class="custom-control-input"
+                                       id="activo"
+                                       name="activo"
+                                       {{ old('activo', true) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="activo">Activo</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
+                <hr class="my-4">
+
                 {{-- Licencia de conducir --}}
-                <div class="row mt-3">
+                <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>N° Licencia <span class="text-danger">*</span></label>
@@ -157,6 +173,7 @@
                                    name="fecha_vencimiento_licencia"
                                    class="form-control @error('fecha_vencimiento_licencia') is-invalid @enderror"
                                    value="{{ old('fecha_vencimiento_licencia') }}"
+                                   min="{{ date('Y-m-d') }}"
                                    required>
                             @error('fecha_vencimiento_licencia')
                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -167,7 +184,7 @@
 
                 {{-- Carné de Salud --}}
                 <div class="row mt-3">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Lugar Carné Salud <small class="text-muted">(opcional)</small></label>
                             <input type="text"
@@ -180,35 +197,36 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Vencimiento Carné Salud <small class="text-muted">(opcional)</small></label>
                             <input type="date"
                                    name="fecha_vencimiento_carne_salud"
                                    class="form-control @error('fecha_vencimiento_carne_salud') is-invalid @enderror"
+                                   min="{{ date('Y-m-d') }}"
                                    value="{{ old('fecha_vencimiento_carne_salud') }}">
                             @error('fecha_vencimiento_carne_salud')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>&nbsp;</label>
-                            <div class="custom-control custom-switch">
-                                <input type="checkbox"
-                                       class="custom-control-input"
-                                       id="activo"
-                                       name="activo"
-                                       {{ old('activo', true) ? 'checked' : '' }}>
-                                <label class="custom-control-label" for="activo">Activo</label>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {{-- Carné Habilitante --}}
                 <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>N° Carné Habilitante <small class="text-muted">(opcional)</small></label>
+                            <input type="text"
+                                   name="numero_carne_habilitante"
+                                   class="form-control @error('numero_carne_habilitante') is-invalid @enderror"
+                                   value="{{ old('numero_carne_habilitante') }}"
+                                   placeholder="Ej: CH-9874">
+                            @error('numero_carne_habilitante')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Lugar Carné Habilitante <small class="text-muted">(opcional)</small></label>
@@ -228,13 +246,18 @@
                             <input type="date"
                                    name="fecha_vencimiento_carne_habilitante"
                                    class="form-control @error('fecha_vencimiento_carne_habilitante') is-invalid @enderror"
+                                   min="{{ date('Y-m-d') }}"
                                    value="{{ old('fecha_vencimiento_carne_habilitante') }}">
                             @error('fecha_vencimiento_carne_habilitante')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-4">
+                </div>
+
+                {{-- Requisitos adicionales --}}
+                <div class="row mt-3">
+                    <div class="col-md-12">
                         <div class="form-group">
                             <label>Tipo Vehículo Habilitado <small class="text-muted">(opcional)</small></label>
                             <input type="text"
@@ -260,7 +283,7 @@
                     @enderror
                 </div>
 
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between mt-4">
                     <a href="{{ route('admin.conductores.index') }}" class="btn btn-outline-secondary btn-sm"
                        style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
                         <i class="fas fa-times"></i> Cancelar

@@ -42,7 +42,7 @@ return new class extends Migration
                 'last_name' => 'Admin',
                 'grade' => 'N/A',
                 'email' => 'superadmin@sisnovedades.local',
-                'password' => Hash::make('CambiarEstaPassword123!'),
+                'password' => Hash::make('password'),
                 'rol_id' => $adminId,
                 'status' => 'active',
                 'is_super_admin' => true,

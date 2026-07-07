@@ -10,6 +10,7 @@ use App\Http\Controllers\CategoriaDocumentoController;
 use App\Http\Controllers\ConductorController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\OrganismoController;
 use App\Http\Controllers\PalomaController;
 use App\Http\Controllers\PalomarController;
@@ -123,8 +124,25 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{organismo}',    [OrganismoController::class, 'destroy'])->name('destroy');
         });
         // Vehículos - CRUD completo
-        Route::resource('vehiculos', VehiculoController::class)
-            ->except(['show']); // Opcional: si no necesitas vista show
+        Route::prefix('vehiculos')->name('vehiculos.')->group(function () {
+            Route::get('/', [VehiculoController::class, 'index'])->name('index');
+            Route::get('/create', [VehiculoController::class, 'create'])->name('create');
+            Route::post('/', [VehiculoController::class, 'store'])->name('store');
+            Route::get('/{vehiculo}', [VehiculoController::class, 'show'])->name('show');
+            Route::get('/{vehiculo}/edit', [VehiculoController::class, 'edit'])->name('edit');
+            Route::put('/{vehiculo}', [VehiculoController::class, 'update'])->name('update');
+            Route::delete('/{vehiculo}', [VehiculoController::class, 'destroy'])->name('destroy');
+
+            // Mantenimientos (anidados bajo vehiculo)
+            Route::prefix('{vehiculo}/mantenimientos')->name('mantenimientos.')->group(function () {
+                Route::get('/', [MantenimientoVehiculoController::class, 'index'])->name('index');
+                Route::get('/create', [MantenimientoVehiculoController::class, 'create'])->name('create');
+                Route::post('/', [MantenimientoVehiculoController::class, 'store'])->name('store');
+                Route::get('/{mantenimiento}/edit', [MantenimientoVehiculoController::class, 'edit'])->name('edit');
+                Route::put('/{mantenimiento}', [MantenimientoVehiculoController::class, 'update'])->name('update');
+                Route::delete('/{mantenimiento}', [MantenimientoVehiculoController::class, 'destroy'])->name('destroy');
+            });
+        });
 
         // Conductores - CRUD completo
         Route::resource('conductores', ConductorController::class)

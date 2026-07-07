@@ -7,6 +7,7 @@ use App\Models\Conductor;
 use App\Models\Documento;
 use App\Models\EstadoPaloma;
 use App\Models\Guard;
+use App\Models\MantenimientoVehiculo;
 use App\Models\News;
 use App\Models\Paloma;
 use App\Models\Palomar;
@@ -21,6 +22,7 @@ use App\Policies\ConductorPolicy;
 use App\Policies\DocumentoPolicy;
 use App\Policies\EstadoPalomaPolicy;
 use App\Policies\GuardiaPolicy;
+use App\Policies\MantenimientoVehiculoPolicy;
 use App\Policies\NovedadPolicy;
 use App\Policies\PalomaPolicy;
 use App\Policies\PalomarPolicy;
@@ -70,8 +72,8 @@ class AppServiceProvider extends ServiceProvider
         //Gates para el sidebar de AdminLTE
         Gate::define('viewAny-user', fn($user) => $user->isAdmin());
         Gate::define('viewAny-rol', fn($user) => $user->isAdmin());
-        Gate::define('viewAny-vehiculo', fn($user) => $user->isAdmin() || $user->isCapitan() || $user->isOficialDia());
-        Gate::define('viewAny-conductor', fn($user) => $user->isAdmin() || $user->isCapitan() || $user->isOficialDia());
+        Gate::define('viewAny-vehiculo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_vehiculo'));
+        Gate::define('viewAny-conductor', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_conductor'));
         Gate::define('viewAny-vuelo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_vuelo'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
@@ -91,7 +93,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(EstadoPaloma::class, EstadoPalomaPolicy::class);
         Gate::policy(Documento::class, DocumentoPolicy::class);
         Gate::policy(CategoriaDocumento::class, CategoriaDocumentoPolicy::class);
-
+        Gate::policy(MantenimientoVehiculo::class, MantenimientoVehiculoPolicy::class);
 
         // Observers
         News::observe(NewsObserver::class);

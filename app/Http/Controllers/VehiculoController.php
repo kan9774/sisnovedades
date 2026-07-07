@@ -18,7 +18,7 @@ class VehiculoController extends Controller
     public function index()
     {
         $this->authorize('viewAny', Vehiculo::class);
-        
+
         $vehiculos = Vehiculo::orderBy('matricula')->paginate(15);
         return view('admin.vehiculos.index', compact('vehiculos'));
     }
@@ -29,7 +29,7 @@ class VehiculoController extends Controller
     public function create()
     {
         $this->authorize('create', Vehiculo::class);
-        
+
         return view('admin.vehiculos.create');
     }
 
@@ -39,22 +39,32 @@ class VehiculoController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Vehiculo::class);
-        
+
         $data = $request->validate([
             'matricula' => 'required|string|max:20|unique:vehiculos,matricula',
+            'marca' => 'nullable|string|max:100',
+            'modelo' => 'nullable|string|max:100',
+            'color' => 'nullable|string|max:50',
+            'numero_chasis' => 'nullable|string|max:50|unique:vehiculos,numero_chasis',
+            'numero_motor' => 'nullable|string|max:50|unique:vehiculos,numero_motor',
+            'ejes' => 'nullable|integer|min:1|max:10',
             'tipo_combustible' => 'required|in:gas_oil,nafta',
-            'consumo_litros_por_km' => 'nullable|numeric|min:0|max:999.9999',            'sin_cuentakilometros' => 'boolean',
+            'consumo_litros_por_km' => 'nullable|numeric|min:0|max:999.9999',
+            'sin_cuentakilometros' => 'boolean',
             'descripcion' => 'nullable|string|max:255',
-
+            'estado' => 'required|in:verde,amarillo,rojo,negro',
         ]);
 
         $data['sin_cuentakilometros'] = $request->has('sin_cuentakilometros');
-        $data['activo'] = $request->has('activo');
+        $data['activo'] = $request->has('activo') && !in_array($data['estado'],['rojo','negro']);
 
         Vehiculo::create($data);
+        $mensaje =$data['activo']
+        ? 'Vehículo creado correctamente.'
+        : 'Vehículo creado correctamente, pero se encuentra inactivo porque el estado es rojo o negro.';
 
         return redirect()->route('admin.vehiculos.index')
-            ->with('success', 'Vehículo creado correctamente.');
+            ->with('success', $mensaje);
     }
 
     /**
@@ -63,11 +73,16 @@ class VehiculoController extends Controller
     public function show(Vehiculo $vehiculo)
     {
         $this->authorize('view', $vehiculo);
-        
-        $vehiculo->load(['novedades' => function($query) {
-            $query->latest()->limit(10);
-        }]);
-        
+
+        $vehiculo->load([
+            'salidas' => function ($query) {
+                $query->with(['guardia', 'conductor'])->latest('id')->limit(10);
+            },
+            'mantenimientos' => function ($query) {
+                $query->latest('fecha')->limit(10);
+            },
+        ]);
+
         return view('admin.vehiculos.show', compact('vehiculo'));
     }
 
@@ -77,7 +92,7 @@ class VehiculoController extends Controller
     public function edit(Vehiculo $vehiculo)
     {
         $this->authorize('update', $vehiculo);
-        
+
         return view('admin.vehiculos.edit', compact('vehiculo'));
     }
 
@@ -87,22 +102,31 @@ class VehiculoController extends Controller
     public function update(Request $request, Vehiculo $vehiculo)
     {
         $this->authorize('update', $vehiculo);
-        
+
         $data = $request->validate([
             'matricula' => 'required|string|max:20|unique:vehiculos,matricula,' . $vehiculo->id,
+            'marca' => 'nullable|string|max:100',
+            'modelo' => 'nullable|string|max:100',
+            'color' => 'nullable|string|max:50',
+            'numero_chasis' => 'nullable|string|max:50|unique:vehiculos,numero_chasis,' . $vehiculo->id,
+            'numero_motor' => 'nullable|string|max:50|unique:vehiculos,numero_motor,' . $vehiculo->id,
+            'ejes' => 'nullable|integer|min:1|max:10',
             'tipo_combustible' => 'required|in:gas_oil,nafta',
             'consumo_litros_por_km' => 'nullable|numeric|min:0|max:999.9999',
             'descripcion' => 'nullable|string|max:255',
-            
+            'estado' => 'required|in:verde,amarillo,rojo,negro',
         ]);
 
         $data['sin_cuentakilometros'] = $request->has('sin_cuentakilometros');
-        $data['activo'] = $request->has('activo');
-
+        $activo = $request->has('activo')&& !in_array($data['estado'],['rojo','negro']);
+        $data['activo'] =$activo;
         $vehiculo->update($data);
 
+        $mensaje = $activo
+        ? 'Vehículo actualizado correctamente'
+        : 'Vehículo actualizado y desactivado automáticamente (estado rojo/negro)';
         return redirect()->route('admin.vehiculos.index')
-            ->with('success', 'Vehículo actualizado correctamente.');
+            ->with('success', $mensaje);
     }
 
     /**
@@ -111,9 +135,9 @@ class VehiculoController extends Controller
     public function destroy(Vehiculo $vehiculo)
     {
         $this->authorize('delete', $vehiculo);
-        
+
         // Verificar si tiene salidas asociadas
-        if ($vehiculo->novedades()->count() > 0) {
+        if ($vehiculo->salidas()->count() > 0) {
             return redirect()->route('admin.vehiculos.index')
                 ->with('error', 'No se puede eliminar un vehículo con salidas asociadas.');
         }
