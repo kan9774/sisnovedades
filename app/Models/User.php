@@ -18,6 +18,8 @@ use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property int $id
@@ -32,12 +34,28 @@ use Illuminate\database\Eloquent\SoftDeletes;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'last_name', 'grade', 'email', 'password', 'rol_id', 'status', 'is_super_admin'])]
+#[Fillable(['name', 'last_name', 'grade', 'email', 'password', 'rol_id', 'unidad_id', 'oficina_id', 'status', 'is_super_admin'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, softDeletes;
+    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, softDeletes, LogsActivity;
+
+
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('Usuarios'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+    }
+
+    // Relación con la unidad a la que pertenece el usuario
+    public function unidad(): BelongsTo
+    {
+        return $this->belongsTo(Unidad::class);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -62,12 +80,16 @@ class User extends Authenticatable implements PasskeyUser
         $initials = Str::initials($this->name, true);
 
         return Str::length($initials) > 1
-            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
+            ? Str::substr($initials, 0, 1) . Str::substr($initials, -1)
             : $initials;
     }
     public function rol(): BelongsTo
     {
         return $this->belongsTo(Rol::class, 'rol_id');
+    }
+    public function oficina(): BelongsTo
+    {
+        return $this->belongsTo(Oficina::class);
     }
 
     /**
@@ -91,7 +113,7 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(News::class, 'escribiente_id');
     }
 
-      /**
+    /**
      * Verificar si el usuario es Super Admin
      */
     public function isSuperAdmin(): bool

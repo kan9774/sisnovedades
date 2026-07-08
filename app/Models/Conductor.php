@@ -3,12 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Conductor extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, LogsActivity;
+
+        public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('Conductores'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+    }
 
     protected $fillable = [
         'grado',

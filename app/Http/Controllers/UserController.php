@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Oficina;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Rol;
 use App\Models\Permission;
+use App\Models\Unidad;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -70,7 +72,7 @@ class UserController extends Controller
 
         if ($user->isAdmin()) {
             return redirect()->route('admin.users.index')
-                             ->with('error', 'No se puede eliminar a un administrador.');
+                ->with('error', 'No se puede eliminar a un administrador.');
         }
 
         $user->delete();
@@ -81,8 +83,10 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
         $roles = Rol::where('name', '!=', 'admin')->get();
+        $unidades = Unidad::where('activo', true)->orderBy('nombre')->get();
+        $oficinas = Oficina::where('activo', true)->orderBy('nombre')->get();
 
-        return view('admin.users.create', compact('roles'));
+        return view('admin.users.create', compact('roles', 'unidades', 'oficinas'));
     }
 
     public function store(Request $request)
@@ -96,10 +100,9 @@ class UserController extends Controller
             'email'     => 'required|email|unique:users,email',
             'password'  => 'required|string|min:6|confirmed',
             'rol_id'    => 'required|exists:rols,id',
+            'unidad_id' => 'required|exists:unidades,id',
+            'oficina_id' => 'nullable|exists:oficinas,id',
         ]);
-
-        // Solo un SuperAdmin puede crear a otro SuperAdmin.
-        // Si el request trae ese flag pero quien lo crea no es SuperAdmin, se ignora.
         $isSuperAdmin = $request->boolean('is_super_admin') && auth()->user()->isSuperAdmin();
 
         User::create([
@@ -109,14 +112,15 @@ class UserController extends Controller
             'email'          => $data['email'],
             'password'       => Hash::make($data['password']),
             'rol_id'         => $data['rol_id'],
+            'unidad_id'      => $data['unidad_id'],
             'status'         => 'active',
             'is_super_admin' => $isSuperAdmin,
+            'oficina_id' => $data['oficina_id'] ?? null,
         ]);
 
         return redirect()->route('admin.users.index')
-                         ->with('success', 'Usuario creado correctamente.');
+            ->with('success', 'Usuario creado correctamente.');
     }
-
     public function show(string $id)
     {
         //
@@ -127,10 +131,18 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $this->authorize('update', $user);
 
-        $roles = Rol::where('name','!=','admin')->get();
+        $roles = Rol::where('name', '!=', 'admin')->get();
         $permisos = Permission::orderBy('name')->get();
+        $unidades = Unidad::where('activo', true)
+            ->orWhere('id', $user->unidad_id)
+            ->orderBy('nombre')
+            ->get();
+        $oficinas = Oficina::where('activo', true)
+            ->orWhere('id', $user->oficina_id)
+            ->orderBy('nombre')
+            ->get();
 
-        return view('admin.users.edit', compact('user', 'roles', 'permisos'));
+        return view('admin.users.edit', compact('user', 'roles', 'permisos', 'unidades', 'oficinas'));
     }
 
     public function update(Request $request, string $id)
@@ -144,9 +156,11 @@ class UserController extends Controller
             'grade'     => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email,' . $user->id,
             'rol_id'    => 'required|exists:rols,id',
+            'unidad_id' => 'required|exists:unidades,id',
             'password'  => 'nullable|string|min:6|confirmed',
             'permisos_directos'   => 'nullable|array',
             'permisos_directos.*' => 'exists:permissions,id',
+            'oficina_id' => 'nullable|exists:oficinas,id',
         ]);
 
         $user->name      = $data['name'];
@@ -154,6 +168,8 @@ class UserController extends Controller
         $user->grade     = $data['grade'];
         $user->email     = $data['email'];
         $user->rol_id    = $data['rol_id'];
+        $user->unidad_id = $data['unidad_id'];
+        $user->oficina_id = $data['oficina_id'] ?? null;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($data['password']);
@@ -174,6 +190,6 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')
-                         ->with('success', 'Usuario actualizado correctamente.');
+            ->with('success', 'Usuario actualizado correctamente.');
     }
 }

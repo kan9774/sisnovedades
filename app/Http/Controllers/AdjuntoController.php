@@ -20,14 +20,12 @@ class AdjuntoController extends Controller
             abort(403, 'No tienes permiso para gestionar adjuntos.');
         }
         // Resto del código para almacenar el adjunto
-        $esObligatorio = in_array($novedad->type, ['Fax', 'Correo Electrónico']);
-
         $request->validate([
             'archivo' => [
-                $esObligatorio ? 'required' : 'nullable',
+                'nullable',
                 'file',
                 'mimes:pdf,jpg,jpeg,png',
-                'max:10240',
+                'max:100000',
             ],
         ]);
 

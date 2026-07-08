@@ -13,6 +13,7 @@ use App\Models\Paloma;
 use App\Models\Palomar;
 use App\Models\Rol;
 use App\Models\SalidaVehiculo;
+use App\Models\TipoVehiculo;
 use App\Models\User;
 use App\Models\Vehiculo;
 use App\Models\Vuelo;
@@ -28,6 +29,7 @@ use App\Policies\PalomaPolicy;
 use App\Policies\PalomarPolicy;
 use App\Policies\RolPolicy;
 use App\Policies\SalidaVehiculoPolicy;
+use App\Policies\TipoVehiculoPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\VehiculoPolicy;
 use App\Policies\VueloPolicy;
@@ -77,8 +79,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-vuelo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_vuelo'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
-
-
+        Gate::define('viewAny-tipo-vehiculo', fn ($user) => $user->isAdmin() || $user->HasPermisos('ver_tipo-vehiculo'));
+        Gate::define('viewAny-log', fn ($user) => $user->isAdmin() || $user->HasPermisos('ver_log'));
+        Gate::define('viewAny-oficina', fn ($user) => $user->isAdmin());
         // Registrar políticas 
         Gate::policy(Guard::class, GuardiaPolicy::class);
         Gate::policy(News::class, NovedadPolicy::class);
@@ -94,7 +97,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Documento::class, DocumentoPolicy::class);
         Gate::policy(CategoriaDocumento::class, CategoriaDocumentoPolicy::class);
         Gate::policy(MantenimientoVehiculo::class, MantenimientoVehiculoPolicy::class);
-
+        Gate::policy(TipoVehiculo::class, TipoVehiculoPolicy::class);
         // Observers
         News::observe(NewsObserver::class);
     }

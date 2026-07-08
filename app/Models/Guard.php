@@ -8,11 +8,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Guard extends Model
 {
-    //
-    use HasFactory, SoftDeletes;
+    
+    use HasFactory, SoftDeletes, LogsActivity ;
+    
+        public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('Guardias'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+    }
+    
+    
+    
     protected $fillable = [
         'date',
         'captain_id',

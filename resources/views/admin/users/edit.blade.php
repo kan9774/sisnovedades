@@ -85,7 +85,36 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
-
+                    <div class="form-group">
+                        <label>Unidad de Destino</label>
+                        <select name="unidad_id" class="form-control @error('unidad_id') is-invalid @enderror" required>
+                            @foreach ($unidades as $unidad)
+                                <option value="{{ $unidad->id }}"
+                                    {{ old('unidad_id', $user->unidad_id) == $unidad->id ? 'selected' : '' }}>
+                                    {{ $unidad->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('unidad_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="form-group">
+                        <label>Oficina <small class="text-muted">(opcional — solo si el usuario pertenece a una
+                                oficina)</small></label>
+                        <select name="oficina_id" class="form-control @error('oficina_id') is-invalid @enderror">
+                            <option value="">-- Ninguna --</option>
+                            @foreach ($oficinas as $oficina)
+                                <option value="{{ $oficina->id }}"
+                                    {{ old('oficina_id', $user->oficina_id) == $oficina->id ? 'selected' : '' }}>
+                                    {{ $oficina->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('oficina_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
                     @if (auth()->user()->isAdmin())
                         <div class="form-group">
                             <label>
@@ -118,16 +147,16 @@
 
                     @if (auth()->user()->isSuperAdmin())
                         <div class="form-group form-check">
-                            <input type="checkbox" class="form-check-input" id="is_super_admin"
-                                name="is_super_admin" value="1"
-                                {{ old('is_super_admin', $user->is_super_admin) ? 'checked' : '' }}
+                            <input type="checkbox" class="form-check-input" id="is_super_admin" name="is_super_admin"
+                                value="1" {{ old('is_super_admin', $user->is_super_admin) ? 'checked' : '' }}
                                 {{ $user->id === auth()->id() ? 'disabled' : '' }}>
                             <label class="form-check-label" for="is_super_admin">
                                 Este usuario es SuperAdmin
                             </label>
                             @if ($user->id === auth()->id())
                                 <input type="hidden" name="is_super_admin" value="1">
-                                <small class="text-muted d-block">No podés quitarte el rol de SuperAdmin a vos mismo.</small>
+                                <small class="text-muted d-block">No podés quitarte el rol de SuperAdmin a vos
+                                    mismo.</small>
                             @endif
                         </div>
                     @endif

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\Unidad;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -46,7 +47,11 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureViews(): void
     {
         Fortify::loginView(fn() => view('auth.login'));
-        Fortify::registerView(fn() => view('auth.register'));
+        Fortify::registerView(function () {
+            $unidades = Unidad::where('activo', true)->orderBy('nombre')->get();
+
+            return view('auth.register', compact('unidades'));
+        });
         Fortify::requestPasswordResetLinkView(fn() => view('auth.forgot-password'));
         Fortify::resetPasswordView(fn($request) => view('auth.reset-password', ['request' => $request]));
         Fortify::verifyEmailView(fn() => view('auth.verify-email'));

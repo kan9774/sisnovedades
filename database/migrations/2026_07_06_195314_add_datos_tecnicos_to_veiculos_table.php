@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::table('vehiculos', function (Blueprint $table) {
             $table->string('marca', 100)->nullable()->after('matricula');
             $table->string('modelo', 100)->nullable()->after('marca');
-            $table->string('color', 50)->nullable()->after('modelo');
-            $table->string('numero_chasis', 50)->nullable()->unique()->after('color');
+            $table->string('vehiculo', 50)->nullable()->after('modelo');
+            $table->string('numero_chasis', 50)->nullable()->unique()->after('vehiculo');
             $table->string('numero_motor', 50)->nullable()->unique()->after('numero_chasis');
             $table->unsignedTinyInteger('ejes')->default(2)->after('numero_motor');
         });
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->dropColumn([
                 'marca',
                 'modelo',
-                'color',
+                'vehiculo',
                 'numero_chasis',
                 'numero_motor',
                 'ejes',

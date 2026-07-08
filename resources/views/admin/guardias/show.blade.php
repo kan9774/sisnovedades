@@ -236,6 +236,13 @@
                 </table>
             </div>
         </div>
+        @php
+            $puedeRegistrarSalida =
+                $guardia->captain_id === auth()->id() ||
+                $guardia->oficer_id === auth()->id() ||
+                $guardia->escribiente->contains('id', auth()->id()) ||
+                auth()->user()->isAdmin();
+        @endphp
         {{-- SALIDAS DE VEHÍCULOS (independientes de novedades) --}}
         <div class="card mt-3">
             <div class="card-header">
@@ -245,7 +252,7 @@
                 </h3>
                 <div class="card-tools">
                     @can('create', App\Models\SalidaVehiculo::class)
-                        @if ($guardia->status === 'open')
+                        @if ($guardia->status === 'open' && $puedeRegistrarSalida)
                             <a href="{{ route('admin.guardias.salidas.create', $guardia) }}"
                                 class="btn btn-outline-info btn-sm ml-1" aria-label="Registrar salida de vehículo">
                                 <i class="fas fa-plus-circle"></i> Registrar Salida
@@ -375,7 +382,7 @@
                         <i class="fas fa-truck fa-2x d-block mb-2"></i>
                         No hay salidas de vehículos registradas en esta guardia.
                         @can('create', App\Models\SalidaVehiculo::class)
-                            @if ($guardia->status === 'open')
+                            @if ($guardia->status === 'open' && $puedeRegistrarSalida)
                                 <br>
                                 <a href="{{ route('admin.guardias.salidas.create', $guardia) }}"
                                     class="btn btn-outline-primary btn-sm mt-2"

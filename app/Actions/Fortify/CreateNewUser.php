@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\Rol;
+use App\Models\Unidad;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -24,6 +25,7 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
+            'unidad_id' => ['required', 'exists:unidades,id'],
         ])->validate();
 
         $rolVisitante = Rol::where('name', 'visitante')->first();
@@ -35,6 +37,7 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
             'rol_id' => $rolVisitante?->id,
+            'unidad_id' => $input['unidad_id'],
             'status' => 'active',
         ]);
     }

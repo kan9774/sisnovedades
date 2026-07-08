@@ -53,21 +53,27 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Escribientes</label>
-                        <select name="escribientes[]"
-                            class="form-control select2-multiple @error('escribientes') is-invalid @enderror"
-                            multiple="multiple" required>
-                            @foreach ($escribientes as $escribiente)
-                                <option value="{{ $escribiente->id }}"
-                                    {{ in_array($escribiente->id, old('escribientes', [])) ? 'selected' : '' }}>
-                                    {{ $escribiente->grade }} {{ $escribiente->name }} {{ $escribiente->last_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted">Selecciona los escribientes de la guardia.</small>
-                        @error('escribientes')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                        <label>Escribiente</label>
+                        @if (auth()->user()->isEscribiente())
+                            <input type="text" class="form-control"
+                                value="{{ auth()->user()->grade }} {{ auth()->user()->name }} {{ auth()->user()->last_name }}"
+                                disabled>
+                            <input type="hidden" name="escribiente_id" value="{{ auth()->id() }}">
+                        @else
+                            <select name="escribiente_id" class="form-control @error('escribiente_id') is-invalid @enderror"
+                                required>
+                                <option value="" disabled selected>-- Seleccionar Escribiente --</option>
+                                @foreach ($escribientes as $escribiente)
+                                    <option value="{{ $escribiente->id }}"
+                                        {{ old('escribiente_id') == $escribiente->id ? 'selected' : '' }}>
+                                        {{ $escribiente->grade }} {{ $escribiente->name }} {{ $escribiente->last_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('escribiente_id')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        @endif
                     </div>
 
                     <div class="form-group">
@@ -91,13 +97,13 @@
     </div>
 @stop
 @push('scripts')
-<script>
-    $(document).ready(function() {
-        $('.select2-multiple').select2({
-            theme: 'bootstrap4',
-            placeholder: 'Seleccionar escribientes',
-            allowClear: true
+    <script>
+        $(document).ready(function() {
+            $('.select2-multiple').select2({
+                theme: 'bootstrap4',
+                placeholder: 'Seleccionar escribientes',
+                allowClear: true
+            });
         });
-    });
-</script>
+    </script>
 @endpush

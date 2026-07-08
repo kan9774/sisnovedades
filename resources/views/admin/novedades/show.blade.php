@@ -136,8 +136,8 @@
                         <tbody>
                             @foreach ($novedad->logs as $log)
                                 <tr>
-                                    <td>{{ $log->action }}</td>
-                                    <td>{{ $log->usuario->name ?? '-' }}</td>
+                                    <td>{{ ucfirst($log->event ?? $log->description) }}</td>
+                                    <td>{{ $log->causer->name ?? 'Sistema' }} {{ $log->causer->last_name ?? '' }}</td>
                                     <td>{{ $log->created_at->format('d/m/Y H:i') }}</td>
                                 </tr>
                             @endforeach
@@ -154,8 +154,9 @@
             <div class="card-body">
 
                 @php
-                    $puedeGestionarAdjuntos = $guardia->status === 'open'
-                        && ($guardia->esMiembro(auth()->user()) || auth()->user()->isAdmin());
+                    $puedeGestionarAdjuntos =
+                        $guardia->status === 'open' &&
+                        ($guardia->esMiembro(auth()->user()) || auth()->user()->isAdmin());
                 @endphp
 
                 {{-- Subir archivo — solo si tiene permiso --}}

@@ -304,29 +304,33 @@ return [
             'type'         => 'fullscreen-widget',
             'topnav_right' => true,
         ],
-        [ 'header' => 'I N I C I O' ],
+        ['header' => 'I N I C I O'],
         [
-            'text'=> 'Inicio',
-            'url'=>'admin',
-            'icon'=> 'fa-solid fa-house-chimney',
-            'active'=> ['admin']
+            'text' => 'Inicio',
+            'url' => 'admin',
+            'icon' => 'fa-solid fa-house-chimney',
+            'active' => ['admin']
         ],
         // Guardias — todos pueden ver
-        ['header' => 'G U A R D I A S'],
+        ['header' => 'GUARDIAS Y NOVEDADES'],
         [
             'text'   => 'Guardias',
             'url'    => 'admin/guardias',
             'icon'   => 'fas fa-person-military-pointing',
             'active' => ['admin/guardias*'],
         ],
-
-        // Novedades — todos pueden ver
-        ['header' => 'N O V E D A D E S'],
         [
             'text' => 'Novedades',
             'icon' => 'fas fa-book-open',
             'url'  => 'admin/novedades',
             'active' => ['admin/novedades*'],
+        ],
+        [
+            'text'   => 'Unidades',
+            'url'    => 'admin/organismos',
+            'icon'   => 'fas fa-building',
+            'active' => ['admin/organismos*'],
+            'can'    => 'viewAny-user', // solo admin
         ],
 
         // Usuarios — solo admin
@@ -340,6 +344,13 @@ return [
             'icon'    => 'fas fa-users',
             'active'  => ['admin/users*'],
             'can'     => 'viewAny-user',
+        ],
+        [
+            'text'   => 'Oficinas',
+            'url'    => 'admin/oficinas',
+            'icon'   => 'fas fa-building',
+            'active' => ['admin/oficinas*'],
+            'can'    => 'viewAny-oficina',
         ],
         // Vehículos
         [
@@ -360,6 +371,13 @@ return [
             'active' => ['admin/conductores*'],
             'can'    => 'viewAny-conductor',
         ],
+        [
+            'text'   => 'Tipos de Vehículo',
+            'url'    => 'admin/vehiculos/tipos',
+            'icon'   => 'fas fa-shapes',
+            'active' => ['admin/vehiculos/tipos*'],
+            'can'    => 'viewAny-tipo-vehiculo',
+        ],
 
         // Roles y Permisos — solo admin
         [
@@ -379,17 +397,6 @@ return [
             'icon'   => 'fas fa-shield-alt',
             'active' => ['admin/permisos*'],
             'can'    => 'viewAny-user',
-        ],
-        [
-            'header'  => 'U N I D A D E S',
-            'can'     => 'viewAny-rol',
-        ],
-        [
-            'text'   => 'Unidades',
-            'url'    => 'admin/organismos',
-            'icon'   => 'fas fa-building',
-            'active' => ['admin/organismos*'],
-            'can'    => 'viewAny-user', // solo admin
         ],
         // Palomar
         [
@@ -435,6 +442,18 @@ return [
             'icon'   => 'fas fa-file-alt',
             'active' => ['admin/documentos*'],
             'can'    => 'viewAny-documento',
+        ],
+        // Auditoría
+        [
+            'header' => 'A U D I T O R Í A',
+            'can'    => 'viewAny-log',
+        ],
+        [
+            'text'   => 'Log de Actividad',
+            'url'    => 'admin/logs',
+            'icon'   => 'fas fa-history',
+            'active' => ['admin/logs*'],
+            'can'    => 'viewAny-log',
         ],
         // Configuración
         // ['header' => 'C U E N T A'],

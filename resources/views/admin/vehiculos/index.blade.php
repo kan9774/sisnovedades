@@ -27,6 +27,19 @@
                     <i class="fas fa-truck"></i> Vehículos
                 </h3>
                 <div class="card-tools">
+                    @can('viewAny', App\Models\TipoVehiculo::class)
+                        <a href="{{ route('admin.vehiculos.tipos.index') }}" class="btn btn-outline-secondary btn-sm"
+                            style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
+                            <i class="fas fa-shapes"></i> Tipos de Vehículo
+                        </a>
+                    @endcan
+                    @can('viewAny', App\Models\Vehiculo::class)
+                        <a href="{{ route('admin.vehiculos.export') }}" class="btn btn-outline-success btn-sm"
+                            style="background-color: rgba(40, 167, 69, 0.08); border-color: rgba(40, 167, 69, 0.25);"
+                            aria-label="Descargar Excel">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </a>
+                    @endcan
                     @can('create', App\Models\Vehiculo::class)
                         <a href="{{ route('admin.vehiculos.create') }}" class="btn btn-outline-primary btn-sm"
                             style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);"
@@ -41,6 +54,8 @@
                     <thead class="thead-dark">
                         <tr>
                             <th>Matrícula</th>
+                            <th>Tipo</th>
+                            <th>Vehículo</th>
                             <th>Combustible</th>
                             <th>Consumo (L/km)</th>
                             <th>Odómetro</th>
@@ -54,6 +69,8 @@
                         @forelse($vehiculos as $vehiculo)
                             <tr>
                                 <td class="disabled"><strong>{{ $vehiculo->matricula }}</strong></td>
+                                <td>{{ $vehiculo->tipoVehiculo->nombre ?? '-' }}</td>
+                                <td>{{ $vehiculo->vehiculo ?? '-' }}</td>
                                 <td>
                                     @if ($vehiculo->tipo_combustible === 'gas_oil')
                                         <span class="badge badge-warning">Gas Oil</span>
@@ -118,7 +135,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="10" class="text-center text-muted py-4">
                                     <i class="fas fa-truck fa-2x d-block mb-2"></i>
                                     No hay vehículos registrados.
                                 </td>

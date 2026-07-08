@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Guard;
 use App\Models\News;
+use App\Models\Oficina;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -22,14 +23,14 @@ class NovedadesSeeder extends Seeder
             $this->command->warn('No hay escribientes.');
             return;
         }
-
+        $Oficina = Oficina::firstOrCreate(['nombre' => 'Oficina de Com']);
         $novedades = [
             [
                 'type' => 'Radio',
                 'direction' => 'Recibido',
                 'number' => '001',
                 'time' => '08:30',
-                'office' => 'Comando',
+                'office_id' => $Oficina->id,
                 'affair' => 'Aviso de ejercicio',
                 'text' => 'Se recibe comunicación sobre ejercicio programado.',
                 'clasification' => 'Prioritario',
@@ -41,7 +42,7 @@ class NovedadesSeeder extends Seeder
                 'direction' => 'Expedido',
                 'number' => '002',
                 'time' => '10:15',
-                'office' => 'Oficina de Logística',
+               'office_id' => $Oficina->id,
                 'affair' => 'Solicitud de combustible',
                 'text' => 'Se envía solicitud de combustible para vehículos.',
                 'clasification' => 'Rutinario',

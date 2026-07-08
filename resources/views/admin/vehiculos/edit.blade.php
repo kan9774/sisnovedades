@@ -36,6 +36,7 @@
                     @csrf
                     @method('PUT')
 
+                    {{-- Fila 1: Matrícula / Marca / Modelo --}}
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
@@ -72,53 +73,69 @@
                         </div>
                     </div>
 
+                    {{-- Fila 2: Color / Tipo de Vehículo / Unidad / Descripción --}}
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Color <small class="text-muted">(opcional)</small></label>
-                                <input type="text" name="color"
-                                    class="form-control @error('color') is-invalid @enderror"
-                                    value="{{ old('color', $vehiculo->color) }}">
-                                @error('color')
+                                <label>Vehículo <small class="text-muted">(opcional)</small></label>
+                                <input type="text" name="vehiculo"
+                                    class="form-control @error('vehiculo') is-invalid @enderror"
+                                    value="{{ old('vehiculo', $vehiculo->vehiculo) }}"
+                                    placeholder="Ej: JEEP, PICKUP, CAMIÓN">
+                                @error('vehiculo')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Ejes</label>
-                                <input type="number" name="ejes"
-                                    class="form-control @error('ejes') is-invalid @enderror"
-                                    value="{{ old('ejes', $vehiculo->ejes) }}" min="1" max="10">
-                                @error('ejes')
+                                <label>Tipo de Vehículo <small class="text-muted">(opcional)</small></label>
+                                <select name="tipo_vehiculo_id"
+                                    class="form-control @error('tipo_vehiculo_id') is-invalid @enderror">
+                                    <option value="">-- Seleccionar --</option>
+                                    @foreach ($tiposVehiculo as $tipo)
+                                        <option value="{{ $tipo->id }}"
+                                            {{ old('tipo_vehiculo_id', $vehiculo->tipo_vehiculo_id) == $tipo->id ? 'selected' : '' }}>
+                                            {{ $tipo->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('tipo_vehiculo_id')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>N° Chasis <small class="text-muted">(opcional)</small></label>
-                                <input type="text" name="numero_chasis"
-                                    class="form-control @error('numero_chasis') is-invalid @enderror"
-                                    value="{{ old('numero_chasis', $vehiculo->numero_chasis) }}">
-                                @error('numero_chasis')
+                                <label>Unidad <small class="text-muted">(opcional)</small></label>
+                                <select name="unidad_id" class="form-control @error('unidad_id') is-invalid @enderror">
+                                    <option value="">-- Seleccionar --</option>
+                                    @foreach ($unidades as $unidad)
+                                        <option value="{{ $unidad->id }}"
+                                            {{ old('unidad_id', $vehiculo->unidad_id) == $unidad->id ? 'selected' : '' }}>
+                                            {{ $unidad->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('unidad_id')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>N° Motor <small class="text-muted">(opcional)</small></label>
-                                <input type="text" name="numero_motor"
-                                    class="form-control @error('numero_motor') is-invalid @enderror"
-                                    value="{{ old('numero_motor', $vehiculo->numero_motor) }}">
-                                @error('numero_motor')
+                                <label>Objeto <small class="text-muted">(opcional)</small></label>
+                                <input type="text" name="descripcion"
+                                    class="form-control @error('descripcion') is-invalid @enderror"
+                                    value="{{ old('descripcion', $vehiculo->descripcion) }}">
+                                @error('descripcion')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
                     </div>
 
+                    {{-- Fila 3: Combustible / Consumo / Sin cuentakilómetros --}}
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
@@ -168,45 +185,75 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Descripción <small class="text-muted">(opcional)</small></label>
-                        <input type="text" name="descripcion"
-                            class="form-control @error('descripcion') is-invalid @enderror"
-                            value="{{ old('descripcion', $vehiculo->descripcion) }}">
-                        @error('descripcion')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="activo" name="activo"
-                            value="1"
-                                {{ old('activo', $vehiculo->activo ?? true) ? 'checked' : ''  }}>
-                                {{ in_array(old( 'estado',$veiculo->estado ?? ''), ['rojo','negro'])? 'disabled' : '' }}
-                            <label class="custom-control-label" for="activo">Activo</label>
+                    {{-- Fila 4: Ejes / Chasis / Motor / Activo / Estado --}}
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Ejes</label>
+                                <input type="number" name="ejes"
+                                    class="form-control @error('ejes') is-invalid @enderror"
+                                    value="{{ old('ejes', $vehiculo->ejes) }}" min="1" max="10">
+                                @error('ejes')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="estado">Estado</label>
-                        <select name="estado" id="estado"
-                            class="form-control @error('estado') is-invalid @enderror">
-                            <option value="verde"
-                                {{ old('estado', $vehiculo->estado ?? 'verde') == 'verde' ? 'selected' : '' }}>🟢 Verde
-                                (OK)</option>
-                            <option value="amarillo"
-                                {{ old('estado', $vehiculo->estado ?? '') == 'amarillo' ? 'selected' : '' }}>🟡 Amarillo
-                                (Observación)</option>
-                            <option value="rojo"
-                                {{ old('estado', $vehiculo->estado ?? '') == 'rojo' ? 'selected' : '' }}>🔴 Rojo (Fuera de
-                                servicio)</option>
-                            <option value="negro"
-                                {{ old('estado', $vehiculo->estado ?? '') == 'negro' ? 'selected' : '' }}>⚫ Negro (Dado de
-                                baja)</option>
-                        </select>
-                        @error('estado')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>N° Chasis <small class="text-muted">(opcional)</small></label>
+                                <input type="text" name="numero_chasis"
+                                    class="form-control @error('numero_chasis') is-invalid @enderror"
+                                    value="{{ old('numero_chasis', $vehiculo->numero_chasis) }}">
+                                @error('numero_chasis')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>N° Motor <small class="text-muted">(opcional)</small></label>
+                                <input type="text" name="numero_motor"
+                                    class="form-control @error('numero_motor') is-invalid @enderror"
+                                    value="{{ old('numero_motor', $vehiculo->numero_motor) }}">
+                                @error('numero_motor')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="activo" name="activo"
+                                        value="1" {{ old('activo', $vehiculo->activo) ? 'checked' : '' }}
+                                        {{ in_array(old('estado', $vehiculo->estado ?? ''), ['rojo', 'negro']) ? 'disabled' : '' }}>
+                                    <label class="custom-control-label" for="activo">Activo</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="estado">Estado</label>
+                                <select name="estado" id="estado"
+                                    class="form-control @error('estado') is-invalid @enderror">
+                                    <option value="verde"
+                                        {{ old('estado', $vehiculo->estado ?? 'verde') == 'verde' ? 'selected' : '' }}>
+                                        🟢 Verde</option>
+                                    <option value="amarillo"
+                                        {{ old('estado', $vehiculo->estado ?? '') == 'amarillo' ? 'selected' : '' }}>
+                                        🟡 Amarillo</option>
+                                    <option value="rojo"
+                                        {{ old('estado', $vehiculo->estado ?? '') == 'rojo' ? 'selected' : '' }}>
+                                        🔴 Rojo</option>
+                                    <option value="negro"
+                                        {{ old('estado', $vehiculo->estado ?? '') == 'negro' ? 'selected' : '' }}>
+                                        ⚫ Negro</option>
+                                </select>
+                                @error('estado')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-between">

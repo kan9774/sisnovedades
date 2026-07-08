@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdjuntoController;
 use App\Http\Controllers\Admin\EstadoPalomaController;
 use App\Http\Controllers\NovedadesController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\ConductorController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MantenimientoVehiculoController;
+use App\Http\Controllers\TipoVehiculoController;
+use App\Http\Controllers\OficinaController;
 use App\Http\Controllers\OrganismoController;
 use App\Http\Controllers\PalomaController;
 use App\Http\Controllers\PalomarController;
@@ -51,8 +54,13 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/', [AdminController::class, 'index'])->name('index');
 
+        // Auditoría de acciones del sistema
+        Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
+
         // Novedades (vista general)
         Route::get('/novedades', [NovedadesController::class, 'index'])->name('novedades.index');
+
+
 
         // Usuarios
         Route::prefix('users')->name('users.')->group(function () {
@@ -104,6 +112,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/guardias/{id}/force-delete', [GuardiaController::class, 'forceDelete'])->name('guardias.force-delete');
         Route::delete('/guardias/{guardia}', [GuardiaController::class, 'destroy'])->name('guardias.destroy');
 
+
         // Novedades anidadas bajo guardia
         Route::prefix('guardias/{guardia}/novedades')->name('guardias.novedades.')->group(function () {
             Route::get('/create',           [NovedadesController::class, 'create'])->name('create');
@@ -123,11 +132,32 @@ Route::middleware('auth')->group(function () {
             Route::put('/{organismo}',       [OrganismoController::class, 'update'])->name('update');
             Route::delete('/{organismo}',    [OrganismoController::class, 'destroy'])->name('destroy');
         });
+
+        // Oficinas (catálogo, para notificaciones de novedades)
+        Route::prefix('oficinas')->name('oficinas.')->group(function () {
+            Route::get('/',              [OficinaController::class, 'index'])->name('index');
+            Route::get('/create',        [OficinaController::class, 'create'])->name('create');
+            Route::post('/',             [OficinaController::class, 'store'])->name('store');
+            Route::get('/{oficina}/edit', [OficinaController::class, 'edit'])->name('edit');
+            Route::put('/{oficina}',     [OficinaController::class, 'update'])->name('update');
+            Route::delete('/{oficina}',  [OficinaController::class, 'destroy'])->name('destroy');
+        });
+        // Tipos de vehículo (catálogo) - debe ir ANTES del grupo vehiculos/{vehiculo}
+        Route::prefix('vehiculos/tipos')->name('vehiculos.tipos.')->group(function () {
+            Route::get('/', [TipoVehiculoController::class, 'index'])->name('index');
+            Route::get('/create', [TipoVehiculoController::class, 'create'])->name('create');
+            Route::post('/', [TipoVehiculoController::class, 'store'])->name('store');
+            Route::get('/{tipo}/edit', [TipoVehiculoController::class, 'edit'])->name('edit');
+            Route::put('/{tipo}', [TipoVehiculoController::class, 'update'])->name('update');
+            Route::delete('/{tipo}', [TipoVehiculoController::class, 'destroy'])->name('destroy');
+        });
+
         // Vehículos - CRUD completo
         Route::prefix('vehiculos')->name('vehiculos.')->group(function () {
             Route::get('/', [VehiculoController::class, 'index'])->name('index');
             Route::get('/create', [VehiculoController::class, 'create'])->name('create');
             Route::post('/', [VehiculoController::class, 'store'])->name('store');
+            Route::get('/export', [VehiculoController::class, 'export'])->name('export');
             Route::get('/{vehiculo}', [VehiculoController::class, 'show'])->name('show');
             Route::get('/{vehiculo}/edit', [VehiculoController::class, 'edit'])->name('edit');
             Route::put('/{vehiculo}', [VehiculoController::class, 'update'])->name('update');

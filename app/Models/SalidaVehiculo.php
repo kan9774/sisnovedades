@@ -3,9 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class SalidaVehiculo extends Model
 {
+
+    use LogsActivity;
+
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('Salida Vehiculos'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+    }
+
+
     protected $table = 'salidas_vehiculos';
 
     protected $fillable = [

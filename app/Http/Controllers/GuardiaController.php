@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guard;
+use App\Models\TipoVehiculo;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class GuardiaController extends Controller
 {
@@ -76,25 +79,31 @@ class GuardiaController extends Controller
     /**
      * Permanently delete a trashed guard.
      */
+
     public function forceDelete($id)
     {
         $guardia = Guard::onlyTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $guardia);
 
-        // Verificar si tiene novedades
-        if ($guardia->novedades()->count() > 0) {
-            return redirect()->route('admin.guardias.trashed')
-                ->with('error', 'No se puede eliminar permanentemente una guardia con novedades asociadas.');
-        }
+        DB::transaction(function () use ($guardia) {
+            $guardia->load('novedades.adjuntos', 'novedades.logs', 'salidasVehiculos');
 
-        // Eliminar escribientes asociados (tabla pivot)
-        $guardia->escribiente()->detach();
+            foreach ($guardia->novedades as $novedad) {
+                foreach ($novedad->adjuntos as $adjunto) {
+                    Storage::disk('guardias')->delete($adjunto->file_path);
+                    $adjunto->delete();
+                }
 
-        // Eliminación permanente
-        $guardia->forceDelete();
+                $novedad->delete();
+            }
+
+            $guardia->salidasVehiculos()->delete();
+            $guardia->escribiente()->detach();
+            $guardia->forceDelete();
+        });
 
         return redirect()->route('admin.guardias.trashed')
-            ->with('success', 'Guardia eliminada permanentemente.');
+            ->with('success', 'Guardia, novedades, adjuntos y salidas de vehículo eliminados permanentemente.');
     }
 
     /**
@@ -105,8 +114,11 @@ class GuardiaController extends Controller
         //
         $this->authorize('create', Guard::class);
         $capitanes = User::whereHas('rol', fn($q) => $q->where('name', 'capitan_de_servicio'))->get();
+        $oficiales = User::whereHas('rol', fn($q) => $q->where('name', 'oficial_de_dia'))->get();
         $escribientes = User::whereHas('rol', fn($q) => $q->where('name', 'escribiente'))->get();
-        return view('admin.guardias.create', compact('capitanes', 'escribientes'));
+        $tiposVehiculo = TipoVehiculo::where('activo', true)->orderBy('nombre')->get();
+
+        return view('admin.guardias.create', compact('capitanes', 'oficiales', 'escribientes', 'tiposVehiculo'));
     }
 
     /**
@@ -120,18 +132,25 @@ class GuardiaController extends Controller
         $data = $request->validate([
             'date' => 'required|date|unique:guards,date',
             'captain_id' => 'required|exists:users,id',
-            'escribientes' => 'required|array|min:1',
-            'escribientes.*' => 'exists:users,id',
+            'oficer_id' => 'required|exists:users,id',
+            'escribiente_id' => 'required|exists:users,id',
             'notes' => 'nullable|string',
         ]);
+
+        // Si quien crea la guardia es escribiente, siempre queda él/ella asignado,
+        // sin importar qué se haya enviado en el formulario.
+        $escribienteId = Auth::user()->isEscribiente()
+            ? Auth::id()
+            : $data['escribiente_id'];
+
         $guardia = Guard::create([
             'date' => $data['date'],
             'captain_id' => $data['captain_id'],
-            'oficer_id' => Auth::id(),
+            'oficer_id' => $data['oficer_id'],
             'status' => 'open',
             'notes' => $data['notes'] ?? null,
         ]);
-        $guardia->escribiente()->attach($data['escribientes']);
+        $guardia->escribiente()->attach($escribienteId);
         return redirect()->route('admin.guardias.show', $guardia)->with('success', 'Guardia creada exitosamente');
     }
 

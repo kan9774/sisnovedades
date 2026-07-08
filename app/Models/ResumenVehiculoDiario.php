@@ -3,9 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class ResumenVehiculoDiario extends Model
 {
+
+    use LogsActivity;
+
+
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('Resumen Vehiculo Diario'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+    }
+
+
+
     protected $table = 'resumen_vehiculos_diario';
 
     protected $fillable = [

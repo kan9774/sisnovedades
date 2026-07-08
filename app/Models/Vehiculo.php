@@ -4,19 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Vehiculo extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('Vehiculos'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+    }
 
     protected $fillable = [
         'matricula',
         'marca',
         'modelo',
-        'color',
+        'vehiculo',
         'numero_chasis',
         'numero_motor',
         'ejes',
+        'tipo_vehiculo_id',
+        'unidad_id',
         'tipo_combustible',
         'consumo_litros_por_km',
         'sin_cuentakilometros',
@@ -33,6 +45,18 @@ class Vehiculo extends Model
     ];
 
     protected $table = 'vehiculos';
+
+    // Relación con Unidad (unidad a la que pertenece el vehículo)
+    public function unidad()
+    {
+        return $this->belongsTo(Unidad::class);
+    }
+
+    // Relación con TipoVehiculo (tipo de vehículo)
+    public function tipoVehiculo()
+    {
+        return $this->belongsTo(TipoVehiculo::class);
+    }
 
     // Relación con SalidaVehiculo (salidas registradas por guardia)
     public function salidas()
@@ -60,24 +84,26 @@ class Vehiculo extends Model
             ? "{$this->matricula} - {$marcaModelo}"
             : "{$this->matricula} - {$this->descripcion}";
     }
+
     public function getEstadoLabelAttribute(): string
     {
         return match ($this->estado) {
-            'verde'  => '🟢 OK',
+            'verde'    => '🟢 OK',
             'amarillo' => '🟡 Observación',
-            'rojo'   => '🔴 Fuera de servicio',
-            'negro'  => '⚫ Dado de baja',
-            default  => 'Desconocido',
+            'rojo'     => '🔴 Fuera de servicio',
+            'negro'    => '⚫ Dado de baja',
+            default    => 'Desconocido',
         };
     }
+
     public function getEstadoBadgeClassAttribute(): string
     {
         return match ($this->estado) {
-            'verde'  => 'badge bg-success',
-            'amarillo' => 'badge bg-warning text-dark',
-            'rojo'   => 'badge bg-danger',
-            'negro'  => 'badge bg-dark',
-            default  => 'badge bg-secondary',
+            'verde'    => 'badge badge-success',
+            'amarillo' => 'badge badge-warning',
+            'rojo'     => 'badge badge-danger',
+            'negro'    => 'badge badge-dark',
+            default    => 'badge badge-secondary',
         };
     }
 }

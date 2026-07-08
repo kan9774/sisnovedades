@@ -4,10 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class News extends Model
 {
+
+    use LogsActivity;
+
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('Novedades'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+    }
+
     //
     protected $fillable = [
         'guard_id',
@@ -15,9 +30,9 @@ class News extends Model
         'type',
         'direction',
         'destino',
+        'office_id',   // ← reemplaza 'office'
         'number',
         'time',
-        'office',
         'affair',
         'text',
         'clasification',
@@ -53,13 +68,17 @@ class News extends Model
     {
         return $this->hasMany(Attach::class, 'news_id');
     }
-    public function logs(): HasMany
-    {
-        return $this->hasMany(Log_News::class, 'news_id');
-    }
     public function organismo(): BelongsTo
     {
         return $this->belongsTo(Organismo::class, 'organismo_id');
+    }
+    public function logs(): MorphMany
+    {
+        return $this->morphMany(Activity::class, 'subject')->latest();
+    }
+    public function oficina(): BelongsTo
+    {
+        return $this->belongsTo(Oficina::class, 'office_id');
     }
 
 

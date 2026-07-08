@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             PalomaSeeder::class,
             VueloSeeder::class,
             CategoriaDocumentoSeeder::class,
+            UnidadSeeder::class,
         ]);
 
         $rolAdmin = \App\Models\Rol::where('name', 'admin')->first();
