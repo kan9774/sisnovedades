@@ -23,7 +23,7 @@ class NovedadesController extends Controller
     }
     public function create(Guard $guardia)
     {
-        $this->authorize('create', News::class);
+        $this->authorize('create', [News::class, $guardia]);
         abort_if($guardia->status === 'closed', 403, 'La guardia está cerrada');
 
         $organismos = Organismo::orderBy('name')->get();
@@ -34,17 +34,7 @@ class NovedadesController extends Controller
 
     public function store(Request $request, Guard $guardia)
     {
-        $this->authorize('create', News::class);
-
-        $esCapitan = $guardia->captain_id === Auth::id();
-        $esOficial = $guardia->oficer_id === Auth::id();
-        $esEscribiente = $guardia->escribiente()
-            ->where('users.id', Auth::id())
-            ->exists();
-
-
-        $puedeCrear = $esCapitan || $esOficial || $esEscribiente || Auth::user()->isAdmin();
-        abort_if(!$puedeCrear, 403, 'No tienes permisos para registrar novedades en esta guardia');
+        $this->authorize('create', [News::class, $guardia]);
         abort_if($guardia->status === 'closed', 403, 'La guardia está cerrada');
 
         $data = $request->validate([

@@ -27,15 +27,23 @@ class NovedadPolicy
 
     /**
      * Determine whether the user can create models.
+     *
+     * IMPORTANTE: si se llama con una guardia específica (p. ej. desde
+     * NovedadesController con `$this->authorize('create', [News::class, $guardia])`),
+     * se valida membresía sobre ESA guardia puntual.
+     * Si no se pasa guardia (p. ej. `@can('create', App\Models\News::class)`
+     * en vistas donde ya se sabe que se trabaja con la guardia de hoy),
+     * se cae al comportamiento anterior de usar Guard::hoy().
      */
-    public function create(User $user): bool
+    public function create(User $user, ?Guard $guardia = null): bool
     {
-        if(!$user->HasPermisos('registrar_novedad')) 
-        {
+        if (!$user->HasPermisos('registrar_novedad')) {
             return false;
         }
-        $guardia= Guard::hoy()->first();
-        if(!$guardia) {
+
+        $guardia = $guardia ?? Guard::hoy()->first();
+
+        if (!$guardia) {
             return false;
         }
 
@@ -61,7 +69,7 @@ class NovedadPolicy
         }
         $perteneceAGuardia = $guardia->captain_id === $user->id
             || $guardia->oficer_id === $user->id;
-        if ($perteneceAGuardia) 
+        if ($perteneceAGuardia)
         {
             return $user->HasPermisos('editar_cualquier_novedad');
         }

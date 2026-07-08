@@ -119,6 +119,16 @@
             </div>
         </div>
 
+        @php
+            // Puede operar (crear novedades / salidas) sólo quien es capitán,
+            // oficial de día, o el/la escribiente designado/a de ESTA guardia puntual
+            // (no cualquier escribiente del sistema), o un admin.
+            $puedeOperarGuardia = $guardia->captain_id === auth()->id()
+                || $guardia->oficer_id === auth()->id()
+                || $guardia->escribiente->contains('id', auth()->id())
+                || auth()->user()->isAdmin();
+        @endphp
+
         {{-- Novedades --}}
         <div class="card">
             <div class="card-header">
@@ -127,14 +137,12 @@
                 </h3>
                 <div class="card-tools">
                     {{-- Botón Crear Novedad --}}
-                    @can('create', App\Models\News::class)
-                        @if ($guardia->status === 'open')
-                            <a href="{{ route('admin.guardias.novedades.create', $guardia) }}"
-                                class="btn btn-outline-info btn-sm ml-1" data-toggle="tooltip" title="Crear novedad">
-                                <i class="fas fa-plus-circle"></i> Registrar Tráfico
-                            </a>
-                        @endif
-                    @endcan
+                    @if ($guardia->status === 'open' && $puedeOperarGuardia)
+                        <a href="{{ route('admin.guardias.novedades.create', $guardia) }}"
+                            class="btn btn-outline-info btn-sm ml-1" data-toggle="tooltip" title="Crear novedad">
+                            <i class="fas fa-plus-circle"></i> Registrar Tráfico
+                        </a>
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -220,29 +228,20 @@
                             <div class="text-center text-muted py-4">
                                 <i class="fa-solid fa-tower-cell fa-2x d-block mb-2"></i>
                                 No hay tráficos registrados en esta guardia.
-                                @can('create', App\Models\Novedad::class)
-                                    @if ($guardia->status === 'open')
-                                        <br>
-                                        <a href="{{ route('admin.guardias.novedades.create', $guardia) }}"
-                                            class="btn btn-outline-primary btn-sm mt-2"
-                                            style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
-                                            <i class="fas fa-plus-circle"></i> Registrar el primer tráfico
-                                        </a>
-                                    @endif
-                                @endcan
+                                @if ($guardia->status === 'open' && $puedeOperarGuardia)
+                                    <br>
+                                    <a href="{{ route('admin.guardias.novedades.create', $guardia) }}"
+                                        class="btn btn-outline-primary btn-sm mt-2"
+                                        style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
+                                        <i class="fas fa-plus-circle"></i> Registrar el primer tráfico
+                                    </a>
+                                @endif
                             </div>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-        @php
-            $puedeRegistrarSalida =
-                $guardia->captain_id === auth()->id() ||
-                $guardia->oficer_id === auth()->id() ||
-                $guardia->escribiente->contains('id', auth()->id()) ||
-                auth()->user()->isAdmin();
-        @endphp
         {{-- SALIDAS DE VEHÍCULOS (independientes de novedades) --}}
         <div class="card mt-3">
             <div class="card-header">
@@ -251,14 +250,12 @@
                     <span class="badge badge-primary ml-2">{{ $guardia->salidasVehiculos->count() }}</span>
                 </h3>
                 <div class="card-tools">
-                    @can('create', App\Models\SalidaVehiculo::class)
-                        @if ($guardia->status === 'open' && $puedeRegistrarSalida)
-                            <a href="{{ route('admin.guardias.salidas.create', $guardia) }}"
-                                class="btn btn-outline-info btn-sm ml-1" aria-label="Registrar salida de vehículo">
-                                <i class="fas fa-plus-circle"></i> Registrar Salida
-                            </a>
-                        @endif
-                    @endcan
+                    @if ($guardia->status === 'open' && $puedeOperarGuardia)
+                        <a href="{{ route('admin.guardias.salidas.create', $guardia) }}"
+                            class="btn btn-outline-info btn-sm ml-1" aria-label="Registrar salida de vehículo">
+                            <i class="fas fa-plus-circle"></i> Registrar Salida
+                        </a>
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -381,16 +378,14 @@
                     <div class="text-center text-muted py-4">
                         <i class="fas fa-truck fa-2x d-block mb-2"></i>
                         No hay salidas de vehículos registradas en esta guardia.
-                        @can('create', App\Models\SalidaVehiculo::class)
-                            @if ($guardia->status === 'open' && $puedeRegistrarSalida)
-                                <br>
-                                <a href="{{ route('admin.guardias.salidas.create', $guardia) }}"
-                                    class="btn btn-outline-primary btn-sm mt-2"
-                                    style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
-                                    <i class="fas fa-plus-circle"></i> Registrar la primera salida
-                                </a>
-                            @endif
-                        @endcan
+                        @if ($guardia->status === 'open' && $puedeOperarGuardia)
+                            <br>
+                            <a href="{{ route('admin.guardias.salidas.create', $guardia) }}"
+                                class="btn btn-outline-primary btn-sm mt-2"
+                                style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
+                                <i class="fas fa-plus-circle"></i> Registrar la primera salida
+                            </a>
+                        @endif
                     </div>
                 @endif
             </div>
