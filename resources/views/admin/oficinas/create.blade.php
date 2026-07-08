@@ -33,8 +33,7 @@
 
                     <div class="form-group">
                         <label>Nombre <span class="text-danger">*</span></label>
-                        <input type="text" name="nombre"
-                            class="form-control @error('nombre') is-invalid @enderror"
+                        <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror"
                             value="{{ old('nombre') }}" placeholder="Ej: Cte.Rva.Gral.E." required>
                         @error('nombre')
                             <span class="invalid-feedback">{{ $message }}</span>
@@ -42,8 +41,9 @@
                     </div>
 
                     <div class="form-group">
+                        <input type="hidden" name="activo" value="0">
                         <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="activo" name="activo"
+                            <input type="checkbox" class="custom-control-input" id="activo" name="activo" value="1"
                                 {{ old('activo', true) ? 'checked' : '' }}>
                             <label class="custom-control-label" for="activo">Activa</label>
                         </div>

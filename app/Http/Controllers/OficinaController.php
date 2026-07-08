@@ -34,10 +34,11 @@ class OficinaController extends Controller
 
         $data = $request->validate([
             'nombre' => 'required|string|max:150|unique:oficinas,nombre',
-            'activo' => 'boolean',
+            'activo' => 'boolean', // Esto es correcto
         ]);
 
-        $data['activo'] = $request->has('activo');
+        // Corrección principal: asignar valor booleano explícito
+        $data['activo'] = $request->filled('activo'); // Usamos filled() en lugar de has()
 
         Oficina::create($data);
 
@@ -61,7 +62,8 @@ class OficinaController extends Controller
             'activo' => 'boolean',
         ]);
 
-        $data['activo'] = $request->has('activo');
+        // Corrección principal: asignar valor booleano explícito
+        $data['activo'] = $request->filled('activo');
 
         $oficina->update($data);
 

@@ -79,9 +79,23 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-vuelo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_vuelo'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
-        Gate::define('viewAny-tipo-vehiculo', fn ($user) => $user->isAdmin() || $user->HasPermisos('ver_tipo-vehiculo'));
-        Gate::define('viewAny-log', fn ($user) => $user->isAdmin() || $user->HasPermisos('ver_log'));
-        Gate::define('viewAny-oficina', fn ($user) => $user->isAdmin());
+        Gate::define('viewAny-tipo-vehiculo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_tipo-vehiculo'));
+        Gate::define('viewAny-log', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_log'));
+        Gate::define('viewAny-oficina', fn($user) => $user->isAdmin());
+
+        Gate::define('upload-attach', function (User $user, News $news) {
+            if ($user->isAdmin()) {
+                return true;
+            }
+
+            $tieneRolHabilitado = $user->isCapitan() || $user->isOficialDia() || $user->isEscribiente();
+
+            return $tieneRolHabilitado && $news->guardia->esMiembro($user);
+        });
+
+        Gate::define('delete-attach', fn(User $user) => $user->isAdmin());
+
+
         // Registrar políticas 
         Gate::policy(Guard::class, GuardiaPolicy::class);
         Gate::policy(News::class, NovedadPolicy::class);

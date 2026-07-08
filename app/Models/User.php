@@ -70,7 +70,7 @@ class User extends Authenticatable implements PasskeyUser
             'is_super_admin' => 'boolean',
         ];
     }
-    protected $with = ['rol.permisos', 'permisosDirectos'];
+    
 
     /**
      * Get the user's initials

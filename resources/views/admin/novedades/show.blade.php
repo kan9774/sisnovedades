@@ -120,9 +120,14 @@
 
         {{-- Historial de cambios --}}
         @if ($novedad->logs->isNotEmpty())
-            <div class="card">
+            <div class="card card-outline collapsed-card">
                 <div class="card-header">
                     <h3 class="card-title"><i class="fas fa-history"></i> Historial</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fa-solid fa-plus-minus"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-striped mb-0">

@@ -105,7 +105,7 @@ class Guard extends Model
 
         return $this->captain_id === $user->id
             || $this->oficer_id === $user->id
-            || $this->escribiente->contains($user->id);
+            || $this->escribiente->contains('id', $user->id);
     }
     public function isAbiertaNoDelete(): bool
     {

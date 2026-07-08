@@ -50,7 +50,7 @@
                         <tr>
                             <td><code>{{ $permiso->name }}</code></td>
                             <td>{{ $permiso->description ?? '-' }}</td>
-                            <td>{{ $permiso->rols->count() }}</td>
+                            <td>{{ $permiso->rols_count }}</td>
                             <td class="text-center align-middle">
                                 <div class="d-flex justify-content-center">
                                     <a href="{{ route('admin.permisos.edit', $permiso) }}"

@@ -148,7 +148,7 @@ class UserController extends Controller
     public function update(Request $request, string $id)
     {
         $user = User::findOrFail($id);
-        $this->authorize('update', $user);
+        $this->authorize('assignPermissions', $user);
 
         $data = $request->validate([
             'name'      => 'required|string|max:255',
@@ -177,9 +177,9 @@ class UserController extends Controller
 
         // Solo un SuperAdmin puede otorgar o quitar el flag de SuperAdmin a otro usuario.
         // Nadie puede quitarse el flag a sí mismo (evita quedarse sin acceso por error).
-        if (auth()->user()->isSuperAdmin() && $user->id !== auth()->id()) {
-            $user->is_super_admin = $request->boolean('is_super_admin');
-        }
+        //if (auth()->user()->isSuperAdmin() && $user->id !== auth()->id()) {
+          //  $user->is_super_admin = $request->boolean('is_super_admin');
+        //}
 
         $user->save();
 

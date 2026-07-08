@@ -18,6 +18,7 @@ class RolController extends Controller
         $this->authorize('viewAny', Rol::class);
 
         $roles = Rol::with('permisos')
+            ->withCount('users')
             ->where('name', '!=', 'admin')
             ->get();
 

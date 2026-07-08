@@ -12,7 +12,7 @@
                 <i class="fas fa-edit"></i> Editar Novedad #{{ $novedad->id }}
             </h3>
             <div class="card-tools ml-2">
-                <a href="{{ route('admin.guardias.novedades.show', [$guardia, $novedad]) }}"
+                <a href="{{ route('admin.guardias.show', $guardia) }}"
                    class="btn btn-outline-secondary btn-sm mr-1"
                         style="background-color: rgba(108, 117, 125, 0.08);" aria-label="Volver a la guardia">
                     <i class="fas fa-arrow-left"></i> Volver
@@ -38,11 +38,12 @@
                 @csrf
                 @method('PUT')
 
+                {{-- Fila 1: Tipo / Dirección / Destino / Organismo --}}
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group">
-                            <label class="font-weight-bold">Tipo</label>
-                            <select name="type" class="form-control shadow-sm @error('type') is-invalid @enderror" required>
+                            <label class="font-weight-bold">Tipo <span class="text-danger">*</span></label>
+                            <select name="type" id="type" class="form-control shadow-sm @error('type') is-invalid @enderror" required>
                                 @foreach(['Radio','Fax','Correo Electrónico'] as $tipo)
                                     <option value="{{ $tipo }}" {{ old('type', $novedad->type) == $tipo ? 'selected' : '' }}>
                                         {{ $tipo }}
@@ -52,10 +53,10 @@
                             @error('type')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group">
-                            <label class="font-weight-bold">Dirección</label>
-                            <select name="direction" class="form-control shadow-sm @error('direction') is-invalid @enderror" required>
+                            <label class="font-weight-bold">Dirección <span class="text-danger">*</span></label>
+                            <select name="direction" id="direction" class="form-control shadow-sm @error('direction') is-invalid @enderror" required>
                                 @foreach(['Recibido','Expedido'] as $dir)
                                     <option value="{{ $dir }}" {{ old('direction', $novedad->direction) == $dir ? 'selected' : '' }}>
                                         {{ $dir }}
@@ -65,9 +66,76 @@
                             @error('direction')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="form-group" id="grupo-destino" style="display:none;">
+                            <label class="font-weight-bold">Destino</label>
+                            <input type="text" name="destino"
+                                class="form-control shadow-sm @error('destino') is-invalid @enderror"
+                                value="{{ old('destino', $novedad->destino) }}" placeholder="Ej: Cte.Rva.Gral.E.">
+                            @error('destino')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group" id="grupo-organismo" style="display:none;">
+                            <label class="font-weight-bold">¿Quién expide?</label>
+                            <select name="organismo_id" class="form-control shadow-sm">
+                                <option value="">-- Seleccionar --</option>
+                                @foreach ($organismos as $organismo)
+                                    <option value="{{ $organismo->id }}"
+                                        {{ old('organismo_id', $novedad->organismo_id) == $organismo->id ? 'selected' : '' }}>
+                                        {{ $organismo->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted d-block mt-1">O escribí uno nuevo:</small>
+                            <input type="text" name="organismo_nuevo" class="form-control mt-1"
+                                placeholder="Nuevo organismo...">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Fila 2: Número / Hora / Oficina --}}
+                <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label class="font-weight-bold">Clasificación</label>
+                            <label class="font-weight-bold">Número <span class="text-danger">*</span></label>
+                            <input type="text" name="number"
+                                   class="form-control shadow-sm @error('number') is-invalid @enderror"
+                                   value="{{ old('number', $novedad->number) }}" required>
+                            @error('number')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Hora <span class="text-danger">*</span></label>
+                            <input type="time" name="time"
+                                   class="form-control shadow-sm @error('time') is-invalid @enderror"
+                                   value="{{ old('time', $novedad->time?->format('H:i')) }}" required>
+                            @error('time')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Oficina <span class="text-danger">*</span></label>
+                            <select name="office_id" class="form-control shadow-sm @error('office_id') is-invalid @enderror" required>
+                                <option value="">-- Seleccionar --</option>
+                                @foreach ($oficinas as $oficina)
+                                    <option value="{{ $oficina->id }}"
+                                        {{ old('office_id', $novedad->office_id) == $oficina->id ? 'selected' : '' }}>
+                                        {{ $oficina->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('office_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Fila 3: Clasificación / Asunto --}}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Clasificación <span class="text-danger">*</span></label>
                             <select name="clasification" class="form-control shadow-sm @error('clasification') is-invalid @enderror" required>
                                 @foreach(['Rutinario','Prioritario','Urgente','Destello'] as $clas)
                                     <option value="{{ $clas }}" {{ old('clasification', $novedad->clasification) == $clas ? 'selected' : '' }}>
@@ -78,44 +146,15 @@
                             @error('clasification')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         </div>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
-                            <label class="font-weight-bold">Número</label>
-                            <input type="text" name="number"
-                                   class="form-control shadow-sm @error('number') is-invalid @enderror"
-                                   value="{{ old('number', $novedad->number) }}" required>
-                            @error('number')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                            <label class="font-weight-bold">Asunto <small class="text-muted">(opcional)</small></label>
+                            <input type="text" name="affair"
+                                   class="form-control shadow-sm @error('affair') is-invalid @enderror"
+                                   value="{{ old('affair', $novedad->affair) }}">
+                            @error('affair')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="font-weight-bold">Hora</label>
-                            <input type="time" name="time"
-                                   class="form-control shadow-sm @error('time') is-invalid @enderror"
-                                   value="{{ old('time', $novedad->time?->format('H:i')) }}" required>
-                            @error('time')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="font-weight-bold">Oficina</label>
-                            <input type="text" name="office"
-                                   class="form-control shadow-sm @error('office') is-invalid @enderror"
-                                   value="{{ old('office', $novedad->office) }}">
-                            @error('office')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="font-weight-bold">Asunto</label>
-                    <input type="text" name="affair"
-                           class="form-control shadow-sm @error('affair') is-invalid @enderror"
-                           value="{{ old('affair', $novedad->affair) }}">
-                    @error('affair')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
@@ -125,6 +164,11 @@
                               required>{{ old('text', $novedad->text) }}</textarea>
                     @error('text')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
+
+                <small class="text-muted d-block mb-3">
+                    <i class="fas fa-paperclip"></i>
+                    Los adjuntos se gestionan desde el detalle de la novedad.
+                </small>
 
                 <!-- Botones de acción -->
                 <div class="d-flex justify-content-between align-items-center pt-2 border-top">
@@ -145,3 +189,23 @@
     </div>
 </div>
 @stop
+
+@push('js')
+    <script>
+        $(document).ready(function() {
+            function toggleOrganismo() {
+                if ($('#direction').val() === 'Recibido') {
+                    $('#grupo-organismo').show();
+                    $('#grupo-destino').hide();
+                } else {
+                    $('#grupo-organismo').hide();
+                    $('#grupo-destino').show();
+                }
+            }
+
+            $('#direction').on('change', toggleOrganismo);
+
+            toggleOrganismo();
+        });
+    </script>
+@endpush

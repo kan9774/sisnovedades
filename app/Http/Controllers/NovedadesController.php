@@ -119,7 +119,10 @@ class NovedadesController extends Controller
     {
         $this->authorize('update', $novedad);
 
-        return view('admin.novedades.edit', compact('guardia', 'novedad'));
+        $organismos = Organismo::orderBy('name')->get();
+        $oficinas = Oficina::where('activo', true)->orderBy('nombre')->get();
+
+        return view('admin.novedades.edit', compact('guardia', 'novedad', 'organismos', 'oficinas'));
     }
     public function update(Request $request, Guard $guardia, News $novedad)
     {
@@ -130,11 +133,31 @@ class NovedadesController extends Controller
             'direction'     => 'required|in:Recibido,Expedido',
             'number'        => 'required|string|max:255',
             'time'          => 'required|date_format:H:i',
-            'office_id'     => 'required|exists:oficinas,id',   // ← corregir acá también
+            'office_id'     => 'required|exists:oficinas,id',
             'affair'        => 'nullable|string|max:255',
             'text'          => 'required|string',
+            'destino'       => 'nullable|string|max:255',
             'clasification' => 'required|in:Rutinario,Prioritario,Urgente,Destello',
+            'organismo_id'      => 'nullable|exists:organismos,id',
+            'organismo_nuevo'   => 'nullable|string|max:255',
         ]);
+
+        // Si viene un organismo nuevo, lo creamos
+        $organismoId = $data['organismo_id'] ?? null;
+
+        if ($request->filled('organismo_nuevo')) {
+            $organismo = Organismo::firstOrCreate(['name' => $request->organismo_nuevo]);
+            $organismoId = $organismo->id;
+        }
+
+        // Si es Expedido, no hay organismo (somos nosotros)
+        if ($data['direction'] === 'Expedido') {
+            $organismoId = null;
+        }
+
+        unset($data['organismo_nuevo']);
+        $data['organismo_id'] = $organismoId;
+
         $novedad->update($data);
 
         return redirect()->route('admin.guardias.show', $guardia)

@@ -16,7 +16,7 @@ class PermisoController extends Controller
     {
         $this->authorize('viewAny', Permission::class);
 
-        $permisos = Permission::orderBy('name')->paginate(15);
+        $permisos = Permission::withCount('rols')->orderBy('name')->paginate(15);
         return view('admin.permisos.index', compact('permisos'));
     }
 

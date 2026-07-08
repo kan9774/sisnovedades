@@ -64,7 +64,7 @@
                                     <span class="badge badge-secondary mb-1">Sin permisos</span>
                                 @endforelse
                             </td>
-                            <td>{{ $rol->users->count() }}</td>
+                            <td>{{ $rol->users_count }}</td>
                             <td class="text-center align-middle">
                                 <div class="d-flex justify-content-center">
                                     @can('update', $rol)

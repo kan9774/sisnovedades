@@ -8,7 +8,8 @@
     <div class="container-fluid">
         <div class="card card-outline card-primary">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-building"></i> Editar Oficina: <strong>{{ $oficina->nombre }}</strong></h3>
+                <h3 class="card-title"><i class="fas fa-building"></i> Editar Oficina: <strong>{{ $oficina->nombre }}</strong>
+                </h3>
                 <div class="card-tools">
                     <a href="{{ route('admin.oficinas.index') }}" class="btn btn-outline-secondary btn-sm"
                         style="background-color: rgba(108, 117, 125, 0.08);">
@@ -34,8 +35,7 @@
 
                     <div class="form-group">
                         <label>Nombre <span class="text-danger">*</span></label>
-                        <input type="text" name="nombre"
-                            class="form-control @error('nombre') is-invalid @enderror"
+                        <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror"
                             value="{{ old('nombre', $oficina->nombre) }}" required>
                         @error('nombre')
                             <span class="invalid-feedback">{{ $message }}</span>
@@ -43,8 +43,9 @@
                     </div>
 
                     <div class="form-group">
+                        <input type="hidden" name="activo" value="0">
                         <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="activo" name="activo"
+                            <input type="checkbox" class="custom-control-input" id="activo" name="activo" value="1"
                                 {{ old('activo', $oficina->activo) ? 'checked' : '' }}>
                             <label class="custom-control-label" for="activo">Activa</label>
                         </div>
