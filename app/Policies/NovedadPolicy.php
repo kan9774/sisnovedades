@@ -69,8 +69,7 @@ class NovedadPolicy
         }
         $perteneceAGuardia = $guardia->captain_id === $user->id
             || $guardia->oficer_id === $user->id;
-        if ($perteneceAGuardia)
-        {
+        if ($perteneceAGuardia) {
             return $user->HasPermisos('editar_cualquier_novedad');
         }
         return $user->isAdmin();
@@ -81,15 +80,23 @@ class NovedadPolicy
      */
     public function delete(User $user, News $news): bool
     {
-       $guardia = $news->guardia;
+        $guardia = $news->guardia;
 
-    $perteneceAGuardia = $guardia->captain_id === $user->id
-                      || $guardia->oficer_id === $user->id;
+        $perteneceAGuardia = $guardia->captain_id === $user->id
+            || $guardia->oficer_id === $user->id;
 
-    if ($perteneceAGuardia) {
-        return $user->HasPermisos('eliminar_novedad');
+        if ($perteneceAGuardia) {
+            return $user->HasPermisos('eliminar_novedad');
+        }
+
+        return $user->isAdmin();
     }
+    public function tomar(User $user, News $news): bool
+    {
+        if ($news->estado_atencion !== 'pendiente') {
+            return false;
+        }
 
-    return $user->isAdmin();
+        return $news->office_id === $user->oficina_id || $user->isAdmin();
     }
 }

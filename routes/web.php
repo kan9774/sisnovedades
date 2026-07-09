@@ -12,6 +12,7 @@ use App\Http\Controllers\ConductorController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MantenimientoVehiculoController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\OficinaController;
 use App\Http\Controllers\OrganismoController;
@@ -56,6 +57,13 @@ Route::middleware('auth')->group(function () {
 
         // Auditoría de acciones del sistema
         Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
+
+        // Notificaciones
+        Route::prefix('notificaciones')->name('notificaciones.')->group(function () {
+            Route::get('/',                [NotificationController::class, 'index'])->name('index');
+            Route::post('/{id}/leer',      [NotificationController::class, 'markAsRead'])->name('leer');
+            Route::post('/marcar-todas',   [NotificationController::class, 'markAllAsRead'])->name('marcar-todas');
+        });
 
         // Novedades (vista general)
         Route::get('/novedades', [NovedadesController::class, 'index'])->name('novedades.index');
@@ -121,6 +129,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/{novedad}/edit',   [NovedadesController::class, 'edit'])->name('edit');
             Route::put('/{novedad}',        [NovedadesController::class, 'update'])->name('update');
             Route::delete('/{novedad}',     [NovedadesController::class, 'destroy'])->name('destroy');
+            Route::post('/{novedad}/tomar', [NotificationController::class, 'tomar'])->name('tomar');
         });
 
         // Organismos

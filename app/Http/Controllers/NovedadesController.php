@@ -7,8 +7,11 @@ use App\Models\Guard;
 use App\Models\News;
 use App\Models\Oficina;
 use App\Models\Organismo;
+use App\Models\User;
+use App\Notifications\NovedadUrgenteNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class NovedadesController extends Controller
@@ -21,6 +24,7 @@ class NovedadesController extends Controller
 
         return view('admin.novedades.index', compact('guardia'));
     }
+
     public function create(Guard $guardia)
     {
         $this->authorize('create', [News::class, $guardia]);
@@ -78,7 +82,7 @@ class NovedadesController extends Controller
             'guard_id' => $guardia->id,
             'user_id' => Auth::id(),
             'organismo_id' => $organismoId,
-
+            'estado_atencion' => 'pendiente', // ← ahora siempre, sin importar la clasificación
         ]);
 
         if ($request->hasFile('archivo')) {
@@ -100,6 +104,16 @@ class NovedadesController extends Controller
             ]);
         }
 
+        // Notificar a la oficina, sin importar la clasificación de la novedad
+        if ($novedad->office_id) {
+            $destinatarios = User::where('oficina_id', $novedad->office_id)
+                ->where('id', '!=', Auth::id())
+                ->get();
+
+            if ($destinatarios->isNotEmpty()) {
+                Notification::send($destinatarios, new NovedadUrgenteNotification($novedad));
+            }
+        }
         return redirect()->route('admin.guardias.show', $guardia)
             ->with('success', 'Novedad registrada correctamente.');
     }
@@ -109,8 +123,7 @@ class NovedadesController extends Controller
             'escribiente',
             'adjuntos',
             'logs.causer',
-            // 'salidas'  ← ELIMINADO
-
+            'tomadoPor',
         ]);
 
         return view('admin.novedades.show', compact('guardia', 'novedad'));

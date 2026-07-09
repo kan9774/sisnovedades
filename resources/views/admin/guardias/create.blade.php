@@ -51,7 +51,21 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
-
+                    <div class="form-group">
+                        <label>Oficial de Día</label>
+                        <select name="oficer_id" class="form-control @error('oficer_id') is-invalid @enderror" required>
+                            <option value="" disabled selected>-- Seleccionar Oficial --</option>
+                            @foreach ($oficiales as $oficial)
+                                <option value="{{ $oficial->id }}"
+                                    {{ old('oficer_id') == $oficial->id ? 'selected' : '' }}>
+                                    {{ $oficial->grade }} {{ $oficial->name }} {{ $oficial->last_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('oficer_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
                     <div class="form-group">
                         <label>Escribiente</label>
                         @if (auth()->user()->isEscribiente())

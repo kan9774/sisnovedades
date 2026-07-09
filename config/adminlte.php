@@ -312,124 +312,141 @@ return [
             'active' => ['admin']
         ],
         // Guardias — todos pueden ver
-        ['header' => 'GUARDIAS Y NOVEDADES'],
         [
-            'text'   => 'Guardias',
-            'url'    => 'admin/guardias',
-            'icon'   => 'fas fa-person-military-pointing',
-            'active' => ['admin/guardias*'],
-        ],
-        [
-            'text' => 'Novedades',
-            'icon' => 'fas fa-book-open',
-            'url'  => 'admin/novedades',
-            'active' => ['admin/novedades*'],
-        ],
-        [
-            'text'   => 'Unidades',
-            'url'    => 'admin/organismos',
-            'icon'   => 'fas fa-building',
-            'active' => ['admin/organismos*'],
-            'can'    => 'viewAny-user', // solo admin
+            'text' => 'Guardias y Novedades',
+            'icon' => 'fa-solid fa-person-military-pointing',
+            'submenu' => [
+                [
+                    'text'   => 'Guardias',
+                    'url'    => 'admin/guardias',
+                    'icon'   => 'fa-solid fa-person-rifle',
+                    'active' => ['admin/guardias*'],
+                ],
+                [
+                    'text' => 'Novedades del Día',
+                    'icon' => 'fa-solid fa-newspaper',
+                    'url'  => 'admin/novedades',
+                    'active' => ['admin/novedades*'],
+                ],
+                [
+                    'text'   => 'Unidades',
+                    'url'    => 'admin/organismos',
+                    'icon'   => 'fas fa-building',
+                    'active' => ['admin/organismos*'],
+                    'can'    => 'viewAny-user', // solo admin
+                ],
+            ],
         ],
 
         // Usuarios — solo admin
         [
-            'header'  => 'U S U A R I O S',
+            'text'  => 'Usuarios',
+            'icon'  => 'fa-solid fa-user-gear',
             'can'     => 'viewAny-user',
-        ],
-        [
-            'text'    => 'Usuarios',
-            'url'     => 'admin/users',
-            'icon'    => 'fas fa-users',
-            'active'  => ['admin/users*'],
-            'can'     => 'viewAny-user',
-        ],
-        [
-            'text'   => 'Oficinas',
-            'url'    => 'admin/oficinas',
-            'icon'   => 'fas fa-building',
-            'active' => ['admin/oficinas*'],
-            'can'    => 'viewAny-oficina',
+            'submenu' => [
+                [
+                    'text'    => 'Usuarios',
+                    'url'     => 'admin/users',
+                    'icon'    => 'fa-solid fa-users',
+                    'active'  => ['admin/users*'],
+                    'can'     => 'viewAny-user',
+                ],
+                [
+                    'text'   => 'Oficinas',
+                    'url'    => 'admin/oficinas',
+                    'icon'   => 'fas fa-building',
+                    'active' => ['admin/oficinas*'],
+                    'can'    => 'viewAny-oficina',
+                ],
+            ],
         ],
         // Vehículos
         [
-            'header' => 'V E H Í C U L O S',
+            'text'   => 'Parque Vehículos',
+            'icon'   => 'fa-solid fa-screwdriver-wrench',
             'can'    => 'viewAny-vehiculo', // Necesitas crear este Gate o usar otro
-        ],
-        [
-            'text'   => 'Vehículos',
-            'url'    => 'admin/vehiculos',
-            'icon'   => 'fas fa-truck',
-            'active' => ['admin/vehiculos*'],
-            'can'    => 'viewAny-vehiculo',
-        ],
-        [
-            'text'   => 'Conductores',
-            'url'    => 'admin/conductores',
-            'icon'   => 'fas fa-user-tie',
-            'active' => ['admin/conductores*'],
-            'can'    => 'viewAny-conductor',
-        ],
-        [
-            'text'   => 'Tipos de Vehículo',
-            'url'    => 'admin/vehiculos/tipos',
-            'icon'   => 'fas fa-shapes',
-            'active' => ['admin/vehiculos/tipos*'],
-            'can'    => 'viewAny-tipo-vehiculo',
+            'submenu' => [
+                [
+                    'text'   => 'Vehículos',
+                    'url'    => 'admin/vehiculos',
+                    'icon'   => 'fa-solid fa-truck-field-un',
+                    'active' => ['admin/vehiculos*'],
+                    'can'    => 'viewAny-vehiculo',
+                ],
+                [
+                    'text'   => 'Conductores',
+                    'url'    => 'admin/conductores',
+                    'icon'   => 'fa-solid fa-wheelchair-move',
+                    'active' => ['admin/conductores*'],
+                    'can'    => 'viewAny-conductor',
+                ],
+                [
+                    'text'   => 'Tipos de Vehículo',
+                    'url'    => 'admin/vehiculos/tipos',
+                    'icon'   => 'fa-solid fa-shapes',
+                    'active' => ['admin/vehiculos/tipos*'],
+                    'can'    => 'viewAny-tipo-vehiculo',
+                ],
+            ],
         ],
 
         // Roles y Permisos — solo admin
         [
-            'header'  => 'R O L E S',
-            'can'     => 'viewAny-rol',
-        ],
-        [
-            'text'    => 'Roles',
-            'url'     => 'admin/roles',
-            'icon'    => 'fas fa-key',
-            'active'  => ['admin/roles*'],
-            'can'     => 'viewAny-rol',
-        ],
-        [
-            'text'   => 'Permisos',
-            'url'    => 'admin/permisos',
-            'icon'   => 'fas fa-shield-alt',
-            'active' => ['admin/permisos*'],
-            'can'    => 'viewAny-user',
+            'text'    => 'Permisos de Usuarios',
+            'icon'   => 'fa-solid fa-user-lock',
+            'can'    => 'viewAny-rol',
+            'submenu' => [
+                [
+                    'text'    => 'Roles',
+                    'url'     => 'admin/roles',
+                    'icon'    => 'fas fa-key',
+                    'active'  => ['admin/roles*'],
+                    'can'     => 'viewAny-rol',
+                ],
+                [
+                    'text'   => 'Permisos',
+                    'url'    => 'admin/permisos',
+                    'icon'   => 'fas fa-shield-alt',
+                    'active' => ['admin/permisos*'],
+                    'can'    => 'viewAny-user',
+                ],
+            ]
         ],
         // Palomar
         [
-            'header' => 'P A L O M A R',
-            'can'    => 'viewAny-rol'
-        ],
-        [
-            'text'   => 'Palomares',
-            'url'    => 'admin/palomar/palomares',
-            'icon'   => 'fas fa-home',
-            'active' => ['admin/palomar/palomares*'],
-            'can'    => 'viewAny-user'
-        ],
-        [
-            'text'   => 'Palomas',
-            'url'    => 'admin/palomar/palomas',
-            'icon'   => 'fas fa-dove',
-            'active' => ['admin/palomar/palomas*'],
-            'can'    => 'viewAny-user'
-        ],
-        [
-            'text'   => 'Vuelos',
-            'url'    => 'admin/palomar/vuelos',
-            'icon'   => 'fas fa-plane',
-            'active' => ['admin/palomar/vuelos*'],
-            'can'    => 'viewAny-vuelo',
-        ],
-        [
-            'text'   => 'Estados',
-            'url'    => 'admin/palomar/estados-paloma',
-            'icon'   => 'fas fa-tags',
-            'active' => ['admin/palomar/estados-paloma*'],
-            'can'    => 'viewAny-user'
+            'text'    => 'Palomar Militar',
+            'icon'    => 'fas fa-dove',
+            'can'     => 'viewAny-user',
+            'submenu' => [
+                [
+                    'text'   => 'Palomares',
+                    'url'    => 'admin/palomar/palomares',
+                    'icon'   => 'fas fa-home',
+                    'active' => ['admin/palomar/palomares*'],
+                    'can'    => 'viewAny-user',
+                ],
+                [
+                    'text'   => 'Palomas',
+                    'url'    => 'admin/palomar/palomas',
+                    'icon'   => 'fas fa-feather-alt',
+                    'active' => ['admin/palomar/palomas*'],
+                    'can'    => 'viewAny-user',
+                ],
+                [
+                    'text'   => 'Vuelos',
+                    'url'    => 'admin/palomar/vuelos',
+                    'icon'   => 'fas fa-plane',
+                    'active' => ['admin/palomar/vuelos*'],
+                    'can'    => 'viewAny-vuelo',
+                ],
+                [
+                    'text'   => 'Estados',
+                    'url'    => 'admin/palomar/estados-paloma',
+                    'icon'   => 'fas fa-tags',
+                    'active' => ['admin/palomar/estados-paloma*'],
+                    'can'    => 'viewAny-user',
+                ],
+            ],
         ],
         // Documentos
         [

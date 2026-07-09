@@ -39,6 +39,9 @@ class News extends Model
         'confirmed',
         'confirmed_at',
         'organismo_id',
+        'estado_atencion',
+        'tomado_por_id',
+        'tomado_en',
     ];
     protected function casts(): array
     {
@@ -46,6 +49,7 @@ class News extends Model
             'confirmed'    => 'boolean',
             'confirmed_at' => 'datetime',
             'time'         => 'datetime:H:i',
+            'tomado_en'    => 'datetime',
         ];
     }
     // Constantes
@@ -54,6 +58,8 @@ class News extends Model
     const DIRECCIONES = ['Recibido', 'Expedido'];
 
     const CLASIFICACIONES = ['Rutinario', 'Prioritario', 'Urgente', 'Destello'];
+
+    const CLASIFICACIONES_URGENTES = ['Urgente', 'Destello'];
 
     // Relaciones
     public function guardia(): BelongsTo
@@ -80,6 +86,10 @@ class News extends Model
     {
         return $this->belongsTo(Oficina::class, 'office_id');
     }
+    public function tomadoPor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'tomado_por_id');
+    }
 
 
 
@@ -92,11 +102,23 @@ class News extends Model
     {
         return $query->where('clasification', ['Urgente', 'Destello']);
     }
+    public function scopePendientes($query)
+    {
+        return $query->where('estado_atencion', 'pendiente');
+    }
 
     // Helpers
     public function estaConfirmada(): bool
     {
         return $this->confirmed === true;
+    }
+    public function esUrgente(): bool
+    {
+        return in_array($this->clasification, self::CLASIFICACIONES_URGENTES);
+    }
+    public function estaPendiente(): bool
+    {
+        return $this->estado_atencion === 'pendiente';
     }
     public function remitente(): string
     {

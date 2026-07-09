@@ -40,13 +40,59 @@
                     @endif
                 @endauth
                 @auth
+                    {{-- Notificaciones --}}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" id="notifDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            @php
+                                $totalNoLeidas = Auth::user()->unreadNotifications()->count();
+                            @endphp
+                            @if ($totalNoLeidas > 0)
+                                <span class="badge badge-danger navbar-badge-notif">{{ $totalNoLeidas }}</span>
+                            @endif
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" style="min-width: 320px;">
+                            <span class="dropdown-item disabled">
+                                <strong>{{ $totalNoLeidas }} notificaciones</strong>
+                            </span>
+                            <div class="dropdown-divider"></div>
+
+                            @php
+                                $notificacionesRecientes = Auth::user()
+                                    ->unreadNotifications()
+                                    ->latest()
+                                    ->take(5)
+                                    ->get();
+                            @endphp
+
+                            @forelse ($notificacionesRecientes as $notificacion)
+                                <form action="{{ route('admin.notificaciones.leer', $notificacion->id) }}" method="POST"
+                                    class="p-0 m-0">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-wrap" style="white-space: normal;">
+                                        <i class="fas fa-exclamation-circle mr-2 text-danger"></i>
+                                        {{ $notificacion->data['mensaje'] ?? 'Nueva notificación' }}
+                                        <br>
+                                        <small class="text-muted">{{ $notificacion->created_at->diffForHumans() }}</small>
+                                    </button>
+                                </form>
+                            @empty
+                                <span class="dropdown-item text-muted">Sin notificaciones pendientes</span>
+                            @endforelse
+
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ route('admin.notificaciones.index') }}" class="dropdown-item text-center">
+                                Ver todas
+                            </a>
+                        </div>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
                             role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             @if (Auth::user()->avatar)
-                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
-                                    class="img-circle elevation-1" alt="Avatar"
-                                    style="width: 28px; height: 28px; object-fit: cover; margin-right: 6px;">
+                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" class="img-circle elevation-1"
+                                    alt="Avatar" style="width: 28px; height: 28px; object-fit: cover; margin-right: 6px;">
                             @else
                                 <span class="avatar-circle">
                                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
