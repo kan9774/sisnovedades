@@ -106,6 +106,15 @@ class News extends Model
     {
         return $query->where('estado_atencion', 'pendiente');
     }
+    public function scopeDeGuardiaAbierta($query)
+    {
+        return $query->whereHas('guardia', fn($q) => $q->where('status', 'open'));
+    }
+
+    public function scopeRecientes($query, int $dias = 7)
+    {
+        return $query->where('created_at', '>=', now()->subDays($dias));
+    }
 
     // Helpers
     public function estaConfirmada(): bool

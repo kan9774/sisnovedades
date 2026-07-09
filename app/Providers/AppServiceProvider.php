@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\Vehiculo;
 use App\Models\Vuelo;
 use App\Observers\NewsObserver;
+use App\Observers\UserObserver;
 use App\Policies\CategoriaDocumentoPolicy;
 use App\Policies\ConductorPolicy;
 use App\Policies\DocumentoPolicy;
@@ -112,8 +113,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(CategoriaDocumento::class, CategoriaDocumentoPolicy::class);
         Gate::policy(MantenimientoVehiculo::class, MantenimientoVehiculoPolicy::class);
         Gate::policy(TipoVehiculo::class, TipoVehiculoPolicy::class);
+        
+        
         // Observers
         News::observe(NewsObserver::class);
+        User::observe(UserObserver::class);
     }
 
     /**

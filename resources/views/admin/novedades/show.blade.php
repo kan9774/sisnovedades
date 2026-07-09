@@ -30,21 +30,7 @@
                         {{ $novedad->clasification }}
                     </span>
                 </h3>
-                @if ($novedad->estado_atencion === 'pendiente')
-                    @can('tomar', $novedad)
-                        <form action="{{ route('admin.guardias.novedades.tomar', [$guardia, $novedad]) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-warning">
-                                <i class="fas fa-hand-paper"></i> Tomar tarea
-                            </button>
-                        </form>
-                    @endcan
-                @elseif($novedad->estado_atencion === 'visto')
-                    <span class="badge badge-success">
-                        Visto por {{ $novedad->tomadoPor->name ?? '—' }} el
-                        {{ optional($novedad->tomado_en)->format('d/m/Y H:i') }}
-                    </span>
-                @endif
+                <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :key="'estado-novedad-' . $novedad->id" />
                 <div class="card-tools ml-2">
                     <!-- Botón Volver -->
                     <a href="{{ route('admin.guardias.show', $guardia) }}" class="btn btn-outline-secondary btn-sm mr-1"

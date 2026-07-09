@@ -156,15 +156,28 @@ class GuardiaController extends Controller
 
     public function show(Guard $guardia)
     {
-        $guardia->load([
-            'capitan',
-            'oficial',
-            'escribiente',
-            'salidasVehiculos.vehiculo',
-            'salidasVehiculos.conductor',
-        ]);
+        $guardia->load(['capitan', 'oficial', 'escribiente']);
 
-        return view('admin.guardias.show', compact('guardia'));
+        $novedades = $guardia->novedades()
+            ->with('escribiente')
+            ->orderBy('time')
+            ->paginate(15, ['*'], 'novedades_page')
+            ->withQueryString();
+
+        $salidas = $guardia->salidasVehiculos()
+            ->with(['vehiculo', 'conductor'])
+            ->orderBy('hora_sale')
+            ->paginate(15, ['*'], 'salidas_page')
+            ->withQueryString();
+
+        // Los totales de combustible deben ser sobre TODAS las salidas,
+        // no solo las de la página visible, así que va aparte sin paginar.
+        $resumenCombustible = $guardia->salidasVehiculos()
+            ->selectRaw('tipo_combustible, SUM(kms_recorridos) as total_kms, SUM(litros) as total_litros')
+            ->groupBy('tipo_combustible')
+            ->get();
+
+        return view('admin.guardias.show', compact('guardia', 'novedades', 'salidas', 'resumenCombustible'));
     }
 
     public function Hoy()
@@ -193,22 +206,28 @@ class GuardiaController extends Controller
     {
         $this->authorize('cerrar', $guardia);
 
-        // Verificar que la guardia esté abierta
         if ($guardia->status !== 'open') {
             return redirect()->route('admin.guardias.show', $guardia)
                 ->with('error', 'La guardia ya está cerrada.');
         }
 
-        // Actualizar estado y fecha de cierre
+        $pendientes = $guardia->novedades()->pendientes()->count();
+
+        if ($pendientes > 0 && !request()->boolean('forzar')) {
+            return redirect()->route('admin.guardias.show', $guardia)
+                ->with('warning', "No se puede cerrar: quedan {$pendientes} novedad(es) sin resolver (Caso a resolver). Si querés cerrar de todas formas, confirmá el cierre forzado.")
+                ->with('pendientes_cierre', $pendientes);
+        }
+
         $guardia->update([
             'status' => 'closed',
             'closed_at' => now(),
         ]);
 
-        // Opcional: puedes registrar un log o notificación aquí
-
         return redirect()->route('admin.guardias.show', $guardia)
-            ->with('success', 'Guardia cerrada correctamente.');
+            ->with('success', $pendientes > 0
+                ? 'Guardia cerrada con novedades sin resolver.'
+                : 'Guardia cerrada correctamente.');
     }
 
     public function pdf(Guard $guardia)
