@@ -105,7 +105,7 @@ class NovedadesController extends Controller
         }
 
         // Notificar a la oficina, sin importar la clasificación de la novedad
-        if ($novedad->office_id) {
+        if ($novedad->office_id && $novedad->direction === 'Recibido') {
             $destinatarios = User::where('oficina_id', $novedad->office_id)
                 ->where('id', '!=', Auth::id())
                 ->get();

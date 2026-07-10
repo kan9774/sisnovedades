@@ -205,7 +205,79 @@
             </table>
         </div>
     @endforeach
+    {{-- Novedades de Personal --}}
+    @php $novedadesPersonal = $guardia->novedadesPersonal->sortBy('hora'); @endphp
+    <div class="seccion">
+        <p class="seccion-titulo">Novedades de Personal.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:8%">Hora</th>
+                    <th style="width:18%">Tipo</th>
+                    <th style="width:74%">Texto</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($novedadesPersonal as $item)
+                    <tr>
+                        <td class="text-center">{{ $item->hora->format('Hi') }}</td>
+                        <td class="text-center">{{ $item->tipo }}</td>
+                        <td>{{ $item->texto }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="sin-novedades">S/N.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
+    {{-- Novedades de Rancho --}}
+    @php
+        $rancho = $guardia->novedadesRancho->sortBy('unidad.nombre');
+        $conMenu = $rancho->filter(fn($r) => filled($r->menu));
+    @endphp
+    <div class="seccion">
+        <p class="seccion-titulo">Novedades de Rancho.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:22%">Unidad</th>
+                    <th style="width:15%">Desayuno</th>
+                    <th style="width:15%">Almuerzo</th>
+                    <th style="width:15%">Merienda</th>
+                    <th style="width:15%">Cena</th>
+                    <th style="width:18%">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($rancho as $item)
+                    <tr>
+                        <td>{{ $item->unidad->nombre }}</td>
+                        <td class="text-center">{{ $item->desayuno ?? '-' }}</td>
+                        <td class="text-center">{{ $item->almuerzo ?? '-' }}</td>
+                        <td class="text-center">{{ $item->merienda ?? '-' }}</td>
+                        <td class="text-center">{{ $item->cena ?? '-' }}</td>
+                        <td class="text-center" style="font-weight:bold;">{{ $item->total }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="sin-novedades">S/N.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+        @if ($guardia->ranchoMenu)
+            <p style="margin-left:20px; margin-top:2px; font-size:8px;">
+                @foreach (['menu_desayuno' => 'Desayuno', 'menu_almuerzo' => 'Almuerzo', 'menu_merienda' => 'Merienda', 'menu_cena' => 'Cena'] as $campo => $label)
+                    @if ($guardia->ranchoMenu->{$campo})
+                        <strong>{{ $label }}:</strong> {{ $guardia->ranchoMenu->{$campo} }}&nbsp;&nbsp;
+                    @endif
+                @endforeach
+            </p>
+        @endif
+    </div>
     {{-- Salidas de Vehículos --}}
     @php
         $todasSalidas = $guardia->salidasVehiculos;

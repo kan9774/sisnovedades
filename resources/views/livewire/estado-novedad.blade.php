@@ -15,7 +15,7 @@
                 </span>
             </button>
         @endcan
-    @else
+    @elseif ($novedad->estado_atencion === 'visto')
         <span class="badge badge-success">
             <i class="fas fa-check"></i> Visto
         </span>
@@ -26,5 +26,7 @@
             {{ $novedad->tomadoPor->name ?? '—' }}
             {{ $compacto ? '' : 'el ' . optional($novedad->tomado_en)->format('d/m/Y H:i') }}
         </small>
+    @else
+        <span class="text-muted small">—</span>
     @endif
 </div>

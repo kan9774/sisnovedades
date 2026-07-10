@@ -62,7 +62,8 @@
                             </form>
                         @endcan
                         @can('reactivar', $guardia)
-                            <form action="{{ route('admin.guardias.reactivar', $guardia) }}" method="POST" class="d-inline ml-1">
+                            <form action="{{ route('admin.guardias.reactivar', $guardia) }}" method="POST"
+                                class="d-inline ml-1">
                                 @csrf
                                 <button class="btn btn-outline-warning btn-sm" data-toggle="tooltip" title="Reactivar guardia"
                                     onclick="return confirm('¿Reactivar la guardia?')">
@@ -128,10 +129,11 @@
         </div>
 
         @php
-            $puedeOperarGuardia = $guardia->captain_id === auth()->id()
-                || $guardia->oficer_id === auth()->id()
-                || $guardia->escribiente->contains('id', auth()->id())
-                || auth()->user()->isAdmin();
+            $puedeOperarGuardia =
+                $guardia->captain_id === auth()->id() ||
+                $guardia->oficer_id === auth()->id() ||
+                $guardia->escribiente->contains('id', auth()->id()) ||
+                auth()->user()->isAdmin();
         @endphp
 
         {{-- Tabs --}}
@@ -141,13 +143,24 @@
                     <li class="nav-item">
                         <a class="nav-link active" data-toggle="pill" href="#tab-novedades" role="tab">
                             <i class="fa-solid fa-tower-cell"></i> Novedades
-                            <span class="badge badge-primary ml-1">{{ $novedades->total() }}</span>
+                            <span class="badge badge-primary ml-1">{{ $novedadesCount }}</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="pill" href="#tab-salidas" role="tab">
                             <i class="fas fa-truck"></i> Salidas de Vehículos
-                            <span class="badge badge-primary ml-1">{{ $salidas->total() }}</span>
+                            <span class="badge badge-primary ml-1">{{ $salidasCount }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="pill" href="#tab-personal" role="tab">
+                            <i class="fas fa-users"></i> Personal
+                            <span class="badge badge-primary ml-1">{{ $novedadesPersonalCount }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="pill" href="#tab-rancho" role="tab">
+                            <i class="fas fa-utensils"></i> Rancho
                         </a>
                     </li>
                 </ul>
@@ -155,17 +168,19 @@
             <div class="card-body">
                 <div class="tab-content">
                     <div class="tab-pane active" id="tab-novedades" role="tabpanel">
-                        @include('admin.guardias.partials._novedades', [
-                            'guardia' => $guardia,
-                            'novedades' => $novedades,
-                            'puedeOperarGuardia' => $puedeOperarGuardia,
-                        ])
+                        <livewire:novedades-guardia :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia" :key="'novedades-guardia-' . $guardia->id" />
                     </div>
                     <div class="tab-pane" id="tab-salidas" role="tabpanel">
-                        @include('admin.guardias.partials._salidas', [
+                        <livewire:salidas-vehiculo :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia" :key="'salidas-vehiculo-' . $guardia->id" />
+                    </div>
+                    <div class="tab-pane" id="tab-personal" role="tabpanel">
+                        <livewire:novedades-personal :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia" :key="'novedades-personal-' . $guardia->id" />
+                    </div>
+                    <div class="tab-pane" id="tab-rancho" role="tabpanel">
+                        @include('admin.guardias.partials._rancho', [
                             'guardia' => $guardia,
-                            'salidas' => $salidas,
-                            'resumenCombustible' => $resumenCombustible,
+                            'unidadesActivas' => $unidadesActivas,
+                            'rancho' => $rancho,
                             'puedeOperarGuardia' => $puedeOperarGuardia,
                         ])
                     </div>
@@ -178,14 +193,14 @@
 @push('js')
     <script>
         $('[data-toggle="tooltip"]').tooltip();
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('.alert').delay(3000).fadeOut('slow');
 
             const hash = window.location.hash;
             if (hash) {
                 $(`a[href="${hash}"]`).tab('show');
             }
-            $('#guardia-tabs a').on('shown.bs.tab', function (e) {
+            $('#guardia-tabs a').on('shown.bs.tab', function(e) {
                 history.replaceState(null, null, e.target.hash);
             });
         });

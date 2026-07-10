@@ -7,25 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Guard extends Model
 {
-    
-    use HasFactory, SoftDeletes, LogsActivity ;
-    
-        public function getActivitylogOptions(): LogOptions
+
+    use HasFactory, SoftDeletes, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
             ->useLogName('Guardias'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
     }
-    
-    
-    
+
+
+
     protected $fillable = [
         'date',
         'captain_id',
@@ -62,6 +63,20 @@ class Guard extends Model
     {
         return $this->belongsToMany(User::class, 'guardia_escribientes', 'guardia_id',  'escribiente_id')
             ->withPivot('hora_inicio', 'hora_fin');
+    }
+
+    public function novedadesPersonal(): HasMany
+    {
+        return $this->hasMany(NovedadPersonal::class, 'guard_id');
+    }
+
+    public function novedadesRancho(): HasMany
+    {
+        return $this->hasMany(NovedadRancho::class, 'guard_id');
+    }
+    public function ranchoMenu(): HasOne
+    {
+        return $this->hasOne(RanchoMenu::class, 'guard_id');
     }
 
     //Scopes

@@ -13,6 +13,8 @@ use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\NovedadPersonalController;
+use App\Http\Controllers\NovedadRanchoController;
 use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\OficinaController;
 use App\Http\Controllers\OrganismoController;
@@ -195,6 +197,13 @@ Route::middleware('auth')->group(function () {
             Route::get('/{salida}/edit', [SalidaVehiculoController::class, 'edit'])->name('edit');
             Route::put('/{salida}', [SalidaVehiculoController::class, 'update'])->name('update');
             Route::delete('/{salida}', [SalidaVehiculoController::class, 'destroy'])->name('destroy');
+        });
+
+        // Novedades de personal y rancho (anidadas a guardia)
+        Route::prefix('guardias/{guardia}')->name('guardias.')->group(function () {
+            Route::post('personal', [NovedadPersonalController::class, 'store'])->name('personal.store');
+            Route::delete('personal/{novedadPersonal}', [NovedadPersonalController::class, 'destroy'])->name('personal.destroy');
+            Route::put('rancho', [NovedadRanchoController::class, 'update'])->name('rancho.update');
         });
         // Palomar
         Route::prefix('palomar')->group(function () {

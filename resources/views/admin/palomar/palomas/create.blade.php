@@ -131,7 +131,7 @@
                             <input type="text" name="raza" id="raza"
                                    class="form-control @error('raza') is-invalid @enderror"
                                    value="{{ old('raza') }}"
-                                   placeholder="Ej: Colombófila, Racer">
+                                   placeholder="Ej: Stassart, Janssen, Delbar">
                             @error('raza')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror

@@ -14,6 +14,7 @@ class UnidadSeeder extends Seeder
             'Bn.Com.N°1',
             'Bn.Com.N°2',
             'E.Com.E.',
+            'CASUBO',
         ];
 
         foreach ($unidades as $nombre) {

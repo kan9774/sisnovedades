@@ -156,28 +156,25 @@ class GuardiaController extends Controller
 
     public function show(Guard $guardia)
     {
-        $guardia->load(['capitan', 'oficial', 'escribiente']);
+        $guardia->load(['capitan', 'oficial', 'escribiente', 'ranchoMenu']);
 
-        $novedades = $guardia->novedades()
-            ->with('escribiente')
-            ->orderBy('time')
-            ->paginate(15, ['*'], 'novedades_page')
-            ->withQueryString();
+        $novedadesCount = $guardia->novedades()->count();
 
-        $salidas = $guardia->salidasVehiculos()
-            ->with(['vehiculo', 'conductor'])
-            ->orderBy('hora_sale')
-            ->paginate(15, ['*'], 'salidas_page')
-            ->withQueryString();
+        $salidasCount = $guardia->salidasVehiculos()->count();
 
-        // Los totales de combustible deben ser sobre TODAS las salidas,
-        // no solo las de la página visible, así que va aparte sin paginar.
-        $resumenCombustible = $guardia->salidasVehiculos()
-            ->selectRaw('tipo_combustible, SUM(kms_recorridos) as total_kms, SUM(litros) as total_litros')
-            ->groupBy('tipo_combustible')
-            ->get();
+        $novedadesPersonalCount = $guardia->novedadesPersonal()->count();
 
-        return view('admin.guardias.show', compact('guardia', 'novedades', 'salidas', 'resumenCombustible'));
+        $unidadesActivas = \App\Models\Unidad::where('activo', true)->orderBy('nombre')->get();
+        $rancho = $guardia->novedadesRancho->keyBy('unidad_id');
+
+        return view('admin.guardias.show', compact(
+            'guardia',
+            'novedadesCount',
+            'salidasCount',
+            'novedadesPersonalCount',
+            'unidadesActivas',
+            'rancho'
+        ));
     }
 
     public function Hoy()
@@ -236,8 +233,11 @@ class GuardiaController extends Controller
             'capitan',
             'oficial',
             'escribiente',
+            'novedades.organismo',
             'salidasVehiculos.vehiculo',
             'salidasVehiculos.conductor',
+            'novedadesPersonal',
+            'novedadesRancho.unidad',
         ]);
 
         $pdf = Pdf::loadView('admin.guardias.pdf.novedades', compact('guardia'))
