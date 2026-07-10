@@ -135,6 +135,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Email Verification Toggle (custom)
+    |--------------------------------------------------------------------------
+    |
+    | Este proyecto está en pruebas, así que la verificación de email queda
+    | armada pero apagada por defecto. Cuando quieras activarla de verdad
+    | (enviar el mail y bloquear acceso hasta confirmar), poné
+    | EMAIL_VERIFICATION_ENABLED=true en el .env. No hace falta tocar código.
+    |
+    */
+
+    'email_verification_enabled' => env('EMAIL_VERIFICATION_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Passkeys
     |--------------------------------------------------------------------------
     |

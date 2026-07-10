@@ -50,7 +50,7 @@ require __DIR__ . '/settings.php';
 //Auth::routes();
 
 // Rutas protegidas
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
 
     // Admin
     Route::prefix('admin')->name('admin.')->group(function () {

@@ -62,15 +62,26 @@ new class extends Component
         return $this->guardia->novedades()
             ->with('escribiente')
             ->orderBy('time')
-            ->paginate(15);
+            ->paginate(8);
     }
 
     public function abrirCrear(): void
     {
         $this->resetValidation();
         $this->reset([
-            'editandoId', 'type', 'direction', 'destino', 'office_id', 'number',
-            'time', 'affair', 'text', 'clasification', 'organismo_id', 'organismo_nuevo', 'archivo',
+            'editandoId',
+            'type',
+            'direction',
+            'destino',
+            'office_id',
+            'number',
+            'time',
+            'affair',
+            'text',
+            'clasification',
+            'organismo_id',
+            'organismo_nuevo',
+            'archivo',
         ]);
         $this->time = now()->format('H:i');
         $this->dispatch('abrir-modal-novedad');
@@ -118,10 +129,7 @@ new class extends Component
         ];
 
         if (!$this->editandoId) {
-            $rules['archivo'] = [
-                'nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240',
-                in_array($this->type, ['Fax', 'Correo Electrónico', 'Radio']) ? 'required' : 'nullable',
-            ];
+            $rules['archivo'] = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
         }
 
         $data = $this->validate($rules);
@@ -190,6 +198,7 @@ new class extends Component
         }
 
         unset($this->novedades);
+        $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
         $this->dispatch('cerrar-modal-novedad');
     }
 
@@ -200,5 +209,7 @@ new class extends Component
 
         $novedad->delete();
         unset($this->novedades);
+
+        $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
     }
 };

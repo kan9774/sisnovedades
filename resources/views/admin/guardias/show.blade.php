@@ -38,6 +38,14 @@
             </div>
         @endif
 
+        @php
+            $puedeOperarGuardia =
+                $guardia->captain_id === auth()->id() ||
+                $guardia->oficer_id === auth()->id() ||
+                $guardia->escribiente->contains('id', auth()->id()) ||
+                auth()->user()->isAdmin();
+        @endphp
+
         {{-- Info de la guardia (sin cambios respecto a lo que ya tenías) --}}
         <div class="card card-primary card-outline">
             <div class="card-header">
@@ -116,8 +124,12 @@
                         <a href="{{ route('admin.guardias.pdf', $guardia) }}"
                             class="btn btn-outline-danger btn-ml ml-1 align-items-center" data-toggle="tooltip"
                             title="Imprimir Guardia" target="_blank">
-                            <i class="fas fa-file-pdf"></i>
+                            <i class="fa-regular fa-file-pdf"></i>
                         </a>
+                        @if ($puedeOperarGuardia)
+                            <livewire:enviar-guardia-email :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia"
+                                :key="'enviar-guardia-email-' . $guardia->id" />
+                        @endif
                     </div>
                 </div>
                 @if ($guardia->notes)
@@ -128,14 +140,6 @@
             </div>
         </div>
 
-        @php
-            $puedeOperarGuardia =
-                $guardia->captain_id === auth()->id() ||
-                $guardia->oficer_id === auth()->id() ||
-                $guardia->escribiente->contains('id', auth()->id()) ||
-                auth()->user()->isAdmin();
-        @endphp
-
         {{-- Tabs --}}
         <div class="card card-primary card-outline card-outline-tabs">
             <div class="card-header p-0 border-bottom-0">
@@ -143,19 +147,19 @@
                     <li class="nav-item">
                         <a class="nav-link active" data-toggle="pill" href="#tab-novedades" role="tab">
                             <i class="fa-solid fa-tower-cell"></i> Novedades
-                            <span class="badge badge-primary ml-1">{{ $novedadesCount }}</span>
+                            <livewire:contador-guardia :guardia="$guardia" tipo="novedades" :key="'contador-novedades-' . $guardia->id" />
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="pill" href="#tab-salidas" role="tab">
                             <i class="fas fa-truck"></i> Salidas de Vehículos
-                            <span class="badge badge-primary ml-1">{{ $salidasCount }}</span>
+                            <livewire:contador-guardia :guardia="$guardia" tipo="salidas" :key="'contador-salidas-' . $guardia->id" />
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="pill" href="#tab-personal" role="tab">
                             <i class="fas fa-users"></i> Personal
-                            <span class="badge badge-primary ml-1">{{ $novedadesPersonalCount }}</span>
+                            <livewire:contador-guardia :guardia="$guardia" tipo="personal" :key="'contador-personal-' . $guardia->id" />
                         </a>
                     </li>
                     <li class="nav-item">

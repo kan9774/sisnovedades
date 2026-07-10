@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Guard;
 use App\Models\TipoVehiculo;
 use App\Models\User;
+use App\Support\GuardiaPdfGenerator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -158,20 +159,11 @@ class GuardiaController extends Controller
     {
         $guardia->load(['capitan', 'oficial', 'escribiente', 'ranchoMenu']);
 
-        $novedadesCount = $guardia->novedades()->count();
-
-        $salidasCount = $guardia->salidasVehiculos()->count();
-
-        $novedadesPersonalCount = $guardia->novedadesPersonal()->count();
-
         $unidadesActivas = \App\Models\Unidad::where('activo', true)->orderBy('nombre')->get();
         $rancho = $guardia->novedadesRancho->keyBy('unidad_id');
 
         return view('admin.guardias.show', compact(
             'guardia',
-            'novedadesCount',
-            'salidasCount',
-            'novedadesPersonalCount',
             'unidadesActivas',
             'rancho'
         ));
@@ -229,20 +221,8 @@ class GuardiaController extends Controller
 
     public function pdf(Guard $guardia)
     {
-        $guardia->load([
-            'capitan',
-            'oficial',
-            'escribiente',
-            'novedades.organismo',
-            'salidasVehiculos.vehiculo',
-            'salidasVehiculos.conductor',
-            'novedadesPersonal',
-            'novedadesRancho.unidad',
-        ]);
+        $pdf = GuardiaPdfGenerator::generar($guardia);
 
-        $pdf = Pdf::loadView('admin.guardias.pdf.novedades', compact('guardia'))
-            ->setPaper('a4', 'portrait');
-
-        return $pdf->stream('novedades-' . $guardia->date->format('d-m-Y') . '.pdf');
+        return $pdf->stream(GuardiaPdfGenerator::nombreArchivo($guardia));
     }
 }

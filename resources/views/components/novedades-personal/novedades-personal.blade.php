@@ -62,4 +62,8 @@
             @endforelse
         </tbody>
     </table>
+
+    @if ($this->novedades->hasPages())
+        <div class="mt-3">{{ $this->novedades->links() }}</div>
+    @endif
 </div>

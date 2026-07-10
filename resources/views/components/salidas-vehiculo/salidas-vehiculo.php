@@ -123,6 +123,8 @@ new class extends Component
             $this->authorize('create', SalidaVehiculo::class);
             $data['guardia_id'] = $this->guardia->id;
             SalidaVehiculo::create($data);
+
+            $this->dispatch('guardia-contador-actualizado', tipo: 'salidas', guardiaId: $this->guardia->id);
         }
 
         unset($this->salidas, $this->resumenCombustible);
@@ -136,5 +138,7 @@ new class extends Component
 
         $salida->delete();
         unset($this->salidas, $this->resumenCombustible);
+
+        $this->dispatch('guardia-contador-actualizado', tipo: 'salidas', guardiaId: $this->guardia->id);
     }
 };

@@ -79,6 +79,14 @@ class Guard extends Model
         return $this->hasOne(RanchoMenu::class, 'guard_id');
     }
 
+    public function pdfRecipients(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'guard_pdf_recipient')
+            ->withPivot('downloaded_or_read_at')
+            ->withTimestamps();
+    }
+
+
     //Scopes
     public function scopeAbierta($query)
     {

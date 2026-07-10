@@ -3,9 +3,14 @@
 use App\Models\Guard;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 new class extends Component
 {
+    use WithPagination;
+
+    protected string $paginationTheme = 'bootstrap';
+
     public Guard $guardia;
     public bool $puedeOperarGuardia = false;
 
@@ -46,6 +51,6 @@ new class extends Component
     #[Computed]
     public function novedades()
     {
-        return $this->guardia->novedadesPersonal()->orderBy('hora')->get();
+        return $this->guardia->novedadesPersonal()->orderBy('hora')->paginate(8);
     }
 };

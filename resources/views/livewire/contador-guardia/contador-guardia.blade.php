@@ -1,0 +1,1 @@
+<span class="badge badge-primary ml-1">{{ $this->total }}</span>

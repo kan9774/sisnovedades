@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -36,10 +37,25 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 #[Fillable(['name', 'last_name', 'grade', 'email', 'password', 'rol_id', 'unidad_id', 'oficina_id', 'status', 'is_super_admin'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements PasskeyUser
+class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, softDeletes, LogsActivity;
+    use MustVerifyEmailTrait {
+        MustVerifyEmailTrait::sendEmailVerificationNotification as protected traitSendEmailVerificationNotification;
+    }
+
+    /**
+     * Envía el mail de verificación SOLO si la feature está activada en config.
+     * Mientras el sistema esté en pruebas (EMAIL_VERIFICATION_ENABLED=false en .env),
+     * este método no hace nada y ningún usuario recibe el correo.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        if (config('fortify.email_verification_enabled', false)) {
+            $this->traitSendEmailVerificationNotification();
+        }
+    }
 
 
 
