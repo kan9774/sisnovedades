@@ -6,7 +6,6 @@ use App\Models\Guard;
 use App\Models\TipoVehiculo;
 use App\Models\User;
 use App\Support\GuardiaPdfGenerator;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +21,7 @@ class GuardiaController extends Controller
         //
         $guardias = Guard::with(['capitan', 'oficial'])
             ->withCount('novedades')
-            ->orderbydesc('date')
+            ->orderByDesc('date')
             ->paginate(15);
         return view('admin.guardias.index', compact('guardias'));
     }

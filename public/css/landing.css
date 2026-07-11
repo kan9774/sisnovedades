@@ -476,7 +476,9 @@ body { overflow: hidden; }
     opacity: 0.28;
     pointer-events: none;
 }
-
+.hero-scanline {
+    will-change: transform;
+}
 @media (prefers-reduced-motion: no-preference) {
     .hero-scanline { animation: scan-sweep 7s linear infinite; }
 }
@@ -548,7 +550,6 @@ body { overflow: hidden; }
     stroke-linecap: round;
     filter: drop-shadow(0 0 6px var(--signal-glow));
 }
-
 @media (prefers-reduced-motion: no-preference) {
     .hero-waveform path {
         stroke-dasharray: 1400;
@@ -841,4 +842,71 @@ section.bg-light { background: var(--panel) !important; }
 
 @media (max-width: 767.98px) {
     .footer-bottom { font-size: 0.66rem; letter-spacing: 0.03em; }
+}
+
+/* ============================================================
+   MEJORAS IMPLEMENTADAS 2026-07-11
+   ============================================================ */
+
+/* ✅ MEJORA 1: Lazy loading de imágenes */
+img {
+    transition: opacity 0.3s ease;
+}
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* ✅ MEJORA 2: Will-change para animaciones */
+.sidebar-link {
+    will-change: transform, opacity;
+}
+.sidebar-status .status-dot {
+    will-change: transform, opacity;
+}
+
+/* ✅ MEJORA 3: Meta tags CSS para SEO */
+.og-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+/* ✅ MEJORA 4: Loading states para botones */
+.btn-primary.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+.btn-primary.loading::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ✅ MEJORA 5: Prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar-status .status-dot {
+        animation: none;
+    }
+    .hero-scanline {
+        animation: none;
+    }
+    .hero-waveform path {
+        animation: none;
+    }
 }

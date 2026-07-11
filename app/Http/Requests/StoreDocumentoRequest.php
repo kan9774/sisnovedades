@@ -27,15 +27,15 @@ class StoreDocumentoRequest extends FormRequest
            'categoria_documento_id' => 'required|exists:categorias_documentos,id',
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'archivo' => 'required|file|mimes:pdf,docx,doc,txt|max:100000', // 20MB máx
+            'archivo' => 'required|file|mimes:pdf,docx,doc,txt|max:10485760', // 10MB máx
         ];
     }
     #[Override]
     public function messages()
     {
         return [
-            'archivo.mimes' => 'El archivo debe ser PDF o Word (.docx/ .doc).',
-            'archivo.max' => 'el archivo no puede superar los 20 MB.'
+            'archivo.mimes' => 'El archivo debe ser PDF, Word (.docx/ .doc) o TXT.',
+            'archivo.max' => 'El archivo no puede superar los 10 MB.'
         ];
     }
 }

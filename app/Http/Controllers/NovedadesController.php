@@ -12,7 +12,7 @@ use App\Notifications\NovedadUrgenteNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
+
 
 class NovedadesController extends Controller
 {
@@ -46,7 +46,7 @@ class NovedadesController extends Controller
             'direction'     => 'required|in:Recibido,Expedido',
             'number'        => 'required|string|max:255',
             'time'          => 'required|date_format:H:i',
-            'office_id'     => 'required|exists:oficinas,id',   // ← debe decir office_id, no office
+            'office_id'     => 'required|exists:oficinas,id',
             'affair'        => 'nullable|string|max:255',
             'text'          => 'required|string',
             'destino'       => 'nullable|string|max:255',
@@ -60,7 +60,7 @@ class NovedadesController extends Controller
                 'nullable',
                 'file',
                 'mimes:pdf,jpg,jpeg,png',
-                'max:100000',
+                'max:10485760', // 10MB
             ],
         ]);
 
@@ -82,7 +82,7 @@ class NovedadesController extends Controller
             'guard_id' => $guardia->id,
             'user_id' => Auth::id(),
             'organismo_id' => $organismoId,
-            'estado_atencion' => 'pendiente', // ← ahora siempre, sin importar la clasificación
+            'estado_atencion' => 'pendiente',
         ]);
 
         if ($request->hasFile('archivo')) {
@@ -91,8 +91,15 @@ class NovedadesController extends Controller
             $directorio = "{$fecha}/{$carpeta}";
 
             $archivo = $request->file('archivo');
-            $nombre  = time() . '_' . $archivo->getClientOriginalName();
+            $nombre  = time() . '_' . basename($archivo->getClientOriginalName());
             $ruta    = $archivo->storeAs($directorio, $nombre, 'guardias');
+            
+            // Añadir thumbnail para imágenes (Laravel 13)
+            $mimeType = $archivo->getMimeType();
+            if ($mimeType && strpos($mimeType, 'image/') === 0) {
+                $nombreThumb = time() . '_' . basename($archivo->getClientOriginalName(), '.png') . '.png';
+                $archivo->storeAs($directorio . '/thumbs', $nombreThumb, 'guardias');
+            }
 
             Attach::create([
                 'news_id'   => $novedad->id,
@@ -171,7 +178,39 @@ class NovedadesController extends Controller
         unset($data['organismo_nuevo']);
         $data['organismo_id'] = $organismoId;
 
+        // Subir o eliminar archivo
         $novedad->update($data);
+        
+        if ($request->hasFile('archivo')) {
+            $fecha      = $guardia->date->format('dmY');
+            $carpeta    = $data['direction'] === 'Recibido' ? 'Recibidos' : 'Expedidos';
+            $directorio = "{$fecha}/{$carpeta}";
+
+            $archivo = $request->file('archivo');
+            $nombre  = time() . '_' . basename($archivo->getClientOriginalName());
+            $ruta    = $archivo->storeAs($directorio, $nombre, 'guardias');
+            
+            // Añadir thumbnail para imágenes (Laravel 13)
+            $mimeType = $archivo->getMimeType();
+            if ($mimeType && strpos($mimeType, 'image/') === 0) {
+                $nombreThumb = time() . '_' . basename($archivo->getClientOriginalName(), '.png') . '.png';
+                $archivo->storeAs($directorio . '/thumbs', $nombreThumb, 'guardias');
+            }
+            
+            Attach::create([
+                'news_id'   => $novedad->id,
+                'user_id'   => Auth::id(),
+                'file_name' => $archivo->getClientOriginalName(),
+                'file_path' => $ruta,
+                'file_type' => $archivo->getMimeType(),
+                'file_size' => $archivo->getSize(),
+            ]);
+        } elseif ($novedad->adjuntos()->where('news_id', $novedad->id)->first()) {
+            // Eliminar archivo anterior si no se envió uno nuevo
+            $adjunto = $novedad->adjuntos()->where('news_id', $novedad->id)->first();
+            Storage::disk('guardias')->delete($adjunto->file_path);
+            $adjunto->delete();
+        }
 
         return redirect()->route('admin.guardias.show', $guardia)
             ->with('success', 'Novedad actualizada correctamente.');
@@ -180,7 +219,13 @@ class NovedadesController extends Controller
     {
         $this->authorize('delete', $novedad);
 
-        $novedad->delete($novedad->id);
+        // Eliminar adjuntos
+        foreach ($novedad->adjuntos as $adjunto) {
+            Storage::disk('guardias')->delete($adjunto->file_path);
+            $adjunto->delete();
+        }
+
+        $novedad->delete();
 
         return redirect()->route('admin.guardias.show', $guardia)
             ->with('success', 'Novedad eliminada correctamente.');

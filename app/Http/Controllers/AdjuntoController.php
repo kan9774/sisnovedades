@@ -20,7 +20,7 @@ class AdjuntoController extends Controller
                 'nullable',
                 'file',
                 'mimes:pdf,jpg,jpeg,png',
-                'max:100000',
+                'max:10485760', // 10MB
             ],
         ]);
 
@@ -30,8 +30,15 @@ class AdjuntoController extends Controller
             $directorio = "{$fecha}/{$carpeta}";
 
             $archivo = $request->file('archivo');
-            $nombre  = time() . '_' . $archivo->getClientOriginalName();
+            $nombre  = time() . '_' . basename($archivo->getClientOriginalName());
             $ruta    = $archivo->storeAs($directorio, $nombre, 'guardias');
+            
+            // Añadir thumbnail para imágenes (Laravel 13)
+            $mimeType = $archivo->getMimeType();
+            if ($mimeType && strpos($mimeType, 'image/') === 0) {
+                $nombreThumb = time() . '_' . basename($archivo->getClientOriginalName(), '.png') . '.png';
+                $archivo->storeAs($directorio . '/thumbs', $nombreThumb, 'guardias');
+            }
 
             Attach::create([
                 'news_id'   => $novedad->id,

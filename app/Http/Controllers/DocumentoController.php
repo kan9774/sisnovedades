@@ -43,7 +43,15 @@ class DocumentoController extends Controller
 
         $categoria = CategoriaDocumento::findOrFail($request->categoria_documento_id);
 
+        // Sanitizar nombre del archivo
         $nombreArchivo = Str::slug($request->titulo) . '-' . now()->format('Y-m-d_His') . '.' . $extension;
+        
+        // Generar thumbnail para imágenes (Laravel 13)
+        $mimeType = $archivo->getMimeType();
+        if ($mimeType && strpos($mimeType, 'image/') === 0) {
+            $nombreThumb = time() . '_' . basename($archivo->getClientOriginalName(), '.png') . '.png';
+            $archivo->storeAs('documentos/' . $categoria->slug . '/thumbs', $nombreThumb, 'public');
+        }
 
         $path = $archivo->storeAs(
             'documentos/' . $categoria->slug,

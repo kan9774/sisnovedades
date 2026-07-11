@@ -209,6 +209,21 @@
                         @error('archivo')
                             <span class="invalid-feedback d-block">{{ $message }}</span>
                         @enderror
+                        
+                        {{-- Preview del archivo --}}
+                        @if (old('archivo'))
+                            <div class="preview-container mt-2">
+                                <span class="preview-label">Preview:</span>
+                                @if (old('archivo')->isImage())
+                                    <img src="{{ old('archivo')->temporaryUrl() }}" alt="Preview" class="preview-image" style="max-width: 200px; max-height: 200px; object-fit: contain;">
+                                @else
+                                    <div class="preview-placeholder">
+                                        <i class="fas fa-file"></i>
+                                        <span>{{ old('archivo')->getClientOriginalName() }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
                     </div>
 
                     <div class="d-flex justify-content-between">
@@ -220,6 +235,11 @@
                             style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
                             <i class="fas fa-save"></i> Registrar Novedad
                         </button>
+                    </div>
+                    
+                    {{-- Barra de progreso --}}
+                    <div class="progress-bar mt-2" style="display: none;">
+                        <div class="progress-bar-fill" id="progress-bar" style="width: 0%;"></div>
                     </div>
                 </form>
             </div>
@@ -250,6 +270,22 @@
                 var fileName = $(this).val().split('\\').pop();
                 $(this).siblings('.custom-file-label').text(fileName || 'Seleccionar archivo');
             });
+        });
+        
+        // Barra de progreso
+        $(document).on('submit', function(e) {
+            if ($('#archivo').val()) {
+                $('#progress-bar').fadeIn();
+                var progress = 0;
+                var interval = setInterval(function() {
+                    progress += 10;
+                    $('#progress-bar').css('width', progress + '%');
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        $('#progress-bar').css('width', '100%');
+                    }
+                }, 50);
+            }
         });
     </script>
 @endpush

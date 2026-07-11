@@ -42,10 +42,10 @@ Sistema de gestión integral para la administración de novedades, palomar, veh�
 ### 5. **Módulo de Vehículos**
 - [x] CRUD completo de vehículos
 - [x] Gestión de tipos de vehículos
-- [x] Relación vehículo-tipo
 - [x] Datos técnicos de vehículos
 - [x] Asignación de unidad a vehículos
-- [x] Relación usuario-oficina
+- [x] Relación vehículo-tipo
+- [x] Relación vehículo-unidad
 - [x] Mantenimientos de vehículos
 - [x] Estado de vehículos (activo/inactivo)
 - [x] Soft deletes para vehículos y conductores
