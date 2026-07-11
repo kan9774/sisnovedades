@@ -15,59 +15,70 @@
     <link rel="stylesheet" href="{{ asset('vendor/adminlte/dist/css/adminlte.min.css') }}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700;900&display=swap"
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
+    <!-- Google Fonts: Oswald (display), IBM Plex Mono (utilitaria), Inter (texto) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <!-- Landing CSS (todos los estilos personalizados) -->
-    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ filemtime(public_path('css/landing.css')) }}">
 
     @livewireStyles
 </head>
 
 <body>
 
-    <livewire:landing.navbar />
+    {{-- Alpine (empaquetado con Livewire 3/4) maneja qué "canal" está activo
+         y si la sidebar está abierta (off-canvas en móvil).
+         Shell de dos columnas: sidebar fija a la izquierda con navegación,
+         estado de red y reloj; a la derecha, el contenido con scroll interno
+         y el footer siempre visible al pie de esa misma columna. --}}
+    <div x-data="{ seccion: 'inicio', sidebarOpen: false }" class="app-shell" :class="{ 'sidebar-open': sidebarOpen }"
+        @cerrar-sidebar.window="sidebarOpen = false">
 
-    <livewire:landing.hero />
+        <livewire:landing.navbar />
 
-    <livewire:landing.nosotros />
+        <div class="content-col">
+            <main class="app-main">
+                <livewire:landing.hero />
+                <livewire:landing.nosotros />
+                <livewire:landing.servicios />
+                <livewire:landing.contacto-seccion />
+            </main>
 
-    <livewire:landing.servicios />
+            <livewire:landing.footer />
+        </div>
 
-    <livewire:landing.contacto-seccion />
-
-    <livewire:landing.footer />
+    </div>
 
     <!-- ======= SCRIPTS ======= -->
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('vendor/fontawesome/js/all.min.js') }}"></script>
     <script>
-        // Smooth scrolling para enlaces internos
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    const offset = 70; // altura del navbar fijo
-                    const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-                    window.scrollTo({
-                        top: top,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // Cerrar dropdown al hacer clic en un enlace en móvil
+        // Cerrar el menú colapsado en móvil al elegir una sección o un link del dropdown
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.dropdown-menu a').forEach(function(link) {
+            document.querySelectorAll('.dropdown-menu a, .dropdown-menu button').forEach(function(link) {
                 link.addEventListener('click', function() {
                     if (window.innerWidth <= 991) {
-                        $('#navbarNav').collapse('hide');
+                        document.dispatchEvent(new CustomEvent('cerrar-sidebar'));
                     }
                 });
             });
         });
+
+        // Reloj de la consola (desktop + móvil)
+        function actualizarReloj() {
+            const ahora = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const texto = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}:${pad(ahora.getSeconds())}`;
+            ['reloj-consola', 'reloj-consola-mobile'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = texto;
+            });
+        }
+        actualizarReloj();
+        setInterval(actualizarReloj, 1000);
     </script>
 
     @livewireScripts

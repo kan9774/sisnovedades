@@ -60,7 +60,7 @@ new class extends Component
     public function novedades()
     {
         return $this->guardia->novedades()
-            ->with('escribiente')
+            ->with(['escribiente', 'tomadoPor'])
             ->orderBy('time')
             ->paginate(8);
     }

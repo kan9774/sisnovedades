@@ -167,6 +167,14 @@
                             <i class="fas fa-utensils"></i> Rancho
                         </a>
                     </li>
+                    @if ($puedeOperarGuardia)
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="pill" href="#tab-correos-fallidos" role="tab">
+                                <i class="fas fa-envelope-circle-check"></i> Correos fallidos
+                                <livewire:badge-correos-fallidos :guardia="$guardia" :key="'badge-correos-fallidos-' . $guardia->id" />
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </div>
             <div class="card-body">
@@ -188,6 +196,11 @@
                             'puedeOperarGuardia' => $puedeOperarGuardia,
                         ])
                     </div>
+                    @if ($puedeOperarGuardia)
+                        <div class="tab-pane" id="tab-correos-fallidos" role="tabpanel">
+                            <livewire:correos-fallidos :guardia="$guardia" :key="'correos-fallidos-' . $guardia->id" />
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

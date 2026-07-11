@@ -11,7 +11,7 @@
                     <h5 class="modal-title">Enviar novedades por correo</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" wire:loading.class="opacity-50" wire:target="enviar">
                     @if ($mensajeExito)
                         <div class="alert alert-success py-2">{{ $mensajeExito }}</div>
                     @endif
@@ -35,7 +35,8 @@
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input"
                                             wire:model="destinatarios" value="{{ $usuario->id }}"
-                                            id="dest-{{ $usuario->id }}">
+                                            id="dest-{{ $usuario->id }}"
+                                            wire:loading.attr="disabled" wire:target="enviar">
                                         <label class="form-check-label" for="dest-{{ $usuario->id }}">
                                             {{ $usuario->grade }} {{ $usuario->name }} {{ $usuario->last_name }}
                                             <span class="text-muted">({{ $usuario->email }})</span>
@@ -49,7 +50,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+                        wire:loading.attr="disabled" wire:target="enviar">
+                        Cerrar
+                    </button>
                     <button type="button" class="btn btn-primary" wire:click="enviar"
                         wire:loading.attr="disabled" wire:target="enviar">
                         <span wire:loading.remove wire:target="enviar"><i class="fas fa-paper-plane"></i> Enviar</span>
@@ -64,5 +68,13 @@
 @script
 <script>
     $wire.on('abrir-modal-enviar-guardia', () => $('#modalEnviarGuardia').modal('show'));
+
+    // El backend debe hacer: $this->dispatch('novedades-enviadas');
+    // al final del método enviar() cuando el envío fue exitoso.
+    $wire.on('novedades-enviadas', () => {
+        setTimeout(() => {
+            $('#modalEnviarGuardia').modal('hide');
+        }, 1200);
+    });
 </script>
 @endscript

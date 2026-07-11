@@ -1,10 +1,9 @@
 <?php
 
-use App\Mail\GuardiaNovedadesMail;
+use App\Jobs\EnviarNovedadGuardiaMail;
 use App\Models\Guard;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -58,19 +57,24 @@ new class extends Component
             ->whereNotNull('email')
             ->get();
 
-        foreach ($usuarios as $usuario) {
-            Mail::to($usuario->email)->send(
-                new GuardiaNovedadesMail($this->guardia, Auth::user()->name . ' ' . Auth::user()->last_name)
-            );
+        $nombreRemitente = Auth::user()->name . ' ' . Auth::user()->last_name;
+
+        // Escalonamos el envío 2 segundos entre cada correo para no saturar el
+        // servidor SMTP con ráfagas grandes (relevante cuando crezca a 100-200+ destinatarios).
+        foreach ($usuarios as $index => $usuario) {
+            EnviarNovedadGuardiaMail::dispatch($this->guardia, $usuario, $nombreRemitente)
+                ->delay(now()->addSeconds($index * 2));
         }
 
         activity('Guardias')
             ->performedOn($this->guardia)
             ->causedBy(Auth::user())
             ->withProperties(['destinatarios' => $usuarios->pluck('email')])
-            ->log("Envió las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
+            ->log("Encoló el envío de las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
 
         $this->destinatarios = [];
-        $this->mensajeExito = 'Correo enviado a ' . $usuarios->count() . ' destinatario(s) correctamente.';
+        $this->mensajeExito = 'Se encolaron ' . $usuarios->count() . ' correo(s) para su envío.';
+
+        $this->dispatch('novedades-enviadas');
     }
 };

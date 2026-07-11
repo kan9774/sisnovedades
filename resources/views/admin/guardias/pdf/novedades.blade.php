@@ -12,7 +12,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 9px;
+            font-size: 11px;
             color: #000;
         }
 
@@ -23,13 +23,13 @@
         }
 
         .header h2 {
-            font-size: 11px;
+            font-size: 14px;
             font-weight: bold;
             text-transform: uppercase;
         }
 
         .header h3 {
-            font-size: 10px;
+            font-size: 13px;
             font-weight: bold;
             text-transform: uppercase;
             margin-top: 4px;
@@ -44,7 +44,7 @@
             font-weight: bold;
             text-transform: uppercase;
             margin-bottom: 4px;
-            font-size: 9px;
+            font-size: 11px;
         }
 
         table {
@@ -59,14 +59,14 @@
             color: #fff;
             text-align: center;
             padding: 3px 4px;
-            font-size: 8px;
+            font-size: 10px;
             font-weight: bold;
         }
 
         table td {
             border: 1px solid #000;
             padding: 3px 4px;
-            font-size: 8px;
+            font-size: 10px;
             vertical-align: top;
         }
 
@@ -93,7 +93,7 @@
             text-align: right;
             margin-bottom: 30px;
             margin-right: 20px;
-            font-size: 9px;
+            font-size: 11px;
         }
 
         .firma-contenido {
@@ -103,7 +103,7 @@
         }
 
         .firma-contenido p {
-            font-size: 9px;
+            font-size: 11px;
         }
 
         .firma-linea {
@@ -269,7 +269,7 @@
             </tbody>
         </table>
         @if ($guardia->ranchoMenu)
-            <p style="margin-left:20px; margin-top:2px; font-size:8px;">
+            <p style="margin-left:20px; margin-top:2px; font-size:10px;">
                 @foreach (['menu_desayuno' => 'Desayuno', 'menu_almuerzo' => 'Almuerzo', 'menu_merienda' => 'Merienda', 'menu_cena' => 'Cena'] as $campo => $label)
                     @if ($guardia->ranchoMenu->{$campo})
                         <strong>{{ $label }}:</strong> {{ $guardia->ranchoMenu->{$campo} }}&nbsp;&nbsp;
@@ -330,7 +330,7 @@
                     @endforelse
                 </tbody>
             </table>
-            <p style="text-align: right; margin-right: 20px; margin-top: 2px; font-weight: bold; font-size: 9px;">
+            <p style="text-align: right; margin-right: 20px; margin-top: 2px; font-weight: bold; font-size: 11px;">
                 TOTAL KMS RECORRIDOS: {{ $totalKms }} Kms &nbsp;&nbsp; TOTAL LTS COMBUSTIBLE:
                 {{ number_format($totalLts, 2) }} Lts.
             </p>
@@ -391,7 +391,7 @@
     @endif
 
     {{-- Firma --}}
-    <div style="margin-top: 40px; font-size: 9px;">
+    <div style="margin-top: 40px; font-size: 11px;">
 
         <p style="text-align: right; margin-right: 60px;">
             Cuartel en Peñarol,
@@ -413,7 +413,7 @@
                 <td style="width: 25%;border: none;">
                     {{ strtoupper($guardia->oficial->grade) }}<br>
                     <div style="border-top: 1px solid #000; width: 150px; margin-bottom: 3px;"></div>
-                    <p style="text-align: center; font-size: 9px;">
+                    <p style="text-align: center; font-size: 11px;">
                         {{ strtoupper($guardia->oficial->name) }} {{ strtoupper($guardia->oficial->last_name) }}.
                     </p>
                 </td>

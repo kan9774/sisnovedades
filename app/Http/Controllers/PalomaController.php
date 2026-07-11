@@ -49,6 +49,7 @@ class PalomaController extends Controller
             'padre_id' => 'nullable|exists:palomas,id',
             'madre_id' => 'nullable|exists:palomas,id',
             'estado_id' => 'required|exists:estados_paloma,id',
+            'estado_sanitario' => 'required|in:Bien,Enferma',
             'observaciones' => 'nullable|string',
         ]);
 
@@ -110,6 +111,7 @@ class PalomaController extends Controller
             'padre_id' => 'nullable|exists:palomas,id',
             'madre_id' => 'nullable|exists:palomas,id',
             'estado_id' => 'required|exists:estados_paloma,id',
+            'estado_sanitario' => 'required|in:Bien,Enferma',
             'observaciones' => 'nullable|string',
         ]);
 

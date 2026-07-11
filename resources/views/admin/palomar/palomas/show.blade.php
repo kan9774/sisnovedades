@@ -65,18 +65,18 @@
                         <div class="row g-2">
                             {{-- Anilla --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-hashtag mr-1"></i> Anilla:</div>
-                                <div class="col-7 col-sm-8 font-weight-bold">{{ $paloma->anilla }}</div>
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-hashtag mr-1"></i> Anilla:</div>
+                                <div class="col-6 col-sm-8 font-weight-bold">{{ $paloma->anilla }}</div>
                             </div>
                             {{-- Nombre --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-tag mr-1"></i> Nombre:</div>
-                                <div class="col-7 col-sm-8">{{ $paloma->nombre ?? '-' }}</div>
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-tag mr-1"></i> Nombre:</div>
+                                <div class="col-6 col-sm-8">{{ $paloma->nombre ?? '-' }}</div>
                             </div>
                             {{-- Palomar --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-home mr-1"></i> Palomar:</div>
-                                <div class="col-7 col-sm-8">
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-home mr-1"></i> Palomar:</div>
+                                <div class="col-6 col-sm-8">
                                     <a href="{{ route('admin.palomares.show', $paloma->palomar_id) }}"
                                         style="color: #0d6efd; text-decoration: none;">
                                         {{ $paloma->palomar->nombre }}
@@ -85,8 +85,8 @@
                             </div>
                             {{-- Sexo --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-venus-mars mr-1"></i> Sexo:</div>
-                                <div class="col-7 col-sm-8">
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-venus-mars mr-1"></i> Sexo:</div>
+                                <div class="col-6 col-sm-8">
                                     @if ($paloma->sexo === 'macho')
                                         <span class="badge bg-primary"><i class="fas fa-mars mr-1"></i> Macho</span>
                                     @elseif($paloma->sexo === 'hembra')
@@ -98,31 +98,31 @@
                             </div>
                             {{-- Color --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-palette mr-1"></i> Color:</div>
-                                <div class="col-7 col-sm-8">{{ $paloma->color ?? '-' }}</div>
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-palette mr-1"></i> Color:</div>
+                                <div class="col-6 col-sm-8">{{ $paloma->color ?? '-' }}</div>
                             </div>
                             {{-- Raza --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-paw mr-1"></i> Raza:</div>
-                                <div class="col-7 col-sm-8">{{ $paloma->raza ?? '-' }}</div>
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-paw mr-1"></i> Raza:</div>
+                                <div class="col-6 col-sm-8">{{ $paloma->raza ?? '-' }}</div>
                             </div>
                             {{-- Origen --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-globe-americas mr-1"></i> Origen:
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-globe-americas mr-1"></i> Origen:
                                 </div>
-                                <div class="col-7 col-sm-8">{{ $paloma->origen ?? '-' }}</div>
+                                <div class="col-6 col-sm-8">{{ $paloma->origen ?? '-' }}</div>
                             </div>
                             {{-- Fecha Nacimiento --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-calendar-alt mr-1"></i> Fecha Nac.:
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-calendar-alt mr-1"></i> Fecha Nac.:
                                 </div>
-                                <div class="col-7 col-sm-8">
+                                <div class="col-6 col-sm-8">
                                     {{ optional($paloma->fecha_nacimiento)->format('d/m/Y') ?? '-' }}</div>
                             </div>
                             {{-- Edad --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-clock mr-1"></i> Edad:</div>
-                                <div class="col-7 col-sm-8">
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-clock mr-1"></i> Edad:</div>
+                                <div class="col-6 col-sm-8">
                                     @if ($paloma->fecha_nacimiento)
                                         @php
                                             $meses = intval($paloma->fecha_nacimiento->diffInMonths(now()));
@@ -144,9 +144,10 @@
                                     @endif
                                 </div>
                             </div>
+
                             {{-- Estado --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-circle mr-1"></i> Estado:</div>
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-circle mr-1"></i> Estado:</div>
                                 <dd class="col-sm-7 col-sm-8">
 
                                     @if ($paloma->estado)
@@ -159,10 +160,25 @@
                                     @endif
                                 </dd>
                             </div>
+                            {{-- Estado Sanitario --}}
+                            <div class="col-12 d-flex flex-wrap py-1 border-bottom">
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-heartbeat"></i> Estado Sanitario:</div>
+                                <dd class="col-sm-7 col-sm-8">
+
+                                    <div class="mb-2">
+                                        
+                                        @if ($paloma->estado_sanitario === 'Bien')
+                                            <span class="badge badge-success">Bien</span>
+                                        @else
+                                            <span class="badge badge-danger">Enferma</span>
+                                        @endif
+                                    </div>
+                                </dd>
+                            </div>
                             {{-- Padre --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-male mr-1"></i> Padre:</div>
-                                <div class="col-7 col-sm-8">
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-male mr-1"></i> Padre:</div>
+                                <div class="col-6 col-sm-8">
                                     @if ($paloma->padre)
                                         <a href="{{ route('admin.palomas.show', $paloma->padre_id) }}"
                                             style="color: #0d6efd; text-decoration: none;">
@@ -175,8 +191,8 @@
                             </div>
                             {{-- Madre --}}
                             <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                                <div class="col-5 col-sm-4 text-muted"><i class="fas fa-female mr-1"></i> Madre:</div>
-                                <div class="col-7 col-sm-8">
+                                <div class="col-6 col-sm-4 text-muted"><i class="fas fa-female mr-1"></i> Madre:</div>
+                                <div class="col-6 col-sm-8">
                                     @if ($paloma->madre)
                                         <a href="{{ route('admin.palomas.show', $paloma->madre_id) }}"
                                             style="color: #0d6efd; text-decoration: none;">
@@ -190,9 +206,9 @@
                             {{-- Observaciones --}}
                             @if ($paloma->observaciones)
                                 <div class="col-12 d-flex flex-wrap py-1">
-                                    <div class="col-5 col-sm-4 text-muted"><i class="fas fa-comment mr-1"></i>
+                                    <div class="col-6 col-sm-4 text-muted"><i class="fas fa-comment mr-1"></i>
                                         Observaciones:</div>
-                                    <div class="col-7 col-sm-8">{{ $paloma->observaciones }}</div>
+                                    <div class="col-6 col-sm-8">{{ $paloma->observaciones }}</div>
                                 </div>
                             @endif
                         </div>

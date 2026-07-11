@@ -5,7 +5,7 @@
             @if ($enviado)
                 <div class="alert alert-success" role="alert">
                     <i class="fas fa-check-circle mr-1"></i>
-                    ¡Mensaje enviado correctamente! Te responderemos a la brevedad.
+                    Transmisión recibida. Te responderemos a la brevedad.
                 </div>
             @endif
 
@@ -36,7 +36,7 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-block" wire:loading.attr="disabled"
                     wire:target="enviar">
-                    <span wire:loading.remove wire:target="enviar">Enviar mensaje</span>
+                    <span wire:loading.remove wire:target="enviar"><i class="fas fa-paper-plane mr-2"></i>Enviar mensaje</span>
                     <span wire:loading wire:target="enviar">
                         <i class="fas fa-spinner fa-spin"></i> Enviando...
                     </span>
