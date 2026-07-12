@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Illuminate\database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -40,7 +40,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, softDeletes, LogsActivity;
+    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, SoftDeletes, LogsActivity;
     use MustVerifyEmailTrait {
         MustVerifyEmailTrait::sendEmailVerificationNotification as protected traitSendEmailVerificationNotification;
     }

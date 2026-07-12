@@ -75,7 +75,7 @@ class ConductorController extends Controller
     {
         $this->authorize('view', $conductor);
         
-        $conductor->load(['novedadesVehiculos' => function($query) {
+        $conductor->load(['salidasVehiculos' => function($query) {
             $query->latest()->limit(10);
         }]);
         
@@ -134,7 +134,7 @@ class ConductorController extends Controller
         $this->authorize('delete', $conductor);
         
         // Verificar si tiene salidas asociadas
-        if ($conductor->novedadesVehiculos()->count() > 0) {
+        if ($conductor->salidasVehiculos()->count() > 0) {
             return redirect()->route('admin.conductores.index')
                 ->with('error', 'No se puede eliminar un conductor con salidas asociadas.');
         }

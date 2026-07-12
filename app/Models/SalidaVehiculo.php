@@ -74,7 +74,14 @@ class SalidaVehiculo extends Model
     {
         $vehiculo = $this->vehiculo;
 
-        if (!$vehiculo->sin_cuentakilometros && $this->kms_sale && $this->kms_entra) {
+        if (!$vehiculo || $this->kms_sale === null || $this->kms_entra === null) {
+            $this->kms_recorridos = null;
+            $this->litros = null;
+            $this->consumo_usado = null;
+            return;
+        }
+
+        if (!$vehiculo->sin_cuentakilometros) {
             $this->kms_recorridos = $this->kms_entra - $this->kms_sale;
         } else {
             $this->kms_recorridos = null;
@@ -82,7 +89,7 @@ class SalidaVehiculo extends Model
 
         if ($vehiculo->consumo_litros_por_km && $this->kms_recorridos) {
             $this->litros = $this->kms_recorridos * $vehiculo->consumo_litros_por_km;
-            $this->consumo_usado = $vehiculo->consumo_litros_por_km;
+            $this->consumo_usado = $this->litros;
         } else {
             $this->litros = null;
             $this->consumo_usado = null;

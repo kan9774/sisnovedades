@@ -50,9 +50,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind('path.public', function () {
-            return storage_path() . '/public_html';
-        });
+        // path.public ya viene configurado por Laravel en public/
+        // No sobreescribir para no romper assets y storage:link
     }
 
     /**

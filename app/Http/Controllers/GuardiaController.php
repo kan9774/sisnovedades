@@ -170,7 +170,7 @@ class GuardiaController extends Controller
 
     public function Hoy()
     {
-        $guardia = Guard::Hoy('date', now()->toDateString())->first();
+        $guardia = Guard::Hoy()->first();
         if (!$guardia) {
             return redirect()->route('admin.guardias.index')->with('error', 'No hay guardia para hoy');
         }

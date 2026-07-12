@@ -22,6 +22,11 @@ class DocumentoPolicy
         return $user->isAdmin() || $user->HasPermisos('crear_documento');
     }
 
+    public function update(User $user, Documento $documento): bool
+    {
+        return $user->isAdmin() || $user->HasPermisos('editar_documento');
+    }
+
     public function delete(User $user, Documento $documento): bool
     {
         return $user->isAdmin() || $user->HasPermisos('eliminar_documento');

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -95,6 +96,11 @@ class Conductor extends Model
     {
         return $this->fecha_vencimiento_carne_habilitante && 
                $this->fecha_vencimiento_carne_habilitante >= today();
+    }
+
+    public function salidasVehiculos(): HasMany
+    {
+        return $this->hasMany(SalidaVehiculo::class, 'conductor_id');
     }
 
 }

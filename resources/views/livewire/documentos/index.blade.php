@@ -222,6 +222,26 @@
                                     <label>Archivo <span class="text-danger {{ $formTipo === 'edit' ? '' : '*' }}">
                                             {{ $formTipo === 'edit' ? '' : '*' }}
                                         </span></label>
+
+                                    @if ($formTipo === 'edit' && $currentFileName)
+                                        <div class="alert alert-info py-2 mb-2">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            <strong>Archivo actual:</strong> {{ $currentFileName }}
+                                            <a href="{{ Storage::url($currentFilePath) }}" target="_blank" class="ml-2">
+                                                <i class="fas fa-download"></i> Descargar
+                                            </a>
+                                            <div class="mt-1">
+                                                <label class="mb-0">
+                                                    <input type="checkbox" wire:model="removeFile">
+                                                    <span class="text-danger">Quitar este archivo</span>
+                                                </label>
+                                            </div>
+                                            <small class="d-block text-muted mt-1">
+                                                Si subís un nuevo archivo, este se eliminará automáticamente.
+                                            </small>
+                                        </div>
+                                    @endif
+
                                     <input type="file" wire:model="formArchivo"
                                         class="form-control @error('formArchivo') is-invalid @enderror"
                                         accept=".pdf,.doc,.docx,.txt">
