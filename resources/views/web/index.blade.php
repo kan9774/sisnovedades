@@ -43,6 +43,7 @@
                 <livewire:landing.hero />
                 <livewire:landing.nosotros />
                 <livewire:landing.servicios />
+                <livewire:landing.documentos />
                 <livewire:landing.contacto-seccion />
             </main>
 

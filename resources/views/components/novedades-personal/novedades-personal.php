@@ -38,6 +38,7 @@ new class extends Component
 
         $this->reset(['hora', 'tipo', 'texto']);
         unset($this->novedades); // limpia la caché del computed para que se vea el nuevo registro
+         $this->dispatch('guardia-contador-actualizado', tipo: 'personal', guardiaId: $this->guardia->id);
     }
 
     public function eliminar(int $id): void
@@ -46,6 +47,7 @@ new class extends Component
 
         $this->guardia->novedadesPersonal()->whereKey($id)->delete();
         unset($this->novedades);
+        $this->dispatch('guardia-contador-actualizado', tipo: 'personal', guardiaId: $this->guardia->id);
     }
 
     #[Computed]

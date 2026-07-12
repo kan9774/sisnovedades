@@ -30,10 +30,10 @@
         </div>
 
         <div class="hero-readout">
-            <span><strong>LAT</strong> -34.8941</span>
-            <span><strong>LON</strong> -56.1938</span>
+            <span><strong>LAT</strong> -34.825610</span>
+            <span><strong>LON</strong> -56.197976</span>
             <span><strong>UNIDAD</strong> Cuartel Peñarol</span>
-            <span><strong>CANAL</strong> Abierto</span>
+            <span><strong>CANAL</strong> QAP</span>
         </div>
     </div>
 </section>
