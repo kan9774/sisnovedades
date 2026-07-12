@@ -416,21 +416,21 @@ return [
         [
             'text'    => 'Palomar Militar',
             'icon'    => 'fas fa-dove',
-            'can'     => 'viewAny-user',
+            'can'     => 'viewAny-palomar',
             'submenu' => [
                 [
                     'text'   => 'Palomares',
                     'url'    => 'admin/palomar/palomares',
                     'icon'   => 'fas fa-home',
                     'active' => ['admin/palomar/palomares*'],
-                    'can'    => 'viewAny-user',
+                    'can'    => 'viewAny-palomar',
                 ],
                 [
                     'text'   => 'Palomas',
                     'url'    => 'admin/palomar/palomas',
                     'icon'   => 'fas fa-feather-alt',
                     'active' => ['admin/palomar/palomas*'],
-                    'can'    => 'viewAny-user',
+                    'can'    => 'viewAny-palomar',
                 ],
                 [
                     'text'   => 'Vuelos',
@@ -444,21 +444,31 @@ return [
                     'url'    => 'admin/palomar/estados-paloma',
                     'icon'   => 'fas fa-tags',
                     'active' => ['admin/palomar/estados-paloma*'],
-                    'can'    => 'viewAny-user',
+                    'can'    => 'viewAny-palomar',
                 ],
             ],
         ],
         // Documentos
         [
-            'header' => 'D O C U M E N T O S',
-            'can'    => 'viewAny-rol'
-        ],
-        [
-            'text'   => 'Documentos',
-            'url'    => 'admin/documentos',
-            'icon'   => 'fas fa-file-alt',
-            'active' => ['admin/documentos*'],
-            'can'    => 'viewAny-documento',
+            'text' => 'Manuales',
+            'icon' => 'fa-solid fa-folder-tree',
+            'submenu' => [
+
+                [
+                    'text'   => 'Documentos',
+                    'url'    => 'admin/documentos',
+                    'icon'   => 'fas fa-file-alt',
+                    'active' => ['admin/documentos'],
+                    'can'    => 'viewAny-documento',
+                ],
+                [
+                    'text'   => 'Categorías',
+                    'url'    => 'admin/documentos/categorias',
+                    'icon'   => 'fa-solid fa-list',
+                    'active' => ['admin/documentos/categorias'],
+                    'can'    => 'viewAny-documento',
+                ],
+            ]
         ],
         // Auditoría
         [
@@ -633,5 +643,5 @@ return [
     |
     */
 
-    'livewire' => false,
+    'livewire' => true,
 ];

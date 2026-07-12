@@ -162,56 +162,9 @@
 
                 @can('viewAny', App\Models\User::class)
                     <a class="dropdown-item" href="{{ route('admin.index') }}">
-                        <i class="fas fa-tachometer-alt"></i> Panel de control
+                        <i class="fas fa-tachometer-alt"></i> Panel de Administrativo
                     </a>
                 @endcan
-
-                @can('viewAny', App\Models\Guard::class)
-                    <a class="dropdown-item" href="{{ route('admin.guardias.index') }}">
-                        <i class="fas fa-shield-alt"></i> Guardias
-                    </a>
-                @endcan
-
-                @can('viewAny', App\Models\Guard::class)
-                    <a class="dropdown-item" href="{{ route('admin.novedades.index') }}">
-                        <i class="fas fa-newspaper"></i> Novedades
-                    </a>
-                @endcan
-
-                @can('viewAny', App\Models\Documento::class)
-                    <a class="dropdown-item" href="{{ route('admin.documentos.index') }}">
-                        <i class="fas fa-file-alt"></i> Documentos
-                    </a>
-                @endcan
-
-                @can('viewAny', App\Models\Palomar::class)
-                    <a class="dropdown-item" href="{{ route('admin.palomares.index') }}">
-                        <i class="fas fa-dove"></i> Palomar
-                    </a>
-                @endcan
-
-                @can('viewAny', App\Models\User::class)
-                    <a class="dropdown-item" href="{{ route('admin.users.index') }}">
-                        <i class="fas fa-users"></i> Usuarios
-                    </a>
-                @endcan
-                @can('viewAny', App\Models\User::class)
-                    <a class="dropdown-item" href="{{ route('admin.roles.index') }}">
-                        <i class="fas fa-key"></i> Roles
-                    </a>
-                @endcan
-                @can('viewAny', App\Models\User::class)
-                    <a class="dropdown-item" href="{{ route('admin.permisos.index') }}">
-                        <i class="fas fa-key"></i> Permisos
-                    </a>
-                @endcan
-
-                @can('viewAny', App\Models\User::class)
-                    <a class="dropdown-item" href="{{ route('admin.organismos.index') }}">
-                        <i class="fas fa-building"></i> Organismos
-                    </a>
-                @endcan
-
                 @if (Auth::user()->rol?->name === 'visitante')
                     <a class="dropdown-item" href="{{ route('novedades-publicas') }}">
                         <i class="fas fa-newspaper"></i> Novedades

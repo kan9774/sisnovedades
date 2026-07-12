@@ -7,9 +7,7 @@ use App\Http\Controllers\NovedadesController;
 use App\Http\Controllers\GuardiaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\CategoriaDocumentoController;
 use App\Http\Controllers\ConductorController;
-use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\NotificationController;
@@ -26,7 +24,9 @@ use App\Http\Controllers\SalidaVehiculoController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VisitanteController;
 use App\Http\Controllers\VueloController;
+use App\Models\Documento;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // Pública
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -232,25 +232,20 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
                 ]);
         });
 
-        // Rutas para administra los documentos
+        // Rutas para administrar los documentos (Livewire)
         Route::prefix('documentos')->name('documentos.')->group(function () {
-            Route::get('/', [DocumentoController::class, 'index'])->name('index');
-            Route::get('/create', [DocumentoController::class, 'create'])->name('create');
-            Route::post('/', [DocumentoController::class, 'store'])->name('store');
-            Route::get('/trashed', [DocumentoController::class, 'trashed'])->name('trashed');
-            Route::get('/{documento}/preview', [DocumentoController::class, 'preview'])->name('preview'); // ← esta faltaba
-            Route::get('/{documento}/download', [DocumentoController::class, 'download'])->name('download');
-            Route::delete('/{documento}', [DocumentoController::class, 'destroy'])->name('destroy');
-            Route::post('/{id}/restore', [DocumentoController::class, 'restore'])->name('restore');
-            Route::delete('/{id}/force-delete', [DocumentoController::class, 'forceDelete'])->name('force-delete');
+            Route::get('/', function () {
+                return view('livewire.documentos.layout');
+            })->name('index');
+            Route::get('/{documento}/download', function (Documento $documento) {
+                return Storage::disk('public')->download(
+                    $documento->archivo_path,
+                    $documento->nombre_original
+                );
+            })->name('download');
         });
-        Route::prefix('documentos/categorias')->name('documentos.categorias.')->group(function () {
-            Route::get('/', [CategoriaDocumentoController::class, 'index'])->name('index');
-            Route::get('/create', [CategoriaDocumentoController::class, 'create'])->name('create');
-            Route::post('/', [CategoriaDocumentoController::class, 'store'])->name('store');
-            Route::get('/{categoria}/edit', [CategoriaDocumentoController::class, 'edit'])->name('edit');
-            Route::put('/{categoria}', [CategoriaDocumentoController::class, 'update'])->name('update');
-            Route::delete('/{categoria}', [CategoriaDocumentoController::class, 'destroy'])->name('destroy');
-        });
+        Route::get('/documentos/categorias', function () {
+            return view('livewire.categorias-documentos.layout');
+        })->name('documentos.categorias.index');
     });
 });

@@ -79,10 +79,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-conductor', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_conductor'));
         Gate::define('viewAny-vuelo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_vuelo'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
-        Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
         Gate::define('viewAny-tipo-vehiculo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_tipo-vehiculo'));
         Gate::define('viewAny-log', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_log'));
         Gate::define('viewAny-oficina', fn($user) => $user->isAdmin());
+        Gate::define('viewAny-palomar', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_palomar'));
 
         Gate::define('upload-attach', function (User $user, News $news) {
             if ($user->isAdmin()) {

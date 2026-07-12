@@ -1,6 +1,10 @@
 @php
-    $notificacionesRecientes = auth()->user()->unreadNotifications()->latest()->take(5)->get();
-    $totalNoLeidas = auth()->user()->unreadNotifications()->count();
+    $notificacionesRecientes = [];
+    $totalNoLeidas = 0;
+    if (auth()->check()) {
+        $notificacionesRecientes = auth()->user()->unreadNotifications()->latest()->take(5)->get();
+        $totalNoLeidas = auth()->user()->unreadNotifications()->count();
+    }
 @endphp
 
 <li class="nav-item dropdown">
