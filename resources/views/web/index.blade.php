@@ -44,6 +44,7 @@
                 <livewire:landing.nosotros />
                 <livewire:landing.servicios />
                 <livewire:landing.documentos />
+                <livewire:landing.novedades-cerradas />
                 <livewire:landing.contacto-seccion />
             </main>
 

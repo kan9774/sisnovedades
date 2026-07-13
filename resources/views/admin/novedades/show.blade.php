@@ -37,14 +37,8 @@
                         style="background-color: rgba(108, 117, 125, 0.08);" aria-label="Volver a la guardia">
                         <i class="fas fa-arrow-left"></i> Volver
                     </a>
-                    @can('update', $novedad)
-                        <!-- Botón Editar -->
-                        <a href="{{ route('admin.guardias.novedades.edit', [$guardia, $novedad]) }}"
-                            class="btn btn-outline-warning btn-sm mr-1" style="background-color: rgba(255, 193, 7, 0.08);"
-                            aria-label="Editar novedad">
-                            <i class="fas fa-edit"></i> Editar
-                        </a>
-                    @endcan
+                    <livewire:editar-novedad-modal :novedad="$novedad" :guardia="$guardia"
+                        :key="'editar-novedad-modal-' . $novedad->id" />
 
                     @can('delete', $novedad)
                         <!-- Botón Eliminar -->
@@ -153,82 +147,7 @@
             </div>
         @endif
         {{-- Adjuntos --}}
-        <div class="card mt-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title"><i class="fas fa-paperclip"></i> Adjuntos</h3>
-            </div>
-            <div class="card-body">
-
-                @php
-                    $puedeGestionarAdjuntos =
-                        $guardia->status === 'open' &&
-                        ($guardia->esMiembro(auth()->user()) || auth()->user()->isAdmin());
-                @endphp
-
-                {{-- Subir archivo — solo si tiene permiso --}}
-                @if ($puedeGestionarAdjuntos)
-                    <form action="{{ route('admin.adjuntos.store', [$guardia, $novedad]) }}" method="POST"
-                        enctype="multipart/form-data" class="mb-4">
-                        @csrf
-                        <div class="input-group">
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input @error('archivo') is-invalid @enderror"
-                                    name="archivo" id="archivo" accept=".pdf,.jpg,.jpeg,.png"
-                                    {{ in_array($novedad->type, ['Fax', 'Correo Electrónico']) ? 'required' : '' }}>
-                                <label class="custom-file-label" for="archivo">
-                                    Seleccionar archivo (PDF, JPG, PNG — máx. 10MB)
-                                </label>
-                            </div>
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-upload"></i> Subir
-                                </button>
-                            </div>
-                        </div>
-                        @error('archivo')
-                            <span class="text-danger small">{{ $message }}</span>
-                        @enderror
-                        @if (in_array($novedad->type, ['Fax', 'Correo Electrónico']))
-                            <small class="text-muted">* Obligatorio para Fax y Correo Electrónico.</small>
-                        @endif
-                    </form>
-                @endif
-
-                {{-- Listado de adjuntos --}}
-                @forelse($novedad->adjuntos as $adjunto)
-                    <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
-                        <div>
-                            @if ($adjunto->esPdf())
-                                <i class="fas fa-file-pdf text-danger mr-2"></i>
-                            @else
-                                <i class="fas fa-file-image text-info mr-2"></i>
-                            @endif
-                            <strong>{{ $adjunto->file_name }}</strong>
-                            <small class="text-muted ml-2">{{ $adjunto->tamanoLegible() }}</small>
-                            <small class="text-muted ml-2">— {{ $adjunto->created_at->format('d/m/Y H:i') }}</small>
-                        </div>
-                        <div>
-                            <a href="{{ route('admin.adjuntos.download', [$guardia, $novedad, $adjunto]) }}"
-                                class="btn btn-info btn-xs">
-                                <i class="fas fa-download"></i>
-                            </a>
-                            @if ($puedeGestionarAdjuntos)
-                                <form action="{{ route('admin.adjuntos.destroy', [$guardia, $novedad, $adjunto]) }}"
-                                    method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar adjunto?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger btn-xs">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
-                    </div>
-                @empty
-                    <p class="text-muted">No hay archivos adjuntos.</p>
-                @endforelse
-            </div>
-        </div>
+        <livewire:gestion-adjuntos :novedad="$novedad" :guardia="$guardia" :key="'adjuntos-' . $novedad->id" />
     </div>
 @stop
 @push('js')

@@ -46,6 +46,27 @@ Route::middleware('auth')->group(function () {
 });
 
 
+// PDF preview de guardia cerrada (público)
+Route::get('/guardias-publicas/{guardia}/pdf-preview', function (\App\Models\Guard $guardia) {
+    abort_if($guardia->status !== 'closed', 403);
+
+    $guardia->load([
+        'capitan',
+        'oficial',
+        'escribiente',
+        'novedades.organismo',
+        'novedadesPersonal',
+        'novedadesRancho.unidad',
+        'ranchoMenu',
+        'salidasVehiculos.vehiculo',
+        'salidasVehiculos.conductor',
+    ]);
+
+    return response()->view('admin.guardias.pdf.novedades', ['guardia' => $guardia])
+        ->header('Content-Type', 'text/html')
+        ->header('X-Frame-Options', 'SAMEORIGIN');
+})->name('guardias-publicas.pdf-preview');
+
 require __DIR__ . '/settings.php';
 //Auth::routes();
 
@@ -105,8 +126,6 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
 
         // Adjuntos
         Route::prefix('guardias/{guardia}/novedades/{novedad}/adjuntos')->name('adjuntos.')->group(function () {
-            Route::post('/',              [AdjuntoController::class, 'store'])->name('store');
-            Route::delete('/{adjunto}',   [AdjuntoController::class, 'destroy'])->name('destroy');
             Route::get('/{adjunto}/download', [AdjuntoController::class, 'download'])->name('download');
         });
 
@@ -125,11 +144,7 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
 
         // Novedades anidadas bajo guardia
         Route::prefix('guardias/{guardia}/novedades')->name('guardias.novedades.')->group(function () {
-            Route::get('/create',           [NovedadesController::class, 'create'])->name('create');
-            Route::post('/',                [NovedadesController::class, 'store'])->name('store');
             Route::get('/{novedad}',        [NovedadesController::class, 'show'])->name('show');
-            Route::get('/{novedad}/edit',   [NovedadesController::class, 'edit'])->name('edit');
-            Route::put('/{novedad}',        [NovedadesController::class, 'update'])->name('update');
             Route::delete('/{novedad}',     [NovedadesController::class, 'destroy'])->name('destroy');
             Route::post('/{novedad}/tomar', [NotificationController::class, 'tomar'])->name('tomar');
         });

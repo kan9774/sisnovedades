@@ -1,103 +1,17 @@
-<div>
-    @if ($guardia->status === 'open' && $puedeOperarGuardia)
-        <div class="d-flex justify-content-end mb-2">
-            <button type="button" class="btn btn-outline-info btn-sm" wire:click="abrirCrear">
-                <i class="fas fa-plus-circle"></i> Registrar Tráfico
-            </button>
-        </div>
-    @endif
+<div class="d-inline">
+    @can('update', $novedad)
+        <button type="button" wire:click="abrir" class="btn btn-outline-warning btn-sm mr-1"
+            style="background-color: rgba(255, 193, 7, 0.08);" aria-label="Editar novedad">
+            <i class="fas fa-edit"></i> Editar
+        </button>
+    @endcan
 
-    <table class="table table-striped table-hover mb-0" style="width: 100%">
-        <thead class="thead-dark">
-            <tr>
-                <th>#</th>
-                <th>Hora</th>
-                <th>Tipo</th>
-                <th>Dirección</th>
-                <th>Número</th>
-                <th>Asunto</th>
-                <th>Clasificación</th>
-                <th>Escribiente</th>
-                <th>Estado</th>
-                <th class="text-center">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($this->novedades as $novedad)
-                <tr wire:key="novedad-{{ $novedad->id }}">
-                    <td>{{ $loop->iteration + ($this->novedades->currentPage() - 1) * $this->novedades->perPage() }}
-                    </td>
-                    <td>{{ $novedad->time?->format('H:i') }}</td>
-                    <td>{{ $novedad->type }}</td>
-                    <td>
-                        @if ($novedad->direction === 'Recibido')
-                            <span class="badge badge-success">Recibido</span>
-                        @else
-                            <span class="badge badge-warning">Expedido</span>
-                        @endif
-                    </td>
-                    <td>{{ $novedad->number }}</td>
-                    <td>{{ Str::limit($novedad->affair, 40) }}</td>
-                    <td>
-                        @php
-                            $colores = [
-                                'Rutinario' => 'secondary',
-                                'Prioritario' => 'primary',
-                                'Urgente' => 'warning',
-                                'Destello' => 'danger',
-                            ];
-                        @endphp
-                        <span class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }}">
-                            {{ $novedad->clasification }}
-                        </span>
-                    </td>
-                    <td>{{ $novedad->escribiente->name ?? '-' }}</td>
-                    <td>
-                        <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :compacto="true"
-                            :key="'estado-novedad-tabla-' . $novedad->id" />
-                    </td>
-                    <td class="text-center align-middle">
-                        <div class="d-flex justify-content-center">
-                            <a href="{{ route('admin.guardias.novedades.show', [$guardia, $novedad]) }}"
-                                class="btn btn-outline-info btn-xs mr-1">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            @if ($guardia->status === 'open' && $puedeOperarGuardia)
-                                <button type="button" wire:click="abrirEditar({{ $novedad->id }})"
-                                    class="btn btn-outline-warning btn-xs mr-1">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button" wire:click="eliminar({{ $novedad->id }})"
-                                    wire:confirm="¿Eliminar esta novedad?" class="btn btn-outline-danger btn-xs">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="10">
-                        <div class="text-center text-muted py-4">
-                            No hay tráficos registrados en esta guardia.
-                        </div>
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    @if ($this->novedades->hasPages())
-        <div class="mt-3">{{ $this->novedades->links() }}</div>
-    @endif
-
-    {{-- Modal --}}
-    <div class="modal fade" id="modalNovedad" tabindex="-1" wire:ignore.self>
+    <div class="modal fade" id="modalEditarNovedad-{{ $novedad->id }}" tabindex="-1" wire:ignore.self>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form wire:submit="guardar">
                     <div class="modal-header">
-                        <h5 class="modal-title">{{ $editandoId ? 'Editar Novedad' : 'Registrar Novedad' }}</h5>
+                        <h5 class="modal-title">Editar Novedad #{{ $novedad->id }}</h5>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
@@ -236,29 +150,11 @@
                             @enderror
                         </div>
 
-                        @if (!$editandoId)
-                            <div class="form-group">
-                                <label>
-                                    Adjunto
-                                    <small class="text-muted">(opcional, max: 10MB)</small>
-                                </label>
-                                <input type="file" wire:model="archivo"
-                                    class="form-control @error('archivo') is-invalid @enderror"
-                                    accept=".pdf,.jpg,.jpeg,.png">
-                                <div wire:loading wire:target="archivo" class="text-muted small mt-1">
-                                    <i class="fas fa-spinner fa-spin"></i> Subiendo archivo...
-                                </div>
-                                @error('archivo')
-                                    <span class="invalid-feedback d-block">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        @else
-                            <div class="form-group">
-                                <label class="font-weight-bold">Adjunto</label>
-                                <livewire:gestion-adjuntos :novedad="$this->guardia->novedades()->find($editandoId)"
-                                    :guardia="$guardia" :key="'adjuntos-modal-' . $editandoId" />
-                            </div>
-                        @endif
+                        <div class="form-group">
+                            <label class="font-weight-bold">Adjunto</label>
+                            <livewire:gestion-adjuntos :novedad="$novedad" :guardia="$guardia"
+                                :key="'adjuntos-editar-modal-' . $novedad->id" />
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary"
@@ -278,7 +174,6 @@
 
 @script
     <script>
-        $wire.on('abrir-modal-novedad', () => $('#modalNovedad').modal('show'));
-        $wire.on('cerrar-modal-novedad', () => $('#modalNovedad').modal('hide'));
+        $wire.on('abrir-modal-editar-novedad', () => $('#modalEditarNovedad-{{ $novedad->id }}').modal('show'));
     </script>
 @endscript

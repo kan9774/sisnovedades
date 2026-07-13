@@ -64,6 +64,12 @@
                 <i class="fas fa-book"></i>
                 <span>Biblioteca</span>
             </a>
+            <a href="#" class="sidebar-link" @click.prevent="seccion = 'novedades-cerradas'; sidebarOpen = false"
+                :class="{ 'sidebar-link-active': seccion === 'novedades-cerradas' }">
+                <span class="sidebar-link__ch">06</span>
+                <i class="fa-solid fa-newspaper"></i>
+                <span>Novedades</span>
+            </a>
         </nav>
 
         <div class="sidebar-spacer"></div>
@@ -168,12 +174,6 @@
                             <i class="fas fa-tachometer-alt"></i> Panel de Administrativo
                         </a>
                     @endcan
-                    @if (Auth::user()->rol?->name === 'visitante')
-                        <a class="dropdown-item" href="{{ route('novedades-publicas') }}">
-                            <i class="fas fa-newspaper"></i> Novedades
-                        </a>
-                    @endif
-
                     <div class="dropdown-divider"></div>
 
                     <a class="dropdown-item text-danger" href="#"

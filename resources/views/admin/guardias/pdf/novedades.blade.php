@@ -341,9 +341,7 @@
     {{-- SECCIÓN PALOMAR (total de todas las palomas del sistema)     --}}
     {{-- ============================================================ --}}
     @php
-        use App\Models\Paloma;
-
-        $todasLasPalomas = Paloma::all();
+        $todasLasPalomas = \App\Models\Paloma::with('estado')->get();
         $total = $todasLasPalomas->count();
         $adultas = $todasLasPalomas->filter(fn($p) => !$p->es_pichon)->count();
         $pichones = $todasLasPalomas->filter(fn($p) => $p->es_pichon)->count();

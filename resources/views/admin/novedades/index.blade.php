@@ -81,113 +81,13 @@
         </div>
 
         {{-- Tabla de novedades --}}
-        <div class="card card-outline card-primary shadow-sm">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-list-ul mr-2"></i> Novedades del día
-                </h3>
-                <div class="card-tools">
-                    @can('create', App\Models\News::class)
-                        @if($guardia->status === 'open')
-                            <a href="{{ route('admin.guardias.novedades.create', $guardia) }}"
-                               class="btn btn-primary btn-sm">
-                                <i class="fas fa-plus mr-1"></i> Nueva Novedad
-                            </a>
-                        @endif
-                    @endcan
-                    <a href="{{ route('admin.guardias.show', $guardia) }}"
-                       class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-eye mr-1"></i> Ver Guardia
-                    </a>
-                </div>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
-                        <thead class="bg-secondary text-white">
-                            <tr>
-                                <th style="width: 10px">#</th>
-                                <th>Hora</th>
-                                <th>Tipo</th>
-                                <th>Dirección</th>
-                                <th>Número</th>
-                                <th>Asunto</th>
-                                <th>Clasificación</th>
-                                <th>Escribiente</th>
-                                <th class="text-center" style="width: 120px">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($guardia->novedades as $novedad)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td><span class="badge badge-light">{{ \Carbon\Carbon::parse($novedad->time)->format('H:i') }}</span></td>
-                                    <td>{{ $novedad->type }}</td>
-                                    <td>
-                                        @if($novedad->direction === 'Recibido')
-                                            <span class="badge badge-success badge-pill">Recibido</span>
-                                        @else
-                                            <span class="badge badge-warning badge-pill">Expedido</span>
-                                        @endif
-                                    </td>
-                                    <td><code>{{ $novedad->number }}</code></td>
-                                    <td>{{ Str::limit($novedad->affair, 30) }}</td>
-                                    <td>
-                                        @php
-                                            $colores = [
-                                                'Rutinario'   => 'secondary',
-                                                'Prioritario' => 'info',
-                                                'Urgente'     => 'warning',
-                                                'Destello'    => 'danger',
-                                            ];
-                                        @endphp
-                                        <span class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }} badge-pill">
-                                            {{ $novedad->clasification }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $novedad->escribiente->name ?? '-' }}</td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{{ route('admin.guardias.novedades.show', [$guardia, $novedad]) }}"
-                                               class="btn btn-outline-info" title="Ver">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @can('update', $novedad)
-                                                <a href="{{ route('admin.guardias.novedades.edit', [$guardia, $novedad]) }}"
-                                                   class="btn btn-outline-warning" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            @endcan
-                                            @can('delete', $novedad)
-                                                <form action="{{ route('admin.guardias.novedades.destroy', [$guardia, $novedad]) }}"
-                                                      method="POST" class="d-inline"
-                                                      onsubmit="return confirm('¿Eliminar esta novedad?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-outline-danger" title="Eliminar">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            @endcan
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9" class="text-center text-muted py-4">
-                                        <i class="fas fa-inbox fa-2x d-block mb-2"></i>
-                                        No hay novedades registradas hoy.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card-footer clearfix">
-                <small class="text-muted">Mostrando {{ $guardia->novedades->count() }} novedades</small>
-            </div>
+        <div class="d-flex justify-content-end mb-2">
+            <a href="{{ route('admin.guardias.show', $guardia) }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-eye mr-1"></i> Ver Guardia
+            </a>
         </div>
+        <livewire:novedades-guardia :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia"
+            :key="'novedades-guardia-index-' . $guardia->id" />
     @endif
 </div>
 @stop

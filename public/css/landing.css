@@ -1497,3 +1497,557 @@ img[loading="lazy"] {
     border: none;
     width: 100%;
 }
+
+/* ============================================================
+   NOVEDADES CERRADAS — PANEL DE GUARDIA
+   ============================================================ */
+
+/* Tarjeta de guardia */
+.ops-guardia-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ops-guardia-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.ops-doc-card__icon--guardia {
+    background: var(--signal);
+    color: #fff;
+}
+
+/* Wrapper del panel */
+.guardia-panel-wrapper {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+/* Header del panel */
+.guardia-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--line);
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.guardia-panel-header h4 {
+    margin: 0;
+    flex: 1;
+    min-width: 200px;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+}
+
+/* Tabs del panel */
+.guardia-panel-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--line);
+    background: var(--bg-alt);
+}
+
+.guardia-tab {
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.guardia-tab:hover {
+    color: var(--text);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.guardia-tab-active {
+    color: var(--signal);
+    border-bottom-color: var(--signal);
+    background: var(--bg);
+}
+
+.guardia-tab .badge-count {
+    background: var(--signal);
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+}
+
+/* Contenido del panel */
+.guardia-panel-content {
+    padding: 20px;
+    min-height: 500px;
+}
+
+/* Frame del PDF */
+.guardia-pdf-frame {
+    width: 100%;
+    height: 80vh;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+}
+
+.guardia-pdf-mobile-fallback {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .guardia-pdf-frame--desktop {
+        display: none;
+    }
+
+    .guardia-pdf-mobile-fallback {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-height: 300px;
+        padding: 2rem;
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .guardia-pdf-mobile-fallback i {
+        font-size: 40px;
+        color: var(--signal);
+    }
+}
+
+/* Sección de adjuntos */
+.adjunto-seccion {
+    margin-bottom: 24px;
+}
+
+.adjunto-seccion-titulo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+/* Item de novedad con adjuntos */
+.adjunto-novedad-item {
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.adjunto-novedad-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.adjunto-novedad-num {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: var(--font-mono);
+}
+
+.adjunto-novedad-hora {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.adjunto-novedad-organismo,
+.adjunto-novedad-destino {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+}
+
+.adjunto-novedad-texto {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+}
+
+/* Lista de adjuntos */
+.adjunto-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.adjunto-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: all 0.15s;
+    font-family: var(--font-mono);
+}
+
+.adjunto-item:hover {
+    background: rgba(var(--signal-rgb), 0.08);
+    border-color: var(--signal);
+    color: var(--signal);
+}
+
+/* ============================================================
+   MODAL DE ADJUNTO INDIVIDUAL
+   ============================================================ */
+.adjunto-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.adjunto-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.adjunto-modal-panel {
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    max-width: 90vw;
+    max-height: 90vh;
+    width: 800px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.adjunto-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-display);
+}
+
+.adjunto-modal-header strong {
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.adjunto-modal-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-left: 8px;
+    font-family: var(--font-mono);
+}
+
+.adjunto-modal-header button {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.adjunto-modal-header button:hover {
+    color: var(--signal);
+}
+
+.adjunto-modal-body {
+    padding: 20px;
+    overflow: auto;
+    flex: 1;
+}
+
+.adjunto-preview-img {
+    max-width: 100%;
+    max-height: 60vh;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+}
+
+.adjunto-preview-frame {
+    width: 100%;
+    height: 60vh;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+}
+
+.adjunto-pdf-mobile-fallback {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .adjunto-preview-frame--desktop {
+        display: none;
+    }
+
+    .adjunto-pdf-mobile-fallback {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-height: 250px;
+        padding: 2rem;
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .adjunto-pdf-mobile-fallback i {
+        font-size: 40px;
+        color: var(--signal);
+    }
+}
+
+.adjunto-preview-not-supported {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+}
+
+.adjunto-preview-not-supported i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.adjunto-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--line);
+}
+/* ============================================================
+   CALENDARIO DE GUARDIAS CERRADAS
+   ============================================================ */
+.ops-view-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px;
+}
+
+.ops-view-toggle button.ops-view-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.ops-view-toggle button.ops-view-btn:hover {
+    color: var(--text);
+}
+
+.ops-view-toggle button.ops-view-btn-active {
+    background: var(--panel-raised);
+    background-color: var(--panel-raised);
+    color: var(--signal);
+}
+
+.ops-calendar {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.ops-calendar__header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.ops-calendar__nav {
+    width: 40px;
+    height: 40px;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.ops-calendar__nav:hover {
+    color: var(--signal);
+    border-color: var(--line-bright);
+}
+
+.ops-calendar__title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    min-width: 280px;
+    text-align: center;
+}
+
+.ops-calendar__hoy {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.ops-calendar__hoy:hover {
+    color: var(--signal);
+    border-color: var(--signal-dim);
+}
+
+.ops-calendar__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.ops-calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ops-calendar__day {
+    position: relative;
+    height: 84px;
+    width: 100%;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--text-faint);
+    text-align: left;
+    padding: 10px 12px;
+    cursor: not-allowed;
+    opacity: 0.5;
+    box-sizing: border-box;
+}
+
+.ops-calendar__day--empty {
+    background: transparent;
+    border: none;
+    opacity: 0;
+}
+
+.ops-calendar__day--closed {
+    color: var(--text);
+    opacity: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ops-calendar__day--closed:hover {
+    background: var(--line);
+    border-color: var(--line-bright);
+}
+
+.ops-calendar__day--today {
+    border-color: var(--signal);
+    box-shadow: 0 0 0 1px var(--signal);
+}
+
+.ops-calendar__day-num {
+    display: block;
+}
+
+.ops-calendar__day-dot {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--signal);
+}
+
+.ops-calendar__legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.ops-calendar__legend-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--signal);
+    margin-right: 6px;
+}
