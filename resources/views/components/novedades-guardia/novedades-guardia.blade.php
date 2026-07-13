@@ -242,15 +242,47 @@
                                     Adjunto
                                     <small class="text-muted">(opcional, max: 10MB)</small>
                                 </label>
-                                <input type="file" wire:model="archivo"
-                                    class="form-control @error('archivo') is-invalid @enderror"
-                                    accept=".pdf,.jpg,.jpeg,.png">
-                                <div wire:loading wire:target="archivo" class="text-muted small mt-1">
+
+                                @if (!$archivo)
+                                    <input type="file" wire:model="archivo"
+                                        class="form-control @error('archivo') is-invalid @enderror"
+                                        accept=".pdf,.jpg,.jpeg,.png">
+                                @endif
+
+                                <div wire:loading wire:target="archivo" class="text-muted small mt-2">
                                     <i class="fas fa-spinner fa-spin"></i> Subiendo archivo...
                                 </div>
+
                                 @error('archivo')
                                     <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror
+
+                                @if ($archivo)
+                                    <div wire:loading.remove wire:target="archivo"
+                                        class="d-flex justify-content-between align-items-center border rounded p-2 mt-2">
+                                        <div class="d-flex align-items-center">
+                                            @if (str_starts_with($archivo->getMimeType() ?? '', 'image/'))
+                                                <img src="{{ $archivo->temporaryUrl() }}" alt="Vista previa"
+                                                    class="rounded mr-2"
+                                                    style="width: 42px; height: 42px; object-fit: cover;">
+                                            @else
+                                                <i class="fas fa-file-pdf text-danger fa-2x mr-2"></i>
+                                            @endif
+                                            <div>
+                                                <div class="font-weight-bold" style="font-size: 0.875rem;">
+                                                    {{ $archivo->getClientOriginalName() }}
+                                                </div>
+                                                <small class="text-muted">
+                                                    {{ number_format($archivo->getSize() / 1024, 0) }} KB
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <button type="button" wire:click="quitarArchivo"
+                                            class="btn btn-outline-danger btn-xs" title="Quitar y elegir otro">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                         @else
                             <div class="form-group">
