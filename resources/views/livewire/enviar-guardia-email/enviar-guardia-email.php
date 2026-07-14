@@ -59,21 +59,32 @@ new class extends Component
 
         $nombreRemitente = Auth::user()->name . ' ' . Auth::user()->last_name;
 
-        // Escalonamos el envío 2 segundos entre cada correo para no saturar el
-        // servidor SMTP con ráfagas grandes (relevante cuando crezca a 100-200+ destinatarios).
-        foreach ($usuarios as $index => $usuario) {
-            EnviarNovedadGuardiaMail::dispatch($this->guardia, $usuario, $nombreRemitente)
-                ->delay(now()->addSeconds($index * 2));
+        // Envío sincrónico (sin cola): para este volumen de destinatarios es
+        // más simple y confiable que depender de un worker (queue:work)
+        // corriendo en segundo plano. Subimos el límite de tiempo por si
+        // el envío de todos los correos tarda más que el máximo por defecto.
+        set_time_limit(120);
+
+        $fallidos = 0;
+
+        foreach ($usuarios as $usuario) {
+            $enviado = EnviarNovedadGuardiaMail::dispatchSync($this->guardia, $usuario, $nombreRemitente);
+
+            if ($enviado === false) {
+                $fallidos++;
+            }
         }
 
         activity('Guardias')
             ->performedOn($this->guardia)
             ->causedBy(Auth::user())
             ->withProperties(['destinatarios' => $usuarios->pluck('email')])
-            ->log("Encoló el envío de las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
+            ->log("Envió las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
 
         $this->destinatarios = [];
-        $this->mensajeExito = 'Se encolaron ' . $usuarios->count() . ' correo(s) para su envío.';
+        $this->mensajeExito = $fallidos > 0
+            ? "Se enviaron {$usuarios->count()} correo(s), {$fallidos} fallaron (ver guardia_correos_fallidos)."
+            : 'Se enviaron ' . $usuarios->count() . ' correo(s) correctamente.';
 
         $this->dispatch('novedades-enviadas');
     }
