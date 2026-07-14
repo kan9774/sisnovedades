@@ -6,6 +6,7 @@ use App\Models\Guard;
 use App\Models\News;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class EstadoNovedad extends Component
@@ -46,6 +47,17 @@ class EstadoNovedad extends Component
     public function refrescar(): void
     {
         $this->novedad->refresh();
+    }
+
+    // Llamado cuando novedades-guardia reabre o cierra la atención de esta novedad
+    // (p. ej. la escribiente corrige la oficina), para que el badge se actualice
+    // al instante sin esperar el poll
+    #[On('novedad-estado-actualizado')]
+    public function onEstadoActualizado(int $novedadId): void
+    {
+        if ($novedadId === $this->novedad->id) {
+            $this->novedad->refresh();
+        }
     }
 
     public function render()

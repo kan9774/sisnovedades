@@ -22,7 +22,6 @@ use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SalidaVehiculoController;
 use App\Http\Controllers\VehiculoController;
-use App\Http\Controllers\VisitanteController;
 use App\Http\Controllers\VueloController;
 use App\Models\Documento;
 use Illuminate\Support\Facades\Route;
@@ -32,15 +31,6 @@ use Illuminate\Support\Facades\Storage;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware('auth')->group(function () {
-
-    // Visitante
-    Route::get('/novedades-publicas', [VisitanteController::class, 'index'])->name('novedades-publicas');
-    Route::get('/guardias-publicas/{guardia}', [VisitanteController::class, 'show'])
-        ->name('guardias-publicas.show');
-    Route::get('/guardias-publicas/{guardia}/novedades/{novedad}', [VisitanteController::class, 'showNovedad'])
-        ->name('guardias-publicas.novedades.show');
-    Route::get('/guardias-publicas/{guardia}/novedades/{novedad}/adjuntos/{adjunto}/download', [VisitanteController::class, 'downloadAdjunto'])
-        ->name('guardias-publicas.adjuntos.download');
     Route::get('/guardias/{guardia}/novedades/{novedad}/adjuntos/{adjunto}/view', [AdjuntoController::class, 'view'])
         ->name('guardias-publicas.adjuntos.view');
 });
@@ -130,6 +120,8 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
         });
 
         // Verificar que todas usen GuardiaController (con doble 'l')
+        Route::put('guardias/{guardia}', [GuardiaController::class, 'update'])->name('guardias.update');
+        Route::get('guardias/{guardia}/edit', [GuardiaController::class, 'edit'])->name('guardias.edit');
         Route::get('/guardias/hoy', [GuardiaController::class, 'hoy'])->name('guardias.hoy');
         Route::get('/guardias/trashed', [GuardiaController::class, 'trashed'])->name('guardias.trashed');
         Route::resource('guardias', GuardiaController::class)->only(['index', 'create', 'store', 'show']);

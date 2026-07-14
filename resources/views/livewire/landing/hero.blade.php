@@ -16,7 +16,7 @@
         </svg>
 
         <p class="hero-subtitle mx-auto">
-            Conectando al país, garantizando la seguridad y soberanía nacional a través de
+            Conectando al País, garantizando la seguridad y soberanía Nacional a través de
             redes tácticas y estratégicas de comunicación.
         </p>
 
@@ -32,8 +32,8 @@
         <div class="hero-readout">
             <span><strong>LAT</strong> -34.825610</span>
             <span><strong>LON</strong> -56.197976</span>
-            <span><strong>UNIDAD</strong> Cuartel Peñarol</span>
-            <span><strong>CANAL</strong> QAP</span>
+            <span><strong>UNIDAD</strong> B.Com.N°1</span>
+            <span><strong>CANAL</strong> 1 - QAP</span>
         </div>
     </div>
 </section>

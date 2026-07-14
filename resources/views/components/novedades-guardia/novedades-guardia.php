@@ -6,6 +6,7 @@ use App\Models\Organismo;
 use App\Models\Attach;
 use App\Models\User;
 use App\Notifications\NovedadUrgenteNotification;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -60,7 +61,7 @@ new class extends Component
     public function novedades()
     {
         return $this->guardia->novedades()
-            ->with(['escribiente', 'tomadoPor'])
+            ->with(['oficina', 'tomadoPor'])
             ->orderBy('time')
             ->paginate(8);
     }
@@ -159,7 +160,51 @@ new class extends Component
         if ($this->editandoId) {
             $novedad = $this->guardia->novedades()->findOrFail($this->editandoId);
             $this->authorize('update', $novedad);
+
+            $oficinaAnterior   = $novedad->office_id;
+            $direccionAnterior = $novedad->direction;
+
+            $cambioOficina   = $data['direction'] === 'Recibido'
+                && (string) $oficinaAnterior !== (string) $data['office_id'];
+            $pasaARecibido   = $data['direction'] === 'Recibido' && $direccionAnterior !== 'Recibido';
+            $pasaAExpedido   = $data['direction'] === 'Expedido' && $direccionAnterior === 'Recibido';
+            $requiereReabrir = $cambioOficina || $pasaARecibido;
+
+            if ($requiereReabrir) {
+                // Cambió de oficina (o ahora sí requiere atención): vuelve a quedar pendiente
+                $payload['estado_atencion'] = 'pendiente';
+                $payload['tomado_por_id']   = null;
+                $payload['tomado_en']       = null;
+            } elseif ($pasaAExpedido) {
+                // Ya no le corresponde atención a ninguna oficina
+                $payload['estado_atencion'] = null;
+                $payload['tomado_por_id']   = null;
+                $payload['tomado_en']       = null;
+            }
+
             $novedad->update($payload);
+
+            if ($requiereReabrir || $pasaAExpedido) {
+                // Invalida las notificaciones viejas: ya no le corresponden a la oficina/estado anterior
+                DatabaseNotification::where('data->novedad_id', $novedad->id)
+                    ->whereNull('read_at')
+                    ->update(['read_at' => now()]);
+            }
+
+            if ($requiereReabrir && $novedad->office_id) {
+                $destinatarios = User::where('oficina_id', $novedad->office_id)
+                    ->where('id', '!=', Auth::id())
+                    ->get();
+
+                if ($destinatarios->isNotEmpty()) {
+                    Notification::send($destinatarios, new NovedadUrgenteNotification($novedad));
+                }
+            }
+
+            if ($requiereReabrir || $pasaAExpedido) {
+                // Refresco inmediato del badge de estado para quien está editando (no espera el poll)
+                $this->dispatch('novedad-estado-actualizado', novedadId: $novedad->id);
+            }
         } else {
             $this->authorize('create', [News::class, $this->guardia]);
 

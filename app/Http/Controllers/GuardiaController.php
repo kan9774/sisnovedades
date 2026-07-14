@@ -154,6 +154,72 @@ class GuardiaController extends Controller
         return redirect()->route('admin.guardias.show', $guardia)->with('success', 'Guardia creada exitosamente');
     }
 
+    /**
+     * Show the form for editing the resource.
+     */
+    public function edit(Guard $guardia)
+    {
+        $this->authorize('update', $guardia);
+
+        $capitanes = User::whereHas('rol', fn($q) => $q->where('name', 'capitan_de_servicio'))->get();
+        $oficiales = User::whereHas('rol', fn($q) => $q->where('name', 'oficial_de_dia'))->get();
+        $escribientes = User::whereHas('rol', fn($q) => $q->where('name', 'escribiente'))->get();
+
+        return view('admin.guardias.edit', compact('guardia', 'capitanes', 'oficiales', 'escribientes'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Guard $guardia)
+    {
+        $this->authorize('update', $guardia);
+
+        $data = $request->validate([
+            'captain_id' => 'required|exists:users,id',
+            'oficer_id' => 'required|exists:users,id',
+            'escribiente_id' => 'required|exists:users,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        // Guard::getActivitylogOptions() (logFillable + logOnlyDirty) ya deja registrado
+        // automáticamente, con el usuario autenticado como causante, cualquier cambio en
+        // captain_id, oficer_id o notes. El escribiente es una relación (pivot), así que
+        // ese cambio se audita a mano acá.
+        $escribientesAnterioresIds = $guardia->escribiente()->pluck('users.id')->all();
+        $escribienteNuevoId = (int) $data['escribiente_id'];
+
+        $guardia->update([
+            'captain_id' => $data['captain_id'],
+            'oficer_id' => $data['oficer_id'],
+            'notes' => $data['notes'] ?? null,
+        ]);
+
+        if ($escribientesAnterioresIds !== [$escribienteNuevoId]) {
+            $guardia->escribiente()->sync([$escribienteNuevoId]);
+
+            $nombresAnteriores = User::whereIn('id', $escribientesAnterioresIds)
+                ->get()
+                ->map(fn($u) => "{$u->grade} {$u->name} {$u->last_name}")
+                ->implode(', ') ?: '—';
+            $escribienteNuevo = User::find($escribienteNuevoId);
+            $nombreNuevoStr = $escribienteNuevo
+                ? "{$escribienteNuevo->grade} {$escribienteNuevo->name} {$escribienteNuevo->last_name}"
+                : '—';
+
+            activity('Guardias')
+                ->causedBy(Auth::user())
+                ->performedOn($guardia)
+                ->withProperties([
+                    'old' => ['escribiente' => $nombresAnteriores],
+                    'attributes' => ['escribiente' => $nombreNuevoStr],
+                ])
+                ->log('Cambio de escribiente de la guardia');
+        }
+
+        return redirect()->route('admin.guardias.show', $guardia)->with('success', 'Guardia actualizada correctamente.');
+    }
+
     public function show(Guard $guardia)
     {
         $guardia->load(['capitan', 'oficial', 'escribiente', 'ranchoMenu']);

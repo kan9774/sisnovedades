@@ -79,11 +79,6 @@
                 <a class="btn btn-sm btn-login" href="{{ route('login') }}">
                     <i class="fas fa-sign-in-alt"></i> Iniciar sesión
                 </a>
-                @if (Route::has('register'))
-                    <a class="btn btn-sm btn-register" href="{{ route('register') }}">
-                        <i class="fas fa-user-plus"></i> Registrarse
-                    </a>
-                @endif
             </div>
         @endguest
 
@@ -169,11 +164,9 @@
                         </div>
                     </div>
 
-                    @can('viewAny', App\Models\User::class)
-                        <a class="dropdown-item" href="{{ route('admin.index') }}">
-                            <i class="fas fa-tachometer-alt"></i> Panel de Administrativo
-                        </a>
-                    @endcan
+                    <a class="dropdown-item" href="{{ route('admin.index') }}">
+                        <i class="fas fa-tachometer-alt"></i> Panel
+                    </a>
                     <div class="dropdown-divider"></div>
 
                     <a class="dropdown-item text-danger" href="#"

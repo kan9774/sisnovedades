@@ -17,7 +17,7 @@
                 <th>Número</th>
                 <th>Asunto</th>
                 <th>Clasificación</th>
-                <th>Escribiente</th>
+                <th>Oficina</th>
                 <th>Estado</th>
                 <th class="text-center">Acciones</th>
             </tr>
@@ -51,7 +51,7 @@
                             {{ $novedad->clasification }}
                         </span>
                     </td>
-                    <td>{{ $novedad->escribiente->name ?? '-' }}</td>
+                    <td>{{ $novedad->oficina->nombre ?? '—' }}</td>
                     <td>
                         <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :compacto="true"
                             :key="'estado-novedad-tabla-' . $novedad->id" />

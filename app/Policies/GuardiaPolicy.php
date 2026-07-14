@@ -60,10 +60,20 @@ class GuardiaPolicy
 
     /**
      * Determine whether the user can update the model.
+     *
+     * Solo pueden editar la guardia quienes ya están designados en ella
+     * (capitán, oficial de día, o alguno de los escribientes actuales),
+     * o un admin. Sirve, por ejemplo, para que una escribiente que ya
+     * figura en la guardia pueda reemplazarse a sí misma por otra si
+     * surge un problema. Una vez cerrada, nadie puede editarla.
      */
     public function update(User $user, Guard $guard): bool
     {
-        return $user->isAdmin();
+        if (!$guard->isAbiertaNoDelete()) {
+            return false;
+        }
+
+        return $guard->esMiembro($user) || $user->isAdmin();
     }
     /**
      * Determine whether the user can view trashed guards.
@@ -94,8 +104,7 @@ class GuardiaPolicy
      */
     public function delete(User $user, Guard $guard): bool
     {
-        // Solo Super Admin o Admin pueden eliminar
-        // y solo si la guardia está cerrada
-        return ($user->isSuperAdmin() || $user->isAdmin()) && $guard->status === 'closed';
+        // Solo Super Admin puede eliminar, y solo si la guardia está cerrada
+        return $user->isSuperAdmin() && $guard->status === 'closed';
     }
 }

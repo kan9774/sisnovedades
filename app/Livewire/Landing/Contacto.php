@@ -37,7 +37,7 @@ class Contacto extends Component
     {
         $this->validate();
 
-        Mail::to('comunicaciones@ejercito.mil.ar')
+        Mail::to('s1bcom1@ejercito.mil.uy')
             ->send(new ContactoMensaje($this->nombre, $this->email, $this->mensaje));
 
         $this->reset(['nombre', 'email', 'mensaje']);

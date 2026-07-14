@@ -1,4 +1,4 @@
-<div @if ($novedad->estado_atencion === 'pendiente') wire:poll.5s="refrescar" @endif>
+<div @if (in_array($novedad->estado_atencion, ['pendiente', 'visto'])) wire:poll.5s="refrescar" @endif>
     @if ($novedad->estado_atencion === 'pendiente')
         <span class="badge badge-warning">
             <i class="fas fa-clock"></i> Pendiente
@@ -19,12 +19,12 @@
         <span class="badge badge-success">
             <i class="fas fa-check"></i> Visto
         </span>
+        <br>
         @unless ($compacto)
-            <br>
         @endunless
         <small class="text-muted {{ $compacto ? 'd-block' : '' }}">
             {{ $novedad->tomadoPor->name ?? '—' }}
-            {{ $compacto ? '' : 'el ' . optional($novedad->tomado_en)->format('d/m/Y H:i') }}
+            {{ $compacto ? '' : 'el ' . optional($novedad->tomado_en)->format('d/m H:i') }}
         </small>
     @else
         <span class="text-muted small">—</span>

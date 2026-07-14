@@ -104,6 +104,13 @@
                                                 title="Ver detalles de la guardia">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+                                            @can('update', $guardia)
+                                                <a href="{{ route('admin.guardias.edit', $guardia) }}"
+                                                    class="btn btn-outline-primary btn-sm ml-1" data-toggle="tooltip"
+                                                    title="Editar guardia">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
 
                                             {{-- Botón Eliminar (solo Super Admin) --}}
                                             @can('delete', $guardia)

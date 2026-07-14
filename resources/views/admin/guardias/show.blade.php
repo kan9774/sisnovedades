@@ -60,6 +60,12 @@
                 </h3>
                 <div class="card-tools">
                     <div class="d-flex align-items-center">
+                        @can('update', $guardia)
+                            <a href="{{ route('admin.guardias.edit', $guardia) }}" class="btn btn-outline-primary btn-sm ml-1"
+                                data-toggle="tooltip" title="Editar guardia">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        @endcan
                         @can('cerrar', $guardia)
                             <form action="{{ route('admin.guardias.cerrar', $guardia) }}" method="POST" class="d-inline ml-1">
                                 @csrf

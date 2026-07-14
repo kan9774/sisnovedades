@@ -435,9 +435,9 @@ return [
                 [
                     'text'   => 'Vuelos',
                     'url'    => 'admin/palomar/vuelos',
-                    'icon'   => 'fas fa-plane',
+                    'icon'   => 'fa-solid fa-plane-departure',
                     'active' => ['admin/palomar/vuelos*'],
-                    'can'    => 'viewAny-vuelo',
+                    'can'    => 'viewAny-palomar',
                 ],
                 [
                     'text'   => 'Estados',
