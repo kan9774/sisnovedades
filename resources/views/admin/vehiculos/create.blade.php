@@ -9,7 +9,7 @@
         <div class="card card-outline card-primary">
             <div class="card-header">
                 <h3 class="card-title">
-                    <i class="fas fa-truck text-primary"></i> Crear Vehículo
+                    <i class="fas fa-truck text-primary"></i> Nuevo Vehículo
                 </h3>
                 <div class="card-tools">
                     <a href="{{ route('admin.vehiculos.index') }}" class="btn btn-outline-secondary btn-sm"
@@ -42,7 +42,7 @@
                                 <label>Matrícula <span class="text-danger">*</span></label>
                                 <input type="text" name="matricula"
                                     class="form-control @error('matricula') is-invalid @enderror"
-                                    value="{{ old('matricula') }}" placeholder="Ej: ABC-123" required>
+                                    value="{{ old('matricula') }}" required>
                                 @error('matricula')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -52,8 +52,8 @@
                             <div class="form-group">
                                 <label>Marca <small class="text-muted">(opcional)</small></label>
                                 <input type="text" name="marca"
-                                    class="form-control @error('marca') is-invalid @enderror" value="{{ old('marca') }}"
-                                    placeholder="Ej: Toyota">
+                                    class="form-control @error('marca') is-invalid @enderror"
+                                    value="{{ old('marca') }}">
                                 @error('marca')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -63,8 +63,8 @@
                             <div class="form-group">
                                 <label>Modelo <small class="text-muted">(opcional)</small></label>
                                 <input type="text" name="modelo"
-                                    class="form-control @error('modelo') is-invalid @enderror" value="{{ old('modelo') }}"
-                                    placeholder="Ej: Hilux 4x4">
+                                    class="form-control @error('modelo') is-invalid @enderror"
+                                    value="{{ old('modelo') }}">
                                 @error('modelo')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -72,7 +72,7 @@
                         </div>
                     </div>
 
-                    {{-- Fila 2: Color / Tipo de Vehículo / Unidad / Descripción --}}
+                    {{-- Fila 2: Vehículo / Tipo de Vehículo / Unidad / Descripción --}}
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
@@ -125,7 +125,7 @@
                                 <label>Objeto <small class="text-muted">(opcional)</small></label>
                                 <input type="text" name="descripcion"
                                     class="form-control @error('descripcion') is-invalid @enderror"
-                                    value="{{ old('descripcion') }}" placeholder="Ej: Transporte de Personal">
+                                    value="{{ old('descripcion') }}">
                                 @error('descripcion')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -133,32 +133,87 @@
                         </div>
                     </div>
 
-                    {{-- Fila 3: Combustible / Consumo / Sin cuentakilómetros --}}
+                    {{-- Fila 3: Combustible / Lubricante / Rodado --}}
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Tipo de Combustible <span class="text-danger">*</span></label>
-                                <select name="tipo_combustible"
-                                    class="form-control @error('tipo_combustible') is-invalid @enderror" required>
-                                    <option value="">-- Seleccionar --</option>
-                                    <option value="gas_oil" {{ old('tipo_combustible') == 'gas_oil' ? 'selected' : '' }}>
-                                        Gas Oil
-                                    </option>
-                                    <option value="nafta" {{ old('tipo_combustible') == 'nafta' ? 'selected' : '' }}>
-                                        Nafta
-                                    </option>
-                                </select>
-                                @error('tipo_combustible')
-                                    <span class="invalid-feedback">{{ $message }}</span>
+                                <div class="input-group input-group-sm">
+                                    <select name="tipo_combustible_id" id="tipo_combustible_id"
+                                        class="form-control @error('tipo_combustible_id') is-invalid @enderror" required>
+                                        <option value="">-- Seleccionar --</option>
+                                        @foreach ($tiposCombustible as $tipo)
+                                            <option value="{{ $tipo->id }}"
+                                                {{ old('tipo_combustible_id') == $tipo->id ? 'selected' : '' }}>
+                                                {{ $tipo->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        @livewire('catalogos.tipos-combustible-modal', key('combustible-modal-create'))
+                                    </div>
+                                </div>
+                                @error('tipo_combustible_id')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
+                                <label>Tipo de Lubricante <small class="text-muted">(opcional)</small></label>
+                                <div class="input-group input-group-sm">
+                                    <select name="tipo_lubricante_id" id="tipo_lubricante_id"
+                                        class="form-control @error('tipo_lubricante_id') is-invalid @enderror">
+                                        <option value="">-- Seleccionar --</option>
+                                        @foreach ($tiposLubricante as $tipo)
+                                            <option value="{{ $tipo->id }}"
+                                                {{ old('tipo_lubricante_id') == $tipo->id ? 'selected' : '' }}>
+                                                {{ $tipo->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        @livewire('catalogos.tipos-lubricante-modal', key('lubricante-modal-create'))
+                                    </div>
+                                </div>
+                                @error('tipo_lubricante_id')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tipo de Rodado <small class="text-muted">(opcional)</small></label>
+                                <div class="input-group input-group-sm">
+                                    <select name="tipo_rodado_id" id="tipo_rodado_id"
+                                        class="form-control @error('tipo_rodado_id') is-invalid @enderror">
+                                        <option value="">-- Seleccionar --</option>
+                                        @foreach ($tiposRodado as $tipo)
+                                            <option value="{{ $tipo->id }}"
+                                                {{ old('tipo_rodado_id') == $tipo->id ? 'selected' : '' }}>
+                                                {{ $tipo->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        @livewire('catalogos.tipos-rodado-modal', key('rodado-modal-create'))
+                                    </div>
+                                </div>
+                                @error('tipo_rodado_id')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Fila 4: Consumo / Odómetro --}}
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <label>Consumo (L/km) <small class="text-muted">(opcional)</small></label>
                                 <input type="number" name="consumo_litros_por_km"
                                     class="form-control @error('consumo_litros_por_km') is-invalid @enderror"
-                                    value="{{ old('consumo_litros_por_km') }}" step="0.0001" placeholder="Ej: 0.12">
+                                    value="{{ old('consumo_litros_por_km') }}" step="0.0001">
                                 @error('consumo_litros_por_km')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -179,14 +234,14 @@
                         </div>
                     </div>
 
-                    {{-- Fila 4: Ejes / Chasis / Motor / Activo / Estado --}}
+                    {{-- Fila 5: Ejes / Chasis / Motor / Activo / Estado --}}
                     <div class="row align-items-center">
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Ejes</label>
                                 <input type="number" name="ejes"
-                                    class="form-control @error('ejes') is-invalid @enderror" value="{{ old('ejes', 2) }}"
-                                    min="1" max="10">
+                                    class="form-control @error('ejes') is-invalid @enderror"
+                                    value="{{ old('ejes') }}" min="1" max="10">
                                 @error('ejes')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -219,7 +274,7 @@
                                 <label>&nbsp;</label>
                                 <div class="custom-control custom-switch">
                                     <input type="checkbox" class="custom-control-input" id="activo" name="activo"
-                                        {{ old('activo', true) ? 'checked' : '' }}>
+                                        value="1" {{ old('activo', true) ? 'checked' : '' }}>
                                     <label class="custom-control-label" for="activo">Activo</label>
                                 </div>
                             </div>
@@ -252,7 +307,7 @@
                         </a>
                         <button type="submit" class="btn btn-outline-primary btn-sm"
                             style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
-                            <i class="fas fa-save"></i> Crear Vehículo
+                            <i class="fas fa-save"></i> Guardar Vehículo
                         </button>
                     </div>
                 </form>
@@ -265,6 +320,29 @@
     <script>
         $(document).ready(function() {
             $('.alert').delay(4000).fadeOut('slow');
+        });
+
+        function actualizarSelect(selectId, id, nombre) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            let option = select.querySelector(`option[value="${id}"]`);
+            if (!option) {
+                option = new Option(nombre, id);
+                select.appendChild(option);
+            } else {
+                option.text = nombre;
+            }
+            select.value = id;
+        }
+
+        window.addEventListener('combustible-actualizado', e => {
+            actualizarSelect('tipo_combustible_id', e.detail.id, e.detail.nombre);
+        });
+        window.addEventListener('lubricante-actualizado', e => {
+            actualizarSelect('tipo_lubricante_id', e.detail.id, e.detail.nombre);
+        });
+        window.addEventListener('rodado-actualizado', e => {
+           actualizarSelect('tipo_rodado_id', e.detail.id, e.detail.nombre);
         });
     </script>
 @endpush

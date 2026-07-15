@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('subtitle', 'Mantenimientos')
-@section('content_header_title', 'Vehículos')
-@section('content_header_subtitle', 'Mantenimientos - ' . $vehiculo->matricula)
+@section('subtitle', 'Unidades')
+@section('content_header_title', 'Unidades')
+@section('content_header_subtitle', 'Listado')
 
 @section('content_body')
 <div class="container-fluid">
@@ -14,23 +14,30 @@
         </div>
     @endif
 
-    <div class="card card-outline card-info">
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible">
+            {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    @endif
+
+    <div class="card card-outline card-primary">
         <div class="card-header">
             <h3 class="card-title">
-                <i class="fas fa-tools"></i> Mantenimientos de {{ $vehiculo->matricula }}
+                <i class="fas fa-building"></i> Unidades
             </h3>
             <div class="card-tools">
-                @can('create', App\Models\MantenimientoVehiculo::class)
-                    <a href="{{ route('admin.vehiculos.mantenimientos.create', $vehiculo) }}"
+                @can('create', App\Models\Unidad::class)
+                    <a href="{{ route('admin.unidades.create') }}"
                        class="btn btn-outline-primary btn-sm"
                        style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
-                        <i class="fas fa-plus-circle"></i> Registrar Mantenimiento
+                        <i class="fas fa-plus-circle"></i> Nueva Unidad
                     </a>
                 @endcan
-                <a href="{{ route('admin.vehiculos.show', $vehiculo) }}"
+                <a href="{{ route('admin.vehiculos.index') }}"
                    class="btn btn-outline-secondary btn-sm"
                    style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
-                    <i class="fas fa-arrow-left"></i> Volver al vehículo
+                    <i class="fas fa-arrow-left"></i> Volver a Vehículos
                 </a>
             </div>
         </div>
@@ -38,41 +45,38 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th>Km</th>
-                        <th>Descripción</th>
-                        <th>Costo</th>
-                        <th>Taller</th>
-                        <th>Próximo</th>
+                        <th>Nombre</th>
+                        <th>Vehículos</th>
+                        <th>Estado</th>
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($mantenimientos as $mantenimiento)
+                    @forelse($unidades as $unidad)
                         <tr>
-                            <td>{{ $mantenimiento->fecha->format('d/m/Y') }}</td>
-                            <td><span class="badge badge-secondary">{{ $mantenimiento->tipo_label }}</span></td>
-                            <td>{{ $mantenimiento->kilometraje ?? '-' }}</td>
-                            <td>{{ $mantenimiento->descripcion }}</td>
-                            <td>{{ $mantenimiento->costo ? '$' . number_format($mantenimiento->costo, 2, ',', '.') : '-' }}</td>
-                            <td>{{ $mantenimiento->taller ?? '-' }}</td>
+                            <td>{{ $unidad->nombre }}</td>
+                            <td>{{ $unidad->vehiculos_count ?? $unidad->vehiculos()->count() }}</td>
                             <td>
-                                @if($mantenimiento->proximo_mantenimiento_fecha)
-                                    {{ $mantenimiento->proximo_mantenimiento_fecha->format('d/m/Y') }}
-                                @elseif($mantenimiento->proximo_mantenimiento_km)
-                                    {{ $mantenimiento->proximo_mantenimiento_km }} km
+                                @if($unidad->activo)
+                                    <span class="badge badge-success">Activo</span>
                                 @else
-                                    -
+                                    <span class="badge badge-secondary">Inactivo</span>
                                 @endif
                             </td>
                             <td class="text-center align-middle">
                                 <div class="d-flex justify-content-center">
-                                    @can('delete', $mantenimiento)
-                                        <form action="{{ route('admin.vehiculos.mantenimientos.destroy', [$vehiculo, $mantenimiento]) }}"
+                                    @can('update', $unidad)
+                                        <a href="{{ route('admin.unidades.edit', $unidad) }}"
+                                           class="btn btn-outline-warning btn-xs mr-1"
+                                           style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    @endcan
+                                    @can('delete', $unidad)
+                                        <form action="{{ route('admin.unidades.destroy', $unidad) }}"
                                               method="POST"
                                               class="d-inline"
-                                              onsubmit="return confirm('¿Eliminar este mantenimiento?')">
+                                              onsubmit="return confirm('¿Eliminar esta unidad?')">
                                             @csrf
                                             @method('DELETE')
                                             <button class="btn btn-outline-danger btn-xs"
@@ -86,18 +90,18 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
-                                <i class="fas fa-tools fa-2x d-block mb-2"></i>
-                                No hay mantenimientos registrados.
+                            <td colspan="4" class="text-center text-muted py-4">
+                                <i class="fas fa-building fa-2x d-block mb-2"></i>
+                                No hay unidades registradas.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if($mantenimientos->hasPages())
+        @if($unidades->hasPages())
             <div class="card-footer">
-                {{ $mantenimientos->links() }}
+                {{ $unidades->links() }}
             </div>
         @endif
     </div>

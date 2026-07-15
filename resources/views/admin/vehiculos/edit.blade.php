@@ -73,7 +73,7 @@
                         </div>
                     </div>
 
-                    {{-- Fila 2: Color / Tipo de Vehículo / Unidad / Descripción --}}
+                    {{-- Fila 2: Vehículo / Tipo de Vehículo / Unidad / Descripción --}}
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
@@ -135,28 +135,81 @@
                         </div>
                     </div>
 
-                    {{-- Fila 3: Combustible / Consumo / Sin cuentakilómetros --}}
+                    {{-- Fila 3: Combustible / Lubricante / Rodado --}}
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Tipo de Combustible <span class="text-danger">*</span></label>
-                                <select name="tipo_combustible"
-                                    class="form-control @error('tipo_combustible') is-invalid @enderror" required>
-                                    <option value="">-- Seleccionar --</option>
-                                    <option value="gas_oil"
-                                        {{ old('tipo_combustible', $vehiculo->tipo_combustible) == 'gas_oil' ? 'selected' : '' }}>
-                                        Gas Oil
-                                    </option>
-                                    <option value="nafta"
-                                        {{ old('tipo_combustible', $vehiculo->tipo_combustible) == 'nafta' ? 'selected' : '' }}>
-                                        Nafta
-                                    </option>
-                                </select>
-                                @error('tipo_combustible')
-                                    <span class="invalid-feedback">{{ $message }}</span>
+                                <div class="input-group input-group-sm">
+                                    <select name="tipo_combustible_id" id="tipo_combustible_id"
+                                        class="form-control @error('tipo_combustible_id') is-invalid @enderror" required>
+                                        <option value="">-- Seleccionar --</option>
+                                        @foreach ($tiposCombustible as $tipo)
+                                            <option value="{{ $tipo->id }}"
+                                                {{ old('tipo_combustible_id', $vehiculo->tipo_combustible_id) == $tipo->id ? 'selected' : '' }}>
+                                                {{ $tipo->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        @livewire('catalogos.tipos-combustible-modal', key('combustible-modal-edit'))
+                                    </div>
+                                </div>
+                                @error('tipo_combustible_id')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tipo de Lubricante <small class="text-muted">(opcional)</small></label>
+                                <div class="input-group input-group-sm">
+                                    <select name="tipo_lubricante_id" id="tipo_lubricante_id"
+                                        class="form-control @error('tipo_lubricante_id') is-invalid @enderror">
+                                        <option value="">-- Seleccionar --</option>
+                                        @foreach ($tiposLubricante as $tipo)
+                                            <option value="{{ $tipo->id }}"
+                                                {{ old('tipo_lubricante_id', $vehiculo->tipo_lubricante_id) == $tipo->id ? 'selected' : '' }}>
+                                                {{ $tipo->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        @livewire('catalogos.tipos-lubricante-modal', key('lubricante-modal-edit'))
+                                    </div>
+                                </div>
+                                @error('tipo_lubricante_id')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tipo de Rodado <small class="text-muted">(opcional)</small></label>
+                                <div class="input-group input-group-sm">
+                                    <select name="tipo_rodado_id" id="tipo_rodado_id"
+                                        class="form-control @error('tipo_rodado_id') is-invalid @enderror">
+                                        <option value="">-- Seleccionar --</option>
+                                        @foreach ($tiposRodado as $tipo)
+                                            <option value="{{ $tipo->id }}"
+                                                {{ old('tipo_rodado_id', $vehiculo->tipo_rodado_id) == $tipo->id ? 'selected' : '' }}>
+                                                {{ $tipo->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        @livewire('catalogos.tipos-rodado-modal', key('rodado-modal-edit'))
+                                    </div>
+                                </div>
+                                @error('tipo_rodado_id')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Fila 4: Consumo / Odómetro --}}
+                    <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Consumo (L/km) <small class="text-muted">(opcional)</small></label>
@@ -185,7 +238,7 @@
                         </div>
                     </div>
 
-                    {{-- Fila 4: Ejes / Chasis / Motor / Activo / Estado --}}
+                    {{-- Fila 5: Ejes / Chasis / Motor / Activo / Estado --}}
                     <div class="row align-items-center">
                         <div class="col-md-2">
                             <div class="form-group">
@@ -276,6 +329,29 @@
     <script>
         $(document).ready(function() {
             $('.alert').delay(4000).fadeOut('slow');
+        });
+
+        function actualizarSelect(selectId, id, nombre) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            let option = select.querySelector(`option[value="${id}"]`);
+            if (!option) {
+                option = new Option(nombre, id);
+                select.appendChild(option);
+            } else {
+                option.text = nombre;
+            }
+            select.value = id;
+        }
+
+        window.addEventListener('combustible-actualizado', e => {
+            actualizarSelect('tipo_combustible_id', e.detail.id, e.detail.nombre);
+        });
+        window.addEventListener('lubricante-actualizado', e => {
+            actualizarSelect('tipo_lubricante_id', e.detail.id, e.detail.nombre);
+        });
+        window.addEventListener('rodado-actualizado', e => {
+            actualizarSelect('tipo_rodado_id', e.detail.id, e.detail.nombre);
         });
     </script>
 @endpush

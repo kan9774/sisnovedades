@@ -36,7 +36,7 @@
                                 <span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Vehículo eliminado</span>
                             @endif
                         </td>
-                        <td>{{ $salida->conductor->nombre_visible ?? 'Conductor eliminado' }}</td>
+                        <td>{{ $salida->conductor ? $salida->conductor->nombre_visible : 'Conductor eliminado' }}</td>
                         <td>
                             @if ($salida->tipo_combustible === 'gas_oil')
                                 <span class="badge badge-warning">Gas Oil</span>
@@ -90,7 +90,8 @@
     @endif
 
     {{-- Modal --}}
-    <div class="modal fade" id="modalSalida" tabindex="-1" wire:ignore.self>
+    @if ($showModal)
+    <div class="modal d-block" style="background: rgba(0,0,0,.5)" wire:click.self="cerrarModal" wire:keydown.escape="cerrarModal">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form wire:submit="guardar">
@@ -98,14 +99,14 @@
                         <h5 class="modal-title">
                             {{ $editandoId ? 'Editar Salida' : 'Registrar Salida' }}
                         </h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" wire:click="cerrarModal"><span>&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Vehículo <span class="text-danger">*</span></label>
-                                    <select wire:model="vehiculo_id" class="form-control @error('vehiculo_id') is-invalid @enderror">
+                                    <select wire:model.live="vehiculo_id" class="form-control @error('vehiculo_id') is-invalid @enderror">
                                         <option value="">Seleccionar...</option>
                                         @foreach ($this->vehiculos as $vehiculo)
                                             <option value="{{ $vehiculo->id }}">
@@ -135,7 +136,7 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Combustible <span class="text-danger">*</span></label>
-                                    <select wire:model="tipo_combustible" class="form-control @error('tipo_combustible') is-invalid @enderror">
+                                    <select wire:model.live="tipo_combustible" class="form-control @error('tipo_combustible') is-invalid @enderror">
                                         <option value="">Seleccionar...</option>
                                         <option value="gas_oil">Gas Oil</option>
                                         <option value="nafta">Nafta</option>
@@ -146,14 +147,14 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Hora Salida <span class="text-danger">*</span></label>
-                                    <input type="time" wire:model="hora_sale" class="form-control @error('hora_sale') is-invalid @enderror">
+                                    <input type="time" wire:model.live="hora_sale" class="form-control @error('hora_sale') is-invalid @enderror">
                                     @error('hora_sale') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Hora Entrada</label>
-                                    <input type="time" wire:model="hora_entra" class="form-control @error('hora_entra') is-invalid @enderror">
+                                    <input type="time" wire:model.live="hora_entra" class="form-control @error('hora_entra') is-invalid @enderror">
                                     @error('hora_entra') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
@@ -163,14 +164,14 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Km Salida</label>
-                                    <input type="number" min="0" wire:model="kms_sale" class="form-control @error('kms_sale') is-invalid @enderror">
+                                    <input type="number" min="0" wire:model.live="kms_sale" class="form-control @error('kms_sale') is-invalid @enderror">
                                     @error('kms_sale') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Km Entrada</label>
-                                    <input type="number" min="0" wire:model="kms_entra" class="form-control @error('kms_entra') is-invalid @enderror">
+                                    <input type="number" min="0" wire:model.live="kms_entra" class="form-control @error('kms_entra') is-invalid @enderror">
                                     @error('kms_entra') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
@@ -183,7 +184,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-outline-secondary" wire:click="cerrarModal">Cancelar</button>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar">
                             <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
                             <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
@@ -193,11 +194,5 @@
             </div>
         </div>
     </div>
+@endif
 </div>
-
-@script
-<script>
-    $wire.on('abrir-modal-salida', () => $('#modalSalida').modal('show'));
-    $wire.on('cerrar-modal-salida', () => $('#modalSalida').modal('hide'));
-</script>
-@endscript

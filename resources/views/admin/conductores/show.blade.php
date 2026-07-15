@@ -145,12 +145,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{-- Se asume que novedadesVehiculos tiene campos comunes como fecha, vehiculo y detalle --}}
-                                    @forelse($conductor->novedadesVehiculos as $novedad)
+                                    @forelse($conductor->salidasVehiculos()->with('vehiculo')->latest('hora_sale')->limit(10)->get() as $salida)
                                         <tr>
-                                            <td>{{ $novedad->created_at->format('d/m/Y H:i') }}</td>
-                                            <td>{{ $novedad->vehiculo?->linea_o_patente ?? 'N/A' }}</td>
-                                            <td>{{ Str::limit($novedad->descripcion ?? $novedad->observacion, 50) }}</td>
+                                            <td>{{ $salida->hora_sale->format('d/m/Y H:i') }}</td>
+                                            <td>{{ $salida->vehiculo?->matricula ?? 'N/A' }}</td>
+                                            <td>{{ Str::limit($salida->comision, 50) }}</td>
                                         </tr>
                                     @empty
                                         <tr>

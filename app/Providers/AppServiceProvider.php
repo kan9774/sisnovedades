@@ -14,6 +14,7 @@ use App\Models\Palomar;
 use App\Models\Rol;
 use App\Models\SalidaVehiculo;
 use App\Models\TipoVehiculo;
+use App\Models\Unidad;
 use App\Models\User;
 use App\Models\Vehiculo;
 use App\Models\Vuelo;
@@ -31,6 +32,7 @@ use App\Policies\PalomarPolicy;
 use App\Policies\RolPolicy;
 use App\Policies\SalidaVehiculoPolicy;
 use App\Policies\TipoVehiculoPolicy;
+use App\Policies\UnidadPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\VehiculoPolicy;
 use App\Policies\VueloPolicy;
@@ -112,6 +114,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(CategoriaDocumento::class, CategoriaDocumentoPolicy::class);
         Gate::policy(MantenimientoVehiculo::class, MantenimientoVehiculoPolicy::class);
         Gate::policy(TipoVehiculo::class, TipoVehiculoPolicy::class);
+        Gate::policy(Unidad::class, UnidadPolicy::class);
         
         
         // Observers

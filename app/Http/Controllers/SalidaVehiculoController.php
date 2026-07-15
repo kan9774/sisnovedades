@@ -55,26 +55,26 @@ class SalidaVehiculoController extends Controller
         abort_if(!$puedeCrear, 403, 'No tienes permisos para registrar salidas de vehículo en esta guardia');
         abort_if($guardia->status === 'closed', 403, 'La guardia está cerrada');
 
-        $data = $request->validate([
-            'vehiculo_id' => 'required|exists:vehiculos,id',
-            'conductor_id' => 'required|exists:conductores,id',
-            'tipo_combustible' => 'required|in:gas_oil,nafta',
-            'hora_sale' => 'required|date_format:H:i',
-            'hora_entra' => 'nullable|date_format:H:i|after:hora_sale',
-            'kms_sale' => 'nullable|integer|min:0',
-            'kms_entra' => 'nullable|integer|min:0|gt:kms_sale',
-            'comision' => 'required|string',
-        ]);
+        $vehiculo = Vehiculo::find($request->vehiculo_id);
 
-        // Validación condicional según vehículo
-        $vehiculo = Vehiculo::find($data['vehiculo_id']);
-        if (!$vehiculo->sin_cuentakilometros) {
-            $request->validate([
-                'kms_sale' => 'required|integer|min:0',
-                'kms_entra' => 'required|integer|min:0|gt:kms_sale',
-            ]);
+        $rules = [
+            'vehiculo_id'      => 'required|exists:vehiculos,id',
+            'conductor_id'     => 'required|exists:conductores,id',
+            'tipo_combustible' => 'required|in:gas_oil,nafta',
+            'hora_sale'        => 'required|date_format:H:i',
+            'hora_entra'       => 'nullable|date_format:H:i|after:hora_sale',
+            'comision'         => 'required|string',
+        ];
+
+        if (!$vehiculo || $vehiculo->sin_cuentakilometros) {
+            $rules['kms_sale'] = 'nullable|integer|min:0';
+            $rules['kms_entra'] = 'nullable|integer|min:0|gt:kms_sale';
+        } else {
+            $rules['kms_sale'] = 'required|integer|min:0';
+            $rules['kms_entra'] = 'required|integer|min:0|gt:kms_sale';
         }
 
+        $data = $request->validate($rules);
         $data['guardia_id'] = $guardia->id;
 
         SalidaVehiculo::create($data);
@@ -103,25 +103,26 @@ class SalidaVehiculoController extends Controller
     {
         $this->authorize('update', $salida);
 
-        $data = $request->validate([
-            'vehiculo_id' => 'required|exists:vehiculos,id',
-            'conductor_id' => 'required|exists:conductores,id',
-            'tipo_combustible' => 'required|in:gas_oil,nafta',
-            'hora_sale' => 'required|date_format:H:i',
-            'hora_entra' => 'nullable|date_format:H:i|after:hora_sale',
-            'kms_sale' => 'nullable|integer|min:0',
-            'kms_entra' => 'nullable|integer|min:0|gt:kms_sale',
-            'comision' => 'required|string',
-        ]);
+        $vehiculo = Vehiculo::find($request->vehiculo_id);
 
-        $vehiculo = Vehiculo::find($data['vehiculo_id']);
-        if (!$vehiculo->sin_cuentakilometros) {
-            $request->validate([
-                'kms_sale' => 'required|integer|min:0',
-                'kms_entra' => 'required|integer|min:0|gt:kms_sale',
-            ]);
+        $rules = [
+            'vehiculo_id'      => 'required|exists:vehiculos,id',
+            'conductor_id'     => 'required|exists:conductores,id',
+            'tipo_combustible' => 'required|in:gas_oil,nafta',
+            'hora_sale'        => 'required|date_format:H:i',
+            'hora_entra'       => 'nullable|date_format:H:i|after:hora_sale',
+            'comision'         => 'required|string',
+        ];
+
+        if (!$vehiculo || $vehiculo->sin_cuentakilometros) {
+            $rules['kms_sale'] = 'nullable|integer|min:0';
+            $rules['kms_entra'] = 'nullable|integer|min:0|gt:kms_sale';
+        } else {
+            $rules['kms_sale'] = 'required|integer|min:0';
+            $rules['kms_entra'] = 'required|integer|min:0|gt:kms_sale';
         }
 
+        $data = $request->validate($rules);
         $salida->update($data);
 
         return redirect()->route('admin.guardias.show', $guardia)

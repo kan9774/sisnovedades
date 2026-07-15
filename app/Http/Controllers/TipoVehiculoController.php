@@ -47,7 +47,7 @@ class TipoVehiculoController extends Controller
     {
         $this->authorize('update', $tipo);
 
-        return view('admin.vehiculos.tipos.edit', ['tipoVehiculo' => $tipo]);
+        return view('admin.vehiculos.tipos.edit', compact('tipo'));
     }
 
     public function update(Request $request, TipoVehiculo $tipo)

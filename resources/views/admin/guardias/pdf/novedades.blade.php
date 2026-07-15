@@ -10,6 +10,12 @@
             box-sizing: border-box;
         }
 
+        @page {
+            margin: 60px 20px 40px 20px;
+            /* arriba, derecha, abajo, izquierda — ajustá según lo que ya tenías */
+        }
+
+
         body {
             font-family: Arial, sans-serif;
             font-size: 11px;
@@ -109,6 +115,13 @@
         .firma-linea {
             border-top: 1px solid #000;
             margin-bottom: 4px;
+        }
+
+        .firma-tabla {
+            page-break-inside: avoid;
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
         }
     </style>
 </head>
@@ -391,26 +404,32 @@
     {{-- Firma --}}
     <div style="margin-top: 40px; font-size: 11px;">
 
-        <p style="text-align: right; margin-right: 60px;">
-            Cuartel en Peñarol,
-            {{ $guardia->date->format('d') }}0830{{ strtoupper($guardia->date->format('My')) }}.<br>
-
-        </p>
-        <p style="text-align: right; margin-right: 60px;">
-            El Ofl. de Día de la {{ config('organizacion.nombre') }}
-        </p>
-        <table style="width: 100%; border-collapse: collapse; " border="0">
+        <table class="firma-tabla" style="width: 100%; border-collapse: collapse; page-break-inside: avoid;"
+            border="0">
+            <tr>
+                <td colspan="3" style="text-align: right; padding-right: 60px; border: none; font-size: 11px;">
+                    Cuartel en Peñarol,
+                    {{ $guardia->date->format('d') }}0830{{ strtoupper($guardia->date->format('My')) }}.
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="text-align: right; padding-right: 60px; border: none; font-size: 11px;">
+                    El Ofl. de Día de la {{ config('organizacion.nombre') }}
+                </td>
+            </tr>
+            <tr>
+                <td style="height: 20px; border: none;"></td>
+            </tr>
             <tr>
                 <td style="width: 25%; font-style: italic; vertical-align: bottom; text-align: right; border: none;">
                     @if ($guardia->escribiente->first())
                         {{ strtoupper(substr($guardia->escribiente->first()->name, 0, 1)) }}{{ strtoupper(substr($guardia->escribiente->first()->last_name, 0, 1)) }}.
                     @endif
                 </td>
-                <td style="width: 50%; text-align: center;border: none;">
-                </td>
-                <td style="width: 25%;border: none;">
+                <td style="width: 50%; border: none;"></td>
+                <td colspan="3" style="text-align: left; padding-left: 40px; border: none; font-size: 11px;">
                     {{ strtoupper($guardia->oficial->grade) }}<br>
-                    <div style="border-top: 1px solid #000; width: 150px; margin-bottom: 3px;"></div>
+                    <div style="border-top: 1px solid #000; width: 150px;  margin-bottom: 3px;"></div>
                     <p style="text-align: center; font-size: 11px;">
                         {{ strtoupper($guardia->oficial->name) }} {{ strtoupper($guardia->oficial->last_name) }}.
                     </p>

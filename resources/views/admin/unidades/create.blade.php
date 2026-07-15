@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('subtitle', 'Editar Tipo de Vehículo')
-@section('content_header_title', 'Vehículos')
-@section('content_header_subtitle', 'Tipos - Editar')
+@section('subtitle', 'Nueva Unidad')
+@section('content_header_title', 'Unidades')
+@section('content_header_subtitle', 'Nuevo')
 
 @section('content_body')
 <div class="container-fluid">
     <div class="card card-outline card-primary">
         <div class="card-header">
             <h3 class="card-title">
-                <i class="fas fa-shapes text-primary"></i> Editar Tipo: <strong>{{ $tipo->nombre }}</strong>
+                <i class="fas fa-building text-primary"></i> Crear Unidad
             </h3>
             <div class="card-tools">
-                <a href="{{ route('admin.vehiculos.tipos.index') }}"
+                <a href="{{ route('admin.unidades.index') }}"
                    class="btn btn-outline-secondary btn-sm"
                    style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
                     <i class="fas fa-arrow-left"></i> Volver
@@ -32,9 +32,8 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.vehiculos.tipos.update', $tipo) }}" method="POST">
+            <form action="{{ route('admin.unidades.store') }}" method="POST">
                 @csrf
-                @method('PUT')
 
                 <div class="row">
                     <div class="col-md-8">
@@ -43,7 +42,8 @@
                             <input type="text"
                                    name="nombre"
                                    class="form-control @error('nombre') is-invalid @enderror"
-                                   value="{{ old('nombre', $tipo->nombre) }}"
+                                   value="{{ old('nombre') }}"
+                                   placeholder="Ej: Compañía, Batallón, Regimiento"
                                    required>
                             @error('nombre')
                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -58,7 +58,7 @@
                                        class="custom-control-input"
                                        id="activo"
                                        name="activo"
-                                       {{ old('activo', $tipo->activo) ? 'checked' : '' }}>
+                                       {{ old('activo', true) ? 'checked' : '' }}>
                                 <label class="custom-control-label" for="activo">Activo</label>
                             </div>
                         </div>
@@ -66,13 +66,13 @@
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a href="{{ route('admin.vehiculos.tipos.index') }}" class="btn btn-outline-secondary btn-sm"
+                    <a href="{{ route('admin.unidades.index') }}" class="btn btn-outline-secondary btn-sm"
                        style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                     <button type="submit" class="btn btn-outline-primary btn-sm"
                             style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
-                        <i class="fas fa-save"></i> Actualizar Tipo
+                        <i class="fas fa-save"></i> Crear Unidad
                     </button>
                 </div>
             </form>

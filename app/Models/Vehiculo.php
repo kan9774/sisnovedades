@@ -28,8 +28,10 @@ class Vehiculo extends Model
         'numero_motor',
         'ejes',
         'tipo_vehiculo_id',
+        'tipo_combustible_id',
+        'tipo_lubricante_id',
+        'tipo_rodado_id', // <-- actualizado
         'unidad_id',
-        'tipo_combustible',
         'consumo_litros_por_km',
         'sin_cuentakilometros',
         'descripcion',
@@ -74,7 +76,18 @@ class Vehiculo extends Model
     {
         return $this->hasMany(MantenimientoVehiculo::class)->orderByDesc('fecha');
     }
-
+    public function tipoCombustible()
+    {
+        return $this->belongsTo(TipoCombustible::class);
+    }
+    public function tipoLubricante()
+    {
+        return $this->belongsTo(TipoLubricante::class);
+    }
+    public function tipoRodado()
+    {
+        return $this->belongsTo(TipoRodado::class);
+    }
     // Helper para obtener nombre completo
     public function getNombreCompletoAttribute(): string
     {

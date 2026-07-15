@@ -18,6 +18,7 @@ new class extends Component
     public bool $puedeOperarGuardia = false;
 
     public ?int $editandoId = null;
+    public bool $showModal = false;
 
     public string $vehiculo_id = '';
     public string $conductor_id = '';
@@ -68,7 +69,7 @@ new class extends Component
     {
         $this->resetValidation();
         $this->reset(['editandoId', 'vehiculo_id', 'conductor_id', 'tipo_combustible', 'hora_sale', 'hora_entra', 'kms_sale', 'kms_entra', 'comision']);
-        $this->dispatch('abrir-modal-salida');
+        $this->showModal = true;
     }
 
     public function abrirEditar(int $id): void
@@ -87,7 +88,13 @@ new class extends Component
         $this->kms_entra = (string) ($salida->kms_entra ?? '');
         $this->comision = $salida->comision;
 
-        $this->dispatch('abrir-modal-salida');
+        $this->showModal = true;
+    }
+
+    public function cerrarModal(): void
+    {
+        $this->showModal = false;
+        $this->editandoId = null;
     }
 
     public function guardar(): void
@@ -127,8 +134,8 @@ new class extends Component
             $this->dispatch('guardia-contador-actualizado', tipo: 'salidas', guardiaId: $this->guardia->id);
         }
 
+        $this->cerrarModal();
         unset($this->salidas, $this->resumenCombustible);
-        $this->dispatch('cerrar-modal-salida');
     }
 
     public function eliminar(int $id): void

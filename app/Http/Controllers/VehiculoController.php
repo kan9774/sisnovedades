@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TipoCombustible;
+use App\Models\TipoLubricante;
+use App\Models\TipoRodado;
 use App\Models\TipoVehiculo;
 use App\Models\Unidad;
 use App\Models\Vehiculo;
@@ -26,7 +29,10 @@ class VehiculoController extends Controller
     {
         $this->authorize('viewAny', Vehiculo::class);
 
-        $vehiculos = Vehiculo::with('tipoVehiculo')->orderBy('matricula')->paginate(15);
+        $vehiculos = Vehiculo::with(['tipoVehiculo', 'tipoCombustible', 'tipoLubricante', 'tipoRodado'])
+            ->orderBy('matricula')
+            ->paginate(15);
+
         return view('admin.vehiculos.index', compact('vehiculos'));
     }
 
@@ -38,8 +44,18 @@ class VehiculoController extends Controller
         $this->authorize('create', Vehiculo::class);
 
         $tiposVehiculo = TipoVehiculo::where('activo', true)->orderBy('nombre')->get();
+        $tiposCombustible = TipoCombustible::where('activo', true)->orderBy('nombre')->get();
+        $tiposLubricante = TipoLubricante::where('activo', true)->orderBy('nombre')->get();
+        $tiposRodado = TipoRodado::where('activo', true)->orderBy('nombre')->get();
         $unidades = Unidad::where('activo', true)->orderBy('nombre')->get();
-        return view('admin.vehiculos.create', compact('tiposVehiculo', 'unidades'));
+
+        return view('admin.vehiculos.create', compact(
+            'tiposVehiculo',
+            'tiposCombustible',
+            'tiposLubricante',
+            'tiposRodado',
+            'unidades'
+        ));
     }
 
     /**
@@ -59,7 +75,9 @@ class VehiculoController extends Controller
             'ejes' => 'nullable|integer|min:1|max:10',
             'tipo_vehiculo_id' => 'nullable|exists:tipos_vehiculo,id',
             'unidad_id' => 'nullable|exists:unidades,id',
-            'tipo_combustible' => 'required|in:gas_oil,nafta',
+            'tipo_combustible_id' => 'required|exists:tipos_combustible,id',
+            'tipo_lubricante_id' => 'nullable|exists:tipos_lubricante,id',
+            'tipo_rodado_id' => 'nullable|exists:tipos_rodado,id',
             'consumo_litros_por_km' => 'nullable|numeric|min:0|max:999.9999',
             'sin_cuentakilometros' => 'boolean',
             'descripcion' => 'nullable|string|max:255',
@@ -87,6 +105,9 @@ class VehiculoController extends Controller
 
         $vehiculo->load([
             'tipoVehiculo',
+            'tipoCombustible',
+            'tipoLubricante',
+            'tipoRodado',
             'salidas' => function ($query) {
                 $query->with(['guardia', 'conductor'])->latest('id')->limit(10);
             },
@@ -109,12 +130,31 @@ class VehiculoController extends Controller
             ->orWhere('id', $vehiculo->tipo_vehiculo_id)
             ->orderBy('nombre')
             ->get();
+        $tiposCombustible = TipoCombustible::where('activo', true)
+            ->orWhere('id', $vehiculo->tipo_combustible_id)
+            ->orderBy('nombre')
+            ->get();
+        $tiposLubricante = TipoLubricante::where('activo', true)
+            ->orWhere('id', $vehiculo->tipo_lubricante_id)
+            ->orderBy('nombre')
+            ->get();
+        $tiposRodado = TipoRodado::where('activo', true)
+            ->orWhere('id', $vehiculo->tipo_rodado_id)
+            ->orderBy('nombre')
+            ->get();
         $unidades = Unidad::where('activo', true)
             ->orWhere('id', $vehiculo->unidad_id)
             ->orderBy('nombre')
             ->get();
 
-        return view('admin.vehiculos.edit', compact('vehiculo', 'tiposVehiculo', 'unidades'));
+        return view('admin.vehiculos.edit', compact(
+            'vehiculo',
+            'tiposVehiculo',
+            'tiposCombustible',
+            'tiposLubricante',
+            'tiposRodado',
+            'unidades'
+        ));
     }
 
     /**
@@ -134,7 +174,9 @@ class VehiculoController extends Controller
             'ejes' => 'nullable|integer|min:1|max:10',
             'unidad_id' => 'nullable|integer|exists:unidades,id',
             'tipo_vehiculo_id' => 'nullable|integer|exists:tipos_vehiculo,id',
-            'tipo_combustible' => 'required|in:gas_oil,nafta',
+            'tipo_combustible_id' => 'required|integer|exists:tipos_combustible,id',
+            'tipo_lubricante_id' => 'nullable|integer|exists:tipos_lubricante,id',
+            'tipo_rodado_id' => 'nullable|integer|exists:tipos_rodado,id',
             'consumo_litros_por_km' => 'nullable|numeric|min:0|max:999.9999',
             'descripcion' => 'nullable|string|max:255',
             'estado' => 'required|in:verde,amarillo,rojo,negro',
@@ -178,7 +220,7 @@ class VehiculoController extends Controller
     {
         $this->authorize('viewAny', Vehiculo::class);
 
-        $vehiculos = Vehiculo::with(['tipoVehiculo', 'unidad'])
+        $vehiculos = Vehiculo::with(['tipoVehiculo', 'unidad', 'tipoCombustible', 'tipoLubricante', 'tipoRodado'])
             ->orderBy('matricula')
             ->get()
             ->groupBy(fn($v) => $v->tipoVehiculo->nombre ?? 'Sin Tipo')
@@ -244,7 +286,7 @@ class VehiculoController extends Controller
                     default => '-',
                 });
                 $sheet->setCellValue("H{$row}", $v->descripcion ?? '-');
-                $sheet->setCellValue("I{$row}", $v->tipo_combustible === 'gas_oil' ? 'Gas Oil' : 'Nafta');
+                $sheet->setCellValue("I{$row}", $v->tipoCombustible->nombre ?? '-');
                 $sheet->mergeCells("I{$row}:J{$row}");
                 $sheet->getStyle("B{$row}:J{$row}")->applyFromArray($dataStyle);
                 $row++;

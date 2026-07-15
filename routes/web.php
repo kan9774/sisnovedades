@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ConductorController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NovedadPersonalController;
@@ -170,6 +171,10 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             Route::delete('/{tipo}', [TipoVehiculoController::class, 'destroy'])->name('destroy');
         });
 
+        // Unidades - CRUD completo
+        Route::resource('unidades', UnidadController::class)
+            ->parameters(['unidades' => 'unidad']);
+
         // Vehículos - CRUD completo
         Route::prefix('vehiculos')->name('vehiculos.')->group(function () {
             Route::get('/', [VehiculoController::class, 'index'])->name('index');
@@ -184,10 +189,6 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             // Mantenimientos (anidados bajo vehiculo)
             Route::prefix('{vehiculo}/mantenimientos')->name('mantenimientos.')->group(function () {
                 Route::get('/', [MantenimientoVehiculoController::class, 'index'])->name('index');
-                Route::get('/create', [MantenimientoVehiculoController::class, 'create'])->name('create');
-                Route::post('/', [MantenimientoVehiculoController::class, 'store'])->name('store');
-                Route::get('/{mantenimiento}/edit', [MantenimientoVehiculoController::class, 'edit'])->name('edit');
-                Route::put('/{mantenimiento}', [MantenimientoVehiculoController::class, 'update'])->name('update');
                 Route::delete('/{mantenimiento}', [MantenimientoVehiculoController::class, 'destroy'])->name('destroy');
             });
         });
