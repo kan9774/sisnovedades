@@ -42,7 +42,7 @@ new class extends Component
         $usuario = User::findOrFail($fallo->user_id);
         $nombreRemitente = Auth::user()->name . ' ' . Auth::user()->last_name;
 
-        EnviarNovedadGuardiaMail::dispatch($this->guardia, $usuario, $nombreRemitente);
+        EnviarNovedadGuardiaMail::dispatchSync($this->guardia, $usuario, $nombreRemitente);
 
         DB::table('guardia_correos_fallidos')->where('id', $id)->update([
             'resuelto_at' => now(),

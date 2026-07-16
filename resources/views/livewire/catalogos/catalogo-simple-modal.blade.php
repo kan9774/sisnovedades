@@ -1,13 +1,13 @@
 <div>
-    <button type="button" wire:click="abrir" class="btn btn-outline-secondary btn-sm" title="Gestionar {{ $this->titulo() }}">
+    <button type="button" wire:click="abrir" class="btn btn-primary btn-sm" title="Gestionar {{ $this->titulo() }}" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); border: none;">
         <i class="fas fa-cog"></i>
     </button>
 
     @if ($abierto)
-        <div class="modal d-block" style="background: rgba(0,0,0,.5)" wire:click.self="cerrar">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
+        <div class="modal d-block" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="cerrar">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+                    <div class="modal-header" style="background-color: #eef2ff !important;">
                         <h5 class="modal-title">{{ $this->titulo() }}</h5>
                         <button type="button" class="close" wire:click="cerrar"><span>&times;</span></button>
                     </div>
@@ -25,7 +25,8 @@
                                 </div>
                             </div>
                             <div class="col-2">
-                                <button type="submit" class="btn btn-primary btn-sm btn-block">
+                                <button type="submit" class="btn btn-primary btn-sm btn-block" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;">
+                                    <i class="fas fa-save"></i>
                                     {{ $editandoId ? 'Guardar' : 'Agregar' }}
                                 </button>
                             </div>

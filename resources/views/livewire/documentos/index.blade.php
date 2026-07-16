@@ -164,7 +164,7 @@
 
     {{-- MODAL: FORMULARIO CREAR / EDITAR --}}
     @if ($showForm)
-        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="closeForm" wire:keydown.escape="closeForm">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -277,24 +277,20 @@
                     </div>
                     @if (!$justSaved)
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" wire:click="closeForm"
+                            <button type="button" class="btn btn-outline-secondary" wire:click="closeForm"
                                 wire:loading.attr="disabled" wire:target="formArchivo, submitForm"
                                 @disabled($loading)>
-                                <i class="fas fa-times"></i> Cancelar
+                                Cancelar
                             </button>
                             <button type="submit" form="form-documento" class="btn btn-primary"
                                 wire:loading.attr="disabled" wire:target="formArchivo, submitForm"
-                                @disabled($loading)>
+                                @disabled($loading) style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); border: none;">
+                                <span wire:loading.remove wire:target="formArchivo">
+                                    <i class="fas fa-save"></i>
+                                    {{ $formTipo === 'create' ? 'Subir' : 'Guardar cambios' }}
+                                </span>
                                 <span wire:loading wire:target="formArchivo">
                                     <span class="spinner-border spinner-border-sm mr-1"></span> Subiendo archivo...
-                                </span>
-                                <span wire:loading.remove wire:target="formArchivo">
-                                    @if ($loading)
-                                        <span class="spinner-border spinner-border-sm mr-1"></span> Guardando...
-                                    @else
-                                        <i class="fas fa-save"></i>
-                                        {{ $formTipo === 'create' ? 'Subir' : 'Guardar cambios' }}
-                                    @endif
                                 </span>
                             </button>
                         </div>
@@ -306,7 +302,7 @@
 
     {{-- MODAL: CONFIRMAR ELIMINACIÓN --}}
     @if ($confirmDeleteId)
-        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="$set('confirmDeleteId', null)" wire:keydown.escape="$set('confirmDeleteId', null)">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header bg-danger text-white">
@@ -337,7 +333,7 @@
 
     {{-- MODAL: CONFIRMAR ELIMINACIÓN DEFINITIVA --}}
     @if ($confirmForceDeleteId)
-        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="$set('confirmForceDeleteId', null)" wire:keydown.escape="$set('confirmForceDeleteId', null)">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header bg-danger text-white">
@@ -371,7 +367,7 @@
 
     {{-- MODAL: PREVIEW PDF --}}
     @if ($showPreview && $previewUrl)
-        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="closePreview" wire:keydown.escape="closePreview">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -397,7 +393,7 @@
 
     {{-- MODAL: PAPELERA --}}
     @if ($showTrash)
-        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal fade show d-block" tabindex="-1" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="closeTrash" wire:keydown.escape="closeTrash">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">

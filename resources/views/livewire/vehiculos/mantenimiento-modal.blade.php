@@ -1,5 +1,5 @@
 <div>
-    <div class="card card-outline card-info">
+    <div class="card card-outline card-primary shadow-sm border-0" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px) saturate(180%); -webkit-backdrop-filter: blur(12px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);">
         <div class="card-header">
             <h3 class="card-title">
                 <i class="fas fa-tools text-info"></i> Mantenimientos
@@ -82,12 +82,12 @@
     </div>
 
     @if ($abierto)
-        <div class="modal d-block" style="background: rgba(0,0,0,.5)" wire:click.self="cerrar"
+        <div class="modal d-block" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="cerrar"
             wire:keydown.escape="cerrar">
             <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <form wire:submit.prevent="guardar">
-                        <div class="modal-header">
+                <div class="modal-content" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+                    <form wire:submit.prevent="guardar" style="--bs-form-control-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);">
+                        <div class="modal-header" style="background-color: #eef2ff !important;">
                             <h5 class="modal-title">
                                 <i class="fas fa-tools text-info"></i>
                                 {{ $editandoId ? 'Editar Mantenimiento' : 'Registrar Mantenimiento' }}:
@@ -192,7 +192,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-outline-secondary btn-sm"
                                 wire:click="cerrar">Cancelar</button>
-                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;">
                                 <i class="fas fa-save"></i>
                                 {{ $editandoId ? 'Guardar cambios' : 'Guardar Mantenimiento' }}
                             </button>

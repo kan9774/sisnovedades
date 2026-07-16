@@ -166,6 +166,8 @@ new class extends Component
             $novedad = $this->guardia->novedades()->findOrFail($this->editandoId);
             $this->authorize('update', $novedad);
             $novedad->update($payload);
+            
+            $this->dispatch('novedad-editada');
         } else {
             $this->authorize('create', [News::class, $this->guardia]);
 
@@ -201,6 +203,8 @@ new class extends Component
                     Notification::send($destinatarios, new NovedadUrgenteNotification($novedad));
                 }
             }
+            
+            $this->dispatch('novedad-creada');
         }
 
         unset($this->novedades);
@@ -217,5 +221,6 @@ new class extends Component
         unset($this->novedades);
 
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
+        $this->dispatch('novedad-eliminada');
     }
 };

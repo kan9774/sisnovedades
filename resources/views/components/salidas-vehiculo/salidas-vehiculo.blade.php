@@ -91,9 +91,9 @@
 
     {{-- Modal --}}
     @if ($showModal)
-    <div class="modal d-block" style="background: rgba(0,0,0,.5)" wire:click.self="cerrarModal" wire:keydown.escape="cerrarModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+    <div class="modal d-block" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="cerrarModal" wire:keydown.escape="cerrarModal">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="backdrop-filter: blur(10px);">
                 <form wire:submit="guardar">
                     <div class="modal-header">
                         <h5 class="modal-title">
@@ -185,7 +185,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" wire:click="cerrarModal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar">
+                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); border: none;">
                             <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
                             <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
                         </button>

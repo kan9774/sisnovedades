@@ -1,13 +1,13 @@
 <div class="d-inline">
-    <button type="button" class="btn btn-outline-primary btn-ml ml-1" wire:click="abrir"
-        data-toggle="tooltip" title="Enviar novedades por correo">
+    <button type="button" class="btn btn-primary btn-ml ml-1" wire:click="abrir"
+        data-toggle="tooltip" title="Enviar novedades por correo" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); border: none;">
         <i class="fa-solid fa-envelopes-bulk"></i>
     </button>
 
-    <div class="modal fade" id="modalEnviarGuardia" tabindex="-1" wire:ignore.self>
-        <div class="modal-dialog modal-md">
-            <div class="modal-content">
-                <div class="modal-header">
+    <div class="modal fade" id="modalEnviarGuardia" tabindex="-1" wire:ignore.self style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+                <div class="modal-header" style="background-color: #eef2ff !important;">
                     <h5 class="modal-title">Enviar novedades por correo</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
@@ -52,10 +52,9 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
                         wire:loading.attr="disabled" wire:target="enviar">
-                        Cerrar
+                        Cancelar
                     </button>
-                    <button type="button" class="btn btn-primary" wire:click="enviar"
-                        wire:loading.attr="disabled" wire:target="enviar">
+                    <button type="button" class="btn btn-primary" wire:click="enviar" wire:loading.attr="disabled" wire:target="enviar" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;">
                         <span wire:loading.remove wire:target="enviar"><i class="fas fa-paper-plane"></i> Enviar</span>
                         <span wire:loading wire:target="enviar"><i class="fas fa-spinner fa-spin"></i> Enviando...</span>
                     </button>

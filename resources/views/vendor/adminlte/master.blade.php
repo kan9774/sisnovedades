@@ -64,11 +64,7 @@
 
     {{-- Livewire Styles --}}
     @if(config('adminlte.livewire'))
-        @if(intval(app()->version()) >= 7)
-            @livewireStyles
-        @else
-            <livewire:styles />
-        @endif
+        <livewire:styles />
     @endif
 
     {{-- Custom Stylesheets (post AdminLTE) --}}
@@ -128,13 +124,9 @@
     {{-- Extra Configured Plugins Scripts --}}
     @include('adminlte::plugins', ['type' => 'js'])
 
-    {{-- Livewire Script --}}
+    {{-- Livewire Scripts --}}
     @if(config('adminlte.livewire'))
-        @if(intval(app()->version()) >= 7)
-            @livewireScripts
-        @else
-            <livewire:scripts />
-        @endif
+        <livewire:scripts />
     @endif
 
     {{-- Custom Scripts --}}

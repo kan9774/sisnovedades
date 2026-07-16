@@ -363,13 +363,13 @@ return [
         // Vehículos
         [
             'text'   => 'Parque Vehículos',
-            'icon'   => 'fa-solid fa-screwdriver-wrench',
+            'icon'   => 'fa-solid fa-car',
             'can'    => 'viewAny-vehiculo', // Necesitas crear este Gate o usar otro
             'submenu' => [
                 [
                     'text'   => 'Vehículos',
                     'url'    => 'admin/vehiculos',
-                    'icon'   => 'fa-solid fa-truck-field-un',
+                    'icon'   => 'fa-solid fa-truck-monster',
                     'active' => ['admin/vehiculos*'],
                     'can'    => 'viewAny-vehiculo',
                 ],

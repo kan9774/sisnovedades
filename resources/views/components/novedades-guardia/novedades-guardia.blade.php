@@ -1,7 +1,7 @@
 <div>
     @if ($guardia->status === 'open' && $puedeOperarGuardia)
         <div class="d-flex justify-content-end mb-2">
-            <button type="button" class="btn btn-outline-info btn-sm" wire:click="abrirCrear">
+            <button type="button" class="btn btn-info btn-sm" wire:click="abrirCrear" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3); border: none;">
                 <i class="fas fa-plus-circle"></i> Registrar Tráfico
             </button>
         </div>
@@ -92,11 +92,11 @@
     @endif
 
     {{-- Modal --}}
-    <div class="modal fade" id="modalNovedad" tabindex="-1" wire:ignore.self>
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form wire:submit="guardar">
-                    <div class="modal-header">
+    <div class="modal fade" id="modalNovedad" tabindex="-1" wire:ignore.self style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="backdrop-filter: blur(10px);">
+                <form wire:submit="guardar" style="--bs-form-control-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);">
+                    <div class="modal-header" style="background-color: #eef2ff !important;">
                         <h5 class="modal-title">{{ $editandoId ? 'Editar Novedad' : 'Registrar Novedad' }}</h5>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
@@ -295,8 +295,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary"
                             data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled"
-                            wire:target="guardar">
+                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;">
                             <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
                             <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
                                 Guardando...</span>

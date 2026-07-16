@@ -67,7 +67,20 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
     // Admin
     Route::prefix('admin')->name('admin.')->group(function () {
 
-        Route::get('/', [AdminController::class, 'index'])->name('index');
+        Route::get('/', function () {
+            $dashboard = new App\Livewire\AdminDashboard();
+            $dashboard->mount();
+            
+            return view('admin.index', [
+                'guardiaHoy' => $dashboard->guardiaHoy,
+                'vehiculosEnRuta' => $dashboard->vehiculosEnRuta,
+                'totalConductores' => $dashboard->totalConductores,
+                'vuelosActivos' => $dashboard->vuelosActivos,
+                'conductoresAlertas' => $dashboard->conductoresAlertas,
+                'ultimosVuelos' => $dashboard->ultimosVuelos,
+                'ultimasNovedades' => [],
+            ]);
+        })->name('index');
 
         // Auditoría de acciones del sistema
         Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');

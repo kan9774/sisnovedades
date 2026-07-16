@@ -48,13 +48,38 @@ class EnviarNovedadGuardiaMail
 
     protected function registrarFallo(Throwable $exception): void
     {
+        $motivo = $this->clasificarMotivo($exception->getMessage());
+
         DB::table('guardia_correos_fallidos')->insert([
             'guardia_id' => $this->guardia->id,
             'user_id'    => $this->usuario->id,
             'email'      => $this->usuario->email,
-            'motivo'     => $exception->getMessage(),
+            'motivo'     => $motivo,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+    }
+
+    protected function clasificarMotivo(string $mensaje): string
+    {
+        $mensajeLower = strtolower($mensaje);
+
+        if (str_contains($mensajeLower, ['mailbox full', 'quota exceeded', 'mailbox unavailable', 'over quota', '552'])) {
+            return '⚠️ Casilla llena (quota excedida)';
+        }
+
+        if (str_contains($mensajeLower, ['unauthenticated', 'authentication required', '535', '5.7.1'])) {
+            return '❌ Error de autenticación SMTP';
+        }
+
+        if (str_contains($mensajeLower, ['connection', 'timeout', 'refused', 'timed out', '550'])) {
+            return '❌ Error de conexión SMTP';
+        }
+
+        if (str_contains($mensajeLower, ['invalid address', 'syntax', '553'])) {
+            return '❌ Dirección de correo inválida';
+        }
+
+        return '❓ ' . $mensaje;
     }
 }
