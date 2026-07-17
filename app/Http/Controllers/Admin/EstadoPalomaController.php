@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\EstadoPaloma;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class EstadoPalomaController extends Controller
@@ -13,7 +15,7 @@ class EstadoPalomaController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(): View
     {
         $this->authorize('viewAny', EstadoPaloma::class);
 
@@ -21,13 +23,13 @@ class EstadoPalomaController extends Controller
         return view('admin.palomar.estados.index', compact('estados'));
     }
 
-    public function create()
+    public function create(): View
     {
         $this->authorize('create', EstadoPaloma::class);
         return view('admin.palomar.estados.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $this->authorize('create', EstadoPaloma::class);
         $data = $request->validate([
@@ -44,13 +46,13 @@ class EstadoPalomaController extends Controller
             ->with('success', 'Estado creado correctamente.');
     }
 
-    public function edit(EstadoPaloma $estado)
+    public function edit(EstadoPaloma $estado): View
     {
         $this->authorize('update', $estado);
         return view('admin.palomar.estados.edit', compact('estado'));
     }
 
-    public function update(Request $request, EstadoPaloma $estado)
+    public function update(Request $request, EstadoPaloma $estado): RedirectResponse
     {
         $this->authorize('update', $estado);
         $data = $request->validate([
@@ -67,7 +69,7 @@ class EstadoPalomaController extends Controller
             ->with('success', 'Estado actualizado correctamente.');
     }
 
-    public function destroy(EstadoPaloma $estado)
+    public function destroy(EstadoPaloma $estado): RedirectResponse
     {
         $this->authorize('delete', $estado);
         if ($estado->palomas()->count() > 0) {

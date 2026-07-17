@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
@@ -25,7 +27,7 @@ class BackupController extends Controller
     /**
      * Mostrar el panel de gestión de backups.
      */
-    public function index()
+    public function index(): View
     {
         $backups = $this->getBackups();
 
@@ -35,7 +37,7 @@ class BackupController extends Controller
     /**
      * Crear un backup manualmente.
      */
-    public function create(Request $request)
+    public function create(Request $request): RedirectResponse
     {
         $result = Artisan::call('backup:run', [
             '--only-db' => true,
@@ -53,7 +55,7 @@ class BackupController extends Controller
     /**
      * Eliminar un backup.
      */
-    public function delete($filename)
+    public function delete(string $filename): RedirectResponse
     {
         $disk = Storage::disk('backup');
 
@@ -68,7 +70,7 @@ class BackupController extends Controller
     /**
      * Ejecutar la limpieza automática de backups viejos.
      */
-    public function cleanup()
+    public function cleanup(): RedirectResponse
     {
         Artisan::call('backup:clean');
 
@@ -79,7 +81,7 @@ class BackupController extends Controller
     /**
      * Obtener la lista de backups desde el disk.
      */
-    private function getBackups()
+    private function getBackups(): array
     {
         $disk = Storage::disk('backup');
         $files = $disk->allFiles();
