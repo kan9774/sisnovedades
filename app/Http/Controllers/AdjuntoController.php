@@ -11,16 +11,20 @@ use Illuminate\Support\Facades\Storage;
 
 class AdjuntoController extends Controller
 {
-
-    public function download(Guard $guardia, News $novedad, Attach $adjunto)
-    {
-        return Storage::disk('guardias')->download($adjunto->file_path, $adjunto->file_name);
-    }
-
+    /**
+     * Ver un adjunto (preview).
+     * Solo puede verlo quien tenga relación con la guardia.
+     */
     public function view(Guard $guardia, News $novedad, Attach $adjunto)
     {
+        // Validar integridad de las relaciones
         abort_if($novedad->guard_id !== $guardia->id, 404);
         abort_if($adjunto->news_id !== $novedad->id, 404);
+
+        // Solo miembros de la guardia o admins pueden ver adjuntos
+        if (! auth()->user()->isAdmin() && ! $guardia->esMiembro(auth()->user())) {
+            abort(403, 'No tenés permisos para ver este adjunto.');
+        }
 
         $url = Storage::disk('guardias')->url($adjunto->file_path);
 

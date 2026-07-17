@@ -190,6 +190,7 @@
                     </div>
                     <div class="tab-pane" id="tab-salidas" role="tabpanel">
                         <livewire:salidas-vehiculo :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia" :key="'salidas-vehiculo-' . $guardia->id" />
+                        <livewire:salidas-pendientes :guardia="$guardia" :key="'salidas-pendientes-' . $guardia->id" />
                     </div>
                     <div class="tab-pane" id="tab-personal" role="tabpanel">
                         <livewire:novedades-personal :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia" :key="'novedades-personal-' . $guardia->id" />

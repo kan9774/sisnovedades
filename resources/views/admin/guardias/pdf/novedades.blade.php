@@ -293,7 +293,22 @@
     </div>
     {{-- Salidas de Vehículos --}}
     @php
-        $todasSalidas = $guardia->salidasVehiculos;
+        // Salidas que se originaron en esta guardia
+        $misSalidas = $guardia->salidasVehiculos()
+            ->with(['vehiculo', 'conductor', 'boletaCierre'])
+            ->get();
+
+        // Salidas originadas en OTRA guardia pero cuya boleta de cierre
+        // (regreso del vehículo) se registró en esta guardia
+        $retornosDeOtrasGuardias = \App\Models\SalidaVehiculo::whereHas('boletaCierre', function ($q) use ($guardia) {
+                $q->where('guardia_id', $guardia->id);
+            })
+            ->where('guardia_id', '!=', $guardia->id)
+            ->with(['vehiculo', 'conductor', 'guardia', 'boletaCierre'])
+            ->get();
+
+        $todasSalidas = $misSalidas->concat($retornosDeOtrasGuardias);
+
         $tiposCombustible = [
             'gas_oil' => 'GAS OIL',
             'nafta' => 'NAFTA',
@@ -311,22 +326,52 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:7%">Hora Sale</th>
-                        <th style="width:7%">Hora Entra</th>
-                        <th style="width:8%">Kms. Sale</th>
-                        <th style="width:8%">Kms. Entra</th>
-                        <th style="width:8%">Kms Rec.</th>
+                        <th style="width:5%">Hora Sale</th>
+                        <th style="width:5%">Fecha Sale</th>
+                        <th style="width:4%">Hora Entra</th>
+                        <th style="width:4%">Fecha Entra</th>
+                        <th style="width:8%">Estado</th>
+                        <th style="width:7%">Kms. Sale</th>
+                        <th style="width:7%">Kms. Entra</th>
+                        <th style="width:7%">Kms Rec.</th>
                         <th style="width:9%">Lts. {{ $label }}</th>
                         <th style="width:9%">Mat.</th>
-                        <th style="width:20%">Conductor</th>
-                        <th style="width:24%">Comisión</th>
+                        <th style="width:21%">Conductor</th>
+                        <th style="width:14%">Comisión</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($salidas as $salida)
                         <tr>
                             <td class="text-center">{{ optional($salida->hora_sale)->format('Hi') }}</td>
-                            <td class="text-center">{{ optional($salida->hora_entra)->format('Hi') ?? '-' }}</td>
+                            <td class="text-center">{{ $salida->guardia->date->format('d/m') }}</td>
+                            <td class="text-center">
+                                @if ($salida->boletaCierre)
+                                    {{ optional($salida->boletaCierre->hora_entra)->format('Hi') }}
+                                @elseif ($salida->hora_entra)
+                                    {{ optional($salida->hora_entra)->format('Hi') }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @if ($salida->boletaCierre)
+                                    {{ optional($salida->boletaCierre->fecha_entra)->format('d/m') }}
+                                @elseif ($salida->hora_entra)
+                                    {{ $salida->guardia->date->format('d/m') }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @if ($salida->boletaCierre)
+                                    <span style="color:green; font-weight:bold;">CERRADA</span><br><small></small>
+                                @elseif ($salida->hora_entra && $salida->kms_entra)
+                                    <span style="color:green; font-weight:bold;">CERRADA</span><br><small>Reg. en salida</small>
+                                @else
+                                    <span style="color:red; font-weight:bold;">PENDIENTE</span>
+                                @endif
+                            </td>
                             <td class="text-center">{{ $salida->kms_sale ?? '-' }}</td>
                             <td class="text-center">{{ $salida->kms_entra ?? '-' }}</td>
                             <td class="text-center">{{ $salida->kms_recorridos ?? '-' }}</td>
@@ -338,7 +383,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="sin-novedades">S/N.</td>
+                            <td colspan="12" class="sin-novedades">S/N.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -417,9 +462,7 @@
                     El Ofl. de Día de la {{ config('organizacion.nombre') }}
                 </td>
             </tr>
-            <tr>
-                <td style="height: 20px; border: none;"></td>
-            </tr>
+            
             <tr>
                 <td style="width: 25%; font-style: italic; vertical-align: bottom; text-align: right; border: none;">
                     @if ($guardia->escribiente->first())
@@ -427,7 +470,7 @@
                     @endif
                 </td>
                 <td style="width: 50%; border: none;"></td>
-                <td colspan="3" style="text-align: left; padding-left: 40px; border: none; font-size: 11px;">
+                <td colspan="3" style="text-align: left; padding-left: 35px; border: none; font-size: 11px;">
                     {{ strtoupper($guardia->oficial->grade) }}<br>
                     <div style="border-top: 1px solid #000; width: 150px;  margin-bottom: 3px;"></div>
                     <p style="text-align: center; font-size: 11px;">

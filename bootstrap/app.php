@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Headers de seguridad en todas las respuestas
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // Redirige visitantes (rol bajo) del backend
         $middleware->append(\App\Http\Middleware\RedirectVisitante::class);
 
         $middleware->alias([

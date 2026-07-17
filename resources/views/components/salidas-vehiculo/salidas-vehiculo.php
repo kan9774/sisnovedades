@@ -1,10 +1,10 @@
 <?php
 
+use App\Models\BoletaCierre;
 use App\Models\Conductor;
 use App\Models\Guard;
 use App\Models\SalidaVehiculo;
 use App\Models\Vehiculo;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -19,6 +19,15 @@ new class extends Component
 
     public ?int $editandoId = null;
     public bool $showModal = false;
+
+    // Boleta de cierre
+    public ?int $boletaSalidaId = null;
+    public bool $showBoletaModal = false;
+    public string $boleta_fecha_entra = '';
+    public string $boleta_hora_entra = '';
+    public string $boleta_kms_entra = '';
+    public string $boleta_observaciones = '';
+    public ?SalidaVehiculo $salida = null;
 
     public string $vehiculo_id = '';
     public string $conductor_id = '';
@@ -35,34 +44,80 @@ new class extends Component
         $this->puedeOperarGuardia = $puedeOperarGuardia;
     }
 
-    #[Computed]
-    public function vehiculos()
+    public function getVehiculosProperty()
     {
         return Vehiculo::where('activo', true)->orderBy('matricula')->get();
     }
 
-    #[Computed]
-    public function conductores()
+    public function getConductoresProperty()
     {
         return Conductor::where('activo', true)->orderBy('primer_apellido')->get();
     }
 
-    #[Computed]
-    public function salidas()
+    /**
+     * Cache en memoria (por request) de la colección combinada, para que
+     * getSalidasProperty() y getResumenCombustibleProperty() no disparen
+     * las mismas queries dos veces cada una.
+     */
+    protected ?\Illuminate\Support\Collection $todasSalidasCache = null;
+
+    /**
+     * Colección combinada: salidas que se originaron en esta guardia
+     * + salidas de OTRA guardia cuya boleta de cierre (regreso) se
+     * registró en esta guardia.
+     */
+    protected function todasSalidasCollection()
     {
-        return $this->guardia->salidasVehiculos()
-            ->with(['vehiculo', 'conductor'])
-            ->orderBy('hora_sale')
-            ->paginate(10);
+        if ($this->todasSalidasCache !== null) {
+            return $this->todasSalidasCache;
+        }
+
+        $misSalidas = $this->guardia->salidasVehiculos()
+            ->with(['vehiculo', 'conductor', 'boletaCierre', 'guardia'])
+            ->get();
+
+        $retornos = SalidaVehiculo::whereHas('boletaCierre', function ($q) {
+                $q->where('guardia_id', $this->guardia->id);
+            })
+            ->where('guardia_id', '!=', $this->guardia->id)
+            ->with(['vehiculo', 'conductor', 'boletaCierre', 'guardia'])
+            ->get();
+
+        return $this->todasSalidasCache = $misSalidas->concat($retornos)->sortBy('hora_sale')->values();
     }
 
-    #[Computed]
-    public function resumenCombustible()
+    public function getSalidasProperty()
     {
-        return $this->guardia->salidasVehiculos()
-            ->selectRaw('tipo_combustible, SUM(kms_recorridos) as total_kms, SUM(litros) as total_litros')
+        $todas = $this->todasSalidasCollection();
+        $perPage = 10;
+        $page = $this->getPage();
+
+        $items = $todas->forPage($page, $perPage)->values();
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $todas->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'pageName' => 'page']
+        );
+    }
+
+    public function getResumenCombustibleProperty()
+    {
+        return $this->todasSalidasCollection()
             ->groupBy('tipo_combustible')
-            ->get();
+            ->map(fn ($grupo, $tipo) => (object) [
+                'tipo_combustible' => $tipo,
+                'total_kms' => $grupo->sum('kms_recorridos'),
+                'total_litros' => $grupo->sum('litros'),
+            ])
+            ->values();
+    }
+
+    public function refreshSalidas(): void
+    {
+        // Solo un placeholder para el wire:poll
     }
 
     public function abrirCrear(): void
@@ -108,14 +163,16 @@ new class extends Component
             'hora_sale'        => 'required|date_format:H:i',
             'hora_entra'       => 'nullable|date_format:H:i|after:hora_sale',
             'kms_sale'         => 'nullable|integer|min:0',
-            'kms_entra'        => 'nullable|integer|min:0|gt:kms_sale',
+            'kms_entra'        => 'nullable|integer|min:0|gte:kms_sale',
             'comision'         => 'required|string',
         ];
 
         $vehiculo = Vehiculo::find($this->vehiculo_id);
         if ($vehiculo && !$vehiculo->sin_cuentakilometros) {
             $rules['kms_sale'] = 'required|integer|min:0';
-            $rules['kms_entra'] = 'required|integer|min:0|gt:kms_sale';
+            // kms_entra es opcional: el vehículo puede no haber vuelto aún
+            // Pero si se ingresa, debe ser mayor o igual al km de salida
+            $rules['kms_entra'] = 'nullable|integer|min:0|gte:kms_sale';
         }
 
         $data = $this->validate($rules);
@@ -135,7 +192,6 @@ new class extends Component
         }
 
         $this->cerrarModal();
-        unset($this->salidas, $this->resumenCombustible);
     }
 
     public function eliminar(int $id): void
@@ -144,8 +200,77 @@ new class extends Component
         $this->authorize('delete', $salida);
 
         $salida->delete();
-        unset($this->salidas, $this->resumenCombustible);
 
         $this->dispatch('guardia-contador-actualizado', tipo: 'salidas', guardiaId: $this->guardia->id);
+    }
+
+    // ==================== BOLETA DE CIERRE ====================
+
+    public function abrirBoleta(int $salidaId): void
+    {
+        $this->resetValidation();
+        $this->salida = SalidaVehiculo::with(['vehiculo', 'conductor', 'guardia', 'boletaCierre'])->findOrFail($salidaId);
+        $this->authorize('update', $this->salida);
+        $this->boletaSalidaId = $salidaId;
+        $this->boleta_fecha_entra = ''; // se llena automáticamente si ya existe
+        $this->boleta_hora_entra = '';
+        $this->boleta_kms_entra = '';
+        $this->boleta_observaciones = '';
+
+        // Si ya existe una boleta, cargar sus datos
+        $boleta = BoletaCierre::where('salida_id', $salidaId)->first();
+        if ($boleta) {
+            $this->boleta_fecha_entra = $boleta->fecha_entra->format('Y-m-d');
+            $this->boleta_hora_entra = $boleta->hora_entra?->format('H:i') ?? '';
+            $this->boleta_kms_entra = (string) ($boleta->kms_entra ?? '');
+            $this->boleta_observaciones = $boleta->observaciones ?? '';
+        }
+
+        $this->showBoletaModal = true;
+    }
+
+    public function cerrarBoletaModal(): void
+    {
+        $this->showBoletaModal = false;
+        $this->boletaSalidaId = null;
+        $this->salida = null;
+    }
+
+    public function guardarBoleta(): void
+    {
+        // Obtener la salida para validar kms_sale
+        $salida = SalidaVehiculo::findOrFail($this->boletaSalidaId);
+        $this->authorize('update', $salida);
+
+        $rules = [
+            'boleta_fecha_entra' => 'nullable|date',
+            'boleta_hora_entra' => 'nullable|date_format:H:i',
+            'boleta_kms_entra' => 'nullable|integer|min:0',
+            'boleta_observaciones' => 'nullable|string|max:500',
+        ];
+
+        // Si tiene kms_sale y se ingresa un valor, validar que kms_entra sea mayor o igual
+        if ($salida->kms_sale !== null && $this->boleta_kms_entra !== '') {
+            $rules['boleta_kms_entra'] .= '|gte:' . $salida->kms_sale;
+        }
+
+        $data = $this->validate($rules);
+        $data['salida_id'] = $this->boletaSalidaId;
+
+        // Crear o actualizar la boleta
+        $boleta = BoletaCierre::updateOrCreate(
+            ['salida_id' => $this->boletaSalidaId],
+            [
+                'fecha_entra' => $data['boleta_fecha_entra'],
+                'hora_entra' => $data['boleta_hora_entra'],
+                'kms_entra' => $data['boleta_kms_entra'],
+                'observaciones' => $data['boleta_observaciones'] ?? null,
+            ]
+        );
+
+        // La relación boleta->salida recalcula automáticamente kms_recorridos y litros
+
+        $this->dispatch('salida-actualizada');
+        $this->cerrarBoletaModal();
     }
 };

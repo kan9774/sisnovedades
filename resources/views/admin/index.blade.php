@@ -58,7 +58,10 @@
         </div>
     </div>
 
-    {{-- 2. DISTRIBUCIÓN DE PANELES CENTRALES --}}
+    {{-- 2. GRÁFICOS DEL DASHBOARD --}}
+    <livewire:dashboard-charts />
+
+    {{-- 3. DISTRIBUCIÓN DE PANELES CENTRALES --}}
     <div class="row">
         
         {{-- COLUMNA IZQUIERDA (ANCHEZA: col-md-7) --}}

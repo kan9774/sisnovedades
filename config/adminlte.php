@@ -482,6 +482,13 @@ return [
             'active' => ['admin/logs*'],
             'can'    => 'viewAny-log',
         ],
+        [
+            'text'   => 'Backups',
+            'url'    => 'admin/backup',
+            'icon'   => 'fas fa-database',
+            'active' => ['admin/backup*'],
+            'can'    => 'viewAny-log',
+        ],
         // Configuración
         // ['header' => 'C U E N T A'],
         // [
@@ -562,12 +569,12 @@ return [
             ],
         ],
         'Chartjs' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js',
+                    'location' => '//cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
                 ],
             ],
         ],

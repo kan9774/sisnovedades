@@ -97,6 +97,11 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('delete-attach', fn(User $user) => $user->isAdmin());
 
+        // Gates para gestión de backups (solo admins)
+        Gate::define('viewAny-backup', fn(User $user) => $user->isAdmin());
+        Gate::define('create-backup', fn(User $user) => $user->isAdmin());
+        Gate::define('delete-backup', fn(User $user) => $user->isAdmin());
+
 
         // Registrar políticas 
         Gate::policy(Guard::class, GuardiaPolicy::class);

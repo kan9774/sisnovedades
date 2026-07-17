@@ -24,12 +24,13 @@ class SalidaVehiculoPolicy
 
     public function update(User $user, SalidaVehiculo $salida): bool
     {
-        // Solo admin, capitán u oficial pueden editar
-        return $user->isAdmin() || $user->isCapitan() || $user->isOficialDia();
+        // Escribiente (registra), capitán, admin y oficial pueden editar
+        return $user->isAdmin() || $user->isCapitan() || $user->isOficialDia() || $user->isEscribiente();
     }
 
     public function delete(User $user, SalidaVehiculo $salida): bool
     {
-        return $user->isAdmin() || $user->isCapitan() || $user->isOficialDia();
+        // Escribiente (registra), capitán, admin y oficial pueden eliminar
+        return $user->isAdmin() || $user->isCapitan() || $user->isOficialDia() || $user->isEscribiente();
     }
 }

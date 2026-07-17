@@ -1,6 +1,27 @@
-# Notas del día — Livewire + Dashboard
+# Notas del día — Livewire + Dashboard + Backup
 
 ## ✅ Lo que hicimos hoy
+
+### 6. Sistema de Backup con Panel Livewire
+- **Paquete:** `spatie/laravel-backup` v10.3 instalado
+- **Configuración:**
+  - `config/backup.php` — nombre 'novedades', destino disk `backup`, rotación 7 días
+  - `config/filesystems.php` — nuevo disk `backup` → `storage/app/backups`
+  - `config/database.php` — `dump_binary_path` apuntando a Laragon MySQL
+- **Componente Livewire:** `app/Livewire/BackupManager.php`
+  - `quickCreate()` — inicia backup en segundo plano
+  - `deleteBackup()` — elimina un backup
+  - `runCleanup()` — limpia backups viejos
+  - `loadBackups()` — lista backups con fecha, tamaño
+- **Vista:** `resources/views/livewire/backup-manager.blade.php`
+  - Tarjeta acciones rápidas (Crear, Limpiar, Refrescar)
+  - Tabla con lista de backups
+  - Info sobre rotación y almacenamiento
+- **Controlador:** `app/Http/Controllers/Admin/BackupController.php`
+- **Vista admin:** `resources/views/admin/backup.blade.php`
+- **Rutas:** GET/POST `/admin/backup` en `routes/web.php`
+- **Menú AdminLTE:** agregado item 'Backups' en sección Auditoría
+- **Test:** Backup exitoso → `storage/app/backups/B.Com.N°1/2026-07-16-14-58-40.zip`
 
 ### 1. Tabla de Salidas de Vehículos — actualizada
 - **Archivo:** `resources/views/admin/index.blade.php`
@@ -65,57 +86,107 @@ resources/views/components/⚡dashboard-salidas.blade.php
 - Solución: recargar página (Ctrl+Shift+R)
 - No es bug, es comportamiento normal de sesión
 
-## 📋 Para mañana
+### 7. Páginas de Error Personalizadas
+- **Vistas:** `resources/views/errors/` con estilo AdminLTE
+- **403** — "No tenés permisos" (icono candado, color warning)
+- **404** — "Página no encontrada" (icono lupa, color danger)
+- **500** — "Error interno del servidor" (icono servidor, color primary)
+- **419** — "Sesión expirada" (icono reloj, color info)
+- Todas con botón "Volver al Inicio" + "Volver"
+- Responsive para mobile
 
-### Prioridad 0: Sistema de Backup con Panel Livewire
-- **Motor:** `spatie/laravel-backup` (CLI, sin UI oficial)
-- **Interfaz:** Crear componente Livewire `BackupManager` (panel propio)
-- **Funcionalidades del panel:**
-  - Botón "Crear Backup Ahora" (ejecuta `backup:run`)
-  - Tabla con lista de backups (fecha, tamaño, tipo)
-  - Botón "Eliminar" en cada backup
-  - Barra de progreso / estado (completado, en curso)
-- **Rotación:** Configurar `config/backup.php` para borrar los viejos automáticamente (ej: mantener 7 días)
-- **Instalación:**
-  ```bash
-  composer require spatie/laravel-backup
-  php artisan vendor:publish --provider "Spatie\Backup\BackupServiceProvider"
-  ```
-- **Automatización:**
-  - Configurar Tarea Programada (Task Scheduler en Windows) para `php artisan backup:run` diario
+### 8. Auditoría de Seguridad
 
-### Prioridad 1: Personalizar páginas de error
-- Crear `resources/views/errors/` con vistas personalizadas
-- Estilo AdminLTE (consistente con el sistema)
-- Iconos FontAwesome
-- Botón "Volver al inicio"
+**Resultados del escaneo:**
 
-**Errores a personalizar (orden de prioridad):**
-1. **403** — "No tenés permisos" (más común en el sistema)
-2. **404** — "Página no encontrada"
-3. **500** — "Error interno del servidor"
-4. **419** — "Sesión expiró" (ya redirige, pero dejar página bonita)
+| Chequeo | Estado | Notas |
+|---------|--------|-------|
+| `composer audit` | ✅ OK | Sin vulnerabilidades conocidas |
+| SQL injection | ✅ OK | Solo Eloquent, sin queries raw |
+| XSS | ✅ OK | Solo vendor/AdminLTE usa `!!` |
+| .env accesible | ✅ OK | No expuesto desde web |
+| Uploads mime | ✅ OK | Whitelist: pdf, jpg, png, gif, doc, xls, ppt, txt |
+| Throttle login | ✅ OK | 60 intentos/min (Fortify) |
+| Session http_only | ✅ OK | Configurado |
+| CSRF | ✅ OK | Laravel built-in |
+| RedirectVisitante | ✅ OK | Bloquea rol 'visitante' del admin |
+| DB prohibitive cmds | ✅ OK | `prohibitDestructiveCommands` en prod |
+| Password policy | ✅ OK | 12 chars + symbols en prod |
+| `eval/exec/shell_exec` | ✅ OK | Ninguno encontrado |
+| Hardcoded creds | ✅ OK | Ninguno encontrado |
 
-**Diseño propuesto:**
-- Fondo claro AdminLTE
-- Icono grande FontAwesome centrado
-- Título del error
-- Descripción breve en español
-- Botón "Volver al inicio" con enlace a `/admin`
-- Logo del sistema arriba
+**Mejoras implementadas:**
 
-### Prioridad 2: Auditoría de Seguridad
-- **Paquetes vulnerables:** Ejecutar `composer audit` para detectar dependencias con fallos de seguridad conocidos.
-- **Middleware activo:** Revisar `bootstrap/app.php` (y `app/Http/Kernel.php` si existe):
-  - `VerifyCsrfToken`: Protege contra ataques CSRF (obligatorio).
-  - `throttle`: Rate limiting (evita fuerza bruta en login/API).
-  - `RedirectVisitante`: Evita acceso a invitados.
-  - `EnsureEmailIsVerifiedIfEnabled`: Verifica emails.
-- **Protección XSS:** Verificar que Blade use `{{ }}` (automático) y no `!!` (peligroso).
-- **SQL Injection:** Verificar que no existan consultas raw (`DB::select`, etc.) y se use Eloquent.
-- **Livewire Security:** Revisar `config/livewire.php` (max upload size, etc.).
-- **Archivos sensibles:** Verificar que `.env` y `storage` no sean accesibles desde el navegador.
-- **CORS:** Verificar si hay rutas API expuestas sin protección.
+1. **BackupController** — Agregada verificación `isAdmin()` en constructor
+2. **Gates para backup** — `viewAny-backup`, `create-backup`, `delete-backup` en AppServiceProvider
+3. **AdjuntoController** — Agregada verificación `esMiembro()` para prevenir IDOR
+4. **SecurityHeaders middleware** — Nuevas cabeceras en todas las respuestas:
+   - `X-XSS-Protection: 1; mode=block`
+   - `X-Content-Type-Options: nosniff`
+   - `X-Frame-Options: SAMEORIGIN`
+   - `Referrer-Policy: strict-origin-when-cross-origin`
+   - `Content-Security-Policy: frame-ancestors 'self'`
+   - `Strict-Transport-Security` en producción
+
+**Notas pendientes:**
+- ⚠️ Ruta `/guardias-publicas/{guardia}/pdf-preview` es pública (intencional, solo guardias cerradas)
+- ⚠️ Considerar agregar CSP más restrictivo en producción
+
+### 9. Backup Diario Automático
+- **Archivo:** `backup-diario.bat` — script para Windows Task Scheduler
+- **Comando:** `php artisan backup:run --only-db`
+- **Log:** `storage/logs/backup-scheduler.log` con éxito/error
+- **Frecuencia recomendada:** Diario a las 2:00 AM
+
+### 10. Dashboard con Gráficos Chart.js
+- **Componente:** `app/Livewire/DashboardCharts.php`
+- **Vista:** `resources/views/livewire/dashboard-charts.blade.php`
+- **4 Gráficos interactivos:**
+  1. **Actividad Semanal** (líneas) — Salidas vs Vuelos últimos 7 días
+  2. **Estado de Conductores** (dona) — Activos vs Inactivos
+  3. **Vehículos en Ruta** (barras) — Hoy: en ruta vs finalizados
+  4. **Novedades por Tipo** (barras horizontales) — Este mes
+- **Poll:** Actualización automática cada 30 segundos
+- **Configuración:** Chart.js habilitado en `config/adminlte.php` (v4.4.1 CDN)
+- **Integrado:** Agregado en `resources/views/admin/index.blade.php`
+
+### 📋 Pendientes / Próximos pasos
+
+### Opción A: Tarea programada para backups automáticos
+- Configurar Task Scheduler en Windows para ejecutar `backup:run` diario
+- Script batch + tarea programada (cada noche a las 2am)
+
+### Opción B: Mejorar el dashboard
+- Agregar gráficos con Chart.js (salidas, novedades, guardias)
+- Mejorar visualización de alertas de conductores
+- Timeline de novedades en tiempo real
+
+### Opción C: Mejorar la landing pública
+- Componente Livewire para mostrar novedades cerradas
+- Filtros por fecha/guardia
+- Búsqueda en novedades públicas
+
+### Opción D: Mejoras generales
+- Logs de actividad más detallados
+- Notificaciones push / badge en navbar
+- Export a Excel/PDF de reportes
+- Mejorar la página de correos fallidos (más info, reintentos individuales)
+
+### Opción E: Hardening adicional
+- CSP más restrictivo en producción
+- Rate limiting en rutas sensibles
+- Logging de intentos de acceso no autorizado
+- 2FA obligatorio para admins
+
+### 7. Boleta de Cierre (para salidas que cruzan días)
+- **Problema resuelto:** Cuando un vehículo sale un día y vuelve otro, la salida quedaba atada a la guardia del día de salida y no se podían calcular kms_recorridos/litros.
+- **Solución:** Nueva tabla `boletas_cierre` independiente que se llena cuando el conductor entrega el vehículo.
+- **Estructura:** `salida_id`, `fecha_entra`, `hora_entra`, `kms_entra`, `observaciones`
+- **Modelo `BoletaCierre`:** Al guardar, actualiza automáticamente `kms_recorridos` y `litros` de la salida original.
+- **Modelo `SalidaVehiculo`:** Nueva relación `hasOne(BoletaCierre::class)`, attributes `tiene_boleta` y `estado`.
+- **Livewire `salidas-vehiculo`:** Nuevo modal "Boleta de Cierre" con campos: fecha/hora regreso, km al regreso, observaciones. Preview del cálculo automático.
+- **Tabla de salidas:** Nueva columna "Estado" (⚠️ Pendiente / ✅ Cerrada) + botones de acción.
+- **PDF `novedades.blade.php`:** Muestra fecha/hora completa de regreso, estado de la salida, observaciones de la boleta.
 
 ## 🔧 Comandos útiles para hoy
 

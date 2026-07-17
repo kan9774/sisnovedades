@@ -62,6 +62,30 @@ class SalidaVehiculo extends Model
         return $this->belongsTo(Conductor::class)->withTrashed();
     }
 
+    /**
+     * Relación: una salida puede tener una boleta de cierre.
+     */
+    public function boletaCierre()
+    {
+        return $this->hasOne(BoletaCierre::class, 'salida_id');
+    }
+
+    /**
+     * Attribute: devuelve true si la salida tiene retorno registrado (boleta o datos en la salida).
+     */
+    public function getTieneBoletaAttribute(): bool
+    {
+        return $this->boletaCierre !== null || ($this->hora_entra !== null && $this->kms_entra !== null);
+    }
+
+    /**
+     * Attribute: estado de la salida ('pendiente' o 'cerrada').
+     */
+    public function getEstadoAttribute(): string
+    {
+        return $this->tiene_boleta ? 'cerrada' : 'pendiente';
+    }
+
     // Cálculo automático de kms y litros
     protected static function booted()
     {

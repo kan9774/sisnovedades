@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\AdjuntoController;
 use App\Http\Controllers\Admin\EstadoPalomaController;
 use App\Http\Controllers\NovedadesController;
@@ -84,6 +85,12 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
 
         // Auditoría de acciones del sistema
         Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
+
+        // Gestión de backups
+        Route::get('/backup',      [BackupController::class, 'index'])->name('backup.index');
+        Route::post('/backup',      [BackupController::class, 'create'])->name('backup.create');
+        Route::post('/backup/clean', [BackupController::class, 'cleanup'])->name('backup.cleanup');
+        Route::post('/backup/{filename}/delete', [BackupController::class, 'delete'])->name('backup.delete');
 
         // Notificaciones
         Route::prefix('notificaciones')->name('notificaciones.')->group(function () {
