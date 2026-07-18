@@ -2,13 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Mail\GuardiaNovedadesMail;
-use App\Models\Guard;
 use App\Models\User;
+use App\Models\Guard;
+use App\Mail\GuardiaNovedadesMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -29,14 +30,31 @@ class EnviarNovedadGuardiaMail
         public Guard $guardia,
         public User $usuario,
         public string $nombreRemitente,
+        public bool $incluirAdjuntos = false,
     ) {}
 
     public function handle(): bool
     {
         try {
-            Mail::to($this->usuario->email)->send(
-                new GuardiaNovedadesMail($this->guardia, $this->nombreRemitente)
+            $sentMessage = Mail::to($this->usuario->email)->send(
+                new GuardiaNovedadesMail($this->guardia, $this->nombreRemitente, $this->incluirAdjuntos)
             );
+
+            // Laravel 13 (Symfony Mailer) devuelve el SentMessage con el
+            // Message-ID real, que se usa para correlacionar rebotes
+            // diferidos (DSN) leídos después por mail:procesar-rebotes.
+            $messageId = $sentMessage?->getMessageId();
+
+            if ($messageId) {
+                DB::table('guardia_correos_enviados')->insert([
+                    'guardia_id' => $this->guardia->id,
+                    'user_id'    => $this->usuario->id,
+                    'email'      => $this->usuario->email,
+                    'message_id' => $messageId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
             return true;
         } catch (Throwable $exception) {
@@ -64,19 +82,19 @@ class EnviarNovedadGuardiaMail
     {
         $mensajeLower = strtolower($mensaje);
 
-        if (str_contains($mensajeLower, ['mailbox full', 'quota exceeded', 'mailbox unavailable', 'over quota', '552'])) {
+        if (Str::contains($mensajeLower, ['mailbox full', 'quota exceeded', 'mailbox unavailable', 'over quota', '552'])) {
             return '⚠️ Casilla llena (quota excedida)';
         }
 
-        if (str_contains($mensajeLower, ['unauthenticated', 'authentication required', '535', '5.7.1'])) {
+        if (Str::contains($mensajeLower, ['unauthenticated', 'authentication required', '535', '5.7.1'])) {
             return '❌ Error de autenticación SMTP';
         }
 
-        if (str_contains($mensajeLower, ['connection', 'timeout', 'refused', 'timed out', '550'])) {
+        if (Str::contains($mensajeLower, ['connection', 'timeout', 'refused', 'timed out', '550'])) {
             return '❌ Error de conexión SMTP';
         }
 
-        if (str_contains($mensajeLower, ['invalid address', 'syntax', '553'])) {
+        if (Str::contains($mensajeLower, ['invalid address', 'syntax', '553'])) {
             return '❌ Dirección de correo inválida';
         }
 

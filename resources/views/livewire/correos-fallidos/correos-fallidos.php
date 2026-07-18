@@ -42,12 +42,18 @@ new class extends Component
         $usuario = User::findOrFail($fallo->user_id);
         $nombreRemitente = Auth::user()->name . ' ' . Auth::user()->last_name;
 
-        EnviarNovedadGuardiaMail::dispatchSync($this->guardia, $usuario, $nombreRemitente);
+        $enviado = EnviarNovedadGuardiaMail::dispatchSync($this->guardia, $usuario, $nombreRemitente);
 
-        DB::table('guardia_correos_fallidos')->where('id', $id)->update([
-            'resuelto_at' => now(),
-            'updated_at'  => now(),
-        ]);
+        if ($enviado) {
+            DB::table('guardia_correos_fallidos')->where('id', $id)->update([
+                'resuelto_at' => now(),
+                'updated_at'  => now(),
+            ]);
+
+            session()->flash('success', "Correo reenviado correctamente a {$fallo->email}.");
+        } else {
+            session()->flash('error', "El reintento a {$fallo->email} volvió a fallar. Revisá el nuevo registro en la lista.");
+        }
 
         unset($this->fallos);
         $this->dispatch('correos-fallidos-actualizado');
