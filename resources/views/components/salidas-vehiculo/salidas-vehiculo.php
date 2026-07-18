@@ -5,6 +5,7 @@ use App\Models\Conductor;
 use App\Models\Guard;
 use App\Models\SalidaVehiculo;
 use App\Models\Vehiculo;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -44,12 +45,14 @@ new class extends Component
         $this->puedeOperarGuardia = $puedeOperarGuardia;
     }
 
-    public function getVehiculosProperty()
+    #[Computed]
+    public function vehiculos()
     {
         return Vehiculo::where('activo', true)->orderBy('matricula')->get();
     }
 
-    public function getConductoresProperty()
+    #[Computed]
+    public function conductores()
     {
         return Conductor::where('activo', true)->orderBy('primer_apellido')->get();
     }
@@ -272,5 +275,10 @@ new class extends Component
 
         $this->dispatch('salida-actualizada');
         $this->cerrarBoletaModal();
+    }
+
+    public function render()
+    {
+        return view('components.salidas-vehiculo.salidas-vehiculo');
     }
 };

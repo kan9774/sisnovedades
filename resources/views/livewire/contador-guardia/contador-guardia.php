@@ -30,4 +30,9 @@ new class extends Component
             unset($this->total);
         }
     }
+
+    public function render()
+    {
+        return view('livewire.contador-guardia.contador-guardia');
+    }
 };

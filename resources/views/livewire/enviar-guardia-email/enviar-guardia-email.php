@@ -88,4 +88,9 @@ new class extends Component
 
         $this->dispatch('novedades-enviadas');
     }
+
+    public function render()
+    {
+        return view('livewire.enviar-guardia-email.enviar-guardia-email');
+    }
 };

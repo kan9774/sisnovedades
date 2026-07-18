@@ -55,4 +55,9 @@ new class extends Component
     {
         return $this->guardia->novedadesPersonal()->orderBy('hora')->paginate(8);
     }
+
+    public function render()
+    {
+        return view('components.novedades-personal.novedades-personal');
+    }
 };

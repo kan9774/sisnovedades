@@ -66,4 +66,9 @@ new class extends Component
         unset($this->fallos);
         $this->dispatch('correos-fallidos-actualizado');
     }
+
+    public function render()
+    {
+        return view('livewire.correos-fallidos.correos-fallidos');
+    }
 };

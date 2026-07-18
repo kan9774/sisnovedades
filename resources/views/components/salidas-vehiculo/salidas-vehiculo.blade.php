@@ -52,9 +52,9 @@
                             @if ($salida->tiene_boleta)
                                 <span class="badge badge-success">✅ Cerrada</span>
                                 @if ($salida->boletaCierre)
-                                    <br><small class="text-muted">Boleta #{{ $salida->boletaCierre->id }}</small>
+                                    <br><small class="text-muted">{{ $salida->boletaCierre->fecha_entra->format('d/m/Y')  }}</small>
                                 @else
-                                    <br><small class="text-muted">Reg. en salida</small>
+                               <small class="text-muted"> {{ $salida->guardia->date->format('d/m/Y') }} </small>
                                 @endif
                             @else
                                 <span class="badge badge-warning">⚠️ Pendiente</span>
@@ -74,7 +74,7 @@
                                             class="btn btn-outline-primary btn-xs mr-1" title="Cerrar boleta">
                                             <i class="fas fa-file-invoice"></i>
                                         </button>
-                                    @else
+                                    @elseif ($salida->boletaCierre && $salida->boletaCierre->guardia_id != $guardia->id)
                                         <button type="button" wire:click="abrirBoleta({{ $salida->id }})"
                                             class="btn btn-outline-info btn-xs mr-1" title="Ver/Editar boleta">
                                             <i class="fas fa-eye"></i>

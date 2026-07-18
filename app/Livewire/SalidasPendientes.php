@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\BoletaCierre;
 use App\Models\Guard;
 use App\Models\SalidaVehiculo;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -26,7 +27,8 @@ class SalidasPendientes extends Component
         $this->guardia = $guardia;
     }
 
-    public function getSalidasPendientesProperty()
+    #[Computed]
+    public function salidasPendientes()
     {
         // Busca salidas sin retorno (sin boleta y sin hora_entra/kms_entra en la salida)
         // de guardias anteriores a la actual

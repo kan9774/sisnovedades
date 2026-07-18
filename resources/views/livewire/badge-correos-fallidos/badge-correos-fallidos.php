@@ -29,4 +29,9 @@ new class extends Component
     {
         unset($this->pendientes);
     }
+
+    public function render()
+    {
+        return view('livewire.badge-correos-fallidos.badge-correos-fallidos');
+    }
 };

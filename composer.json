@@ -23,6 +23,8 @@
         "livewire/livewire": "^4.1",
         "phpoffice/phpspreadsheet": "^5.8",
         "resend/resend-laravel": "^1.4",
+        "setasign/fpdf": "^1.9",
+        "setasign/fpdi": "^2.6",
         "spatie/laravel-activitylog": "^4.12",
         "spatie/laravel-backup": "^10.3"
     },

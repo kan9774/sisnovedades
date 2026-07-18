@@ -335,6 +335,12 @@ return [
                     'active' => ['admin/organismos*'],
                     'can'    => 'viewAny-user', // solo admin
                 ],
+                [
+                    'text'   => 'Destinatarios PDF',
+                    'url'    => 'admin/pdf-destinatarios',
+                    'icon'   => 'fa-solid fa-address-book',
+                    'active' => ['admin/pdf-destinatarios*'],
+                ],
             ],
         ],
 

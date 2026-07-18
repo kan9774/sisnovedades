@@ -5,16 +5,22 @@ namespace Database\Seeders;
 use App\Models\Vehiculo;
 use App\Models\Conductor;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class VehiculoConductorSeeder extends Seeder
 {
     public function run(): void
     {
+        // Los tipos de combustible ya vienen precargados por la migración
+        // 2026_07_14_183333_migrate_tipo_combustible_to_catalogo.php
+        $gasOilId = DB::table('tipos_combustible')->where('nombre', 'Gas Oil')->value('id');
+        $naftaId  = DB::table('tipos_combustible')->where('nombre', 'Nafta')->value('id');
+
         // --- Vehículos ---
         $vehiculos = [
             [
                 'matricula' => 'ENM-0685',
-                'tipo_combustible' => 'gas_oil',
+                'tipo_combustible_id' => $gasOilId,
                 'consumo_litros_por_km' => 0.15,
                 'sin_cuentakilometros' => false,
                 'descripcion' => 'Camión Mercedes Benz',
@@ -22,7 +28,7 @@ class VehiculoConductorSeeder extends Seeder
             ],
             [
                 'matricula' => 'ENM-0724',
-                'tipo_combustible' => 'nafta',
+                'tipo_combustible_id' => $naftaId,
                 'consumo_litros_por_km' => 0.12,
                 'sin_cuentakilometros' => false,
                 'descripcion' => 'Toyota Hilux 4x4',
@@ -30,7 +36,7 @@ class VehiculoConductorSeeder extends Seeder
             ],
             [
                 'matricula' => 'ENM-0891',
-                'tipo_combustible' => 'gas_oil',
+                'tipo_combustible_id' => $gasOilId,
                 'consumo_litros_por_km' => 0.18,
                 'sin_cuentakilometros' => true,
                 'descripcion' => 'Camión sin cuentakm (Unimog)',

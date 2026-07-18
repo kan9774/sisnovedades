@@ -135,6 +135,11 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             Route::delete('/{permiso}',      [PermisoController::class, 'destroy'])->name('destroy');
         });
 
+        // Destinatarios de PDF
+        Route::get('/pdf-destinatarios', function () {
+            return view('livewire.pdf-destinatarios.layout');
+        })->name('pdf-destinatarios');
+
         // Adjuntos
         Route::prefix('guardias/{guardia}/novedades/{novedad}/adjuntos')->name('adjuntos.')->group(function () {
             Route::get('/{adjunto}/download', [AdjuntoController::class, 'download'])->name('download');
