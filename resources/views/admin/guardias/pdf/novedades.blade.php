@@ -367,7 +367,7 @@
                                 @if ($salida->boletaCierre)
                                     <span style="color:green; font-weight:bold;">CERRADA</span><br><small></small>
                                 @elseif ($salida->hora_entra && $salida->kms_entra)
-                                    <span style="color:green; font-weight:bold;">CERRADA</span><br><small>Reg. en salida</small>
+                                    <span style="color:green; font-weight:bold;">CERRADA</span>
                                 @else
                                     <span style="color:red; font-weight:bold;">PENDIENTE</span>
                                 @endif
@@ -479,7 +479,36 @@
                 </td>
             </tr>
         </table>
+
+        {{-- Pie con jerarquías de la guardia --}}
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; page-break-inside: avoid;" border="0">
+            <tr>
+                <td style="border: none; font-size: 11px; padding: 2px 20px;">
+                    <strong>Capitán de Servicio:</strong>
+                    {{ strtoupper($guardia->capitan->grade) }} {{ strtoupper($guardia->capitan->name) }} {{ strtoupper($guardia->capitan->last_name) }}
+                </td>
+            </tr>
+            <tr>
+                <td style="border: none; font-size: 11px; padding: 2px 20px;">
+                    <strong>Oficial de Día:</strong>
+                    {{ strtoupper($guardia->oficial->grade) }} {{ strtoupper($guardia->oficial->name) }} {{ strtoupper($guardia->oficial->last_name) }}
+                </td>
+            </tr>
+            <tr>
+                <td style="border: none; font-size: 11px; padding: 2px 20px;">
+                    <strong>Escribiente de Servicio:</strong>
+                    @if ($guardia->escribiente->first())
+                        {{ strtoupper($guardia->escribiente->first()->grade) }} {{ strtoupper($guardia->escribiente->first()->name) }} {{ strtoupper($guardia->escribiente->first()->last_name) }}
+                    @else
+                        S/D
+                    @endif
+                </td>
+            </tr>
+        </table>
     </div>
+    @if ($incluirAdjuntos ?? false)
+        @include('admin.guardias.pdf.anexos-recibidos', ['guardia' => $guardia])
+    @endif
 
 </body>
 

@@ -108,7 +108,7 @@
 
             <div class="attachment-notice">
                 <i>📎</i>
-                <strong>Adjunto:</strong> {{ RecibidosPdfGenerator::nombreArchivo($guardia) }}
+                <strong>Adjunto:</strong> {{ $nombreArchivo }}
                 <br>
                 <span style="font-size: 12px; color: #666;">Este archivo contiene todos los documentos recibidos con sus imágenes incrustadas.</span>
             </div>

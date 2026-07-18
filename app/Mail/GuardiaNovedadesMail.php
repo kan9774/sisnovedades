@@ -17,6 +17,7 @@ class GuardiaNovedadesMail extends Mailable
     public function __construct(
         public Guard $guardia,
         public string $remitenteName,
+        public bool $incluirAdjuntos = false,
     ) {}
 
     public function envelope(): Envelope
@@ -28,6 +29,17 @@ class GuardiaNovedadesMail extends Mailable
 
     public function content(): Content
     {
+        if ($this->incluirAdjuntos) {
+            return new Content(
+                view: 'emails.recibidos-novedades',
+                with: [
+                    'guardia' => $this->guardia,
+                    'nombreRemitente' => $this->remitenteName,
+                    'nombreArchivo' => GuardiaPdfGenerator::nombreArchivoConAdjuntos($this->guardia),
+                ],
+            );
+        }
+
         return new Content(
             view: 'emails.guardia-novedades',
             with: [
@@ -39,6 +51,17 @@ class GuardiaNovedadesMail extends Mailable
 
     public function attachments(): array
     {
+        if ($this->incluirAdjuntos) {
+            $contenidoPdf = GuardiaPdfGenerator::generarConAdjuntos($this->guardia);
+
+            return [
+                \Illuminate\Mail\Mailables\Attachment::fromData(
+                    fn () => $contenidoPdf,
+                    GuardiaPdfGenerator::nombreArchivoConAdjuntos($this->guardia),
+                )->withMime('application/pdf'),
+            ];
+        }
+
         $pdf = GuardiaPdfGenerator::generar($this->guardia);
 
         return [

@@ -73,7 +73,7 @@
                         <strong>Número:</strong><br>{{ $novedad->number }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Hora:</strong><br>{{ $novedad->time }}
+                        <strong>Hora:</strong><br><span class="badge badge-info"> {{ $novedad->time->format('H:i') }} </span>
                     </div>
                 </div>
 
@@ -84,7 +84,7 @@
                         {{ $novedad->remitente() ?? '-' }}
                     </div>
                     <div class="col-md-4">
-                        <strong>Oficina:</strong><br>{{ $novedad->office ?? '-' }}
+                        <strong>Oficina:</strong><br>{{ $novedad->oficina->nombre ?? '-' }}
                     </div>
                     <div class="col-md-4">
                         <strong>Asunto:</strong><br>{{ $novedad->affair ?? '-' }}
