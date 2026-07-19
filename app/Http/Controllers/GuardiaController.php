@@ -246,10 +246,16 @@ class GuardiaController extends Controller
     public function reactivar(Guard $guardia)
     {
         $this->authorize('reactivar', $guardia);
+        $guardia->disableLogging();
         $guardia->update([
             'status' => 'open',
             'closed_at' => null,
         ]);
+        $guardia->enableLogging();
+        activity('Guardias')
+            ->causedBy(Auth::user())
+            ->performedOn($guardia)
+            ->log('Reactivó la guardia');
         return redirect()->route('admin.guardias.show', $guardia)->with('success', 'Guardia reactivada exitosamente');
     }
 
@@ -272,11 +278,23 @@ class GuardiaController extends Controller
                 ->with('warning', "No se puede cerrar: quedan {$pendientes} novedad(es) sin resolver (Caso a resolver). Si querés cerrar de todas formas, confirmá el cierre forzado.")
                 ->with('pendientes_cierre', $pendientes);
         }
-
+        $forzado = $pendientes > 0;
+        $guardia->disableLogging();
         $guardia->update([
             'status' => 'closed',
             'closed_at' => now(),
         ]);
+        $guardia->enableLogging();
+        activity('Guardias')
+            ->causedBy(Auth::user())
+            ->performedOn($guardia)
+            ->withProperties([
+                'forzado' => $forzado,
+                'novedades_pendientes' => $pendientes,
+            ])
+            ->log($forzado
+                ? "Cerró la guardia de forma forzada con {$pendientes} novedad(es) sin resolver"
+                : 'Cerró la guardia');
 
         return redirect()->route('admin.guardias.show', $guardia)
             ->with('success', $pendientes > 0

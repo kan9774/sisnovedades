@@ -79,9 +79,10 @@ class BackupManager extends Component
     public function quickCreate()
     {
         Artisan::call('backup:run', ['--only-db' => true]);
-        $this->message = '⚡ Backup iniciado en segundo plano.';
-        $this->messageType = 'info';
+        $this->message = '⚡ Backup completado correctamente.';
+         $this->messageType = 'success';
         $this->dispatch('refresh-backups');
+         $this->loadBackups();
     }
 
     public function deleteBackup($filename)

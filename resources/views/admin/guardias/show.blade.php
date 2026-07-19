@@ -25,12 +25,12 @@
             <div class="alert alert-warning alert-dismissible">
                 {{ session('warning') }}
                 @if ($guardia->status === 'open')
-                    <form action="{{ route('admin.guardias.cerrar', $guardia) }}" method="POST" class="d-inline ml-2">
+                    <form id="form-cerrar-forzado" action="{{ route('admin.guardias.cerrar', $guardia) }}" method="POST"
+                        class="d-inline ml-2">
                         @csrf
                         <input type="hidden" name="forzar" value="1">
-                        <button type="submit" class="btn btn-sm btn-outline-dark"
-                            onclick="return confirm('¿Confirmás cerrar la guardia con novedades sin resolver?')">
-                            Cerrar de todas formas
+                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="confirmarCierreForzado()">
+                            Cerrar con novedades sin resolver
                         </button>
                     </form>
                 @endif
@@ -67,11 +67,11 @@
                             </a>
                         @endcan
                         @can('cerrar', $guardia)
-                            <form action="{{ route('admin.guardias.cerrar', $guardia) }}" method="POST" class="d-inline ml-1">
+                            <form id="form-cerrar-guardia" action="{{ route('admin.guardias.cerrar', $guardia) }}"
+                                method="POST" class="d-inline ml-1">
                                 @csrf
-                                <button class="btn btn-outline-danger btn-sm" data-toggle="tooltip" title="Cerrar guardia"
-                                    onclick="return confirm('¿Cerrar la guardia?')">
-                                    <i class="fas fa-lock"></i>
+                                <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="tooltip"
+                                    title="Cerrar guardia" onclick="confirmarCierre()"> <i class="fas fa-lock"></i>
                                 </button>
                             </form>
                         @endcan
@@ -133,8 +133,7 @@
                             <i class="fa-regular fa-file-pdf"></i>
                         </a>
                         @if ($puedeOperarGuardia)
-                            <livewire:enviar-guardia-email :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia"
-                                :key="'enviar-guardia-email-' . $guardia->id" />
+                            <livewire:enviar-guardia-email :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia" :key="'enviar-guardia-email-' . $guardia->id" />
                         @endif
                     </div>
                 </div>
@@ -218,7 +217,7 @@
     <script>
         $('[data-toggle="tooltip"]').tooltip();
         $(document).ready(function() {
-            $('.alert').delay(3000).fadeOut('slow');
+            $('.alert:not(.alert-warning)').delay(3000).fadeOut('slow');
 
             const hash = window.location.hash;
             if (hash) {
@@ -228,5 +227,42 @@
                 history.replaceState(null, null, e.target.hash);
             });
         });
+
+        function confirmarCierre() {
+            Swal.fire({
+                title: '¿Cerrar la guardia?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cerrar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc3545',
+                reverseButtons: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }).then((result) => {
+                 if (result.isConfirmed || result.value) {
+                    document.getElementById('form-cerrar-guardia').submit();
+                }
+            });
+        }
+
+        function confirmarCierreForzado() {
+            Swal.fire({
+                title: '¿Cerrar guardia con novedades sin resolver?',
+                text: 'Esta acción queda registrada en el historial de auditoría.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cerrar de todas formas',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc3545',
+                reverseButtons: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }).then((result) => {
+                if (result.isConfirmed || result.value) {
+                    document.getElementById('form-cerrar-forzado').submit();
+                }
+            });
+        }
     </script>
 @endpush
