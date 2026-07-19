@@ -10,14 +10,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ConductorController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NovedadPersonalController;
 use App\Http\Controllers\NovedadRanchoController;
 use App\Http\Controllers\TipoVehiculoController;
+use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\OficinaController;
-use App\Http\Controllers\OrganismoController;
 use App\Http\Controllers\PalomaController;
 use App\Http\Controllers\PalomarController;
 use App\Http\Controllers\PermisoController;
@@ -167,15 +166,10 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             Route::post('/{novedad}/tomar', [NotificationController::class, 'tomar'])->name('tomar');
         });
 
-        // Organismos
-        Route::prefix('organismos')->name('organismos.')->group(function () {
-            Route::get('/',              [OrganismoController::class, 'index'])->name('index');
-            Route::get('/create',        [OrganismoController::class, 'create'])->name('create');
-            Route::post('/',             [OrganismoController::class, 'store'])->name('store');
-            Route::get('/{organismo}/edit',  [OrganismoController::class, 'edit'])->name('edit');
-            Route::put('/{organismo}',       [OrganismoController::class, 'update'])->name('update');
-            Route::delete('/{organismo}',    [OrganismoController::class, 'destroy'])->name('destroy');
-        });
+        // Organismos (Livewire, formulario inline sin modales)
+        Route::get('/organismos', function () {
+            return view('livewire.organismos.layout');
+        })->name('organismos.index');
 
         // Oficinas (catálogo, para notificaciones de novedades)
         Route::prefix('oficinas')->name('oficinas.')->group(function () {
@@ -196,8 +190,14 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             Route::delete('/{tipo}', [TipoVehiculoController::class, 'destroy'])->name('destroy');
         });
 
-        // Unidades - CRUD completo
+        // Unidades - listado/alta/edición/borrado en Livewire (formulario inline, sin modales)
+        Route::get('/unidades', function () {
+            return view('livewire.unidades.layout');
+        })->name('unidades.index');
+
+        // Detalle de unidad (sin migrar, sigue usando UnidadController@show)
         Route::resource('unidades', UnidadController::class)
+            ->only(['show'])
             ->parameters(['unidades' => 'unidad']);
 
         // Vehículos - CRUD completo

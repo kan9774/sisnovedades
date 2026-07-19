@@ -14,10 +14,18 @@ class GuardiaNovedadesMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * @param string|null $pdfContent Binario del PDF ya generado. En un
+     *   envío masivo (mismo PDF para N destinatarios) se genera UNA sola
+     *   vez afuera y se pasa acá para no repetir el render de DomPDF +
+     *   la fusión de FPDI por cada destinatario. Si viene null, este
+     *   Mailable lo genera él mismo (uso individual, fuera de un loop).
+     */
     public function __construct(
         public Guard $guardia,
         public string $remitenteName,
         public bool $incluirAdjuntos = false,
+        public ?string $pdfContent = null,
     ) {}
 
     public function envelope(): Envelope
@@ -51,23 +59,22 @@ class GuardiaNovedadesMail extends Mailable
 
     public function attachments(): array
     {
-        if ($this->incluirAdjuntos) {
-            $contenidoPdf = GuardiaPdfGenerator::generarConAdjuntos($this->guardia);
+        $nombreArchivo = $this->incluirAdjuntos
+            ? GuardiaPdfGenerator::nombreArchivoConAdjuntos($this->guardia)
+            : GuardiaPdfGenerator::nombreArchivo($this->guardia);
 
-            return [
-                \Illuminate\Mail\Mailables\Attachment::fromData(
-                    fn () => $contenidoPdf,
-                    GuardiaPdfGenerator::nombreArchivoConAdjuntos($this->guardia),
-                )->withMime('application/pdf'),
-            ];
-        }
-
-        $pdf = GuardiaPdfGenerator::generar($this->guardia);
+        // Reusamos el PDF pasado desde afuera si vino; si no, lo generamos
+        // acá (fallback para uso individual del Mailable fuera de un loop).
+        $contenidoPdf = $this->pdfContent ?? (
+            $this->incluirAdjuntos
+                ? GuardiaPdfGenerator::generarConAdjuntos($this->guardia)
+                : GuardiaPdfGenerator::generar($this->guardia)->output()
+        );
 
         return [
             \Illuminate\Mail\Mailables\Attachment::fromData(
-                fn () => $pdf->output(),
-                GuardiaPdfGenerator::nombreArchivo($this->guardia),
+                fn () => $contenidoPdf,
+                $nombreArchivo,
             )->withMime('application/pdf'),
         ];
     }

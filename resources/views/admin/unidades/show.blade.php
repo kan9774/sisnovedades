@@ -18,7 +18,7 @@
             </h3>
             <div class="card-tools">
                 @can('update', $unidad)
-                    <a href="{{ route('admin.unidades.edit', $unidad) }}" class="btn btn-outline-warning btn-sm">
+                    <a href="{{ route('admin.unidades.index', ['edit' => $unidad->id]) }}" class="btn btn-outline-warning btn-sm">
                         <i class="fas fa-edit"></i> Editar
                     </a>
                 @endcan

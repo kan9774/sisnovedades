@@ -79,7 +79,7 @@
 
                         <div class="form-group">
                             <label>Hora de retorno *</label>
-                            <input type="text" class="form-control" placeholder="HH:MM"
+                            <input type="time" class="form-control" placeholder="HH:MM"
                                    wire:model="boleta_hora_entra" maxlength="5">
                             @error('boleta_hora_entra') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>

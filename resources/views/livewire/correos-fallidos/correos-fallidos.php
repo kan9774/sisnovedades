@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 new class extends Component
@@ -16,6 +17,11 @@ new class extends Component
     public function mount(Guard $guardia): void
     {
         $this->guardia = $guardia;
+    }
+    #[On('novedades-enviadas')]
+    public function refrecar(): void
+    {
+        unset($this->fallos);
     }
 
     #[Computed]

@@ -89,21 +89,30 @@
 
         {{-- Content --}}
         <div class="content">
-            <p>Estimado Capitán de Servicio,</p>
 
             <p>Se adjunta a este correo el archivo PDF con la relación de todos los archivos recibidos correspondientes a la guardia del <strong>{{ $guardia->date->format('d/m/Y') }}</strong>.</p>
 
             <div class="info">
                 <span><strong>Guardia:</strong> {{ config('organizacion.nombre') }}</span>
                 <span><strong>Fecha:</strong> {{ $guardia->date->format('d/m/Y') }}</span>
-                <span><strong>Estado:</strong> 
+                <span><strong>Estado:</strong>
                     @if($guardia->status === 'open')
                         <span style="color: green;">Abierta</span>
                     @else
                         <span style="color: #999;">Cerrada</span>
                     @endif
                 </span>
-                <span><strong>Oficial de Día:</strong> {{ $guardia->oficial->grade }} {{ $guardia->oficial->name }} {{ $guardia->oficial->last_name }}</span>
+                <span><strong>Capitan de Servicio:</strong> {{ $guardia->capitan->grade }} {{ $guardia->capitan->name }} {{ $guardia->capitan->last_name }}</span><br>
+                <span><strong>Oficial de Día:</strong> {{ $guardia->oficial->grade }} {{ $guardia->oficial->name }} {{ $guardia->oficial->last_name }}</span><br>
+                <span>
+                    <strong>{{ $guardia->escribiente->count() === 1 ? 'La Escribiente de Serv.:' : 'Escribientes de Serv.:' }}</strong>
+                    @forelse ($guardia->escribiente as $escribiente)
+                        {{ $escribiente->grade }} {{ $escribiente->name }} {{ $escribiente->last_name }}{{ !$loop->last ? ',' : '' }}
+                    @empty
+                        Sin escribientes
+                    @endforelse
+                </span><br>
+
             </div>
 
             <div class="attachment-notice">

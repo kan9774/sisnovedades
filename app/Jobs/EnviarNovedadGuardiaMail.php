@@ -26,18 +26,24 @@ class EnviarNovedadGuardiaMail
 {
     use Dispatchable, Queueable;
 
+    /**
+     * @param string|null $pdfContent Binario del PDF ya generado (una
+     *   sola vez) desde afuera, para no regenerarlo en cada uno de los
+     *   N destinatarios de un mismo envío.
+     */
     public function __construct(
         public Guard $guardia,
         public User $usuario,
         public string $nombreRemitente,
         public bool $incluirAdjuntos = false,
+        public ?string $pdfContent = null,
     ) {}
 
     public function handle(): bool
     {
         try {
             $sentMessage = Mail::to($this->usuario->email)->send(
-                new GuardiaNovedadesMail($this->guardia, $this->nombreRemitente, $this->incluirAdjuntos)
+                new GuardiaNovedadesMail($this->guardia, $this->nombreRemitente, $this->incluirAdjuntos, $this->pdfContent)
             );
 
             // Laravel 13 (Symfony Mailer) devuelve el SentMessage con el

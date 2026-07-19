@@ -6,6 +6,6 @@
 
 @section('content_body')
 <div class="container-fluid">
-    @livewire('unidades.manager')
+    <livewire:unidades :edit="request()->integer('edit') ?: null" />
 </div>
 @stop

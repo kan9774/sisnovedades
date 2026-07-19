@@ -4,6 +4,7 @@ use App\Jobs\EnviarNovedadGuardiaMail;
 use App\Models\Guard;
 use App\Models\GuardiaPdfDestinatario;
 use App\Models\User;
+use App\Support\GuardiaPdfGenerator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -97,6 +98,14 @@ new class extends Component
         // el envío de todos los correos tarda más que el máximo por defecto.
         set_time_limit(120);
 
+        // El PDF es el mismo para todos los destinatarios de esta guardia
+        // (no depende del usuario) — se genera UNA sola vez acá afuera y
+        // se reutiliza en los N envíos, en vez de que cada uno dispare su
+        // propio render de DomPDF + fusión de FPDI.
+        $pdfContent = $this->incluirAdjuntos
+            ? GuardiaPdfGenerator::generarConAdjuntos($this->guardia)
+            : GuardiaPdfGenerator::generar($this->guardia)->output();
+
         $fallidos = 0;
 
         foreach ($usuarios as $usuario) {
@@ -105,6 +114,7 @@ new class extends Component
                 $usuario,
                 $nombreRemitente,
                 $this->incluirAdjuntos,
+                $pdfContent,
             );
 
             if ($enviado === false) {

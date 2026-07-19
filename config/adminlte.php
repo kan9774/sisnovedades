@@ -329,13 +329,6 @@ return [
                     'active' => ['admin/novedades*'],
                 ],
                 [
-                    'text'   => 'Unidades',
-                    'url'    => 'admin/organismos',
-                    'icon'   => 'fas fa-building',
-                    'active' => ['admin/organismos*'],
-                    'can'    => 'viewAny-user', // solo admin
-                ],
-                [
                     'text'   => 'Destinatarios PDF',
                     'url'    => 'admin/pdf-destinatarios',
                     'icon'   => 'fa-solid fa-address-book',
@@ -357,12 +350,26 @@ return [
                     'active'  => ['admin/users*'],
                     'can'     => 'viewAny-user',
                 ],
+                                [
+                    'text'   => 'Unidades Ámbito',
+                    'url'    => 'admin/unidades',
+                    'icon'   => 'fas fa-building',
+                    'active' => ['admin/unidades*'],
+                    'can'    => 'viewAny-user', // solo admin
+                ],
                 [
                     'text'   => 'Oficinas',
                     'url'    => 'admin/oficinas',
                     'icon'   => 'fas fa-building',
                     'active' => ['admin/oficinas*'],
                     'can'    => 'viewAny-oficina',
+                ],
+                                [
+                    'text'   => 'Unidades Ejército',
+                    'url'    => 'admin/organismos',
+                    'icon'   => 'fas fa-landmark',
+                    'active' => ['admin/organismos*'],
+                    'can'    => 'viewAny-user', // solo admin
                 ],
             ],
         ],

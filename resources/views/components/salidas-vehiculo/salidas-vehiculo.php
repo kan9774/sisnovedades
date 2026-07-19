@@ -6,6 +6,7 @@ use App\Models\Guard;
 use App\Models\SalidaVehiculo;
 use App\Models\Vehiculo;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -43,6 +44,12 @@ new class extends Component
     {
         $this->guardia = $guardia;
         $this->puedeOperarGuardia = $puedeOperarGuardia;
+    }
+    #[On('salidas-actualizadas')]
+    public function refrescarSalidas(): void
+    {
+        // Refresca las salidas aquí si es necesario
+        $this->todasSalidasCache = null; // Limpia el cache si es
     }
 
     #[Computed]

@@ -1,8 +1,9 @@
 {{--
     Sección de Anexos: todo lo "Recibido" con adjuntos, para agregar al final
-    del PDF de la guardia. Las imágenes se embeben acá mismo; los PDFs
-    adjuntos se listan con una nota y se fusionan como páginas extra
-    en RecibidosPdfGenerator (fuera de este Blade, con FPDI).
+    del PDF de la guardia. Las imágenes se embeben acá mismo (redimensionadas
+    y recomprimidas, ver App\Support\ImagenPdfCompresor); los PDFs adjuntos
+    se listan con una nota y se fusionan como páginas extra en
+    RecibidosPdfGenerator (fuera de este Blade, con FPDI).
 
     Espera: $guardia (con novedades.adjuntos, novedades.organismo,
     novedades.oficina, novedades.tomadoPor cargados)
@@ -61,12 +62,7 @@
                     @if ($adjunto->esImagen())
                         @php
                             $rutaCompleta = \Illuminate\Support\Facades\Storage::disk('guardias')->path($adjunto->file_path);
-                            $base64 = null;
-                            if (file_exists($rutaCompleta)) {
-                                $tipo = $adjunto->file_type;
-                                $contenido = file_get_contents($rutaCompleta);
-                                $base64 = 'data:' . $tipo . ';base64,' . base64_encode($contenido);
-                            }
+                            $base64 = \App\Support\ImagenPdfCompresor::comprimirParaEmbeber($rutaCompleta, $adjunto->file_type);
                         @endphp
                         @if ($base64)
                             <img src="{{ $base64 }}" style="max-width: 100%; max-height: 500px;">
