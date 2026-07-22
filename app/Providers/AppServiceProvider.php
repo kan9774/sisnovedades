@@ -48,6 +48,19 @@ use Illuminate\Validation\Rules\Password;
 class AppServiceProvider extends ServiceProvider
 {
     /**
+     * Hosts de confianza que NO deben forzar la URL raíz configurada en APP_URL.
+     * Cualquier acceso desde estos hosts respeta el host real de la petición,
+     * en vez de redirigir siempre a config('app.url').
+     */
+    protected const HOSTS_LOCALES = [
+        'novedades.test',
+        'localhost',
+        '127.0.0.1',
+        'sisnovedades.lan',
+        '192.168.1.9',
+    ];
+
+    /**
      * Register any application services.
      */
     public function register(): void
@@ -63,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $host = request()->getHost();
 
-        if (!in_array($host, ['novedades.test', 'localhost', '127.0.0.1'])) {
+        if (!in_array($host, self::HOSTS_LOCALES)) {
             URL::forceRootUrl(config('app.url'));
             // No forzamos https porque No-IP anda por http sin certificado SSL
         }
