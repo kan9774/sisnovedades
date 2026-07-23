@@ -211,4 +211,32 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 
         return false;
     }
+    /**
+     * Accessor para obtener el primer rol (compatibilidad con código existente)
+     */
+    public function getRolAttribute()
+    {
+        return $this->roles()->first();
+    }
+
+    /**
+     * Accessor para obtener el nombre del rol principal
+     */
+    public function getRolNameAttribute()
+    {
+        $roleName = $this->roles()->first()->name ?? 'Sin rol';
+        return str_replace('_', ' ', $roleName);
+    }
+
+    /**
+     * Accessor para obtener todos los roles como string
+     */
+    public function getRolesListAttribute()
+    {
+        $roles = $this->roles->pluck('name')->map(function ($name) {
+            return str_replace('_', ' ', $name);
+        })->implode(', ') ?: 'Sin rol';
+
+        return $roles;
+    }
 }

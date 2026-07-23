@@ -9,7 +9,7 @@ class VehiculoPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->HasPermisos('ver_vehiculos') || $user->isSuperAdmin();
+        return $user->HasPermisos('ver_vehiculo') || $user->isSuperAdmin();
     }
 
     public function view(User $user, Vehiculo $vehiculo): bool

@@ -152,7 +152,7 @@
 
                                     @if ($paloma->estado)
                                         <span class="badge"
-                                            style="background-color: {{ $paloma->estado->color ?? '#6c757d' }}; color: #fff; padding: 5px 12px;">
+                                            style="background-color: {{ $paloma->estado->color ?? '#db1714' }}; color: #062d8a; padding: 5px 12px;">
                                             {{ $paloma->estado->nombre }}
                                         </span>
                                     @else

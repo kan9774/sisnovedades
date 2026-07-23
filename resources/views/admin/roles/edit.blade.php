@@ -44,25 +44,43 @@
 
                 <div class="form-group">
                     <label>Permisos</label>
-                    <div class="row">
-                        @foreach($permisos as $permiso)
-                            <div class="col-md-4">
-                                <div class="custom-control custom-checkbox mb-2">
-                                    <input type="checkbox"
-                                           class="custom-control-input"
-                                           id="permiso_{{ $permiso->id }}"
-                                           name="permisos[]"
-                                           value="{{ $permiso->id }}"
-                                           {{ in_array($permiso->id, old('permisos', $rol->permisos->pluck('id')->toArray())) ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="permiso_{{ $permiso->id }}">
-                                        {{ ucfirst(str_replace('_', ' ', $permiso->name)) }}
-                                        <br>
-                                        <small class="text-muted">{{ $permiso->description }}</small>
-                                    </label>
+
+                    @php
+                        $permisosAsignados = old('permisos', $rol->permisos->pluck('id')->toArray());
+                    @endphp
+
+                    @foreach($permisosPorModulo as $modulo => $permisosModulo)
+                        <div class="card card-outline card-secondary mb-3">
+                            <div class="card-header py-2">
+                                <h3 class="card-title mb-0">
+                                    <i class="fas fa-layer-group mr-1"></i>
+                                    {{ ucfirst(str_replace('_', ' ', $modulo)) }}
+                                </h3>
+                            </div>
+                            <div class="card-body py-2">
+                                <div class="row">
+                                    @foreach($permisosModulo as $permiso)
+                                        <div class="col-md-4">
+                                            <div class="custom-control custom-checkbox mb-2">
+                                                <input type="checkbox"
+                                                       class="custom-control-input"
+                                                       id="permiso_{{ $permiso->id }}"
+                                                       name="permisos[]"
+                                                       value="{{ $permiso->id }}"
+                                                       {{ in_array($permiso->id, $permisosAsignados) ? 'checked' : '' }}>
+                                                <label class="custom-control-label" for="permiso_{{ $permiso->id }}">
+                                                    {{ ucfirst(str_replace('_', ' ', $permiso->name)) }}
+                                                    <br>
+                                                    <small class="text-muted">{{ $permiso->description }}</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
+                        </div>
+                    @endforeach
+                    @error('permisos')<span class="text-danger d-block mb-2">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="d-flex justify-content-between">

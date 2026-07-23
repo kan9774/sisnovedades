@@ -60,7 +60,7 @@ class PdfDestinatarios extends Component
         }
 
         // No tiene acceso
-        abort(403, 'No tenés permiso para acceder a esta sección.');
+        abort(403, 'Para acceder a destinatarios PDF debes ser miembro de la guardia del día o ser SuperAdmin.');
     }
 
     public function render()

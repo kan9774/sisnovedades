@@ -14,8 +14,7 @@ class TipoVehiculoPolicy
 
     public function view(User $user, TipoVehiculo $tipoVehiculo): bool
     {
-        return $user->HasPermisos('ver_tipos_vehiculo') ||
-            $user->HasPermisos('ver_tipo_vehiculo') || $user->isSuperAdmin();
+        return $user->HasPermisos('ver_tipos_vehiculo') || $user->isSuperAdmin();
     }
 
     public function create(User $user): bool

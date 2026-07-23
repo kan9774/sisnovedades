@@ -39,11 +39,7 @@
         @endif
 
         @php
-            $puedeOperarGuardia =
-                $guardia->captain_id === auth()->id() ||
-                $guardia->oficer_id === auth()->id() ||
-                $guardia->escribiente->contains('id', auth()->id()) ||
-                auth()->user()->isAdmin();
+            $puedeOperarGuardia = $guardia->esMiembro(auth()->user()) || auth()->user()->isAdmin();
         @endphp
 
         {{-- Info de la guardia (sin cambios respecto a lo que ya tenías) --}}

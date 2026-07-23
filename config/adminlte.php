@@ -315,12 +315,14 @@ return [
         [
             'text' => 'Guardias y Novedades',
             'icon' => 'fa-solid fa-person-military-pointing',
+            'can' => 'view_guardias',
             'submenu' => [
                 [
                     'text'   => 'Guardias',
                     'url'    => 'admin/guardias',
                     'icon'   => 'fa-solid fa-person-rifle',
                     'active' => ['admin/guardias*'],
+                    'can'    => 'view_guardias',
                 ],
                 [
                     'text' => 'Novedades del Día',
@@ -333,6 +335,7 @@ return [
                     'url'    => 'admin/pdf-destinatarios',
                     'icon'   => 'fa-solid fa-address-book',
                     'active' => ['admin/pdf-destinatarios*'],
+                    'can'    => 'ver_destinatarios_pdf',
                 ],
             ],
         ],
@@ -398,7 +401,7 @@ return [
                     'url'    => 'admin/vehiculos/tipos',
                     'icon'   => 'fa-solid fa-shapes',
                     'active' => ['admin/vehiculos/tipos*'],
-                    'can'    => 'viewAny-tipo-vehiculo',
+                    'can'    => 'viewAny-tipos-vehiculo',
                 ],
             ],
         ],

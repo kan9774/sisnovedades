@@ -29,9 +29,9 @@ class RolController extends Controller
     {
         $this->authorize('create', Rol::class);
 
-        $permisos = Permission::all();
+        $permisosPorModulo = $this->agruparPermisosPorModulo(Permission::all());
 
-        return view('admin.roles.create', compact('permisos'));
+        return view('admin.roles.create', compact('permisosPorModulo'));
     }
 
     public function store(Request $request)
@@ -62,9 +62,9 @@ class RolController extends Controller
     {
         $this->authorize('update', $rol);
 
-        $permisos = Permission::all();
+        $permisosPorModulo = $this->agruparPermisosPorModulo(Permission::all());
 
-        return view('admin.roles.edit', compact('rol', 'permisos'));
+        return view('admin.roles.edit', compact('rol', 'permisosPorModulo'));
     }
 
     public function update(Request $request, Rol $rol)
@@ -109,5 +109,21 @@ class RolController extends Controller
 
         return redirect()->route('admin.roles.index')
                          ->with('success', 'Rol eliminado correctamente.');
+    }
+
+    /**
+     * Agrupa una colección de permisos por módulo, usando el prefijo
+     * del name antes del primer guion bajo (ej: "novedades_crear" -> "novedades").
+     * Los permisos sin guion bajo caen en el grupo "general".
+     */
+    private function agruparPermisosPorModulo($permisos)
+    {
+        return $permisos
+            ->groupBy(function ($permiso) {
+                return str_contains($permiso->name, '_')
+                    ? strstr($permiso->name, '_', true)
+                    : 'general';
+            })
+            ->sortKeys();
     }
 }

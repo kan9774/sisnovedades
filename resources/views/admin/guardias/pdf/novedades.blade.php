@@ -407,13 +407,9 @@
         $ausentes = $todasLasPalomas->filter(fn($p) => optional($p->estado)->nombre === 'Ausente')->count();
         $presentes = $total - $ausentes;
 
-        // Estado sanitario: tomamos el valor de la primera paloma que tenga definido el campo,
-        // o 'S/N' si no hay o está vacío.
-        $estadoSanitario = 'S/N';
-        $primeraConEstado = $todasLasPalomas->firstWhere('estado_sanitario', '!=', null);
-        if ($primeraConEstado) {
-            $estadoSanitario = $primeraConEstado->estado_sanitario;
-        }
+        // Estado sanitario: conteo real de palomas en cada estado.
+        $palomasSanas = $todasLasPalomas->where('estado_sanitario', 'Bien')->count();
+        $palomasEnfermas = $todasLasPalomas->where('estado_sanitario', 'Enferma')->count();
     @endphp
 
     @if ($total > 0)
@@ -428,7 +424,8 @@
                         <th>REPRODUCTORAS</th>
                         <th>AUSENTES</th>
                         <th>PRESENTES</th>
-                        <th>ESTADO SANITARIO</th>
+                        <th>SANAS</th>
+                        <th>ENFERMAS</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -439,7 +436,8 @@
                         <td class="text-center">{{ $reproductoras }}</td>
                         <td class="text-center">{{ $ausentes }}</td>
                         <td class="text-center">{{ $presentes }}</td>
-                        <td class="text-center">{{ $estadoSanitario }}</td>
+                        <td class="text-center">{{ $palomasSanas }}</td>
+                        <td class="text-center">{{ $palomasEnfermas }}</td>
                     </tr>
                 </tbody>
             </table>

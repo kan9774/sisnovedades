@@ -13,7 +13,7 @@ class GuardiaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->rol?->name !== 'visitante';
+        return $user->HasPermisos('ver_guardia') || $user->isSuperAdmin() || $user->isAdmin();
     }
 
     /**
@@ -21,7 +21,10 @@ class GuardiaPolicy
      */
     public function view(User $user, Guard $guard): bool
     {
-        return true;
+        return $user->isSuperAdmin()
+            || $user->isAdmin()
+            || $user->HasPermisos('ver_guardia')
+            || $guard->esMiembro($user);
     }
 
     /**
@@ -38,7 +41,7 @@ class GuardiaPolicy
             return false;
         }
         //Capitan de guardia
-        if ($guardia->capitan_id === $user->id) {
+        if ($guardia->captain_id === $user->id) {
             return $user->HasPermisos('cerrar_guardia');
         }
         //Oficiales de guardia

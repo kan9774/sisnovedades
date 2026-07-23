@@ -49,7 +49,7 @@
                 <br>
                 <small style="color: #6c757d !important;">
                     <i class="fas fa-user-tag mr-1"></i>
-                    {{ $user->rol->name ?? 'Sin rol' }}
+                    {{ $user->roles_list ?? 'Sin rol' }}
                 </small>
                 <br>
                 <small style="color: #6c757d !important; display: block; margin-top: 4px;">
