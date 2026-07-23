@@ -9,26 +9,26 @@ class VehiculoPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isCapitan() || $user->isOficialDia();
+        return $user->HasPermisos('ver_vehiculos') || $user->isSuperAdmin();
     }
 
     public function view(User $user, Vehiculo $vehiculo): bool
     {
-        return $user->isAdmin() || $user->isCapitan() || $user->isOficialDia();
+        return $user->HasPermisos('ver_vehiculo') || $user->HasPermisos('ver_vehiculos') || $user->isSuperAdmin();
     }
 
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+         return $user->HasPermisos('crear_vehiculo') || $user->isSuperAdmin();
     }
 
     public function update(User $user, Vehiculo $vehiculo): bool
     {
-        return $user->isAdmin();
+       return $user->HasPermisos('editar_vehiculo') || $user->isSuperAdmin();
     }
 
     public function delete(User $user, Vehiculo $vehiculo): bool
     {
-        return $user->isAdmin();
+       return $user->HasPermisos('eliminar_vehiculo') || $user->isSuperAdmin();
     }
 }
