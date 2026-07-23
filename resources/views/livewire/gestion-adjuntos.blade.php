@@ -12,31 +12,32 @@
                 </div>
             @endif
 
-            {{-- Subir / reemplazar archivo --}}
+            {{-- Subir archivo(s) --}}
             @if ($this->puedeGestionar)
                 <div class="mb-4">
                     <div class="custom-file">
-                        <input type="file" wire:model="archivo"
-                            class="custom-file-input @error('archivo') is-invalid @enderror"
+                        <input type="file" wire:model="archivos" multiple
+                            class="custom-file-input @error('archivos') is-invalid @enderror @error('archivos.*') is-invalid @enderror"
                             id="archivo-{{ $novedad->id }}" accept=".pdf,.jpg,.jpeg,.png">
                         <label class="custom-file-label" for="archivo-{{ $novedad->id }}">
-                            {{ $this->adjuntos->isNotEmpty() ? 'Reemplazar archivo (PDF, JPG, PNG — máx. 10MB)' : 'Seleccionar archivo (PDF, JPG, PNG — máx. 10MB)' }}
+                            Agregar archivo(s) (PDF, JPG, PNG — máx. 10MB c/u)
                         </label>
                     </div>
 
-                    <div wire:loading wire:target="archivo" class="text-muted small mt-1">
-                        <i class="fas fa-spinner fa-spin"></i> Subiendo archivo...
+                    <div wire:loading wire:target="archivos" class="text-muted small mt-1">
+                        <i class="fas fa-spinner fa-spin"></i> Subiendo archivo(s)...
                     </div>
 
-                    @error('archivo')
+                    @error('archivos')
+                        <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                    @enderror
+                    @error('archivos.*')
                         <span class="text-danger small d-block mt-1">{{ $message }}</span>
                     @enderror
 
-                    @if ($this->adjuntos->isNotEmpty())
-                        <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle"></i> Al subir un nuevo archivo, el anterior se elimina automáticamente.
-                        </small>
-                    @endif
+                    <small class="text-muted d-block mt-1">
+                        <i class="fas fa-info-circle"></i> Los archivos se suman a los que ya tiene la novedad (no se reemplazan). Podés seleccionar varios a la vez o subirlos de a uno.
+                    </small>
                 </div>
             @endif
 

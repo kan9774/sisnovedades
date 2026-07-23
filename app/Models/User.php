@@ -57,6 +57,20 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
         }
     }
 
+    /**
+     * El Super Admin usa un email ficticio (no puede recibir el correo de
+     * verificación), así que queda exento sin importar email_verified_at.
+     * El resto de los usuarios sigue el comportamiento normal del trait.
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return ! is_null($this->email_verified_at);
+    }
+
 
 
     public function getActivitylogOptions(): LogOptions

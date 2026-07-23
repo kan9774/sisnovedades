@@ -96,9 +96,15 @@ return [
             ],
             'retry_after' => 60,
         ],
-
+        
     ],
-
+'bounce_imap' => [
+            'host'       => env('BOUNCE_IMAP_HOST', 'webmail.ejercito.mil.uy'),
+            'port'       => env('BOUNCE_IMAP_PORT', 993),
+            'encryption' => env('BOUNCE_IMAP_ENCRYPTION', 'ssl'),
+            'username'   => env('BOUNCE_IMAP_USERNAME'),
+            'password'   => env('BOUNCE_IMAP_PASSWORD'),
+        ],
     /*
     |--------------------------------------------------------------------------
     | Global "From" Address

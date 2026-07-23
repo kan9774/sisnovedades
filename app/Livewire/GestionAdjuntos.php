@@ -18,7 +18,7 @@ class GestionAdjuntos extends Component
     public News $novedad;
     public Guard $guardia;
 
-    public $archivo = null;
+    public array $archivos = [];
 
     public function mount(News $novedad, Guard $guardia): void
     {
@@ -39,9 +39,9 @@ class GestionAdjuntos extends Component
         return $this->novedad->adjuntos()->latest()->get();
     }
 
-    public function updatedArchivo(): void
+    public function updatedArchivos(): void
     {
-        // Sube apenas se selecciona el archivo, sin botón "Subir" aparte
+        // Sube apenas se seleccionan los archivos, sin botón "Subir" aparte
         $this->subir();
     }
 
@@ -49,41 +49,46 @@ class GestionAdjuntos extends Component
     {
         $this->authorize('upload-attach', $this->novedad);
 
-        if (!$this->archivo) {
+        if (empty($this->archivos)) {
             return;
         }
 
         $this->validate([
-            'archivo' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'archivos' => ['array', 'max:5'],
+            'archivos.*' => ['file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
         ]);
 
-        // Reemplazo: si ya hay un adjunto, se borra antes de crear el nuevo
-        $anterior = $this->novedad->adjuntos()->first();
-        if ($anterior) {
-            Storage::disk('guardias')->delete($anterior->file_path);
-            $anterior->delete();
+        $totalActual = $this->novedad->adjuntos()->count();
+        if ($totalActual + count($this->archivos) > 8) {
+            $this->addError('archivos', "Esta novedad ya tiene {$totalActual} adjunto(s); el máximo total es 8.");
+            return;
         }
+
+        // Ya NO se borra el adjunto anterior: cada archivo seleccionado se
+        // suma a los que ya tiene la novedad, hasta el límite de arriba.
 
         $fecha      = $this->guardia->date->format('dmY');
         $carpeta    = $this->novedad->direction === 'Recibido' ? 'Recibidos' : 'Expedidos';
         $directorio = "{$fecha}/{$carpeta}";
 
-        $nombre = time() . '_' . basename($this->archivo->getClientOriginalName());
-        $ruta   = $this->archivo->storeAs($directorio, $nombre, 'guardias');
+        foreach ($this->archivos as $archivo) {
+            $nombre = time() . '_' . uniqid() . '_' . basename($archivo->getClientOriginalName());
+            $ruta   = $archivo->storeAs($directorio, $nombre, 'guardias');
 
-        Attach::create([
-            'news_id'   => $this->novedad->id,
-            'user_id'   => Auth::id(),
-            'file_name' => $this->archivo->getClientOriginalName(),
-            'file_path' => $ruta,
-            'file_type' => $this->archivo->getMimeType(),
-            'file_size' => $this->archivo->getSize(),
-        ]);
+            Attach::create([
+                'news_id'   => $this->novedad->id,
+                'user_id'   => Auth::id(),
+                'file_name' => $archivo->getClientOriginalName(),
+                'file_path' => $ruta,
+                'file_type' => $archivo->getMimeType(),
+                'file_size' => $archivo->getSize(),
+            ]);
+        }
 
-        $this->archivo = null;
+        $this->archivos = [];
         unset($this->adjuntos);
 
-        session()->flash('adjunto-success', 'Archivo adjuntado correctamente.');
+        session()->flash('adjunto-success', 'Archivo(s) adjuntado(s) correctamente.');
         $this->dispatch('adjunto-actualizado');
     }
 

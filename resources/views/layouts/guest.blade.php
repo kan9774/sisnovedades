@@ -30,8 +30,7 @@
         /* Resetear todos los estilos */
         html,
         body {
-            height: 100% !important;
-            min-height: 100vh !important;
+            min-height: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
             font-family: 'Source Sans Pro', sans-serif;
@@ -41,12 +40,12 @@
         .guest-page {
             background: linear-gradient(160deg, #e3eeff 0%, #d4e4f7 30%, #e8f0fe 60%, #f0f4ff 100%) !important;
             min-height: 100vh !important;
-            height: 100% !important;
+            height: auto !important;
             display: flex !important;
-            align-items: center !important;
+            align-items: safe center !important;
             justify-content: center !important;
             margin: 0 !important;
-            padding: 20px !important;
+            padding: 40px 20px !important;
             position: relative !important;
         }
 

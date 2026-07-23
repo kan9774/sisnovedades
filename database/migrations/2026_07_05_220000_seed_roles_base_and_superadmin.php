@@ -41,7 +41,7 @@ return new class extends Migration
                 'name' => 'Super',
                 'last_name' => 'Admin',
                 'grade' => 'N/A',
-                'email' => 'superadmin@sisnovedades.local',
+                'email' => 's1bcom1@ejercito.mil.uy',
                 'password' => Hash::make('password'),
                 'rol_id' => $adminId,
                 'status' => 'active',

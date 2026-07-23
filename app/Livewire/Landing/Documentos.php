@@ -4,7 +4,6 @@ namespace App\Livewire\Landing;
 
 use App\Models\CategoriaDocumento;
 use App\Models\Documento;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -97,7 +96,7 @@ class Documentos extends Component
 
     public function urlArchivo(Documento $documento): string
     {
-        return Storage::disk('public')->url($documento->archivo_path);
+        return asset('storage/' . $documento->archivo_path);
     }
 
     public function iconoPara(string $extension): string

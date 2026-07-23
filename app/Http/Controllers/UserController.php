@@ -116,6 +116,9 @@ class UserController extends Controller
             'status'         => 'active',
             'is_super_admin' => $isSuperAdmin,
             'oficina_id' => $data['oficina_id'] ?? null,
+            // Vos definiste la contraseña a mano, así que la tiene que
+            // cambiar apenas entre por primera vez.
+            'must_change_password' => true,
         ]);
 
         return redirect()->route('admin.users.index')
@@ -173,6 +176,9 @@ class UserController extends Controller
 
         if ($request->filled('password')) {
             $user->password = Hash::make($data['password']);
+            // Fue el admin quien la definió, así que la tiene que cambiar
+            // en su próximo login.
+            $user->must_change_password = true;
         }
 
         // Solo un SuperAdmin puede otorgar o quitar el flag de SuperAdmin a otro usuario.

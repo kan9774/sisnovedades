@@ -34,7 +34,7 @@
                     <div class="form-group">
                         <label>Nombre <span class="text-danger">*</span></label>
                         <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror"
-                            value="{{ old('nombre') }}" placeholder="Ej: Cte.Rva.Gral.E." required>
+                            value="{{ old('nombre') }}" placeholder="Ej: Oficina S-1" required>
                         @error('nombre')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror

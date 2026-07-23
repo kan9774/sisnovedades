@@ -30,6 +30,9 @@ class EnviarNovedadGuardiaMail
      * @param string|null $pdfContent Binario del PDF ya generado (una
      *   sola vez) desde afuera, para no regenerarlo en cada uno de los
      *   N destinatarios de un mismo envío.
+     * @param string|null $zipContent Binario del ZIP ya armado (PDF +
+     *   adjuntos crudos), generado una sola vez afuera. Mutuamente
+     *   excluyente con $incluirAdjuntos.
      */
     public function __construct(
         public Guard $guardia,
@@ -37,13 +40,22 @@ class EnviarNovedadGuardiaMail
         public string $nombreRemitente,
         public bool $incluirAdjuntos = false,
         public ?string $pdfContent = null,
+        public bool $enviarZip = false,
+        public ?string $zipContent = null,
     ) {}
 
     public function handle(): bool
     {
         try {
             $sentMessage = Mail::to($this->usuario->email)->send(
-                new GuardiaNovedadesMail($this->guardia, $this->nombreRemitente, $this->incluirAdjuntos, $this->pdfContent)
+                new GuardiaNovedadesMail(
+                    $this->guardia,
+                    $this->nombreRemitente,
+                    $this->incluirAdjuntos,
+                    $this->pdfContent,
+                    $this->enviarZip,
+                    $this->zipContent,
+                )
             );
 
             // Laravel 13 (Symfony Mailer) devuelve el SentMessage con el

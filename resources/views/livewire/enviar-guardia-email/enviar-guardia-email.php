@@ -5,6 +5,7 @@ use App\Models\Guard;
 use App\Models\GuardiaPdfDestinatario;
 use App\Models\User;
 use App\Support\GuardiaPdfGenerator;
+use App\Support\GuardiaZipGenerator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -18,12 +19,34 @@ new class extends Component
     public array $destinatarios = [];
     public ?int $grupoSeleccionado = null;
     public bool $incluirAdjuntos = false;
+    public bool $enviarZip = false;
     public string $mensajeExito = '';
 
     public function mount(Guard $guardia, bool $puedeOperarGuardia = false): void
     {
         $this->guardia = $guardia;
         $this->puedeOperarGuardia = $puedeOperarGuardia;
+    }
+
+    /**
+     * "Incluir adjuntos" (embebidos en el PDF) y "Enviar ZIP" son
+     * mutuamente excluyentes: la primera opción ya es pesada de procesar
+     * (fusión FPDI + imágenes embebidas), y sumarle el armado del ZIP
+     * en el mismo envío puede tirar timeout o memory limit. Al tildar
+     * una, se destilda la otra automáticamente.
+     */
+    public function updatedIncluirAdjuntos(bool $valor): void
+    {
+        if ($valor) {
+            $this->enviarZip = false;
+        }
+    }
+
+    public function updatedEnviarZip(bool $valor): void
+    {
+        if ($valor) {
+            $this->incluirAdjuntos = false;
+        }
     }
 
     #[Computed]
@@ -53,6 +76,7 @@ new class extends Component
         $this->grupoSeleccionado = null;
         $this->modoSeleccion = 'manual';
         $this->incluirAdjuntos = false;
+        $this->enviarZip = false;
         $this->mensajeExito = '';
         $this->dispatch('abrir-modal-enviar-guardia');
     }
@@ -60,6 +84,16 @@ new class extends Component
     public function enviar(): void
     {
         abort_unless($this->puedeOperarGuardia, 403);
+
+        // Garantía dura, no solo cosmética: nunca se procesan las dos
+        // opciones juntas, sin importar cómo haya llegado el estado hasta
+        // acá. Si por lo que sea las dos vinieran en true, el ZIP gana y
+        // la otra se apaga ANTES de generar nada — así nunca se paga el
+        // costo de armar el PDF con adjuntos embebidos si al final no se
+        // va a usar.
+        if ($this->enviarZip) {
+            $this->incluirAdjuntos = false;
+        }
 
         $this->mensajeExito = '';
 
@@ -106,6 +140,13 @@ new class extends Component
             ? GuardiaPdfGenerator::generarConAdjuntos($this->guardia)
             : GuardiaPdfGenerator::generar($this->guardia)->output();
 
+        // El ZIP (PDF + adjuntos crudos, sin embeber) también se arma una
+        // sola vez y se reutiliza en los N envíos. Mutuamente excluyente
+        // con $incluirAdjuntos (ver updatedIncluirAdjuntos/updatedEnviarZip).
+        $zipContent = $this->enviarZip
+            ? GuardiaZipGenerator::generar($this->guardia, $pdfContent)
+            : null;
+
         $fallidos = 0;
 
         foreach ($usuarios as $usuario) {
@@ -115,6 +156,8 @@ new class extends Component
                 $nombreRemitente,
                 $this->incluirAdjuntos,
                 $pdfContent,
+                $this->enviarZip,
+                $zipContent,
             );
 
             if ($enviado === false) {
@@ -129,6 +172,7 @@ new class extends Component
                 'destinatarios' => $usuarios->pluck('email'),
                 'modo' => $this->modoSeleccion,
                 'con_adjuntos' => $this->incluirAdjuntos,
+                'con_zip' => $this->enviarZip,
             ])
             ->log("Envió las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
 

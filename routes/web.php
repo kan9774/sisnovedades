@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\AdjuntoController;
 use App\Http\Controllers\Admin\EstadoPalomaController;
+use App\Http\Controllers\ForzarCambioPasswordController;
 use App\Http\Controllers\NovedadesController;
 use App\Http\Controllers\GuardiaController;
 use App\Http\Controllers\UserController;
@@ -62,8 +63,13 @@ require __DIR__ . '/settings.php';
 //Auth::routes();
 
 // Rutas protegidas
+Route::middleware(['auth'])->group(function () {
+    Route::get('/password/forzar-cambio', [ForzarCambioPasswordController::class, 'edit'])
+        ->name('password.forzar-cambio');
+    Route::put('/password/forzar-cambio', [ForzarCambioPasswordController::class, 'update'])
+        ->name('password.forzar-cambio.update');
+});
 Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
-
     // Admin
     Route::prefix('admin')->name('admin.')->group(function () {
 

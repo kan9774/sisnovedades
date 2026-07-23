@@ -113,7 +113,10 @@ class GuardiaController extends Controller
     {
         //
         $this->authorize('create', Guard::class);
-        $capitanes = User::whereHas('rol', fn($q) => $q->where('name', 'capitan_de_servicio'))->get();
+        $capitanes = User::whereHas('rol', fn($q) => $q->where('name', 'capitan_de_servicio'))
+            ->get()
+            ->reject(fn($u) => $u->isSuperAdmin())
+            ->values();
         $oficiales = User::whereHas('rol', fn($q) => $q->where('name', 'oficial_de_dia'))->get();
         $escribientes = User::whereHas('rol', fn($q) => $q->where('name', 'escribiente'))->get();
         $tiposVehiculo = TipoVehiculo::where('activo', true)->orderBy('nombre')->get();
@@ -161,7 +164,10 @@ class GuardiaController extends Controller
     {
         $this->authorize('update', $guardia);
 
-        $capitanes = User::whereHas('rol', fn($q) => $q->where('name', 'capitan_de_servicio'))->get();
+        $capitanes = User::whereHas('rol', fn($q) => $q->where('name', 'capitan_de_servicio'))
+            ->get()
+            ->reject(fn($u) => $u->isSuperAdmin())
+            ->values();
         $oficiales = User::whereHas('rol', fn($q) => $q->where('name', 'oficial_de_dia'))->get();
         $escribientes = User::whereHas('rol', fn($q) => $q->where('name', 'escribiente'))->get();
 

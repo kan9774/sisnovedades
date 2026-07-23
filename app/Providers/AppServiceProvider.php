@@ -56,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
         'novedades.test',
         'localhost',
         '127.0.0.1',
-        'sisnovedades.lan',
+        'sisnovedades',
         '192.168.1.9',
     ];
 
@@ -153,7 +153,7 @@ class AppServiceProvider extends ServiceProvider
 
         Password::defaults(
             fn(): ?Password => app()->isProduction()
-                ? Password::min(12)
+                ? Password::min(8)
                 ->mixedCase()
                 ->letters()
                 ->numbers()

@@ -37,7 +37,7 @@ new class extends Component
     public string $clasification = '';
     public string $organismo_id = '';
     public string $organismo_nuevo = '';
-    public $archivo = null;
+    public array $archivos = [];
 
     public function mount(Guard $guardia, bool $puedeOperarGuardia = false): void
     {
@@ -82,7 +82,7 @@ new class extends Component
             'clasification',
             'organismo_id',
             'organismo_nuevo',
-            'archivo',
+            'archivos',
         ]);
         $this->time = now()->format('H:i');
         $this->dispatch('abrir-modal-novedad');
@@ -106,9 +106,15 @@ new class extends Component
         $this->clasification = $novedad->clasification;
         $this->organismo_id = (string) ($novedad->organismo_id ?? '');
         $this->organismo_nuevo = '';
-        $this->archivo = null;
+        $this->archivos = [];
 
         $this->dispatch('abrir-modal-novedad');
+    }
+
+    public function quitarArchivo(int $index): void
+    {
+        unset($this->archivos[$index]);
+        $this->archivos = array_values($this->archivos);
     }
 
     public function guardar(): void
@@ -130,7 +136,8 @@ new class extends Component
         ];
 
         if (!$this->editandoId) {
-            $rules['archivo'] = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
+            $rules['archivos'] = ['nullable', 'array', 'max:5'];
+            $rules['archivos.*'] = ['file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
         }
 
         $data = $this->validate($rules);
@@ -214,21 +221,24 @@ new class extends Component
                 'estado_atencion' => $data['direction'] === 'Recibido' ? 'pendiente' : null,
             ]);
 
-            if ($this->archivo) {
+            if (!empty($this->archivos)) {
                 $fecha      = $this->guardia->date->format('dmY');
                 $carpeta    = $data['direction'] === 'Recibido' ? 'Recibidos' : 'Expedidos';
                 $directorio = "{$fecha}/{$carpeta}";
-                $nombre     = time() . '_' . $this->archivo->getClientOriginalName();
-                $ruta       = $this->archivo->storeAs($directorio, $nombre, 'guardias');
 
-                Attach::create([
-                    'news_id'   => $novedad->id,
-                    'user_id'   => Auth::id(),
-                    'file_name' => $this->archivo->getClientOriginalName(),
-                    'file_path' => $ruta,
-                    'file_type' => $this->archivo->getMimeType(),
-                    'file_size' => $this->archivo->getSize(),
-                ]);
+                foreach ($this->archivos as $archivo) {
+                    $nombre = time() . '_' . uniqid() . '_' . $archivo->getClientOriginalName();
+                    $ruta   = $archivo->storeAs($directorio, $nombre, 'guardias');
+
+                    Attach::create([
+                        'news_id'   => $novedad->id,
+                        'user_id'   => Auth::id(),
+                        'file_name' => $archivo->getClientOriginalName(),
+                        'file_path' => $ruta,
+                        'file_type' => $archivo->getMimeType(),
+                        'file_size' => $archivo->getSize(),
+                    ]);
+                }
             }
 
             if ($novedad->office_id && $novedad->direction === 'Recibido') {

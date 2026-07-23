@@ -22,12 +22,12 @@ class ProcesarRebotesCommand extends Command
             $clientManager = new ClientManager();
 
             $client = $clientManager->make([
-                'host'          => 'imap.gmail.com',
-                'port'          => 993,
-                'encryption'    => 'ssl',
+                'host'          => config('mail.bounce_imap.host'),
+                'port'          => config('mail.bounce_imap.port'),
+                'encryption'    => config('mail.bounce_imap.encryption'),
                 'validate_cert' => true,
-                'username'      => config('mail.mailers.smtp.username', env('MAIL_USERNAME')),
-                'password'      => config('mail.mailers.smtp.password', env('MAIL_PASSWORD')),
+                'username'      => config('mail.bounce_imap.username'),
+                'password'      => config('mail.bounce_imap.password'),
                 'protocol'      => 'imap',
             ]);
 
@@ -39,7 +39,7 @@ class ProcesarRebotesCommand extends Command
         }
 
         $folder = $client->getFolder('INBOX');
-        $mensajes = $folder->messages()->unseen()->get();
+        $mensajes = $folder->messages()->unseen()->leaveUnread()->get();
 
         $this->info("Mensajes no leídos encontrados: {$mensajes->count()}");
 

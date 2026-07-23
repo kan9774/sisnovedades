@@ -175,7 +175,7 @@ return [
     */
 
     'features' => [
-        // Features::registration(), // Deshabilitado: alta de usuarios solo por el panel (admin/SuperAdmin), no autoservicio
+        Features::registration(), // Deshabilitado: alta de usuarios solo por el panel (admin/SuperAdmin), no autoservicio
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

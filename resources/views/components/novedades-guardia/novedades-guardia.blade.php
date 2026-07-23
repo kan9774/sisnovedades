@@ -91,16 +91,23 @@
         <div class="mt-3">{{ $this->novedades->links() }}</div>
     @endif
 
-    {{-- Modal --}}
-    <div class="modal fade" id="modalNovedad" tabindex="-1" wire:ignore.self style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content" style="backdrop-filter: blur(10px);">
-                <form wire:submit="guardar" style="--bs-form-control-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);">
-                    <div class="modal-header" style="background-color: #eef2ff !important;">
-                        <h5 class="modal-title">{{ $editandoId ? 'Editar Novedad' : 'Registrar Novedad' }}</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    {{-- Panel pantalla completa --}}
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalNovedad" wire:ignore.self>
+        <div class="ops-panel">
+            <form wire:submit="guardar" class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">BCOM1 · Tráfico de Guardia</span>
+                        <h5 class="ops-panel__title">{{ $editandoId ? 'Editar Novedad' : 'Registrar Novedad' }}</h5>
                     </div>
-                    <div class="modal-body">
+                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalNovedad')" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
@@ -239,48 +246,53 @@
                         @if (!$editandoId)
                             <div class="form-group">
                                 <label>
-                                    Adjunto
-                                    <small class="text-muted">(opcional, max: 10MB)</small>
+                                    Adjuntos
+                                    <small class="text-muted">(opcional, hasta 5 archivos, max: 10MB c/u)</small>
                                 </label>
 
-                                @if (!$archivo)
-                                    <input type="file" wire:model="archivo"
-                                        class="form-control @error('archivo') is-invalid @enderror"
-                                        accept=".pdf,.jpg,.jpeg,.png">
-                                @endif
+                                <input type="file" wire:model="archivos" multiple
+                                    class="form-control @error('archivos') is-invalid @enderror @error('archivos.*') is-invalid @enderror"
+                                    accept=".pdf,.jpg,.jpeg,.png">
 
-                                <div wire:loading wire:target="archivo" class="text-muted small mt-2">
-                                    <i class="fas fa-spinner fa-spin"></i> Subiendo archivo...
+                                <div wire:loading wire:target="archivos" class="text-muted small mt-2">
+                                    <i class="fas fa-spinner fa-spin"></i> Subiendo archivo(s)...
                                 </div>
 
-                                @error('archivo')
+                                @error('archivos')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                                @error('archivos.*')
                                     <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror
 
-                                @if ($archivo)
-                                    <div wire:loading.remove wire:target="archivo"
-                                        class="d-flex justify-content-between align-items-center border rounded p-2 mt-2">
-                                        <div class="d-flex align-items-center">
-                                            @if (str_starts_with($archivo->getMimeType() ?? '', 'image/'))
-                                                <img src="{{ $archivo->temporaryUrl() }}" alt="Vista previa"
-                                                    class="rounded mr-2"
-                                                    style="width: 42px; height: 42px; object-fit: cover;">
-                                            @else
-                                                <i class="fas fa-file-pdf text-danger fa-2x mr-2"></i>
-                                            @endif
-                                            <div>
-                                                <div class="font-weight-bold" style="font-size: 0.875rem;">
-                                                    {{ $archivo->getClientOriginalName() }}
+                                @if (!empty($archivos))
+                                    <div wire:loading.remove wire:target="archivos" class="mt-2">
+                                        @foreach ($archivos as $index => $archivoItem)
+                                            <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-1"
+                                                wire:key="archivo-preview-{{ $index }}">
+                                                <div class="d-flex align-items-center">
+                                                    @if (str_starts_with($archivoItem->getMimeType() ?? '', 'image/'))
+                                                        <img src="{{ $archivoItem->temporaryUrl() }}" alt="Vista previa"
+                                                            class="rounded mr-2"
+                                                            style="width: 42px; height: 42px; object-fit: cover;">
+                                                    @else
+                                                        <i class="fas fa-file-pdf text-danger fa-2x mr-2"></i>
+                                                    @endif
+                                                    <div>
+                                                        <div class="font-weight-bold" style="font-size: 0.875rem;">
+                                                            {{ $archivoItem->getClientOriginalName() }}
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            {{ number_format($archivoItem->getSize() / 1024, 0) }} KB
+                                                        </small>
+                                                    </div>
                                                 </div>
-                                                <small class="text-muted">
-                                                    {{ number_format($archivo->getSize() / 1024, 0) }} KB
-                                                </small>
+                                                <button type="button" wire:click="quitarArchivo({{ $index }})"
+                                                    class="btn btn-outline-danger btn-xs" title="Quitar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </div>
-                                        </div>
-                                        <button type="button" wire:click="quitarArchivo"
-                                            class="btn btn-outline-danger btn-xs" title="Quitar y elegir otro">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        @endforeach
                                     </div>
                                 @endif
                             </div>
@@ -292,24 +304,150 @@
                             </div>
                         @endif
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary"
-                            data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;">
-                            <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
-                            <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
-                                Guardando...</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalNovedad')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;">
+                        <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
+                        <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
+                            Guardando...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+    </template>
 </div>
+
+<style>
+    .ops-panel-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1060;
+        background: #f4f5f7;
+    }
+
+    .ops-panel-overlay.is-open {
+        display: block;
+        animation: opsPanelFadeIn .16s ease-out;
+    }
+
+    .ops-panel {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+    }
+
+    .ops-panel__form {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .ops-panel__header {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.75rem;
+        background: #0A0E13;
+        border-bottom: 3px solid #FF5A1F;
+    }
+
+    .ops-panel__eyebrow {
+        display: block;
+        color: #FF5A1F;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .ops-panel__title {
+        color: #fff;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .ops-panel__close {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #fff;
+        border-radius: 6px;
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .15s, border-color .15s;
+    }
+
+    .ops-panel__close:hover {
+        background: rgba(255, 90, 31, 0.15);
+        border-color: #FF5A1F;
+        color: #FF5A1F;
+    }
+
+    .ops-panel__body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 2rem 1.75rem;
+    }
+
+    .ops-panel__content {
+        max-width: 900px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .ops-panel__footer {
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: flex-end;
+        gap: .5rem;
+        padding: 1rem 1.75rem;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    @keyframes opsPanelFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body.ops-panel-open {
+        overflow: hidden;
+    }
+</style>
 
 @script
     <script>
-        $wire.on('abrir-modal-novedad', () => $('#modalNovedad').modal('show'));
-        $wire.on('cerrar-modal-novedad', () => $('#modalNovedad').modal('hide'));
+        if (!window.cerrarOpsPanel) {
+            window.cerrarOpsPanel = function (id) {
+                const overlay = document.getElementById(id);
+                if (overlay) {
+                    overlay.classList.remove('is-open');
+                }
+                document.body.classList.remove('ops-panel-open');
+            };
+        }
+
+        $wire.on('abrir-modal-novedad', () => {
+            document.getElementById('modalNovedad').classList.add('is-open');
+            document.body.classList.add('ops-panel-open');
+        });
+
+        $wire.on('cerrar-modal-novedad', () => {
+            cerrarOpsPanel('modalNovedad');
+        });
     </script>
 @endscript

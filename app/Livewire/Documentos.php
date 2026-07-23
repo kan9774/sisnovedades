@@ -412,7 +412,7 @@ class Documentos extends Component
         }
 
         $this->previewDocumento = $documento;
-        $this->previewUrl = Storage::disk('public')->url($documento->archivo_path);
+        $this->previewUrl = asset('storage/' . $documento->archivo_path);
         $this->showPreview = true;
     }
 
