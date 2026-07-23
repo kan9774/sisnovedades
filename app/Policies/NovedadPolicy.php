@@ -58,38 +58,30 @@ class NovedadPolicy
 
     /**
      * Determine whether the user can update the model.
+     *
+     * Alineado con $puedeOperarGuardia de la vista: cualquier miembro de la
+     * guardia (capitán, oficial o escribiente asignado) puede editar
+     * cualquier novedad de esa guardia, no solo la propia. Ya no depende de
+     * los permisos 'editar_novedad_propia' / 'editar_cualquier_novedad'.
      */
     public function update(User $user, News $news): bool
     {
-        // Puede editar la propia
         $guardia = $news->guardia;
 
-        if ($news->user_id === $user->id) {
-            return $user->HasPermisos('editar_novedad_propia');
-        }
-        $perteneceAGuardia = $guardia->captain_id === $user->id
-            || $guardia->oficer_id === $user->id;
-        if ($perteneceAGuardia) {
-            return $user->HasPermisos('editar_cualquier_novedad');
-        }
-        return $user->isAdmin();
+        return $guardia->esMiembro($user) || $user->isAdmin();
     }
 
     /**
      * Determine whether the user can delete the model.
+     *
+     * Misma regla que update(): miembro de la guardia o admin. Ya no
+     * depende del permiso 'eliminar_novedad'.
      */
     public function delete(User $user, News $news): bool
     {
         $guardia = $news->guardia;
 
-        $perteneceAGuardia = $guardia->captain_id === $user->id
-            || $guardia->oficer_id === $user->id;
-
-        if ($perteneceAGuardia) {
-            return $user->HasPermisos('eliminar_novedad');
-        }
-
-        return $user->isAdmin();
+        return $guardia->esMiembro($user) || $user->isAdmin();
     }
     public function tomar(User $user, News $news): bool
     {

@@ -285,13 +285,13 @@
                                 <select name="estado" id="estado"
                                     class="form-control @error('estado') is-invalid @enderror">
                                     <option value="verde" {{ old('estado', 'verde') == 'verde' ? 'selected' : '' }}>
-                                        🟢 Verde</option>
+                                         Verde</option>
                                     <option value="amarillo" {{ old('estado') == 'amarillo' ? 'selected' : '' }}>
-                                        🟡 Amarillo</option>
+                                         Amarillo</option>
                                     <option value="rojo" {{ old('estado') == 'rojo' ? 'selected' : '' }}>
-                                        🔴 Rojo</option>
+                                         Rojo</option>
                                     <option value="negro" {{ old('estado') == 'negro' ? 'selected' : '' }}>
-                                        ⚫ Negro</option>
+                                         Negro</option>
                                 </select>
                                 @error('estado')
                                     <span class="invalid-feedback">{{ $message }}</span>

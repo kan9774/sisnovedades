@@ -119,19 +119,23 @@
         </div>
     @endif
 
-    {{-- Modal --}}
-    @if ($showModal)
-    <div class="modal d-block" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="cerrarModal" wire:keydown.escape="cerrarModal">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content" style="backdrop-filter: blur(10px);">
-                <form wire:submit="guardar">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            {{ $editandoId ? 'Editar Salida' : 'Registrar Salida' }}
-                        </h5>
-                        <button type="button" class="close" wire:click="cerrarModal"><span>&times;</span></button>
+    {{-- Panel pantalla completa: crear/editar salida --}}
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalSalida" wire:ignore.self>
+        <div class="ops-panel">
+            <form wire:submit="guardar" class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">BCOM1 · Salidas de Vehículos</span>
+                        <h5 class="ops-panel__title">{{ $editandoId ? 'Editar Salida' : 'Registrar Salida' }}</h5>
                     </div>
-                    <div class="modal-body">
+                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalSalida')" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -213,101 +217,252 @@
                             @error('comision') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" wire:click="cerrarModal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); border: none;">
-                            <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
-                            <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalSalida')">Cancelar</button>
+                    <button type="submit" class="btn" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important; color: #0B2545 !important; font-weight: 700; box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important; border: none;">
+                        <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
+                        <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-@endif
+    </template>
 
-    {{-- Modal Boleta de Cierre --}}
-    @if ($showBoletaModal)
-    <div class="modal d-block" style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;" wire:click.self="cerrarBoletaModal" wire:keydown.escape="cerrarBoletaModal">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content" style="backdrop-filter: blur(10px);">
-                <form wire:submit="guardarBoleta">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            @if ($salida->boletaCierre)
-                                ✏️ Editar Boleta de Cierre
+    {{-- Panel pantalla completa: boleta de cierre --}}
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalBoletaCierre" wire:ignore.self>
+        <div class="ops-panel">
+            <form wire:submit="guardarBoleta" class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">BCOM1 · Salidas de Vehículos</span>
+                        <h5 class="ops-panel__title">
+                            @if ($salida?->boletaCierre)
+                                Editar Boleta de Cierre
                             @else
-                                📋 Boleta de Cierre
+                                Boleta de Cierre
                             @endif
                         </h5>
-                        <button type="button" class="close" wire:click="cerrarBoletaModal"><span>&times;</span></button>
                     </div>
-                    <div class="modal-body">
-                        {{-- Info de la salida --}}
-                        <div class="alert alert-info mb-3">
-                            <strong>Salida #{{ $salida->id }}</strong> — {{ $salida->vehiculo->matricula }}<br>
-                            Conductor: {{ $salida->conductor->nombre_visible }}<br>
-                            Salida: {{ $salida->guardia->date->format('d/m/Y') }} a las {{ $salida->hora_sale?->format('H:i') }}<br>
-                            @if ($salida->kms_sale)
-                                Km Sale: <strong>{{ $salida->kms_sale }}</strong>
+                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalBoletaCierre')" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
+                        @if ($salida)
+                            {{-- Info de la salida --}}
+                            <div class="alert alert-info mb-3">
+                                <strong>Salida #{{ $salida->id }}</strong> — {{ $salida->vehiculo->matricula }}<br>
+                                Conductor: {{ $salida->conductor->nombre_visible }}<br>
+                                Salida: {{ $salida->guardia->date->format('d/m/Y') }} a las {{ $salida->hora_sale?->format('H:i') }}<br>
+                                @if ($salida->kms_sale)
+                                    Km Sale: <strong>{{ $salida->kms_sale }}</strong>
+                                @endif
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Fecha de regreso <span class="text-danger">*</span></label>
+                                        <input type="date" wire:model.live="boleta_fecha_entra" class="form-control @error('boleta_fecha_entra') is-invalid @enderror">
+                                        @error('boleta_fecha_entra') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Hora de regreso <span class="text-danger">*</span></label>
+                                        <input type="time" wire:model.live="boleta_hora_entra" class="form-control @error('boleta_hora_entra') is-invalid @enderror">
+                                        @error('boleta_hora_entra') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Km al regreso <span class="text-danger">*</span></label>
+                                        <input type="number" min="0" wire:model.live="boleta_kms_entra" class="form-control @error('boleta_kms_entra') is-invalid @enderror">
+                                        @error('boleta_kms_entra') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Observaciones</label>
+                                        <input type="text" wire:model.live="boleta_observaciones" class="form-control @error('boleta_observaciones') is-invalid @enderror" maxlength="500">
+                                        @error('boleta_observaciones') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Preview del cálculo --}}
+                            @if ($boleta_kms_entra && $salida->kms_sale && $boleta_kms_entra > $salida->kms_sale)
+                            <div class="alert alert-success mt-3">
+                                <strong>Cálculo automático:</strong><br>
+                                Kms Recorridos: <strong>{{ $boleta_kms_entra - $salida->kms_sale }}</strong> km
+                                @if ($salida->vehiculo && $salida->vehiculo->consumo_litros_por_km)
+                                    <br>Litros estimados: <strong>{{ number_format(($boleta_kms_entra - $salida->kms_sale) * $salida->vehiculo->consumo_litros_por_km, 2) }} L</strong>
+                                @endif
+                            </div>
                             @endif
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Fecha de regreso <span class="text-danger">*</span></label>
-                                    <input type="date" wire:model.live="boleta_fecha_entra" class="form-control @error('boleta_fecha_entra') is-invalid @enderror">
-                                    @error('boleta_fecha_entra') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Hora de regreso <span class="text-danger">*</span></label>
-                                    <input type="time" wire:model.live="boleta_hora_entra" class="form-control @error('boleta_hora_entra') is-invalid @enderror">
-                                    @error('boleta_hora_entra') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Km al regreso <span class="text-danger">*</span></label>
-                                    <input type="number" min="0" wire:model.live="boleta_kms_entra" class="form-control @error('boleta_kms_entra') is-invalid @enderror">
-                                    @error('boleta_kms_entra') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Observaciones</label>
-                                    <input type="text" wire:model.live="boleta_observaciones" class="form-control @error('boleta_observaciones') is-invalid @enderror" maxlength="500">
-                                    @error('boleta_observaciones') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Preview del cálculo --}}
-                        @if ($boleta_kms_entra && $salida->kms_sale && $boleta_kms_entra > $salida->kms_sale)
-                        <div class="alert alert-success mt-3">
-                            <strong>📊 Cálculo automático:</strong><br>
-                            Kms Recorridos: <strong>{{ $boleta_kms_entra - $salida->kms_sale }}</strong> km
-                            @if ($salida->vehiculo && $salida->vehiculo->consumo_litros_por_km)
-                                <br>Litros estimados: <strong>{{ number_format(($boleta_kms_entra - $salida->kms_sale) * $salida->vehiculo->consumo_litros_por_km, 2) }} L</strong>
-                            @endif
-                        </div>
                         @endif
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" wire:click="cerrarBoletaModal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardarBoleta" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%); box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4); border: none;">
-                            <span wire:loading.remove wire:target="guardarBoleta"><i class="fas fa-save"></i> Guardar Boleta</span>
-                            <span wire:loading wire:target="guardarBoleta"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalBoletaCierre')">Cancelar</button>
+                    <button type="submit" class="btn" wire:loading.attr="disabled" wire:target="guardarBoleta" style="background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important; color: #0B2545 !important; font-weight: 700; box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important; border: none;">
+                        <span wire:loading.remove wire:target="guardarBoleta"><i class="fas fa-save"></i> Guardar Boleta</span>
+                        <span wire:loading wire:target="guardarBoleta"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-    @endif
+    </template>
 </div>
+
+<style>
+    .ops-panel-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1060;
+        background: #f4f5f7;
+    }
+
+    .ops-panel-overlay.is-open {
+        display: block;
+        animation: opsPanelFadeIn .16s ease-out;
+    }
+
+    .ops-panel {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+    }
+
+    .ops-panel__form {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .ops-panel__header {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.75rem;
+        background: linear-gradient(135deg, #0B2545 0%, #0F3460 100%);
+        border-bottom: 4px solid #FFD200;
+    }
+
+    .ops-panel__eyebrow {
+        display: block;
+        color: #FFD200;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .ops-panel__title {
+        color: #fff;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .ops-panel__close {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #fff;
+        border-radius: 6px;
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .15s, border-color .15s;
+    }
+
+    .ops-panel__close:hover {
+        background: rgba(255, 210, 0, 0.18);
+        border-color: #FFD200;
+        color: #FFD200;
+    }
+
+    .ops-panel__body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 2rem 1.75rem;
+    }
+
+    .ops-panel__content {
+        max-width: 900px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .ops-panel__footer {
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: flex-end;
+        gap: .5rem;
+        padding: 1rem 1.75rem;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    @keyframes opsPanelFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body.ops-panel-open {
+        overflow: hidden;
+    }
+</style>
+
+@script
+    <script>
+        if (!window.cerrarOpsPanel) {
+            window.cerrarOpsPanel = function (id) {
+                const overlay = document.getElementById(id);
+                if (overlay) {
+                    overlay.classList.remove('is-open');
+                }
+                document.body.classList.remove('ops-panel-open');
+            };
+        }
+
+        $wire.on('abrir-modal-salida', () => {
+            document.getElementById('modalSalida').classList.add('is-open');
+            document.body.classList.add('ops-panel-open');
+        });
+
+        $wire.on('cerrar-modal-salida', () => {
+            cerrarOpsPanel('modalSalida');
+        });
+
+        $wire.on('abrir-modal-boleta', () => {
+            document.getElementById('modalBoletaCierre').classList.add('is-open');
+            document.body.classList.add('ops-panel-open');
+        });
+
+        $wire.on('cerrar-modal-boleta', () => {
+            cerrarOpsPanel('modalBoletaCierre');
+        });
+    </script>
+@endscript

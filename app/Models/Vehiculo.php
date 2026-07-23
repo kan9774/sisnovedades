@@ -101,10 +101,10 @@ class Vehiculo extends Model
     public function getEstadoLabelAttribute(): string
     {
         return match ($this->estado) {
-            'verde'    => '🟢 OK',
-            'amarillo' => '🟡 Observación',
-            'rojo'     => '🔴 Fuera de servicio',
-            'negro'    => '⚫ Dado de baja',
+            'verde'    => 'OK',
+            'amarillo' => 'Observación',
+            'rojo'     => 'Fuera de servicio',
+            'negro'    => 'Dado de baja',
             default    => 'Desconocido',
         };
     }

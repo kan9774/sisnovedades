@@ -71,17 +71,23 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Rol</label>
-                        <select name="rol_id" class="form-control @error('rol_id') is-invalid @enderror" required>
-                            <option value="">-- Seleccionar --</option>
+                        <label>Roles</label>
+                        <div class="row">
                             @foreach ($roles as $rol)
-                                <option value="{{ $rol->id }}" {{ old('rol_id') == $rol->id ? 'selected' : '' }}>
-                                    {{ ucfirst(str_replace('_', ' ', $rol->name)) }}
-                                </option>
+                                <div class="col-md-4">
+                                    <div class="custom-control custom-checkbox mb-2">
+                                        <input type="checkbox" class="custom-control-input" id="rol_{{ $rol->id }}"
+                                            name="roles[]" value="{{ $rol->id }}"
+                                            {{ in_array($rol->id, old('roles', [])) ? 'checked' : '' }}>
+                                        <label class="custom-control-label" for="rol_{{ $rol->id }}">
+                                            {{ ucfirst(str_replace('_', ' ', $rol->name)) }}
+                                        </label>
+                                    </div>
+                                </div>
                             @endforeach
-                        </select>
-                        @error('rol_id')
-                            <span class="invalid-feedback">{{ $message }}</span>
+                        </div>
+                        @error('roles')
+                            <span class="text-danger small d-block mt-1">{{ $message }}</span>
                         @enderror
                     </div>
                     <div class="form-group">

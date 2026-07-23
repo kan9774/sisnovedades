@@ -13,13 +13,10 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 
 new class extends Component
 {
-    use WithPagination, WithFileUploads;
-
-    protected string $paginationTheme = 'bootstrap';
+    use WithFileUploads;
 
     public Guard $guardia;
     public bool $puedeOperarGuardia = false;
@@ -58,12 +55,30 @@ new class extends Component
     }
 
     #[Computed]
-    public function novedades()
+    public function novedadesAgrupadas()
     {
-        return $this->guardia->novedades()
+        // Sin paginación a propósito: agrupar por dirección/tipo/hora solo
+        // tiene sentido viendo el conjunto completo de la guardia (un día),
+        // no fragmentado en páginas de 8. El volumen de una guardia no
+        // amerita paginar.
+        $todas = $this->guardia->novedades()
             ->with(['oficina', 'tomadoPor'])
             ->orderBy('time')
-            ->paginate(8);
+            ->get();
+
+        // Orden fijo de subgrupos dentro de cada dirección, para que
+        // Radio siempre aparezca antes que Correo Electrónico y Fax,
+        // sin importar cuál tenga más registros.
+        $ordenTipos = ['Radio' => 0, 'Correo Electrónico' => 1, 'Fax' => 2];
+
+        return $todas
+            ->groupBy('direction')
+            ->map(function ($porDireccion) use ($ordenTipos) {
+                return $porDireccion
+                    ->groupBy('type')
+                    ->sortBy(fn ($grupo, $tipo) => $ordenTipos[$tipo] ?? 99)
+                    ->map(fn ($grupo) => $grupo->sortBy('time')->values());
+            });
     }
 
     public function abrirCrear(): void
@@ -252,7 +267,7 @@ new class extends Component
             }
         }
 
-        unset($this->novedades);
+        unset($this->novedadesAgrupadas);
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
         $this->dispatch('cerrar-modal-novedad');
     }
@@ -263,7 +278,7 @@ new class extends Component
         $this->authorize('delete', $novedad);
 
         $novedad->delete();
-        unset($this->novedades);
+        unset($this->novedadesAgrupadas);
 
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
     }

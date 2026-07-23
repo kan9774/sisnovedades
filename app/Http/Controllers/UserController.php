@@ -23,11 +23,11 @@ class UserController extends Controller
 
         if (auth()->user()->isSuperAdmin()) {
             // El SuperAdmin ve a todos, incluidos admins y a sí mismo.
-            $users = User::with('rol')->get();
+            $users = User::with('roles')->get();
         } else {
-            // Un admin normal no ve admins ni SuperAdmins.
-            $users = User::with('rol')
-                ->whereHas('rol', fn($q) => $q->where('name', '!=', 'admin'))
+            // Un admin normal no ve a nadie que tenga el rol admin, ni a SuperAdmins.
+            $users = User::with('roles')
+                ->whereDoesntHave('roles', fn($q) => $q->where('name', 'admin'))
                 ->where('is_super_admin', false)
                 ->get();
         }
@@ -82,7 +82,12 @@ class UserController extends Controller
     public function create()
     {
         $this->authorize('create', User::class);
-        $roles = Rol::where('name', '!=', 'admin')->get();
+
+        if (auth()->user()->isSuperAdmin()) {
+            $roles = Rol::all();
+        } else {
+            $roles = Rol::where('name', '!=', 'admin')->get();
+        }
         $unidades = Unidad::where('activo', true)->orderBy('nombre')->get();
         $oficinas = Oficina::where('activo', true)->orderBy('nombre')->get();
 
@@ -92,38 +97,46 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', User::class);
-        // Validate the request
+
         $data = $request->validate([
-            'name'      => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'grade'     => 'required|string|max:255',
-            'email'     => 'required|email|unique:users,email',
-            'password'  => 'required|string|min:6|confirmed',
-            'rol_id'    => 'required|exists:rols,id',
-            'unidad_id' => 'required|exists:unidades,id',
+            'name'       => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'grade'      => 'required|string|max:255',
+            'email'      => 'required|email|unique:users,email',
+            'password'   => 'required|string|min:6|confirmed',
+            'roles'      => 'required|array|min:1',
+            'roles.*'    => 'exists:rols,id',
+            'unidad_id'  => 'required|exists:unidades,id',
             'oficina_id' => 'nullable|exists:oficinas,id',
         ]);
+
         $isSuperAdmin = $request->boolean('is_super_admin') && auth()->user()->isSuperAdmin();
 
-        User::create([
+        // Solo un SuperAdmin puede asignar el rol "admin", aunque alguien
+        // manipule el form y mande ese id igual.
+        $roles = $this->filtrarRolesPermitidos($data['roles']);
+
+        $user = User::create([
             'name'           => $data['name'],
             'last_name'      => $data['last_name'],
             'grade'          => $data['grade'],
             'email'          => $data['email'],
             'password'       => Hash::make($data['password']),
-            'rol_id'         => $data['rol_id'],
             'unidad_id'      => $data['unidad_id'],
             'status'         => 'active',
             'is_super_admin' => $isSuperAdmin,
-            'oficina_id' => $data['oficina_id'] ?? null,
+            'oficina_id'     => $data['oficina_id'] ?? null,
             // Vos definiste la contraseña a mano, así que la tiene que
             // cambiar apenas entre por primera vez.
             'must_change_password' => true,
         ]);
 
+        $user->roles()->sync($roles);
+
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario creado correctamente.');
     }
+
     public function show(string $id)
     {
         //
@@ -131,10 +144,15 @@ class UserController extends Controller
 
     public function edit(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('roles')->findOrFail($id);
         $this->authorize('update', $user);
 
-        $roles = Rol::where('name', '!=', 'admin')->get();
+        if (auth()->user()->isSuperAdmin()) {
+            $roles = Rol::all();
+        } else {
+            $roles = Rol::where('name', '!=', 'admin')->get();
+        }
+
         $permisos = Permission::orderBy('name')->get();
         $unidades = Unidad::where('activo', true)
             ->orWhere('id', $user->unidad_id)
@@ -154,13 +172,14 @@ class UserController extends Controller
         $this->authorize('assignPermissions', $user);
 
         $data = $request->validate([
-            'name'      => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'grade'     => 'required|string|max:255',
-            'email'     => 'required|email|unique:users,email,' . $user->id,
-            'rol_id'    => 'required|exists:rols,id',
-            'unidad_id' => 'required|exists:unidades,id',
-            'password'  => 'nullable|string|min:6|confirmed',
+            'name'       => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'grade'      => 'required|string|max:255',
+            'email'      => 'required|email|unique:users,email,' . $user->id,
+            'roles'      => 'required|array|min:1',
+            'roles.*'    => 'exists:rols,id',
+            'unidad_id'  => 'required|exists:unidades,id',
+            'password'   => 'nullable|string|min:6|confirmed',
             'permisos_directos'   => 'nullable|array',
             'permisos_directos.*' => 'exists:permissions,id',
             'oficina_id' => 'nullable|exists:oficinas,id',
@@ -170,7 +189,6 @@ class UserController extends Controller
         $user->last_name = $data['last_name'];
         $user->grade     = $data['grade'];
         $user->email     = $data['email'];
-        $user->rol_id    = $data['rol_id'];
         $user->unidad_id = $data['unidad_id'];
         $user->oficina_id = $data['oficina_id'] ?? null;
 
@@ -181,13 +199,10 @@ class UserController extends Controller
             $user->must_change_password = true;
         }
 
-        // Solo un SuperAdmin puede otorgar o quitar el flag de SuperAdmin a otro usuario.
-        // Nadie puede quitarse el flag a sí mismo (evita quedarse sin acceso por error).
-        //if (auth()->user()->isSuperAdmin() && $user->id !== auth()->id()) {
-          //  $user->is_super_admin = $request->boolean('is_super_admin');
-        //}
-
         $user->save();
+
+        $roles = $this->filtrarRolesPermitidos($data['roles']);
+        $user->roles()->sync($roles);
 
         // Solo un admin puede otorgar permisos individuales, para evitar que
         // alguien con permiso de "editar usuarios" se autoasigne privilegios extra.
@@ -197,5 +212,23 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario actualizado correctamente.');
+    }
+
+    /**
+     * Quita el rol "admin" del listado si quien está armando/editando el
+     * usuario no es SuperAdmin, sin importar lo que haya venido en el form.
+     *
+     * @param array<int> $rolesIds
+     * @return array<int>
+     */
+    private function filtrarRolesPermitidos(array $rolesIds): array
+    {
+        if (auth()->user()->isSuperAdmin()) {
+            return $rolesIds;
+        }
+
+        $adminRolId = Rol::where('name', 'admin')->value('id');
+
+        return array_values(array_diff($rolesIds, [$adminRolId]));
     }
 }

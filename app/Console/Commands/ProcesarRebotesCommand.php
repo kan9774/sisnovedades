@@ -45,6 +45,7 @@ class ProcesarRebotesCommand extends Command
 
         $rebotesProcesados = 0;
         $rebotesSinCorrelacion = 0;
+        $rebotesSinEnvioCorrelacionado = 0;
 
         foreach ($mensajes as $mensaje) {
             if (!$this->pareceRebote($mensaje)) {
@@ -71,6 +72,14 @@ class ProcesarRebotesCommand extends Command
             if (!$envioOriginal) {
                 // Rebote real, pero no corresponde a un envío que hicimos
                 // desde este sistema (o ya fue procesado / es muy viejo).
+                // Se loguea para poder distinguir esto de un bug de
+                // correlación (message_id guardado en un formato distinto
+                // al parseado acá) sin tener que revisar el buzón a mano.
+                $rebotesSinEnvioCorrelacionado++;
+                Log::info('ProcesarRebotesCommand: rebote sin envío correlacionado en guardia_correos_enviados', [
+                    'destinatario'        => $datos['destinatario'] ?? null,
+                    'message_id_parseado' => $datos['message_id_original'],
+                ]);
                 $mensaje->setFlag('Seen');
                 continue;
             }
@@ -94,7 +103,7 @@ class ProcesarRebotesCommand extends Command
             $this->info("Rebote registrado: {$datos['destinatario']} (guardia #{$envioOriginal->guardia_id})");
         }
 
-        $this->info("Listo. Rebotes procesados: {$rebotesProcesados}. Sin correlación (revisar a mano): {$rebotesSinCorrelacion}.");
+        $this->info("Listo. Rebotes procesados: {$rebotesProcesados}. Sin correlación (revisar a mano): {$rebotesSinCorrelacion}. Sin envío correlacionado (ver logs): {$rebotesSinEnvioCorrelacionado}.");
 
         return self::SUCCESS;
     }

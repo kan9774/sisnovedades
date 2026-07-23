@@ -42,7 +42,7 @@
                             <th>Grado</th>
                             <th>Nombre</th>
                             <th>Email</th>
-                            <th>Rol</th>
+                            <th>Roles</th>
                             <th>Estado</th>
                             <th class="text-center">Acciones</th>
                         </tr>
@@ -54,11 +54,15 @@
                                 <td>{{ $user->name }} {{ $user->last_name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>
-                                    <span class="badge badge-info">
-                                        {{ $user->rol->name ?? '-' }}
-                                    </span>
+                                    @forelse($user->roles as $rol)
+                                        <span class="badge badge-info mr-1 mb-1">
+                                            {{ ucfirst(str_replace('_', ' ', $rol->name)) }}
+                                        </span>
+                                    @empty
+                                        <span class="badge badge-secondary mb-1">Sin rol</span>
+                                    @endforelse
                                     @if($user->isSuperAdmin())
-                                        <span class="badge badge-dark">SuperAdmin</span>
+                                        <span class="badge badge-dark mb-1">SuperAdmin</span>
                                     @endif
                                 </td>
                                 <td>

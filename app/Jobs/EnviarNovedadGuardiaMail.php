@@ -61,7 +61,15 @@ class EnviarNovedadGuardiaMail
             // Laravel 13 (Symfony Mailer) devuelve el SentMessage con el
             // Message-ID real, que se usa para correlacionar rebotes
             // diferidos (DSN) leídos después por mail:procesar-rebotes.
-            $messageId = $sentMessage?->getMessageId();
+            //
+            // IMPORTANTE: Symfony devuelve el Message-ID CON los signos
+            // <...>, pero el regex que parsea el DSN en
+            // ProcesarRebotesCommand extrae el valor SIN esos signos
+            // (Message-ID:\s*<([^>]+)>). Si acá se guarda con < > nunca
+            // va a matchear contra lo que llega parseado del rebote, y la
+            // correlación falla siempre en silencio. Se normaliza sin
+            // brackets para que ambos lados queden consistentes.
+            $messageId = trim($sentMessage?->getMessageId() ?? '', '<> ');
 
             if ($messageId) {
                 DB::table('guardia_correos_enviados')->insert([

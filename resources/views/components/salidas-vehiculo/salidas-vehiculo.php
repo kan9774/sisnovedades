@@ -20,11 +20,9 @@ new class extends Component
     public bool $puedeOperarGuardia = false;
 
     public ?int $editandoId = null;
-    public bool $showModal = false;
 
     // Boleta de cierre
     public ?int $boletaSalidaId = null;
-    public bool $showBoletaModal = false;
     public string $boleta_fecha_entra = '';
     public string $boleta_hora_entra = '';
     public string $boleta_kms_entra = '';
@@ -134,7 +132,7 @@ new class extends Component
     {
         $this->resetValidation();
         $this->reset(['editandoId', 'vehiculo_id', 'conductor_id', 'tipo_combustible', 'hora_sale', 'hora_entra', 'kms_sale', 'kms_entra', 'comision']);
-        $this->showModal = true;
+        $this->dispatch('abrir-modal-salida');
     }
 
     public function abrirEditar(int $id): void
@@ -153,12 +151,11 @@ new class extends Component
         $this->kms_entra = (string) ($salida->kms_entra ?? '');
         $this->comision = $salida->comision;
 
-        $this->showModal = true;
+        $this->dispatch('abrir-modal-salida');
     }
 
     public function cerrarModal(): void
     {
-        $this->showModal = false;
         $this->editandoId = null;
     }
 
@@ -202,6 +199,7 @@ new class extends Component
         }
 
         $this->cerrarModal();
+        $this->dispatch('cerrar-modal-salida');
     }
 
     public function eliminar(int $id): void
@@ -236,12 +234,11 @@ new class extends Component
             $this->boleta_observaciones = $boleta->observaciones ?? '';
         }
 
-        $this->showBoletaModal = true;
+        $this->dispatch('abrir-modal-boleta');
     }
 
     public function cerrarBoletaModal(): void
     {
-        $this->showBoletaModal = false;
         $this->boletaSalidaId = null;
         $this->salida = null;
     }
@@ -282,6 +279,7 @@ new class extends Component
 
         $this->dispatch('salida-actualizada');
         $this->cerrarBoletaModal();
+        $this->dispatch('cerrar-modal-boleta');
     }
 
     public function render()

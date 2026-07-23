@@ -21,6 +21,7 @@ new class extends Component
     public bool $incluirAdjuntos = false;
     public bool $enviarZip = false;
     public string $mensajeExito = '';
+    public int $fallidosCount = 0;
 
     public function mount(Guard $guardia, bool $puedeOperarGuardia = false): void
     {
@@ -78,6 +79,7 @@ new class extends Component
         $this->incluirAdjuntos = false;
         $this->enviarZip = false;
         $this->mensajeExito = '';
+        $this->fallidosCount = 0;
         $this->dispatch('abrir-modal-enviar-guardia');
     }
 
@@ -178,11 +180,12 @@ new class extends Component
 
         $this->destinatarios = [];
         $this->grupoSeleccionado = null;
+        $this->fallidosCount = $fallidos;
         $this->mensajeExito = $fallidos > 0
-            ? "Se enviaron {$usuarios->count()} correo(s), {$fallidos} fallaron (ver guardia_correos_fallidos)."
+            ? "Se enviaron {$usuarios->count()} correo(s), {$fallidos} fallaron."
             : 'Se enviaron ' . $usuarios->count() . ' correo(s) correctamente.';
 
-        $this->dispatch('novedades-enviadas');
+        $this->dispatch('novedades-enviadas', fallidos: $fallidos);
     }
 
     public function render()

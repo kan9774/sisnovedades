@@ -35,7 +35,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'last_name', 'grade', 'email', 'password', 'rol_id', 'unidad_id', 'oficina_id', 'status', 'is_super_admin'])]
+#[Fillable(['name', 'last_name', 'grade', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {
@@ -71,14 +71,12 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
         return ! is_null($this->email_verified_at);
     }
 
-
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->useLogName('Usuarios'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+            ->useLogName('Usuarios');
     }
 
     // Relación con la unidad a la que pertenece el usuario
@@ -100,7 +98,6 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
             'is_super_admin' => 'boolean',
         ];
     }
-    
 
     /**
      * Get the user's initials
@@ -113,17 +110,22 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
             ? Str::substr($initials, 0, 1) . Str::substr($initials, -1)
             : $initials;
     }
-    public function rol(): BelongsTo
+
+    /**
+     * Roles asignados al usuario. Un usuario puede tener más de uno.
+     */
+    public function roles(): BelongsToMany
     {
-        return $this->belongsTo(Rol::class, 'rol_id');
+        return $this->belongsToMany(Rol::class, 'role_user', 'user_id', 'rol_id');
     }
+
     public function oficina(): BelongsTo
     {
         return $this->belongsTo(Oficina::class);
     }
 
     /**
-     * Permisos asignados directamente al usuario, además de los de su rol.
+     * Permisos asignados directamente al usuario, además de los de sus roles.
      */
     public function permisosDirectos(): BelongsToMany
     {
@@ -152,11 +154,19 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     }
 
     /**
+     * Verificar si el usuario tiene un rol determinado por nombre.
+     */
+    public function tieneRol(string $nombre): bool
+    {
+        return $this->roles->contains('name', $nombre);
+    }
+
+    /**
      * Verificar si el usuario es Admin (incluye Super Admin)
      */
     public function isAdmin(): bool
     {
-        return $this->rol?->name === 'admin' || $this->isSuperAdmin();
+        return $this->tieneRol('admin') || $this->isSuperAdmin();
     }
 
     /**
@@ -164,7 +174,7 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
      */
     public function isOficialDia(): bool
     {
-        return $this->rol?->name === 'oficial_de_dia';
+        return $this->tieneRol('oficial_de_dia');
     }
 
     /**
@@ -172,7 +182,7 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
      */
     public function isCapitan(): bool
     {
-        return $this->rol?->name === 'capitan_de_servicio';
+        return $this->tieneRol('capitan_de_servicio');
     }
 
     /**
@@ -180,16 +190,25 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
      */
     public function isEscribiente(): bool
     {
-        return $this->rol?->name === 'escribiente';
+        return $this->tieneRol('escribiente');
     }
 
     /**
      * Verificar si el usuario tiene un permiso específico,
-     * ya sea heredado de su rol o asignado directamente.
+     * heredado de cualquiera de sus roles o asignado directamente.
      */
     public function HasPermisos(string $permiso): bool
     {
-        return $this->rol?->permisos->contains('name', $permiso)
-            || $this->permisosDirectos->contains('name', $permiso);
+        if ($this->permisosDirectos->contains('name', $permiso)) {
+            return true;
+        }
+
+        foreach ($this->roles as $rol) {
+            if ($rol->permisos->contains('name', $permiso)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -7,88 +7,107 @@
         </div>
     @endif
 
-    <table class="table table-striped table-hover mb-0" style="width: 100%">
-        <thead class="thead-dark">
-            <tr>
-                <th>#</th>
-                <th>Hora</th>
-                <th>Tipo</th>
-                <th>Dirección</th>
-                <th>Número</th>
-                <th>Asunto</th>
-                <th>Clasificación</th>
-                <th>Oficina</th>
-                <th>Estado</th>
-                <th class="text-center">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($this->novedades as $novedad)
-                <tr wire:key="novedad-{{ $novedad->id }}">
-                    <td>{{ $loop->iteration + ($this->novedades->currentPage() - 1) * $this->novedades->perPage() }}
-                    </td>
-                    <td>{{ $novedad->time?->format('H:i') }}</td>
-                    <td>{{ $novedad->type }}</td>
-                    <td>
-                        @if ($novedad->direction === 'Recibido')
-                            <span class="badge badge-success">Recibido</span>
-                        @else
-                            <span class="badge badge-warning">Expedido</span>
-                        @endif
-                    </td>
-                    <td>{{ $novedad->number }}</td>
-                    <td>{{ Str::limit($novedad->affair, 40) }}</td>
-                    <td>
-                        @php
-                            $colores = [
-                                'Rutinario' => 'secondary',
-                                'Prioritario' => 'primary',
-                                'Urgente' => 'warning',
-                                'Destello' => 'danger',
-                            ];
-                        @endphp
-                        <span class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }}">
-                            {{ $novedad->clasification }}
-                        </span>
-                    </td>
-                    <td>{{ $novedad->oficina->nombre ?? '—' }}</td>
-                    <td>
-                        <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :compacto="true"
-                            :key="'estado-novedad-tabla-' . $novedad->id" />
-                    </td>
-                    <td class="text-center align-middle">
-                        <div class="d-flex justify-content-center">
-                            <a href="{{ route('admin.guardias.novedades.show', [$guardia, $novedad]) }}"
-                                class="btn btn-outline-info btn-xs mr-1">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            @if ($guardia->status === 'open' && $puedeOperarGuardia)
-                                <button type="button" wire:click="abrirEditar({{ $novedad->id }})"
-                                    class="btn btn-outline-warning btn-xs mr-1">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button" wire:click="eliminar({{ $novedad->id }})"
-                                    wire:confirm="¿Eliminar esta novedad?" class="btn btn-outline-danger btn-xs">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="10">
-                        <div class="text-center text-muted py-4">
-                            No hay tráficos registrados en esta guardia.
-                        </div>
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+    @php
+        $direcciones = [
+            'Recibido' => ['icono' => 'fa-inbox', 'color' => '#1e7e34', 'bg' => '#e6f4ea', 'label' => 'RECIBIDOS'],
+            'Expedido' => ['icono' => 'fa-paper-plane', 'color' => '#8a6d00', 'bg' => '#fff8e1', 'label' => 'EXPEDIDOS'],
+        ];
+        $tiposMeta = [
+            'Radio'               => ['icono' => 'fa-satellite-dish', 'label' => 'Radios'],
+            'Correo Electrónico'  => ['icono' => 'fa-envelope',        'label' => 'Correos'],
+            'Fax'                 => ['icono' => 'fa-fax',             'label' => 'Fax'],
+        ];
+        $hayNovedades = $this->novedadesAgrupadas->flatten(1)->isNotEmpty();
+    @endphp
 
-    @if ($this->novedades->hasPages())
-        <div class="mt-3">{{ $this->novedades->links() }}</div>
+    @if (! $hayNovedades)
+        <div class="text-center text-muted py-4">
+            No hay tráficos registrados en esta guardia.
+        </div>
+    @else
+        @foreach ($direcciones as $direccionKey => $meta)
+            @continue(! $this->novedadesAgrupadas->has($direccionKey))
+            <div class="mb-4">
+                <div class="d-flex align-items-center px-3 py-2 mb-2" style="background: {{ $meta['bg'] }}; border-left: 4px solid {{ $meta['color'] }}; border-radius: 4px;">
+                    <i class="fas {{ $meta['icono'] }} mr-2" style="color: {{ $meta['color'] }};"></i>
+                    <strong style="color: {{ $meta['color'] }}; letter-spacing: .03em;">{{ $meta['label'] }}</strong>
+                    <span class="badge badge-light ml-2">{{ $this->novedadesAgrupadas[$direccionKey]->flatten(1)->count() }}</span>
+                </div>
+
+                @foreach ($this->novedadesAgrupadas[$direccionKey] as $tipoKey => $items)
+                    @php $tipoMeta = $tiposMeta[$tipoKey] ?? ['icono' => 'fa-circle-info', 'label' => $tipoKey]; @endphp
+                    <div class="mb-3 pl-3">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="fas {{ $tipoMeta['icono'] }} text-muted mr-2"></i>
+                            <span class="text-muted small text-uppercase font-weight-bold">{{ $tipoMeta['label'] }} por hora</span>
+                            <span class="badge badge-secondary ml-2">{{ $items->count() }}</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-hover mb-0" style="width: 100%">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th style="width: 40px;">#</th>
+                                        <th style="width: 90px;">Hora</th>
+                                        <th>Número</th>
+                                        <th>Asunto</th>
+                                        <th style="width: 130px;">Clasificación</th>
+                                        <th>Oficina</th>
+                                        <th style="width: 100px;">Estado</th>
+                                        <th class="text-center" style="width: 110px;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($items as $novedad)
+                                        <tr wire:key="novedad-{{ $novedad->id }}">
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td><strong>{{ $novedad->time?->format('H:i') }}</strong></td>
+                                            <td>{{ $novedad->number }}</td>
+                                            <td>{{ Str::limit($novedad->affair, 40) }}</td>
+                                            <td>
+                                                @php
+                                                    $colores = [
+                                                        'Rutinario' => 'secondary',
+                                                        'Prioritario' => 'primary',
+                                                        'Urgente' => 'warning',
+                                                        'Destello' => 'danger',
+                                                    ];
+                                                @endphp
+                                                <span class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }}">
+                                                    {{ $novedad->clasification }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $novedad->oficina->nombre ?? '—' }}</td>
+                                            <td>
+                                                <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :compacto="true"
+                                                    :key="'estado-novedad-tabla-' . $novedad->id" />
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <div class="d-flex justify-content-center">
+                                                    <a href="{{ route('admin.guardias.novedades.show', [$guardia, $novedad]) }}"
+                                                        class="btn btn-outline-info btn-xs mr-1">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @if ($guardia->status === 'open' && $puedeOperarGuardia)
+                                                        <button type="button" wire:click="abrirEditar({{ $novedad->id }})"
+                                                            class="btn btn-outline-warning btn-xs mr-1">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" wire:click="eliminar({{ $novedad->id }})"
+                                                            wire:confirm="¿Eliminar esta novedad?" class="btn btn-outline-danger btn-xs">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endforeach
     @endif
 
     {{-- Panel pantalla completa --}}
@@ -308,7 +327,7 @@
 
                 <div class="ops-panel__footer">
                     <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalNovedad')">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;">
+                    <button type="submit" class="btn" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important; color: #0B2545 !important; font-weight: 700; box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important; border: none;">
                         <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
                         <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
                             Guardando...</span>
@@ -353,13 +372,13 @@
         align-items: center;
         justify-content: space-between;
         padding: 1rem 1.75rem;
-        background: #0A0E13;
-        border-bottom: 3px solid #FF5A1F;
+        background: linear-gradient(135deg, #0B2545 0%, #0F3460 100%);
+        border-bottom: 4px solid #FFD200;
     }
 
     .ops-panel__eyebrow {
         display: block;
-        color: #FF5A1F;
+        color: #FFD200;
         font-size: 0.7rem;
         font-weight: 700;
         letter-spacing: 0.08em;
@@ -388,9 +407,9 @@
     }
 
     .ops-panel__close:hover {
-        background: rgba(255, 90, 31, 0.15);
-        border-color: #FF5A1F;
-        color: #FF5A1F;
+        background: rgba(255, 210, 0, 0.18);
+        border-color: #FFD200;
+        color: #FFD200;
     }
 
     .ops-panel__body {
