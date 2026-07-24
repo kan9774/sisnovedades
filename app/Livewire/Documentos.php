@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\CategoriaDocumento;
 use App\Models\Documento;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -85,11 +86,16 @@ class Documentos extends Component
 
     public function submitForm()
     {
-        // Check permissions before validating
-        if ($this->formTipo === 'create') {
-            Gate::authorize('create', Documento::class);
-        } else {
-            Gate::authorize('update', Documento::findOrFail($this->formDocumentoId));
+        try {
+            // Check permissions before validating
+            if ($this->formTipo === 'create') {
+                Gate::authorize('create', Documento::class);
+            } else {
+                Gate::authorize('update', Documento::findOrFail($this->formDocumentoId));
+            }
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
+            return;
         }
 
         $this->validate(
@@ -119,6 +125,8 @@ class Documentos extends Component
             $this->justSaved = true;
             $this->page = 1;
             $this->dispatch('documento-guardado');
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
         } catch (\Exception $e) {
             $this->errorMsg = 'Error al guardar: ' . $e->getMessage();
         } finally {
@@ -252,8 +260,6 @@ class Documentos extends Component
      */
     protected function deleteOldThumbnail(Documento $documento): void
     {
-        // El thumbnail se guarda con el nombre: slug_titulo-fecha.png
-        // Buscamos en la carpeta de la categoría anterior del documento
         $categoriaAnterior = $documento->categoria;
         if ($categoriaAnterior && $categoriaAnterior->slug) {
             $thumbPath = 'documentos/' . $categoriaAnterior->slug . '/thumbs/' . Str::slug($documento->titulo) . '-' . $documento->created_at->format('Y-m-d_His') . '.png';
@@ -263,7 +269,12 @@ class Documentos extends Component
 
     public function openCreate()
     {
-        Gate::authorize('create', Documento::class);
+        try {
+            Gate::authorize('create', Documento::class);
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
+            return;
+        }
 
         $this->resetErrorBag();
         $this->formTipo = 'create';
@@ -279,7 +290,13 @@ class Documentos extends Component
     public function openEdit(int $documentoId)
     {
         $documento = Documento::findOrFail($documentoId);
-        Gate::authorize('update', $documento);
+
+        try {
+            Gate::authorize('update', $documento);
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
+            return;
+        }
 
         $this->resetErrorBag();
 
@@ -326,8 +343,6 @@ class Documentos extends Component
 
     public function executeDelete()
     {
-        Gate::authorize('delete', Documento::class);
-
         $this->loading = true;
         try {
             $documento = Documento::findOrFail($this->confirmDeleteId);
@@ -335,6 +350,8 @@ class Documentos extends Component
 
             $documento->delete();
             $this->successMsg = 'Documento eliminado correctamente.';
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
         } catch (\Exception $e) {
             $this->errorMsg = 'Error al eliminar: ' . $e->getMessage();
         } finally {
@@ -346,8 +363,6 @@ class Documentos extends Component
     // --- RESTORE ---
     public function restore(int $documentoId)
     {
-        Gate::authorize('restore', Documento::class);
-
         $this->loading = true;
         try {
             $documento = Documento::onlyTrashed()->findOrFail($documentoId);
@@ -356,6 +371,8 @@ class Documentos extends Component
             $documento->restore();
             $this->successMsg = 'Documento restaurado correctamente.';
             $this->trashedPage = 1;
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
         } catch (\Exception $e) {
             $this->errorMsg = 'Error al restaurar: ' . $e->getMessage();
         } finally {
@@ -371,8 +388,6 @@ class Documentos extends Component
 
     public function executeForceDelete()
     {
-        Gate::authorize('forceDelete', Documento::class);
-
         $this->loading = true;
         try {
             $documento = Documento::onlyTrashed()->findOrFail($this->confirmForceDeleteId);
@@ -392,6 +407,8 @@ class Documentos extends Component
 
             $documento->forceDelete();
             $this->successMsg = 'Documento eliminado definitivamente.';
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
         } catch (\Exception $e) {
             $this->errorMsg = 'Error al eliminar: ' . $e->getMessage();
         } finally {
@@ -404,7 +421,13 @@ class Documentos extends Component
     public function openPreview(int $documentoId)
     {
         $documento = Documento::with('categoria')->findOrFail($documentoId);
-        Gate::authorize('view', $documento);
+
+        try {
+            Gate::authorize('view', $documento);
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
+            return;
+        }
 
         if ($documento->extension !== 'pdf') {
             $this->errorMsg = 'Solo se puede previsualizar PDF.';
@@ -426,7 +449,12 @@ class Documentos extends Component
     // --- TRASH ---
     public function openTrash()
     {
-        Gate::authorize('viewAny', Documento::class);
+        try {
+            Gate::authorize('viewAny', Documento::class);
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
+            return;
+        }
 
         $this->showTrash = true;
         $this->trashedPage = 1;
@@ -458,9 +486,6 @@ class Documentos extends Component
 
     public function updated($propertyName)
     {
-        // Solo valida en vivo los campos del formulario del modal,
-        // y solo si el modal está abierto (para no interferir con
-        // el buscador, el filtro de categoría, etc.)
         if (! $this->showForm) {
             return;
         }
@@ -490,9 +515,6 @@ class Documentos extends Component
         ]);
     }
 
-    /**
-     * Reglas de validación centralizadas.
-     */
     protected function reglasValidacion(): array
     {
         $rules = [
@@ -507,9 +529,6 @@ class Documentos extends Component
         return $rules;
     }
 
-    /**
-     * Mensajes de validación centralizados.
-     */
     protected function mensajesValidacion(): array
     {
         return [

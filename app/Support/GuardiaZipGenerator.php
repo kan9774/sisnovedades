@@ -25,9 +25,13 @@ class GuardiaZipGenerator
         }
 
         $zip = new ZipArchive();
-        $zip->open($rutaZip, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        if ($zip->open($rutaZip, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            throw new \RuntimeException("No se pudo crear el archivo ZIP temporal en {$rutaZip}");
+        }
 
-        $zip->addFromString(self::nombreArchivo($guardia), $pdfContent);
+        // Nombre correcto para el PDF interno dentro del ZIP
+        $nombrePdfInterno = GuardiaPdfGenerator::nombreArchivo($guardia);
+        $zip->addFromString($nombrePdfInterno, $pdfContent);
 
         foreach ($guardia->novedades as $novedad) {
             foreach ($novedad->adjuntos as $adjunto) {
@@ -45,7 +49,7 @@ class GuardiaZipGenerator
         $zip->close();
 
         $contenidoZip = file_get_contents($rutaZip);
-        unlink($rutaZip);
+        @unlink($rutaZip);
 
         return $contenidoZip;
     }
