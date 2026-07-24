@@ -59,7 +59,13 @@ return [
                 env('DB_CONNECTION', 'mysql'),
             ],
         ],
+        /*
+         * The path where the mysqldump/pg_dump binary is located.
+         */
+        'database_dump_binary_path' => 'C:\tools\mysql\bin\\',
 
+        /*
+         * The database dump can be compressed to decrease disk space usage.
 
         /*
          * The database dump can be compressed to decrease disk space usage.

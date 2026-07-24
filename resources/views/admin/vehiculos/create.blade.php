@@ -238,10 +238,10 @@
                     <div class="row align-items-center">
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label>Ejes</label>
+                                <label>Ejes <span class="text-danger">*</span></label>
                                 <input type="number" name="ejes"
                                     class="form-control @error('ejes') is-invalid @enderror"
-                                    value="{{ old('ejes') }}" min="1" max="10">
+                                    value="{{ old('ejes') }}" min="1" max="10" required>
                                 @error('ejes')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror

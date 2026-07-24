@@ -13,7 +13,7 @@
                     </div>
                     <div class="modal-body">
                         <form wire:submit.prevent="guardar" class="row align-items-end mb-3">
-                            <div class="col-7">
+                            <div class="col-6">
                                 <label class="mb-1">Nombre</label>
                                 <input type="text" wire:model="nombre" class="form-control form-control-sm @error('nombre') is-invalid @enderror">
                                 @error('nombre') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
@@ -24,7 +24,7 @@
                                     <label class="custom-control-label" for="activo-{{ $this->getId() }}">Activo</label>
                                 </div>
                             </div>
-                            <div class="col-2">
+                            <div class="col-3">
                                 <button type="submit" class="btn btn-primary btn-sm btn-block" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;">
                                     <i class="fas fa-save"></i>
                                     {{ $editandoId ? 'Guardar' : 'Agregar' }}
