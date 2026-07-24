@@ -79,7 +79,6 @@ class VehiculoController extends Controller
             'tipo_lubricante_id' => 'nullable|exists:tipos_lubricante,id',
             'tipo_rodado_id' => 'nullable|exists:tipos_rodado,id',
             'consumo_litros_por_km' => 'nullable|numeric|min:0|max:999.9999',
-            'sin_cuentakilometros' => 'boolean',
             'descripcion' => 'nullable|string|max:255',
             'estado' => 'required|in:verde,amarillo,rojo,negro',
         ]);

@@ -38,10 +38,13 @@ class CreateNewUser implements CreatesNewUsers
             'grade' => $input['grade'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
-            'rol_id' => $rolVisitante?->id,
             'unidad_id' => $input['unidad_id'],
             'status' => 'active',
         ]);
+
+        if ($rolVisitante) {
+            $user->roles()->attach($rolVisitante->id);
+        }
 
         // Aviso a admins/superadmins para que decidan si le asignan un rol
         // distinto o lo dejan como visitante. Solo se dispara acá (registro
@@ -54,7 +57,7 @@ class CreateNewUser implements CreatesNewUsers
     protected function notificarAdmins(User $usuarioRegistrado): void
     {
         $admins = User::where('is_super_admin', true)
-            ->orWhereHas('rol', fn ($q) => $q->where('name', 'admin'))
+            ->orWhereHas('roles', fn ($q) => $q->where('name', 'admin'))
             ->get();
 
         if ($admins->isNotEmpty()) {
