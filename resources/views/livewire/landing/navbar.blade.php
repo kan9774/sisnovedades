@@ -9,7 +9,7 @@ del flujo, sus hijos actúan como si fueran hijos directos de .app-shell --}}
             <i class="fas fa-bars"></i>
         </button>
         <a class="mobile-topbar__brand" href="{{ route('home') }}">
-            <img src="{{ asset('image/logo/Heraldica.png') }}" alt="Ejército Nacional">
+            <img src="{{ asset('image/logo/Heraldica.png') }}" alt="B.Com.N°1">
             <span>{{ config('app.name') }}</span>
         </a>
         <span class="mobile-topbar__clock" id="reloj-consola-mobile">--:--:--</span>
@@ -25,10 +25,10 @@ SIDEBAR
     <aside class="sidebar">
 
         <a class="sidebar-brand" href="{{ route('home') }}">
-            <img src="{{ asset('image/logo/Heraldica.png') }}" alt="Ejército Nacional">
+            <img src="{{ asset('image/logo/Heraldica.png') }}" alt="B.Com.N°1">
             <span class="sidebar-brand__text">
                 {{ config('app.name') }}
-                <small>BCOM1 // Ejército Nacional</small>
+                <small>Ejército Nacional</small>
             </span>
         </a>
 
@@ -45,27 +45,33 @@ SIDEBAR
                 <i class="fas fa-users"></i>
                 <span>Nosotros</span>
             </a>
+            <a href="#" class="sidebar-link" @click.prevent="seccion = 'organigrama'; sidebarOpen = false"
+                :class="{ 'sidebar-link-active': seccion === 'organigrama' }">
+                <span class="sidebar-link__ch">03</span>
+                <i class="fa-solid fa-sitemap"></i>
+                <span>Organigrama</span>
+            </a>
             <a href="#" class="sidebar-link" @click.prevent="seccion = 'servicios'; sidebarOpen = false"
                 :class="{ 'sidebar-link-active': seccion === 'servicios' }">
-                <span class="sidebar-link__ch">03</span>
+                <span class="sidebar-link__ch">04</span>
                 <i class="fa-solid fa-satellite-dish"></i>
                 <span>Servicios</span>
             </a>
             <a href="#" class="sidebar-link" @click.prevent="seccion = 'contacto'; sidebarOpen = false"
                 :class="{ 'sidebar-link-active': seccion === 'contacto' }">
-                <span class="sidebar-link__ch">04</span>
+                <span class="sidebar-link__ch">05</span>
                 <i class="fas fa-envelope"></i>
                 <span>Contacto</span>
             </a>
             <a href="#" class="sidebar-link" @click.prevent="seccion = 'documentos'; sidebarOpen = false"
                 :class="{ 'sidebar-link-active': seccion === 'documentos' }">
-                <span class="sidebar-link__ch">05</span>
+                <span class="sidebar-link__ch">06</span>
                 <i class="fas fa-book"></i>
                 <span>Biblioteca</span>
             </a>
             <a href="#" class="sidebar-link" @click.prevent="seccion = 'novedades-cerradas'; sidebarOpen = false"
                 :class="{ 'sidebar-link-active': seccion === 'novedades-cerradas' }">
-                <span class="sidebar-link__ch">06</span>
+                <span class="sidebar-link__ch">07</span>
                 <i class="fa-solid fa-newspaper"></i>
                 <span>Novedades</span>
             </a>

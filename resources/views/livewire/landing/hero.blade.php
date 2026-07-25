@@ -4,6 +4,7 @@
     <div class="hero-scanline"></div>
 
     <div class="container text-center hero-content">
+     <div><img src="{{ asset('image/logo/Heraldica.png') }}" width="160xp" alt="B.Com.N°1"></div>
         <span class="hero-eyebrow">// BCOM1 · TRANSMISIÓN ACTIVA</span>
 
         <h1 class="hero-title">Comunicaciones</h1>
