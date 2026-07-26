@@ -1,0 +1,120 @@
+/*
+ * Panel de alta/edición estilo "ops" (BCOM1)
+ * Usado por los paneles full-screen de Novedades de Guardia e Inventario
+ * (categorías, ítems, ubicaciones, unidades individuales).
+ */
+
+.ops-panel-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1060;
+    background: #f4f5f7;
+}
+
+.ops-panel-overlay.is-open {
+    display: block;
+    animation: opsPanelFadeIn .16s ease-out;
+}
+
+.ops-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.ops-panel__form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.ops-panel__header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.75rem;
+    background: linear-gradient(135deg, #0B2545 0%, #0F3460 100%);
+    border-bottom: 4px solid #FFD200;
+}
+
+.ops-panel__eyebrow {
+    display: block;
+    color: #FFD200;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.ops-panel__title {
+    color: #fff;
+    margin: 0;
+    font-weight: 600;
+}
+
+.ops-panel__close {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    border-radius: 6px;
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, border-color .15s;
+}
+
+.ops-panel__close:hover {
+    background: rgba(255, 210, 0, 0.18);
+    border-color: #FFD200;
+    color: #FFD200;
+}
+
+.ops-panel__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 2rem 1.75rem;
+}
+
+.ops-panel__content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ops-panel__footer {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    padding: 1rem 1.75rem;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.btn-ops-primary {
+    background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important;
+    color: #0B2545 !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important;
+    border: none;
+}
+
+@keyframes opsPanelFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+body.ops-panel-open {
+    overflow: hidden;
+}

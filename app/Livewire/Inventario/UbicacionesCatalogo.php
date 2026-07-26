@@ -49,6 +49,7 @@ class UbicacionesCatalogo extends Component
         $this->authorize('create', Ubicacion::class);
         $this->resetFormulario();
         $this->mostrarModal = true;
+        $this->dispatch('abrir-modal-ubicacion');
     }
 
     public function abrirModalEditar(int $ubicacionId): void
@@ -61,6 +62,7 @@ class UbicacionesCatalogo extends Component
         $this->descripcion = (string) $ubicacion->descripcion;
 
         $this->mostrarModal = true;
+        $this->dispatch('abrir-modal-ubicacion');
     }
 
     public function guardar(): void
@@ -102,6 +104,7 @@ class UbicacionesCatalogo extends Component
     {
         $this->mostrarModal = false;
         $this->resetFormulario();
+        $this->dispatch('cerrar-modal-ubicacion');
     }
 
     private function resetFormulario(): void

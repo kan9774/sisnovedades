@@ -100,19 +100,25 @@
         </div>
     </div>
 
-    {{-- Modal de alta/edición --}}
-    <div class="modal fade @if ($mostrarModal) show d-block @endif" tabindex="-1"
-         style="@if ($mostrarModal) background: rgba(0,0,0,.5); @endif">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form wire:submit="guardar">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
+    {{-- Panel de alta/edición estilo ops --}}
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalItem" wire:ignore.self>
+        <div class="ops-panel">
+            <form wire:submit="guardar" class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
+                        <h5 class="ops-panel__title">
                             {{ $itemId ? 'Editar ítem' : 'Nuevo ítem' }}
                         </h5>
-                        <button type="button" class="close" wire:click="cerrarModal">&times;</button>
                     </div>
-                    <div class="modal-body">
+                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalItem')" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
                         <div class="row">
                             <div class="form-group col-md-4">
                                 <label>Código</label>
@@ -178,15 +184,39 @@
                             @endif
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="cerrarModal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
-                            <span wire:loading wire:target="guardar" class="spinner-border spinner-border-sm"></span>
-                            Guardar
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalItem')">Cancelar</button>
+                    <button type="submit" class="btn btn-ops-primary" wire:loading.attr="disabled" wire:target="guardar">
+                        <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
+                        <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+    </template>
 </div>
+
+
+@script
+    <script>
+        if (!window.cerrarOpsPanel) {
+            window.cerrarOpsPanel = function (id) {
+                const overlay = document.getElementById(id);
+                if (overlay) overlay.classList.remove('is-open');
+                document.body.classList.remove('ops-panel-open');
+            };
+        }
+
+        $wire.on('abrir-modal-item', () => {
+            document.getElementById('modalItem').classList.add('is-open');
+            document.body.classList.add('ops-panel-open');
+        });
+
+        $wire.on('cerrar-modal-item', () => {
+            cerrarOpsPanel('modalItem');
+        });
+    </script>
+@endscript

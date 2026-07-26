@@ -62,6 +62,7 @@ class UnidadesIndividuales extends Component
         $this->reset(['altaItemId', 'altaNumeroSerie', 'altaUbicacionId', 'altaMotivo']);
         $this->resetErrorBag();
         $this->mostrarModalAlta = true;
+        $this->dispatch('abrir-modal-unidad-alta');
     }
 
     public function darDeAlta(): void
@@ -95,6 +96,7 @@ class UnidadesIndividuales extends Component
 
         session()->flash('success', 'Unidad dada de alta correctamente.');
         $this->mostrarModalAlta = false;
+        $this->dispatch('cerrar-modal-unidad');
     }
 
     /*
@@ -112,6 +114,7 @@ class UnidadesIndividuales extends Component
         $this->reset(['asignarUbicacionId', 'asignarResponsableId', 'asignarMotivo']);
         $this->resetErrorBag();
         $this->mostrarModalAsignar = true;
+        $this->dispatch('abrir-modal-unidad-asignar');
     }
 
     public function asignar(): void
@@ -147,6 +150,7 @@ class UnidadesIndividuales extends Component
 
         session()->flash('success', 'Unidad asignada correctamente.');
         $this->mostrarModalAsignar = false;
+        $this->dispatch('cerrar-modal-unidad');
     }
 
     /*
@@ -180,6 +184,7 @@ class UnidadesIndividuales extends Component
         $this->bajaMotivo = null;
         $this->resetErrorBag();
         $this->mostrarModalBaja = true;
+        $this->dispatch('abrir-modal-unidad-baja');
     }
 
     public function confirmarBaja(): void
@@ -202,6 +207,7 @@ class UnidadesIndividuales extends Component
 
         session()->flash('success', 'Unidad dada de baja.');
         $this->mostrarModalBaja = false;
+        $this->dispatch('cerrar-modal-unidad');
     }
 
     public function cerrarModales(): void
@@ -209,6 +215,7 @@ class UnidadesIndividuales extends Component
         $this->mostrarModalAlta = false;
         $this->mostrarModalAsignar = false;
         $this->mostrarModalBaja = false;
+        $this->dispatch('cerrar-modal-unidad');
     }
 
     public function render()

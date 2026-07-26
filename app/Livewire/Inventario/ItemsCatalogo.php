@@ -74,6 +74,7 @@ class ItemsCatalogo extends Component
         $this->authorize('create', Item::class);
         $this->resetFormulario();
         $this->mostrarModal = true;
+        $this->dispatch('abrir-modal-item');
     }
 
     public function abrirModalEditar(int $itemId): void
@@ -92,6 +93,7 @@ class ItemsCatalogo extends Component
         $this->stock_minimo = $item->stock_minimo;
 
         $this->mostrarModal = true;
+        $this->dispatch('abrir-modal-item');
     }
 
     public function guardar(): void
@@ -135,6 +137,7 @@ class ItemsCatalogo extends Component
     {
         $this->mostrarModal = false;
         $this->resetFormulario();
+        $this->dispatch('cerrar-modal-item');
     }
 
     private function resetFormulario(): void

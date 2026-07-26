@@ -115,17 +115,23 @@
         </div>
     </div>
 
-    {{-- Modal: alta de unidad --}}
-    <div class="modal fade @if ($mostrarModalAlta) show d-block @endif" tabindex="-1"
-         style="@if ($mostrarModalAlta) background: rgba(0,0,0,.5); @endif">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form wire:submit="darDeAlta">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Nueva unidad</h5>
-                        <button type="button" class="close" wire:click="cerrarModales">&times;</button>
+    {{-- Panel: alta de unidad (estilo ops) --}}
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalUnidadAlta" wire:ignore.self>
+        <div class="ops-panel">
+            <form wire:submit="darDeAlta" class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
+                        <h5 class="ops-panel__title">Nueva unidad</h5>
                     </div>
-                    <div class="modal-body">
+                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalUnidadAlta')" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
                         <div class="form-group">
                             <label>Ítem</label>
                             <select wire:model="altaItemId" class="form-control @error('altaItemId') is-invalid @enderror">
@@ -134,7 +140,7 @@
                                     <option value="{{ $item->id }}">{{ $item->codigo }} — {{ $item->nombre }}</option>
                                 @endforeach
                             </select>
-                            @error('altaItemId') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            @error('altaItemId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                         <div class="form-group">
                             <label>Número de serie (opcional)</label>
@@ -148,33 +154,44 @@
                                     <option value="{{ $ubicacion->id }}">{{ $ubicacion->nombre }}</option>
                                 @endforeach
                             </select>
-                            @error('altaUbicacionId') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            @error('altaUbicacionId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                         <div class="form-group">
                             <label>Motivo (opcional)</label>
                             <input type="text" wire:model="altaMotivo" class="form-control" placeholder="ej: compra, donación...">
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="cerrarModales">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">Dar de alta</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalUnidadAlta')">Cancelar</button>
+                    <button type="submit" class="btn btn-ops-primary" wire:loading.attr="disabled" wire:target="darDeAlta">
+                        <span wire:loading.remove wire:target="darDeAlta"><i class="fas fa-save"></i> Dar de alta</span>
+                        <span wire:loading wire:target="darDeAlta"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+    </template>
 
-    {{-- Modal: asignar / transferir --}}
-    <div class="modal fade @if ($mostrarModalAsignar) show d-block @endif" tabindex="-1"
-         style="@if ($mostrarModalAsignar) background: rgba(0,0,0,.5); @endif">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form wire:submit="asignar">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Asignar / transferir unidad</h5>
-                        <button type="button" class="close" wire:click="cerrarModales">&times;</button>
+    {{-- Panel: asignar / transferir (estilo ops) --}}
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalUnidadAsignar" wire:ignore.self>
+        <div class="ops-panel">
+            <form wire:submit="asignar" class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
+                        <h5 class="ops-panel__title">Asignar / transferir unidad</h5>
                     </div>
-                    <div class="modal-body">
+                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalUnidadAsignar')" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
                         <div class="form-group">
                             <label>Nueva ubicación</label>
                             <select wire:model="asignarUbicacionId" class="form-control @error('asignarUbicacionId') is-invalid @enderror">
@@ -183,7 +200,7 @@
                                     <option value="{{ $ubicacion->id }}">{{ $ubicacion->nombre }}</option>
                                 @endforeach
                             </select>
-                            @error('asignarUbicacionId') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            @error('asignarUbicacionId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                         <div class="form-group">
                             <label>Responsable (opcional)</label>
@@ -199,39 +216,87 @@
                             <input type="text" wire:model="asignarMotivo" class="form-control">
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="cerrarModales">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">Asignar</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalUnidadAsignar')">Cancelar</button>
+                    <button type="submit" class="btn btn-ops-primary" wire:loading.attr="disabled" wire:target="asignar">
+                        <span wire:loading.remove wire:target="asignar"><i class="fas fa-save"></i> Asignar</span>
+                        <span wire:loading wire:target="asignar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+    </template>
 
-    {{-- Modal: dar de baja --}}
-    <div class="modal fade @if ($mostrarModalBaja) show d-block @endif" tabindex="-1"
-         style="@if ($mostrarModalBaja) background: rgba(0,0,0,.5); @endif">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form wire:submit="confirmarBaja">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-danger">Dar de baja unidad</h5>
-                        <button type="button" class="close" wire:click="cerrarModales">&times;</button>
+    {{-- Panel: dar de baja (estilo ops) --}}
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalUnidadBaja" wire:ignore.self>
+        <div class="ops-panel">
+            <form wire:submit="confirmarBaja" class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
+                        <h5 class="ops-panel__title">Dar de baja unidad</h5>
                     </div>
-                    <div class="modal-body">
+                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalUnidadBaja')" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
                         <p class="text-muted">Esta acción es definitiva: la unidad queda fuera de servicio.</p>
                         <div class="form-group">
                             <label>Motivo</label>
                             <textarea wire:model="bajaMotivo" class="form-control @error('bajaMotivo') is-invalid @enderror" rows="3"></textarea>
-                            @error('bajaMotivo') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            @error('bajaMotivo') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="cerrarModales">Cancelar</button>
-                        <button type="submit" class="btn btn-danger" wire:loading.attr="disabled">Dar de baja</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalUnidadBaja')">Cancelar</button>
+                    <button type="submit" class="btn btn-danger" wire:loading.attr="disabled" wire:target="confirmarBaja">
+                        <span wire:loading.remove wire:target="confirmarBaja"><i class="fas fa-trash"></i> Dar de baja</span>
+                        <span wire:loading wire:target="confirmarBaja"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+    </template>
 </div>
+
+
+@script
+    <script>
+        if (!window.cerrarOpsPanel) {
+            window.cerrarOpsPanel = function (id) {
+                const overlay = document.getElementById(id);
+                if (overlay) overlay.classList.remove('is-open');
+                document.body.classList.remove('ops-panel-open');
+            };
+        }
+
+        const opsPanelesUnidad = {
+            'abrir-modal-unidad-alta': 'modalUnidadAlta',
+            'abrir-modal-unidad-asignar': 'modalUnidadAsignar',
+            'abrir-modal-unidad-baja': 'modalUnidadBaja',
+        };
+
+        Object.entries(opsPanelesUnidad).forEach(([evento, id]) => {
+            $wire.on(evento, () => {
+                document.getElementById(id).classList.add('is-open');
+                document.body.classList.add('ops-panel-open');
+            });
+        });
+
+        $wire.on('cerrar-modal-unidad', () => {
+            cerrarOpsPanel('modalUnidadAlta');
+            cerrarOpsPanel('modalUnidadAsignar');
+            cerrarOpsPanel('modalUnidadBaja');
+        });
+    </script>
+@endscript

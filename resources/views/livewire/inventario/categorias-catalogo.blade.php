@@ -20,96 +20,102 @@
                     <input type="text" wire:model.live.debounce.400ms="busqueda"
                            class="form-control" placeholder="Buscar por nombre...">
                 </div>
-                <div class="col-md-4 text-right">
-                    @can('create', \App\Models\Categoria::class)
-                        <button wire:click="abrirModalCrear" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Nueva categoría
-                        </button>
-                    @endcan
-                </div>
             </div>
         </div>
 
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Ítems asociados</th>
-                        <th class="text-right">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($categorias as $categoria)
-                        <tr wire:key="categoria-{{ $categoria->id }}">
-                            <td>{{ $categoria->nombre }}</td>
-                            <td>{{ $categoria->descripcion ?? '—' }}</td>
-                            <td>{{ $categoria->items_count }}</td>
-                            <td class="text-right">
-                                @can('update', $categoria)
-                                    <button wire:click="abrirModalEditar({{ $categoria->id }})"
-                                            class="btn btn-sm btn-outline-secondary" title="Editar">
-                                        <i class="fas fa-pen"></i>
-                                    </button>
-                                @endcan
-                                @can('delete', $categoria)
-                                    <button wire:click="eliminar({{ $categoria->id }})"
-                                            wire:confirm="¿Eliminar esta categoría?"
-                                            class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                @endcan
-                            </td>
-                        </tr>
-                    @empty
+        <div class="card-body">
+            {{-- FILA DE ALTA --}}
+            @can('create', \App\Models\Categoria::class)
+                <form wire:submit="agregar">
+                    <div class="row align-items-start mb-3">
+                        <div class="col-md-9">
+                            <label class="font-weight-bold">Nombre</label>
+                            <input type="text" wire:model="nombre"
+                                   class="form-control @error('nombre') is-invalid @enderror"
+                                   placeholder="Ej: Uniformes, Herramientas...">
+                            @error('nombre') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label class="font-weight-bold d-none d-md-block">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block"
+                                    wire:loading.attr="disabled" wire:target="agregar">
+                                <span wire:loading.remove wire:target="agregar"><i class="fas fa-plus"></i> Agregar</span>
+                                <span wire:loading wire:target="agregar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            @endcan
+
+            {{-- TABLA --}}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="thead-dark">
                         <tr>
-                            <td colspan="4" class="text-center text-muted py-4">
-                                No hay categorías que coincidan con la búsqueda.
-                            </td>
+                            <th>Nombre</th>
+                            <th style="width: 12%" class="text-center">Ítems</th>
+                            <th style="width: 12%" class="text-right">Acciones</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse ($categorias as $categoria)
+                            <tr wire:key="categoria-{{ $categoria->id }}">
+                                @if ($editingId === $categoria->id)
+                                    {{-- FILA EN MODO EDICIÓN --}}
+                                    <td>
+                                        <input type="text" wire:model="editNombre"
+                                               class="form-control form-control-sm @error('editNombre') is-invalid @enderror">
+                                        @error('editNombre') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-secondary">{{ $categoria->items_count }}</span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button wire:click="saveEdit" class="btn btn-success btn-sm" title="Guardar"
+                                                wire:loading.attr="disabled" wire:target="saveEdit">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button wire:click="cancelEdit" class="btn btn-outline-secondary btn-sm" title="Cancelar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                @else
+                                    {{-- FILA NORMAL --}}
+                                    <td>{{ $categoria->nombre }}</td>
+                                    <td class="text-center">
+                                        <span class="badge badge-secondary">{{ $categoria->items_count }}</span>
+                                    </td>
+                                    <td class="text-right">
+                                        @can('update', $categoria)
+                                            <button wire:click="startEdit({{ $categoria->id }})"
+                                                    class="btn btn-outline-secondary btn-sm" title="Editar">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                        @endcan
+                                        @can('delete', $categoria)
+                                            <button wire:click="eliminar({{ $categoria->id }})"
+                                                    wire:confirm="¿Eliminar esta categoría?"
+                                                    class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endcan
+                                    </td>
+                                @endif
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    No hay categorías que coincidan con la búsqueda.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="card-footer">
             {{ $categorias->links() }}
-        </div>
-    </div>
-
-    {{-- Modal de alta/edición --}}
-    <div class="modal fade @if ($mostrarModal) show d-block @endif" tabindex="-1"
-         style="@if ($mostrarModal) background: rgba(0,0,0,.5); @endif">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form wire:submit="guardar">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            {{ $categoriaId ? 'Editar categoría' : 'Nueva categoría' }}
-                        </h5>
-                        <button type="button" class="close" wire:click="cerrarModal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" wire:model="nombre" class="form-control @error('nombre') is-invalid @enderror">
-                            @error('nombre') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción (opcional)</label>
-                            <textarea wire:model="descripcion" class="form-control" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="cerrarModal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
-                            <span wire:loading wire:target="guardar" class="spinner-border spinner-border-sm"></span>
-                            Guardar
-                        </button>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
 </div>

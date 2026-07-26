@@ -37,7 +37,7 @@
             @can('create', App\Models\CategoriaDocumento::class)
                 <form wire:submit="agregar">
                     <div class="row align-items-start mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <label class="font-weight-bold">Nombre</label>
                             <input type="text" wire:model="nombre"
                                 class="form-control @error('nombre') is-invalid @enderror"
@@ -46,12 +46,13 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label class="font-weight-bold">Descripción</label>
                             <input type="text" wire:model="descripcion" class="form-control"
                                 placeholder="Descripción opcional...">
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
+                        <div class="col-md-2  align-items-end">
+                             <label class="font-weight-bold d-none d-md-block">&nbsp;</label>
                             <button type="submit" class="btn btn-primary btn-block" wire:loading.attr="disabled"
                                 wire:target="agregar" @disabled($loading)>
                                 @if ($loading)

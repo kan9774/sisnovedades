@@ -62,6 +62,9 @@
     {{-- Extra Configured Plugins Stylesheets --}}
     @include('adminlte::plugins', ['type' => 'css'])
 
+    {{-- Estilos compartidos del panel "ops" (BCOM1) --}}
+    <link rel="stylesheet" href="{{ asset('css/ops-panel.css') }}">
+
     {{-- Livewire Styles --}}
     @if(config('adminlte.livewire'))
         <livewire:styles />
