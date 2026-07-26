@@ -28,6 +28,11 @@ use App\Http\Controllers\VueloController;
 use App\Models\Documento;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use App\Livewire\Inventario\ItemsCatalogo;
+use App\Livewire\Inventario\MovimientosInventario;
+use App\Livewire\Inventario\UnidadesIndividuales;
+use App\Livewire\Inventario\CategoriasCatalogo;
+use App\Livewire\Inventario\UbicacionesCatalogo;
 
 // Pública
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -72,11 +77,31 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
     // Admin
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::prefix('inventario')->name('inventario.')->group(function () {
+            Route::get('/items', function () {
+                return view('livewire.inventario.items-layout');
+            })->name('items');
 
+            Route::get('/movimientos', function () {
+                return view('livewire.inventario.movimientos-layout');
+            })->name('movimientos');
+
+            Route::get('/unidades-individuales', function () {
+                return view('livewire.inventario.unidades-layout');
+            })->name('unidades-individuales');
+
+            Route::get('/ubicaciones', function () {
+                return view('livewire.inventario.ubicaciones-layout');
+            })->name('ubicaciones');
+
+            Route::get('/categorias', function () {
+                return view('livewire.inventario.categorias-layout');
+            })->name('categorias');
+        });
         Route::get('/', function () {
             $dashboard = new App\Livewire\AdminDashboard();
             $dashboard->mount();
-            
+
             return view('admin.index', [
                 'guardiaHoy' => $dashboard->guardiaHoy,
                 'vehiculosEnRuta' => $dashboard->vehiculosEnRuta,

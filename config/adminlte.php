@@ -353,7 +353,7 @@ return [
                     'active'  => ['admin/users*'],
                     'can'     => 'viewAny-user',
                 ],
-                                [
+                [
                     'text'   => 'Unidades Ámbito',
                     'url'    => 'admin/unidades',
                     'icon'   => 'fas fa-building',
@@ -367,7 +367,7 @@ return [
                     'active' => ['admin/oficinas*'],
                     'can'    => 'viewAny-oficina',
                 ],
-                                [
+                [
                     'text'   => 'Unidades Ejército',
                     'url'    => 'admin/organismos',
                     'icon'   => 'fas fa-landmark',
@@ -380,7 +380,7 @@ return [
         [
             'text'   => 'Parque Vehículos',
             'icon'   => 'fa-solid fa-car',
-            'can'    => 'viewAny-vehiculo', // Necesitas crear este Gate o usar otro
+            'can'    => 'viewAny-vehiculo',
             'submenu' => [
                 [
                     'text'   => 'Vehículos',
@@ -402,6 +402,50 @@ return [
                     'icon'   => 'fa-solid fa-shapes',
                     'active' => ['admin/vehiculos/tipos*'],
                     'can'    => 'viewAny-tipos-vehiculo',
+                ],
+            ],
+        ],
+
+        // INVENTARIO - NUEVO MÓDULO
+        [
+            'text'   => 'Inventario',
+            'icon'   => 'fa-solid fa-boxes-stacked',
+            'can'    => 'viewAny-item', // Necesitas crear este Gate
+            'submenu' => [
+                [
+                    'text'   => 'Catálogo de Ítems',
+                    'url'    => 'admin/inventario/items',
+                    'icon'   => 'fa-solid fa-cube',
+                    'active' => ['admin/inventario/items*'],
+                    'can'    => 'viewAny-item',
+                ],
+                [
+                    'text'   => 'Movimientos',
+                    'url'    => 'admin/inventario/movimientos',
+                    'icon'   => 'fa-solid fa-arrows-spin',
+                    'active' => ['admin/inventario/movimientos*'],
+                    'can'    => 'viewAny-movimiento',
+                ],
+                [
+                    'text'   => 'Unidades Individuales',
+                    'url'    => 'admin/inventario/unidades-individuales',
+                    'icon'   => 'fa-solid fa-hashtag',
+                    'active' => ['admin/inventario/unidades-individuales*'],
+                    'can'    => 'viewAny-unidad',
+                ],
+                [
+                    'text'   => 'Ubicaciones',
+                    'url'    => 'admin/inventario/ubicaciones',
+                    'icon'   => 'fa-solid fa-location-dot',
+                    'active' => ['admin/inventario/ubicaciones*'],
+                    'can'    => 'viewAny-ubicacion',
+                ],
+                [
+                    'text'   => 'Categorías',
+                    'url'    => 'admin/inventario/categorias',
+                    'icon'   => 'fa-solid fa-tags',
+                    'active' => ['admin/inventario/categorias*'],
+                    'can'    => 'viewAny-categoria',
                 ],
             ],
         ],

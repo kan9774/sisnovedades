@@ -146,6 +146,15 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     }
 
     /**
+     * Unidades individuales de inventario (PC, radio, silla, etc.)
+     * actualmente asignadas a este usuario como responsable.
+     */
+    public function itemUnidadesAsignadas(): HasMany
+    {
+        return $this->hasMany(ItemUnidad::class, 'responsable_id');
+    }
+
+    /**
      * Verificar si el usuario es Super Admin
      */
     public function isSuperAdmin(): bool

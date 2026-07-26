@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\Categoria;
 use App\Models\CategoriaDocumento;
 use App\Models\Conductor;
 use App\Models\Documento;
 use App\Models\EstadoPaloma;
 use App\Models\Guard;
+use App\Models\Item;
+use App\Models\ItemUnidad;
 use App\Models\MantenimientoVehiculo;
+use App\Models\Movimiento;
 use App\Models\News;
 use App\Models\Paloma;
 use App\Models\Palomar;
@@ -19,19 +23,25 @@ use App\Models\User;
 use App\Models\Vehiculo;
 use App\Models\Vuelo;
 use App\Observers\NewsObserver;
+use App\Models\Ubicacion;
 use App\Observers\UserObserver;
+use App\Policies\CategoriaPolicy;
 use App\Policies\CategoriaDocumentoPolicy;
 use App\Policies\ConductorPolicy;
 use App\Policies\DocumentoPolicy;
 use App\Policies\EstadoPalomaPolicy;
 use App\Policies\GuardiaPolicy;
+use App\Policies\ItemPolicy;
+use App\Policies\ItemUnidadPolicy;
 use App\Policies\MantenimientoVehiculoPolicy;
+use App\Policies\MovimientoPolicy;
 use App\Policies\NovedadPolicy;
 use App\Policies\PalomaPolicy;
 use App\Policies\PalomarPolicy;
 use App\Policies\RolPolicy;
 use App\Policies\SalidaVehiculoPolicy;
 use App\Policies\TipoVehiculoPolicy;
+use App\Policies\UbicacionPolicy;
 use App\Policies\UnidadPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\VehiculoPolicy;
@@ -57,7 +67,7 @@ class AppServiceProvider extends ServiceProvider
         'localhost',
         '127.0.0.1',
         'sisnovedades',
-        '192.168.1.9',
+        '172.30.105.126',
     ];
 
     /**
@@ -100,6 +110,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-oficina', fn($user) => $user->isAdmin());
         Gate::define('viewAny-palomar', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_palomar'));
 
+        // Gates para el módulo de inventario
+        Gate::define('viewAny-item', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
+        Gate::define('viewAny-movimiento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
+        Gate::define('viewAny-unidad', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
+        Gate::define('viewAny-categoria', fn($user) => $user->isAdmin());
+        Gate::define('viewAny-talla', fn($user) => $user->isAdmin());
+        Gate::define('viewAny-ubicacion', fn($user) => $user->isAdmin());
         Gate::define('upload-attach', function (User $user, News $news) {
             if ($user->isAdmin()) {
                 return true;
@@ -135,8 +152,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(MantenimientoVehiculo::class, MantenimientoVehiculoPolicy::class);
         Gate::policy(TipoVehiculo::class, TipoVehiculoPolicy::class);
         Gate::policy(Unidad::class, UnidadPolicy::class);
-        
-        
+        Gate::policy(Item::class, ItemPolicy::class);
+        Gate::policy(ItemUnidad::class, ItemUnidadPolicy::class);
+        Gate::policy(Movimiento::class, MovimientoPolicy::class);
+        Gate::policy(Categoria::class, CategoriaPolicy::class);
+        Gate::policy(Ubicacion::class, UbicacionPolicy::class);
+
+
         // Observers
         News::observe(NewsObserver::class);
         User::observe(UserObserver::class);
