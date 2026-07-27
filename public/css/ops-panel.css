@@ -118,3 +118,93 @@
 body.ops-panel-open {
     overflow: hidden;
 }
+.ops-panel__save-btn{
+    background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important;
+    color: #0B2545 !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important;
+    border: none;
+}
+/*
+ * Addendum a ops-panel.css — AGREGAR AL FINAL del archivo existente
+ * (no reemplaza nada, son clases nuevas: .ops-modal-*)
+ *
+ * Mini-modal centrado y liviano para altas rápidas dentro de otro
+ * formulario ya abierto (ej: crear una Categoría o Talla sin salir
+ * del modal de "Nuevo Ítem"). A diferencia de .ops-panel-*, este NO
+ * ocupa toda la pantalla: es un cuadro chico con fondo oscurecido,
+ * pensado para quedar apilado ENCIMA de un .ops-panel-overlay ya abierto.
+ */
+
+.ops-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1070; /* por encima de .ops-panel-overlay (1060) */
+    background: rgba(11, 37, 69, 0.55);
+    align-items: center;
+    justify-content: center;
+}
+
+.ops-modal-overlay.is-open {
+    display: flex;
+    animation: opsPanelFadeIn .16s ease-out;
+}
+
+.ops-modal {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    margin: 1rem;
+}
+
+.ops-modal__header {
+    padding: .9rem 1.25rem;
+    background: linear-gradient(135deg, #0B2545 0%, #0F3460 100%);
+    border-bottom: 3px solid #FFD200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ops-modal__title {
+    color: #fff;
+    margin: 0;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.ops-modal__close {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    font-size: .85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, border-color .15s;
+}
+
+.ops-modal__close:hover {
+    background: rgba(255, 210, 0, 0.18);
+    border-color: #FFD200;
+    color: #FFD200;
+}
+
+.ops-modal__body {
+    padding: 1.25rem;
+}
+
+.ops-modal__footer {
+    padding: .9rem 1.25rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+}

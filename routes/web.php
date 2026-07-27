@@ -97,6 +97,9 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             Route::get('/categorias', function () {
                 return view('livewire.inventario.categorias-layout');
             })->name('categorias');
+            Route::get('/tallas', function () {
+                return view('livewire.inventario.tallas-layout');
+            })->name('tallas');
         });
         Route::get('/', function () {
             $dashboard = new App\Livewire\AdminDashboard();

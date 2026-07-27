@@ -48,6 +48,7 @@
                         <th>Talla</th>
                         <th>Seguimiento</th>
                         <th>Stock mín.</th>
+                        <th>Vida útil</th>
                         <th class="text-right">Acciones</th>
                     </tr>
                 </thead>
@@ -68,6 +69,13 @@
                                 @endif
                             </td>
                             <td>{{ $item->stock_minimo ?? '—' }}</td>
+                            <td>
+                                @if ($item->vida_util_meses)
+                                    {{ $item->vida_util_meses }} {{ Str::plural('mes', $item->vida_util_meses) }}
+                                @else
+                                    <span class="text-muted">No vence</span>
+                                @endif
+                            </td>
                             <td class="text-right">
                                 @can('update', $item)
                                     <button wire:click="abrirModalEditar({{ $item->id }})"
@@ -86,7 +94,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
+                            <td colspan="8" class="text-center text-muted py-4">
                                 No hay ítems que coincidan con la búsqueda.
                             </td>
                         </tr>
@@ -182,6 +190,20 @@
                                     <input type="number" wire:model="stock_minimo" min="0" class="form-control">
                                 </div>
                             @endif
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-md-4">
+                                <label>Vida útil (meses, opcional)</label>
+                                <input type="number" wire:model="vida_util_meses" min="1"
+                                       placeholder="Ej: 24"
+                                       class="form-control @error('vida_util_meses') is-invalid @enderror">
+                                @error('vida_util_meses') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                <small class="form-text text-muted">
+                                    Dejar vacío si el ítem no vence (ej: mobiliario). Si tiene valor, sus
+                                    unidades/lotes vencen a partir de la fecha en que se reciben del proveedor.
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </div>

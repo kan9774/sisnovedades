@@ -31,6 +31,7 @@ class ItemsCatalogo extends Component
     public string $tipo_seguimiento = 'cantidad';
     public ?string $unidad_medida = null;
     public ?int $stock_minimo = null;
+    public ?int $vida_util_meses = null;
 
     protected function rules(): array
     {
@@ -43,6 +44,7 @@ class ItemsCatalogo extends Component
             'tipo_seguimiento' => 'required|in:cantidad,individual',
             'unidad_medida' => 'nullable|required_if:tipo_seguimiento,cantidad|string|max:30',
             'stock_minimo' => 'nullable|integer|min:0',
+            'vida_util_meses' => 'nullable|integer|min:1|max:600',
         ];
     }
 
@@ -52,6 +54,8 @@ class ItemsCatalogo extends Component
         'nombre.required' => 'El nombre es obligatorio.',
         'categoria_id.required' => 'Seleccioná una categoría.',
         'unidad_medida.required_if' => 'Indicá la unidad de medida (unidad, caja, litro, etc).',
+        'vida_util_meses.integer' => 'La vida útil debe ser un número entero de meses.',
+        'vida_util_meses.min' => 'La vida útil debe ser de al menos 1 mes.',
     ];
 
     public function mount(): void
@@ -91,6 +95,7 @@ class ItemsCatalogo extends Component
         $this->tipo_seguimiento = $item->tipo_seguimiento;
         $this->unidad_medida = $item->unidad_medida;
         $this->stock_minimo = $item->stock_minimo;
+        $this->vida_util_meses = $item->vida_util_meses;
 
         $this->mostrarModal = true;
         $this->dispatch('abrir-modal-item');
@@ -144,7 +149,7 @@ class ItemsCatalogo extends Component
     {
         $this->reset([
             'itemId', 'codigo', 'nombre', 'descripcion',
-            'categoria_id', 'talla_id', 'unidad_medida', 'stock_minimo',
+            'categoria_id', 'talla_id', 'unidad_medida', 'stock_minimo', 'vida_util_meses',
         ]);
         $this->tipo_seguimiento = 'cantidad';
         $this->resetErrorBag();

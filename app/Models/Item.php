@@ -20,12 +20,14 @@ class Item extends Model
         'tipo_seguimiento',
         'unidad_medida',
         'stock_minimo',
+        'vida_util_meses',
         'atributos',
     ];
 
     protected $casts = [
         'atributos' => 'array',
         'stock_minimo' => 'integer',
+        'vida_util_meses' => 'integer',
     ];
 
     public function categoria(): BelongsTo
@@ -48,6 +50,11 @@ class Item extends Model
         return $this->hasMany(Movimiento::class);
     }
 
+    public function lotesStock(): HasMany
+    {
+        return $this->hasMany(LoteStock::class);
+    }
+
     public function esIndividual(): bool
     {
         return $this->tipo_seguimiento === 'individual';
@@ -56,5 +63,10 @@ class Item extends Model
     public function esPorCantidad(): bool
     {
         return $this->tipo_seguimiento === 'cantidad';
+    }
+
+    public function tieneVidaUtil(): bool
+    {
+        return ! is_null($this->vida_util_meses);
     }
 }

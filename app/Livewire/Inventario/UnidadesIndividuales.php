@@ -5,6 +5,7 @@ namespace App\Livewire\Inventario;
 use App\Exceptions\StockInsuficienteException;
 use App\Models\Item;
 use App\Models\ItemUnidad;
+use App\Models\Proveedor;
 use App\Models\Ubicacion;
 use App\Models\User;
 use App\Services\InventarioService;
@@ -27,6 +28,8 @@ class UnidadesIndividuales extends Component
     public ?int $altaItemId = null;
     public ?string $altaNumeroSerie = null;
     public ?int $altaUbicacionId = null;
+    public ?int $altaProveedorId = null;
+    public ?string $altaFechaRecibido = null;
     public ?string $altaMotivo = null;
 
     // Modal: asignar / transferir
@@ -59,7 +62,7 @@ class UnidadesIndividuales extends Component
     public function abrirModalAlta(): void
     {
         $this->authorize('create', ItemUnidad::class);
-        $this->reset(['altaItemId', 'altaNumeroSerie', 'altaUbicacionId', 'altaMotivo']);
+        $this->reset(['altaItemId', 'altaNumeroSerie', 'altaUbicacionId', 'altaProveedorId', 'altaFechaRecibido', 'altaMotivo']);
         $this->resetErrorBag();
         $this->mostrarModalAlta = true;
         $this->dispatch('abrir-modal-unidad-alta');
@@ -73,10 +76,13 @@ class UnidadesIndividuales extends Component
             'altaItemId' => 'required|exists:items,id',
             'altaNumeroSerie' => 'nullable|string|max:100',
             'altaUbicacionId' => 'required|exists:ubicaciones,id',
+            'altaProveedorId' => 'nullable|exists:proveedores,id',
+            'altaFechaRecibido' => 'nullable|date|before_or_equal:today',
             'altaMotivo' => 'nullable|string|max:255',
         ], [
             'altaItemId.required' => 'Seleccioná el ítem al que pertenece la unidad.',
             'altaUbicacionId.required' => 'Seleccioná la ubicación inicial.',
+            'altaFechaRecibido.before_or_equal' => 'La fecha de recibido no puede ser futura.',
         ]);
 
         $item = Item::findOrFail($datos['altaItemId']);
@@ -92,6 +98,8 @@ class UnidadesIndividuales extends Component
             Auth::user(),
             $datos['altaNumeroSerie'],
             $datos['altaMotivo'],
+            $datos['altaProveedorId'] ? Proveedor::findOrFail($datos['altaProveedorId']) : null,
+            $datos['altaFechaRecibido'],
         );
 
         session()->flash('success', 'Unidad dada de alta correctamente.');
@@ -218,10 +226,28 @@ class UnidadesIndividuales extends Component
         $this->dispatch('cerrar-modal-unidad');
     }
 
+    public function itemSeleccionadoTieneVidaUtil(): bool
+    {
+        if (! $this->altaItemId) {
+            return false;
+        }
+
+        return (bool) Item::find($this->altaItemId)?->vida_util_meses;
+    }
+
+    public function vidaUtilDelItemSeleccionado(): ?int
+    {
+        if (! $this->altaItemId) {
+            return null;
+        }
+
+        return Item::find($this->altaItemId)?->vida_util_meses;
+    }
+
     public function render()
     {
         $unidades = ItemUnidad::query()
-            ->with(['item', 'ubicacionActual', 'responsable'])
+            ->with(['item', 'ubicacionActual', 'responsable', 'proveedor'])
             ->when($this->busqueda, fn ($q) => $q->where('numero_serie', 'like', "%{$this->busqueda}%"))
             ->when($this->filtroItemId, fn ($q) => $q->where('item_id', $this->filtroItemId))
             ->when($this->filtroEstado, fn ($q) => $q->where('estado', $this->filtroEstado))
@@ -233,6 +259,7 @@ class UnidadesIndividuales extends Component
             'items' => Item::where('tipo_seguimiento', 'individual')->orderBy('nombre')->get(),
             'ubicaciones' => Ubicacion::orderBy('nombre')->get(),
             'usuarios' => User::orderBy('name')->get(),
+            'proveedores' => Proveedor::orderBy('nombre')->get(),
         ]);
     }
 }

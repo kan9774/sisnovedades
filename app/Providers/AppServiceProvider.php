@@ -17,6 +17,7 @@ use App\Models\Paloma;
 use App\Models\Palomar;
 use App\Models\Rol;
 use App\Models\SalidaVehiculo;
+use App\Models\Talla;
 use App\Models\TipoVehiculo;
 use App\Models\Unidad;
 use App\Models\User;
@@ -40,6 +41,7 @@ use App\Policies\PalomaPolicy;
 use App\Policies\PalomarPolicy;
 use App\Policies\RolPolicy;
 use App\Policies\SalidaVehiculoPolicy;
+use App\Policies\TallaPolicy;
 use App\Policies\TipoVehiculoPolicy;
 use App\Policies\UbicacionPolicy;
 use App\Policies\UnidadPolicy;
@@ -157,6 +159,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Movimiento::class, MovimientoPolicy::class);
         Gate::policy(Categoria::class, CategoriaPolicy::class);
         Gate::policy(Ubicacion::class, UbicacionPolicy::class);
+        Gate::policy(Talla::class, TallaPolicy::class);
 
 
         // Observers

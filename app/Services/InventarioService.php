@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Exceptions\StockInsuficienteException;
 use App\Models\Item;
 use App\Models\ItemUnidad;
+use App\Models\LoteStock;
 use App\Models\Movimiento;
+use App\Models\Proveedor;
 use App\Models\Stock;
 use App\Models\Ubicacion;
 use App\Models\User;
@@ -26,13 +28,21 @@ class InventarioService
         int $cantidad,
         User $usuario,
         ?string $motivo = null,
-        ?string $referencia = null
+        ?string $referencia = null,
+        ?Proveedor $proveedor = null,
+        ?string $fechaRecibido = null,
     ): Movimiento {
         $this->asegurarPorCantidad($item);
         $this->asegurarCantidadPositiva($cantidad);
 
-        return DB::transaction(function () use ($item, $destino, $cantidad, $usuario, $motivo, $referencia) {
+        return DB::transaction(function () use ($item, $destino, $cantidad, $usuario, $motivo, $referencia, $proveedor, $fechaRecibido) {
             $this->incrementarStock($item, $destino, $cantidad);
+
+            $this->acreditarLote($item, $destino, [
+                'proveedor_id' => $proveedor?->id,
+                'fecha_recibido' => $fechaRecibido ?? now()->toDateString(),
+                'cantidad' => $cantidad,
+            ], $referencia);
 
             return Movimiento::create([
                 'item_id' => $item->id,
@@ -59,6 +69,7 @@ class InventarioService
 
         return DB::transaction(function () use ($item, $origen, $cantidad, $usuario, $motivo, $referencia) {
             $this->decrementarStock($item, $origen, $cantidad);
+            $this->consumirLotesFefo($item, $origen, $cantidad);
 
             return Movimiento::create([
                 'item_id' => $item->id,
@@ -91,6 +102,15 @@ class InventarioService
             $this->decrementarStock($item, $origen, $cantidad);
             $this->incrementarStock($item, $destino, $cantidad);
 
+            // Las partidas consumidas en origen (con su fecha_recibido y
+            // proveedor originales) se re-acreditan en destino, así la
+            // fecha de vencimiento del lote viaja con la mercadería en
+            // vez de "resetearse" a hoy.
+            $partidas = $this->consumirLotesFefo($item, $origen, $cantidad);
+            foreach ($partidas as $partida) {
+                $this->acreditarLote($item, $destino, $partida);
+            }
+
             return Movimiento::create([
                 'item_id' => $item->id,
                 'tipo' => 'transferencia',
@@ -106,6 +126,14 @@ class InventarioService
     /**
      * Ajusta el stock de un item en una ubicación al valor real contado
      * (ej: tras un conteo físico), registrando la diferencia como movimiento.
+     *
+     * Faltante (cantidadReal < stock actual): se descuenta de los lotes
+     * existentes por FEFO, igual que una salida.
+     *
+     * Sobrante (cantidadReal > stock actual): se registra como un lote
+     * nuevo sin proveedor y con fecha de hoy, ya que no se conoce su
+     * origen real — queda marcado como "Ajuste de inventario" para
+     * distinguirlo de una entrada normal.
      */
     public function registrarAjuste(
         Item $item,
@@ -126,6 +154,16 @@ class InventarioService
 
             $stock->update(['cantidad' => $cantidadReal]);
 
+            if ($diferencia < 0) {
+                $this->consumirLotesFefo($item, $ubicacion, abs($diferencia));
+            } elseif ($diferencia > 0) {
+                $this->acreditarLote($item, $ubicacion, [
+                    'proveedor_id' => null,
+                    'fecha_recibido' => now()->toDateString(),
+                    'cantidad' => $diferencia,
+                ], 'Ajuste de inventario');
+            }
+
             return Movimiento::create([
                 'item_id' => $item->id,
                 'tipo' => 'ajuste',
@@ -144,6 +182,21 @@ class InventarioService
         return Stock::where('item_id', $item->id)
             ->where('ubicacion_id', $ubicacion->id)
             ->value('cantidad') ?? 0;
+    }
+
+    /**
+     * Lotes con stock disponible de un item en una ubicación, ordenados
+     * del que vence antes al que vence después (FEFO). Útil para mostrar
+     * el detalle de vencimientos en pantalla.
+     */
+    public function lotesDisponibles(Item $item, Ubicacion $ubicacion)
+    {
+        return LoteStock::where('item_id', $item->id)
+            ->where('ubicacion_id', $ubicacion->id)
+            ->where('cantidad_actual', '>', 0)
+            ->orderBy('fecha_recibido')
+            ->orderBy('id')
+            ->get();
     }
 
     /*
@@ -205,16 +258,20 @@ class InventarioService
         Ubicacion $ubicacion,
         User $usuario,
         ?string $numeroSerie = null,
-        ?string $motivo = null
+        ?string $motivo = null,
+        ?Proveedor $proveedor = null,
+        ?string $fechaRecibido = null,
     ): ItemUnidad {
         $this->asegurarIndividual($item);
 
-        return DB::transaction(function () use ($item, $ubicacion, $usuario, $numeroSerie, $motivo) {
+        return DB::transaction(function () use ($item, $ubicacion, $usuario, $numeroSerie, $motivo, $proveedor, $fechaRecibido) {
             $unidad = ItemUnidad::create([
                 'item_id' => $item->id,
                 'numero_serie' => $numeroSerie,
                 'estado' => 'disponible',
                 'ubicacion_actual_id' => $ubicacion->id,
+                'proveedor_id' => $proveedor?->id,
+                'fecha_recibido' => $fechaRecibido,
                 'fecha_alta' => now(),
             ]);
 
@@ -258,7 +315,7 @@ class InventarioService
 
     /*
     |--------------------------------------------------------------------
-    | Helpers internos
+    | Helpers internos: stock agregado
     |--------------------------------------------------------------------
     */
 
@@ -306,6 +363,107 @@ class InventarioService
             'cantidad' => 0,
         ]);
     }
+
+    /*
+    |--------------------------------------------------------------------
+    | Helpers internos: lotes (FEFO)
+    |--------------------------------------------------------------------
+    */
+
+    /**
+     * Descuenta `$cantidad` de los lotes disponibles de un item en una
+     * ubicación, empezando por el que vence antes (FEFO). Como la vida
+     * útil es una propiedad del item (no del lote), dentro de un mismo
+     * item "vence antes" es siempre equivalente a "se recibió antes", así
+     * que alcanza con ordenar por fecha_recibido.
+     *
+     * Devuelve el detalle de las partidas realmente consumidas
+     * (fecha_recibido, proveedor_id, cantidad), útil para transferencias
+     * donde ese detalle tiene que viajar al destino.
+     *
+     * Debe llamarse siempre dentro de una transacción.
+     *
+     * @return array<int, array{fecha_recibido: string, proveedor_id: ?int, cantidad: int}>
+     */
+    private function consumirLotesFefo(Item $item, Ubicacion $ubicacion, int $cantidad): array
+    {
+        $restante = $cantidad;
+        $consumido = [];
+
+        $lotes = LoteStock::where('item_id', $item->id)
+            ->where('ubicacion_id', $ubicacion->id)
+            ->where('cantidad_actual', '>', 0)
+            ->orderBy('fecha_recibido')
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        foreach ($lotes as $lote) {
+            if ($restante <= 0) {
+                break;
+            }
+
+            $tomar = min($lote->cantidad_actual, $restante);
+            $lote->decrement('cantidad_actual', $tomar);
+            $restante -= $tomar;
+
+            $consumido[] = [
+                'fecha_recibido' => $lote->fecha_recibido->toDateString(),
+                'proveedor_id' => $lote->proveedor_id,
+                'cantidad' => $tomar,
+            ];
+        }
+
+        if ($restante > 0) {
+            // No debería pasar si el stock agregado y los lotes están
+            // sincronizados; lo dejamos como salvaguarda ante una
+            // desincronización entre `stocks` y `lotes_stock`.
+            throw new InvalidArgumentException(
+                "Los lotes registrados de \"{$item->nombre}\" no alcanzan a cubrir la cantidad solicitada "
+                . "(faltan {$restante} unidades sin lote asociado)."
+            );
+        }
+
+        return $consumido;
+    }
+
+    /**
+     * Acredita una cantidad a un lote existente (mismo item+ubicación+
+     * proveedor+fecha_recibido) o crea uno nuevo si no existe.
+     *
+     * @param array{proveedor_id: ?int, fecha_recibido: string, cantidad: int} $partida
+     */
+    private function acreditarLote(Item $item, Ubicacion $ubicacion, array $partida, ?string $referencia = null): void
+    {
+        $lote = LoteStock::where('item_id', $item->id)
+            ->where('ubicacion_id', $ubicacion->id)
+            ->where('proveedor_id', $partida['proveedor_id'])
+            ->where('fecha_recibido', $partida['fecha_recibido'])
+            ->lockForUpdate()
+            ->first();
+
+        if ($lote) {
+            $lote->increment('cantidad_actual', $partida['cantidad']);
+            $lote->increment('cantidad_inicial', $partida['cantidad']);
+            return;
+        }
+
+        LoteStock::create([
+            'item_id' => $item->id,
+            'ubicacion_id' => $ubicacion->id,
+            'proveedor_id' => $partida['proveedor_id'],
+            'fecha_recibido' => $partida['fecha_recibido'],
+            'cantidad_inicial' => $partida['cantidad'],
+            'cantidad_actual' => $partida['cantidad'],
+            'referencia' => $referencia,
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------
+    | Validaciones internas
+    |--------------------------------------------------------------------
+    */
 
     private function asegurarPorCantidad(Item $item): void
     {

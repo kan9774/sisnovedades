@@ -447,6 +447,12 @@ return [
                     'active' => ['admin/inventario/categorias*'],
                     'can'    => 'viewAny-categoria',
                 ],
+                [
+                    'text' => 'Tallas',
+                    'icon' => 'fas fa-ruler',
+                    'url' => 'admin/inventario/tallas',
+                    'can' => 'viewAny-talla',
+                ],
             ],
         ],
 

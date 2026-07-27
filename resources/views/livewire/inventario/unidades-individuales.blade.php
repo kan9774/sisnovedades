@@ -47,6 +47,7 @@
                         <th>Nº de serie</th>
                         <th>Ítem</th>
                         <th>Estado</th>
+                        <th>Vencimiento</th>
                         <th>Ubicación actual</th>
                         <th>Responsable</th>
                         <th class="text-right">Acciones</th>
@@ -68,6 +69,19 @@
                                 ">
                                     {{ str_replace('_', ' ', ucfirst($unidad->estado)) }}
                                 </span>
+                            </td>
+                            <td>
+                                @if ($unidad->vencimiento)
+                                    @if ($unidad->estaVencida())
+                                        <span class="badge badge-danger" title="Venció el {{ $unidad->vencimiento->format('d/m/Y') }}">
+                                            <i class="fas fa-exclamation-triangle"></i> Vencida
+                                        </span>
+                                    @else
+                                        <span class="text-muted small">{{ $unidad->vencimiento->format('d/m/Y') }}</span>
+                                    @endif
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
                             </td>
                             <td>{{ $unidad->ubicacionActual->nombre ?? '—' }}</td>
                             <td>{{ $unidad->responsable->name ?? '—' }}</td>
@@ -101,7 +115,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="7" class="text-center text-muted py-4">
                                 No hay unidades registradas todavía.
                             </td>
                         </tr>
@@ -134,7 +148,7 @@
                     <div class="ops-panel__content">
                         <div class="form-group">
                             <label>Ítem</label>
-                            <select wire:model="altaItemId" class="form-control @error('altaItemId') is-invalid @enderror">
+                            <select wire:model.live="altaItemId" class="form-control @error('altaItemId') is-invalid @enderror">
                                 <option value="">Seleccionar...</option>
                                 @foreach ($items as $item)
                                     <option value="{{ $item->id }}">{{ $item->codigo }} — {{ $item->nombre }}</option>
@@ -155,6 +169,29 @@
                                 @endforeach
                             </select>
                             @error('altaUbicacionId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <label>Proveedor (opcional)</label>
+                                <select wire:model="altaProveedorId" class="form-control @error('altaProveedorId') is-invalid @enderror">
+                                    <option value="">Sin especificar</option>
+                                    @foreach ($proveedores as $proveedor)
+                                        <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('altaProveedorId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Fecha de recibido (opcional)</label>
+                                <input type="date" wire:model="altaFechaRecibido"
+                                       class="form-control @error('altaFechaRecibido') is-invalid @enderror">
+                                @error('altaFechaRecibido') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                @if ($this->itemSeleccionadoTieneVidaUtil())
+                                    <small class="form-text text-muted">
+                                        Este ítem vence a los {{ $this->vidaUtilDelItemSeleccionado() }} meses de recibido.
+                                    </small>
+                                @endif
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Motivo (opcional)</label>

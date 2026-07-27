@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,11 +18,14 @@ class ItemUnidad extends Model
         'estado',
         'ubicacion_actual_id',
         'responsable_id',
+        'proveedor_id',
+        'fecha_recibido',
         'fecha_alta',
         'fecha_baja',
     ];
     protected $table = 'item_unidades';
     protected $casts = [
+        'fecha_recibido' => 'date',
         'fecha_alta' => 'date',
         'fecha_baja' => 'date',
     ];
@@ -41,6 +45,11 @@ class ItemUnidad extends Model
         return $this->belongsTo(User::class, 'responsable_id');
     }
 
+    public function proveedor(): BelongsTo
+    {
+        return $this->belongsTo(Proveedor::class);
+    }
+
     public function movimientos(): HasMany
     {
         return $this->hasMany(Movimiento::class);
@@ -49,5 +58,26 @@ class ItemUnidad extends Model
     public function estaDisponible(): bool
     {
         return $this->estado === 'disponible';
+    }
+
+    /**
+     * Fecha de vencimiento de esta unidad (fecha_recibido + vida_util_meses
+     * del ítem). Null si falta la fecha de recibido o el ítem no tiene
+     * vida útil definida.
+     */
+    protected function vencimiento(): Attribute
+    {
+        return Attribute::get(function () {
+            if (! $this->fecha_recibido || ! $this->item?->vida_util_meses) {
+                return null;
+            }
+
+            return $this->fecha_recibido->copy()->addMonths($this->item->vida_util_meses);
+        });
+    }
+
+    public function estaVencida(): bool
+    {
+        return $this->vencimiento !== null && $this->vencimiento->isPast();
     }
 }
