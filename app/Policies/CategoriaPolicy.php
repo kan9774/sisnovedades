@@ -9,7 +9,7 @@ class CategoriaPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_categorias');
+        return $user->isAdmin() || $user->HasPermisos('ver_categoria');
     }
 
     public function view(User $user, Categoria $categoria): bool

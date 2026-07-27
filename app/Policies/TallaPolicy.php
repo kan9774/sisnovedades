@@ -9,7 +9,7 @@ class TallaPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_tallas');
+        return $user->isAdmin() || $user->HasPermisos('ver_talla');
     }
 
     public function view(User $user, Talla $talla): bool
