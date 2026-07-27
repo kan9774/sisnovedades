@@ -5,6 +5,7 @@ namespace App\Livewire\Inventario;
 use App\Exceptions\StockInsuficienteException;
 use App\Models\Item;
 use App\Models\Movimiento;
+use App\Models\Proveedor;
 use App\Models\Ubicacion;
 use App\Services\InventarioService;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,11 @@ class MovimientosInventario extends Component
     public ?string $motivo = null;
     public ?string $referencia = null;
 
+    // Solo aplican a tipo 'entrada': de dónde vino la mercadería y
+    // desde cuándo empieza a correr su vida útil (si el ítem tiene).
+    public ?int $proveedor_id = null;
+    public ?string $fecha_recibido = null;
+
     // Filtros del historial
     public string $filtroTipo = '';
     public ?int $filtroItemId = null;
@@ -44,6 +50,8 @@ class MovimientosInventario extends Component
             'cantidad' => 'required|integer|min:1',
             'motivo' => 'nullable|string|max:255',
             'referencia' => 'nullable|string|max:100',
+            'proveedor_id' => 'nullable|exists:proveedores,id',
+            'fecha_recibido' => 'nullable|date|before_or_equal:today',
         ];
 
         if (in_array($this->tipo, ['salida', 'transferencia'])) {
@@ -70,11 +78,12 @@ class MovimientosInventario extends Component
         'ubicacion_origen_id.required' => 'Seleccioná la ubicación de origen.',
         'ubicacion_destino_id.required' => 'Seleccioná la ubicación de destino.',
         'ubicacion_destino_id.different' => 'El origen y el destino no pueden ser la misma ubicación.',
+        'fecha_recibido.before_or_equal' => 'La fecha de recibido no puede ser futura.',
     ];
 
     public function updatingTipo(): void
     {
-        $this->reset(['ubicacion_origen_id', 'ubicacion_destino_id', 'cantidad']);
+        $this->reset(['ubicacion_origen_id', 'ubicacion_destino_id', 'cantidad', 'proveedor_id', 'fecha_recibido']);
         $this->resetErrorBag();
     }
 
@@ -132,6 +141,8 @@ class MovimientosInventario extends Component
                     $usuario,
                     $this->motivo,
                     $this->referencia,
+                    $this->proveedor_id ? Proveedor::findOrFail($this->proveedor_id) : null,
+                    $this->fecha_recibido,
                 ),
                 'salida' => $servicio->registrarSalida(
                     $item,
@@ -166,7 +177,10 @@ class MovimientosInventario extends Component
         }
 
         session()->flash('success', 'Movimiento registrado correctamente.');
-        $this->reset(['item_id', 'ubicacion_origen_id', 'ubicacion_destino_id', 'cantidad', 'motivo', 'referencia']);
+        $this->reset([
+            'item_id', 'ubicacion_origen_id', 'ubicacion_destino_id', 'cantidad',
+            'motivo', 'referencia', 'proveedor_id', 'fecha_recibido',
+        ]);
         unset($this->itemSeleccionado, $this->stockDeReferencia);
     }
 
@@ -197,6 +211,7 @@ class MovimientosInventario extends Component
             'movimientos' => $movimientos,
             'items' => Item::where('tipo_seguimiento', 'cantidad')->orderBy('nombre')->get(),
             'ubicaciones' => Ubicacion::orderBy('nombre')->get(),
+            'proveedores' => Proveedor::orderBy('nombre')->get(),
         ]);
     }
 }

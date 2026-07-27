@@ -32,7 +32,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('admin.vehiculos.store') }}" method="POST">
+                <form action="{{ route('admin.vehiculos.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     {{-- Fila 1: Matrícula / Marca / Modelo --}}
@@ -52,8 +52,7 @@
                             <div class="form-group">
                                 <label>Marca <small class="text-muted">(opcional)</small></label>
                                 <input type="text" name="marca"
-                                    class="form-control @error('marca') is-invalid @enderror"
-                                    value="{{ old('marca') }}">
+                                    class="form-control @error('marca') is-invalid @enderror" value="{{ old('marca') }}">
                                 @error('marca')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -63,8 +62,7 @@
                             <div class="form-group">
                                 <label>Modelo <small class="text-muted">(opcional)</small></label>
                                 <input type="text" name="modelo"
-                                    class="form-control @error('modelo') is-invalid @enderror"
-                                    value="{{ old('modelo') }}">
+                                    class="form-control @error('modelo') is-invalid @enderror" value="{{ old('modelo') }}">
                                 @error('modelo')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -240,8 +238,8 @@
                             <div class="form-group">
                                 <label>Ejes <span class="text-danger">*</span></label>
                                 <input type="number" name="ejes"
-                                    class="form-control @error('ejes') is-invalid @enderror"
-                                    value="{{ old('ejes') }}" min="1" max="10" required>
+                                    class="form-control @error('ejes') is-invalid @enderror" value="{{ old('ejes') }}"
+                                    min="1" max="10" required>
                                 @error('ejes')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -285,13 +283,13 @@
                                 <select name="estado" id="estado"
                                     class="form-control @error('estado') is-invalid @enderror">
                                     <option value="verde" {{ old('estado', 'verde') == 'verde' ? 'selected' : '' }}>
-                                         Verde</option>
+                                        Verde</option>
                                     <option value="amarillo" {{ old('estado') == 'amarillo' ? 'selected' : '' }}>
-                                         Amarillo</option>
+                                        Amarillo</option>
                                     <option value="rojo" {{ old('estado') == 'rojo' ? 'selected' : '' }}>
-                                         Rojo</option>
+                                        Rojo</option>
                                     <option value="negro" {{ old('estado') == 'negro' ? 'selected' : '' }}>
-                                         Negro</option>
+                                        Negro</option>
                                 </select>
                                 @error('estado')
                                     <span class="invalid-feedback">{{ $message }}</span>
@@ -299,7 +297,17 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="acta">Acta <small class="text-muted">(PDF, Word, Imagen -
+                                    Opcional)</small></label>
+                            <input type="file" name="acta"
+                                class="form-control-file @error('acta') is-invalid @enderror">
+                            @error('acta')
+                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('admin.vehiculos.index') }}" class="btn btn-outline-secondary btn-sm"
                             style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
@@ -342,7 +350,7 @@
             actualizarSelect('tipo_lubricante_id', e.detail.id, e.detail.nombre);
         });
         window.addEventListener('rodado-actualizado', e => {
-           actualizarSelect('tipo_rodado_id', e.detail.id, e.detail.nombre);
+            actualizarSelect('tipo_rodado_id', e.detail.id, e.detail.nombre);
         });
     </script>
 @endpush

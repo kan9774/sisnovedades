@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\Inventario\EntregaController;
 use App\Http\Controllers\AdjuntoController;
 use App\Http\Controllers\Admin\EstadoPalomaController;
 use App\Http\Controllers\ForzarCambioPasswordController;
@@ -100,6 +101,16 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             Route::get('/tallas', function () {
                 return view('livewire.inventario.tallas-layout');
             })->name('tallas');
+            Route::get('/proveedores', function () {
+                return view('livewire.inventario.proveedores-layout');
+            })->name('proveedores');
+
+            // Entregas y devoluciones (carrito multi-ítem)
+            Route::get('/entregas', function () {
+                return view('livewire.inventario.entregas-layout');
+            })->name('entregas');
+            Route::get('/entregas/{entrega}/comprobante', [EntregaController::class, 'comprobante'])
+                ->name('entregas.comprobante');
         });
         Route::get('/', function () {
             $dashboard = new App\Livewire\AdminDashboard();

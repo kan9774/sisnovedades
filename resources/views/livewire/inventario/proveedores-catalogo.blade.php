@@ -32,7 +32,7 @@
                             <label class="font-weight-bold">Nombre</label>
                             <input type="text" wire:model="nombre"
                                    class="form-control @error('nombre') is-invalid @enderror"
-                                   placeholder="Ej: Textil Uruguay S.A....">
+                                   placeholder="Ej: S.I.E., B.Com.Nº1, Compra Directa....">
                             @error('nombre') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-4">

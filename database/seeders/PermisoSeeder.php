@@ -217,17 +217,17 @@ class PermisoSeeder extends Seeder
             ['name' => 'crear_tipo_vehiculo', 'description' => 'Crear tipos de vehículo'],
             ['name' => 'editar_tipo_vehiculo', 'description' => 'Editar tipos de vehículo'],
             ['name' => 'eliminar_tipo_vehiculo', 'description' => 'Eliminar tipos de vehículo'],
-            
+
             ['name' => 'ver_tipos_combustible', 'description' => 'Ver tipos de combustible'],
             ['name' => 'crear_tipo_combustible', 'description' => 'Crear tipos de combustible'],
             ['name' => 'editar_tipo_combustible', 'description' => 'Editar tipos de combustible'],
             ['name' => 'eliminar_tipo_combustible', 'description' => 'Eliminar tipos de combustible'],
-            
+
             ['name' => 'ver_tipos_lubricante', 'description' => 'Ver tipos de lubricante'],
             ['name' => 'crear_tipo_lubricante', 'description' => 'Crear tipos de lubricante'],
             ['name' => 'editar_tipo_lubricante', 'description' => 'Editar tipos de lubricante'],
             ['name' => 'eliminar_tipo_lubricante', 'description' => 'Eliminar tipos de lubricante'],
-            
+
             ['name' => 'ver_tipos_rodado', 'description' => 'Ver tipos de rodado'],
             ['name' => 'crear_tipo_rodado', 'description' => 'Crear tipos de rodado'],
             ['name' => 'editar_tipo_rodado', 'description' => 'Editar tipos de rodado'],
@@ -274,6 +274,43 @@ class PermisoSeeder extends Seeder
             ['name' => 'editar_destinatario_pdf', 'description' => 'Editar destinatarios de PDF de guardia'],
             ['name' => 'eliminar_destinatario_pdf', 'description' => 'Eliminar destinatarios de PDF de guardia'],
             ['name' => 'asignar_usuarios_destinatario', 'description' => 'Asignar usuarios a destinatarios de PDF'],
+
+            // ============================================
+            // MÓDULO DE INVENTARIO (Item, ItemUnidad, Movimiento, Entrega)
+            // ============================================
+            ['name' => 'ver_item', 'description' => 'Ver catálogo de ítems, unidades, movimientos y entregas de inventario'],
+            ['name' => 'crear_item', 'description' => 'Dar de alta ítems y unidades individuales en inventario'],
+            ['name' => 'editar_item', 'description' => 'Editar ítems del catálogo de inventario'],
+            ['name' => 'eliminar_item', 'description' => 'Eliminar ítems del catálogo de inventario'], // <-- AGREGADO
+
+            // Catálogos
+            ['name' => 'crear_categoria_item', 'description' => 'Crear categorías de ítems'], // <-- AGREGADO
+            ['name' => 'editar_categoria_item', 'description' => 'Editar categorías de ítems'], // <-- AGREGADO
+            ['name' => 'eliminar_categoria_item', 'description' => 'Eliminar categorías de ítems'], // <-- AGREGADO
+
+            ['name' => 'crear_talla', 'description' => 'Crear tallas de ítems'], // <-- AGREGADO
+            ['name' => 'editar_talla', 'description' => 'Editar tallas de ítems'], // <-- AGREGADO
+            ['name' => 'eliminar_talla', 'description' => 'Eliminar tallas de ítems'], // <-- AGREGADO
+
+            ['name' => 'crear_ubicacion', 'description' => 'Crear ubicaciones de depósito'], // <-- AGREGADO
+            ['name' => 'editar_ubicacion', 'description' => 'Editar ubicaciones de depósito'], // <-- AGREGADO
+            ['name' => 'eliminar_ubicacion', 'description' => 'Eliminar ubicaciones de depósito'], // <-- AGREGADO
+
+            // Movimientos y Entregas
+            ['name' => 'registrar_entrada_inventario', 'description' => 'Registrar entradas de stock (ítems por cantidad)'],
+            ['name' => 'registrar_salida_inventario', 'description' => 'Registrar salidas de stock (ítems por cantidad)'],
+            ['name' => 'registrar_transferencia_inventario', 'description' => 'Transferir stock entre ubicaciones'],
+            ['name' => 'registrar_entrega_inventario', 'description' => 'Registrar entregas de inventario a personal'], // <-- AGREGADO
+            ['name' => 'ajustar_stock_inventario', 'description' => 'Ajustar stock tras un conteo físico'],
+            ['name' => 'asignar_item_unidad', 'description' => 'Asignar/transferir una unidad individual a otra ubicación'],
+            ['name' => 'reparar_item_unidad', 'description' => 'Marcar una unidad individual como en reparación'],
+            ['name' => 'dar_baja_item_unidad', 'description' => 'Dar de baja definitivamente una unidad individual'],
+
+            // MÓDULO DE PROVEEDORES (Proveedor)
+            ['name' => 'ver_proveedores', 'description' => 'Ver listado de proveedores'],
+            ['name' => 'crear_proveedor', 'description' => 'Crear proveedores'],
+            ['name' => 'editar_proveedor', 'description' => 'Editar proveedores'],
+            ['name' => 'eliminar_proveedor', 'description' => 'Eliminar proveedores'],
 
             // ============================================
             // MÓDULO DE REPORTES Y ESTADÍSTICAS

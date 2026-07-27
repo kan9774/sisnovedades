@@ -7,6 +7,7 @@ use App\Models\CategoriaDocumento;
 use App\Models\Conductor;
 use App\Models\Documento;
 use App\Models\EstadoPaloma;
+use App\Models\Entrega;
 use App\Models\Guard;
 use App\Models\Item;
 use App\Models\ItemUnidad;
@@ -15,6 +16,7 @@ use App\Models\Movimiento;
 use App\Models\News;
 use App\Models\Paloma;
 use App\Models\Palomar;
+use App\Models\Proveedor;
 use App\Models\Rol;
 use App\Models\SalidaVehiculo;
 use App\Models\Talla;
@@ -31,6 +33,7 @@ use App\Policies\CategoriaDocumentoPolicy;
 use App\Policies\ConductorPolicy;
 use App\Policies\DocumentoPolicy;
 use App\Policies\EstadoPalomaPolicy;
+use App\Policies\EntregaPolicy;
 use App\Policies\GuardiaPolicy;
 use App\Policies\ItemPolicy;
 use App\Policies\ItemUnidadPolicy;
@@ -39,6 +42,7 @@ use App\Policies\MovimientoPolicy;
 use App\Policies\NovedadPolicy;
 use App\Policies\PalomaPolicy;
 use App\Policies\PalomarPolicy;
+use App\Policies\ProveedorPolicy;
 use App\Policies\RolPolicy;
 use App\Policies\SalidaVehiculoPolicy;
 use App\Policies\TallaPolicy;
@@ -116,9 +120,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-item', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
         Gate::define('viewAny-movimiento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
         Gate::define('viewAny-unidad', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
-        Gate::define('viewAny-categoria', fn($user) => $user->isAdmin());
-        Gate::define('viewAny-talla', fn($user) => $user->isAdmin());
-        Gate::define('viewAny-ubicacion', fn($user) => $user->isAdmin());
+        Gate::define('viewAny-entrega', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
+        Gate::define('viewAny-categoria', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_categorias'));
+        Gate::define('viewAny-talla', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_tallas'));
+        Gate::define('viewAny-ubicacion', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_ubicaciones'));
+        Gate::define('viewAny-proveedor', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_proveedores'));
+
+        // Gates de los adjuntos de la Guardia
         Gate::define('upload-attach', function (User $user, News $news) {
             if ($user->isAdmin()) {
                 return true;
@@ -157,8 +165,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Item::class, ItemPolicy::class);
         Gate::policy(ItemUnidad::class, ItemUnidadPolicy::class);
         Gate::policy(Movimiento::class, MovimientoPolicy::class);
+        Gate::policy(Entrega::class, EntregaPolicy::class);
         Gate::policy(Categoria::class, CategoriaPolicy::class);
         Gate::policy(Ubicacion::class, UbicacionPolicy::class);
+        Gate::policy(Proveedor::class, ProveedorPolicy::class);
         Gate::policy(Talla::class, TallaPolicy::class);
 
 

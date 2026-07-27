@@ -128,27 +128,9 @@
                 <div class="ops-panel__body">
                     <div class="ops-panel__content">
                         <div class="row">
-                            <div class="form-group col-md-4">
-                                <label>Código</label>
-                                <input type="text" wire:model="codigo" class="form-control @error('codigo') is-invalid @enderror">
-                                @error('codigo') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                            </div>
-                            <div class="form-group col-md-8">
-                                <label>Nombre</label>
-                                <input type="text" wire:model="nombre" class="form-control @error('nombre') is-invalid @enderror">
-                                @error('nombre') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Descripción</label>
-                            <textarea wire:model="descripcion" class="form-control" rows="2"></textarea>
-                        </div>
-
-                        <div class="row">
                             <div class="form-group col-md-6">
                                 <label>Categoría</label>
-                                <select wire:model="categoria_id" class="form-control @error('categoria_id') is-invalid @enderror">
+                                <select wire:model.live="categoria_id" class="form-control @error('categoria_id') is-invalid @enderror">
                                     <option value="">Seleccionar...</option>
                                     @foreach ($categorias as $categoria)
                                         <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
@@ -167,6 +149,38 @@
                                     @endforeach
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-md-4">
+                                <label>
+                                    Código
+                                    @if ($codigoAuto && $categoria_id)
+                                        <small class="text-muted font-weight-normal">(sugerido)</small>
+                                    @endif
+                                </label>
+                                <input type="text" wire:model.live.debounce.400ms="codigo"
+                                       class="form-control @error('codigo') is-invalid @enderror">
+                                @error('codigo') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label>Nombre</label>
+                                <input type="text" wire:model="nombre" class="form-control @error('nombre') is-invalid @enderror">
+                                @error('nombre') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        @if ($categoria_id && $codigoAuto && $codigo === '')
+                            <small class="text-warning d-block mb-2">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Esta categoría no tiene abreviatura configurada, cargá el código a mano
+                                (o agregale una abreviatura desde Inventario &gt; Categorías).
+                            </small>
+                        @endif
+
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea wire:model="descripcion" class="form-control" rows="2"></textarea>
                         </div>
 
                         <div class="row">

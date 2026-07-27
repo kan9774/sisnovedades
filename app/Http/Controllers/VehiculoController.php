@@ -8,6 +8,7 @@ use App\Models\TipoRodado;
 use App\Models\TipoVehiculo;
 use App\Models\Unidad;
 use App\Models\Vehiculo;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -80,8 +81,13 @@ class VehiculoController extends Controller
             'tipo_rodado_id' => 'nullable|exists:tipos_rodado,id',
             'consumo_litros_por_km' => 'nullable|numeric|min:0|max:999.9999',
             'descripcion' => 'nullable|string|max:255',
+            'acta' => 'nullable|file|mimes:pdf,jpg,jpeg,png,bmp,doc,docx|max:10240',
             'estado' => 'required|in:verde,amarillo,rojo,negro',
         ]);
+        if ($request->hasFile('acta')) {
+            // Guarda en storage/app/public/actas
+            $data['acta'] = $request->file('acta')->store('actas', 'public');
+        }
 
         $data['sin_cuentakilometros'] = $request->has('sin_cuentakilometros');
         $data['activo'] = $request->has('activo') && !in_array($data['estado'], ['rojo', 'negro']);
@@ -178,8 +184,25 @@ class VehiculoController extends Controller
             'tipo_rodado_id' => 'nullable|integer|exists:tipos_rodado,id',
             'consumo_litros_por_km' => 'nullable|numeric|min:0|max:999.9999',
             'descripcion' => 'nullable|string|max:255',
+            'acta' => 'nullable|file|mimes:pdf,jpg,jpeg,png,bmp,doc,docx|max:10240',
+            'eliminar_acta' => 'nullable|boolean',
             'estado' => 'required|in:verde,amarillo,rojo,negro',
         ]);
+        // 1. Si el usuario marcó la opción de eliminar el acta actual
+        if ($request->has('eliminar_acta') && $vehiculo->acta) {
+            Storage::disk('public')->delete($vehiculo->acta);
+            $data['acta'] = null;
+        }
+
+        // 2. Si el usuario subió un nuevo archivo de acta
+        if ($request->hasFile('acta')) {
+            // Borrar el archivo viejo si existía
+            if ($vehiculo->acta) {
+                Storage::disk('public')->delete($vehiculo->acta);
+            }
+            // Guardar el nuevo archivo
+            $data['acta'] = $request->file('acta')->store('actas', 'public');
+        }
 
         $data['sin_cuentakilometros'] = $request->has('sin_cuentakilometros');
         $activo = $request->has('activo') && !in_array($data['estado'], ['rojo', 'negro']);

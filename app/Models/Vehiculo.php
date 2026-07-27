@@ -35,6 +35,7 @@ class Vehiculo extends Model
         'consumo_litros_por_km',
         'sin_cuentakilometros',
         'descripcion',
+        'acta',
         'estado',
         'activo',
     ];

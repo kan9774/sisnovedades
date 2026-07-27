@@ -109,6 +109,19 @@
                         <p class="text-muted">{{ $vehiculo->descripcion ?? '-' }}</p>
                     </div>
                 </div>
+                <div class="col-md-3">
+                    <strong>Acta Adjunta</strong>
+                    <p class="text-muted">
+                        @if ($vehiculo->acta)
+                            <a href="{{ asset('storage/' . $vehiculo->acta) }}" target="_blank"
+                                class="btn btn-outline-info btn-xs">
+                                <i class="fas fa-file-download"></i> Ver / Descargar Acta
+                            </a>
+                        @else
+                            <span class="text-muted">Sin acta adjunta</span>
+                        @endif
+                    </p>
+                </div>
             </div>
         </div>
 

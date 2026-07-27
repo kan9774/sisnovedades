@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\StockInsuficienteException;
+use App\Models\Entrega;
 use App\Models\Item;
 use App\Models\ItemUnidad;
 use App\Models\LoteStock;
@@ -89,7 +90,8 @@ class InventarioService
         Ubicacion $destino,
         int $cantidad,
         User $usuario,
-        ?string $motivo = null
+        ?string $motivo = null,
+        ?int $entregaId = null,
     ): Movimiento {
         $this->asegurarPorCantidad($item);
         $this->asegurarCantidadPositiva($cantidad);
@@ -98,7 +100,7 @@ class InventarioService
             throw new InvalidArgumentException('El origen y el destino de la transferencia no pueden ser la misma ubicación.');
         }
 
-        return DB::transaction(function () use ($item, $origen, $destino, $cantidad, $usuario, $motivo) {
+        return DB::transaction(function () use ($item, $origen, $destino, $cantidad, $usuario, $motivo, $entregaId) {
             $this->decrementarStock($item, $origen, $cantidad);
             $this->incrementarStock($item, $destino, $cantidad);
 
@@ -119,6 +121,7 @@ class InventarioService
                 'ubicacion_destino_id' => $destino->id,
                 'usuario_id' => $usuario->id,
                 'motivo' => $motivo,
+                'entrega_id' => $entregaId,
             ]);
         });
     }
@@ -209,7 +212,8 @@ class InventarioService
         ItemUnidad $unidad,
         Ubicacion $destino,
         User $usuario,
-        ?string $motivo = null
+        ?string $motivo = null,
+        ?int $entregaId = null,
     ): Movimiento {
         $this->asegurarIndividual($unidad->item);
 
@@ -217,7 +221,7 @@ class InventarioService
             throw new InvalidArgumentException('No se puede reasignar una unidad que ya fue dada de baja.');
         }
 
-        return DB::transaction(function () use ($unidad, $destino, $usuario, $motivo) {
+        return DB::transaction(function () use ($unidad, $destino, $usuario, $motivo, $entregaId) {
             $origenId = $unidad->ubicacion_actual_id;
 
             $unidad->update([
@@ -233,6 +237,7 @@ class InventarioService
                 'ubicacion_destino_id' => $destino->id,
                 'usuario_id' => $usuario->id,
                 'motivo' => $motivo,
+                'entrega_id' => $entregaId,
             ]);
         });
     }
@@ -310,6 +315,83 @@ class InventarioService
                 'usuario_id' => $usuario->id,
                 'motivo' => $motivo,
             ]);
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------
+    | Entregas y devoluciones (carrito multi-ítem)
+    |--------------------------------------------------------------------
+    */
+
+    /**
+     * Procesa una entrega o devolución con varias líneas (mezclando
+     * ítems por cantidad e individuales) como una sola operación
+     * atómica, agrupada bajo un registro de Entrega para el comprobante.
+     *
+     * $lineas: array de arrays, cada uno con:
+     *   - 'item_id' (int, requerido)
+     *   - 'cantidad' (int, requerido si el item es por cantidad)
+     *   - 'item_unidad_id' (int, requerido si el item es individual)
+     */
+    public function registrarEntregaCarrito(
+        string $tipo, // 'entrega' | 'devolucion'
+        Ubicacion $origen,
+        Ubicacion $destino,
+        User $usuario,
+        array $lineas,
+        ?string $motivo = null,
+    ): Entrega {
+        if (! in_array($tipo, ['entrega', 'devolucion'], true)) {
+            throw new InvalidArgumentException('Tipo de entrega inválido.');
+        }
+
+        if ($origen->is($destino)) {
+            throw new InvalidArgumentException('El origen y el destino no pueden ser la misma ubicación.');
+        }
+
+        if (empty($lineas)) {
+            throw new InvalidArgumentException('La entrega debe tener al menos un ítem.');
+        }
+
+        return DB::transaction(function () use ($tipo, $origen, $destino, $usuario, $lineas, $motivo) {
+            $entrega = Entrega::create([
+                'tipo' => $tipo,
+                'ubicacion_origen_id' => $origen->id,
+                'ubicacion_destino_id' => $destino->id,
+                'usuario_id' => $usuario->id,
+                'motivo' => $motivo,
+            ]);
+
+            foreach ($lineas as $linea) {
+                $item = Item::findOrFail($linea['item_id']);
+
+                if ($item->esPorCantidad()) {
+                    $cantidad = (int) ($linea['cantidad'] ?? 0);
+
+                    if ($cantidad <= 0) {
+                        throw new InvalidArgumentException("Indicá una cantidad válida para \"{$item->nombre}\".");
+                    }
+
+                    $this->registrarTransferencia($item, $origen, $destino, $cantidad, $usuario, $motivo, $entrega->id);
+                } else {
+                    $unidad = ItemUnidad::findOrFail($linea['item_unidad_id'] ?? null);
+
+                    if ($unidad->item_id !== $item->id) {
+                        throw new InvalidArgumentException('La unidad seleccionada no corresponde al ítem indicado.');
+                    }
+
+                    if ($unidad->ubicacion_actual_id !== $origen->id) {
+                        throw new InvalidArgumentException(
+                            "La unidad \"{$unidad->numero_serie}\" ya no está en \"{$origen->nombre}\" (puede haber sido movida por otra operación)."
+                        );
+                    }
+
+                    $this->asignarUnidad($unidad, $destino, $usuario, $motivo, $entrega->id);
+                }
+            }
+
+            return $entrega;
         });
     }
 

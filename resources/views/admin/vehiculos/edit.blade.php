@@ -32,7 +32,8 @@
                     </div>
                 @endif
 
-                <form action="{{ route('admin.vehiculos.update', $vehiculo) }}" method="POST">
+                <form action="{{ route('admin.vehiculos.update', $vehiculo) }}" method="POST"
+                    enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -308,7 +309,49 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="acta">Acta <small class="text-muted">(PDF, Word, Imagen -
+                                    Opcional)</small></label>
 
+                            {{-- Si ya existe un acta guardada, la mostramos --}}
+                            @if ($vehiculo->acta)
+                                <div class="mb-2 d-flex align-items-center">
+                                    <span class="badge badge-info mr-2 p-2">
+                                        <i class="fas fa-file-alt"></i> Acta actual cargada
+                                    </span>
+                                    <a href="{{ asset('storage/' . $vehiculo->acta) }}" target="_blank"
+                                        class="btn btn-outline-info btn-xs mr-2">
+                                        <i class="fas fa-eye"></i> Ver / Descargar
+                                    </a>
+
+                                    {{-- Checkbox opcional para eliminar el acta actual --}}
+                                    <div class="custom-control custom-checkbox d-inline ml-2">
+                                        <input type="checkbox" class="custom-control-input" id="eliminar_acta"
+                                            name="eliminar_acta" value="1">
+                                        <label class="custom-control-label text-danger" for="eliminar_acta">
+                                            Eliminar acta actual
+                                        </label>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Input para subir o reemplazar el acta --}}
+                            <input type="file" name="acta" id="acta"
+                                class="form-control-file @error('acta') is-invalid @enderror">
+                            <small class="form-text text-muted">
+                                @if ($vehiculo->acta)
+                                    Seleccioná un nuevo archivo solo si querés reemplazar el existente.
+                                @else
+                                    Seleccioná un archivo si querés adjuntar un acta.
+                                @endif
+                            </small>
+
+                            @error('acta')
+                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('admin.vehiculos.index') }}" class="btn btn-outline-secondary btn-sm"
                             style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">

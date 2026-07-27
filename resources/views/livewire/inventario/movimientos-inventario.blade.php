@@ -72,6 +72,32 @@
                             </div>
                         @endif
 
+                        @if ($tipo === 'entrada')
+                            <div class="form-group">
+                                <label>Proveedor (opcional)</label>
+                                <select wire:model="proveedor_id" class="form-control @error('proveedor_id') is-invalid @enderror">
+                                    <option value="">Sin especificar</option>
+                                    @foreach ($proveedores as $proveedor)
+                                        <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('proveedor_id') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label>Fecha de recibido (opcional)</label>
+                                <input type="date" wire:model="fecha_recibido"
+                                       class="form-control @error('fecha_recibido') is-invalid @enderror">
+                                @error('fecha_recibido') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                @if ($this->itemSeleccionado?->vida_util_meses)
+                                    <small class="form-text text-muted">
+                                        Este ítem vence a los {{ $this->itemSeleccionado->vida_util_meses }} meses de recibido.
+                                        Si dejás la fecha vacía, se usa la de hoy.
+                                    </small>
+                                @endif
+                            </div>
+                        @endif
+
                         @if ($this->stockDeReferencia !== null)
                             <div class="alert alert-light border small py-1 px-2">
                                 Stock actual en esa ubicación: <strong>{{ $this->stockDeReferencia }}</strong>

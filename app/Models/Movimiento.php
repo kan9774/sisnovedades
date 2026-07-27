@@ -13,6 +13,7 @@ class Movimiento extends Model
     protected $fillable = [
         'item_id',
         'item_unidad_id',
+        'entrega_id',
         'tipo',
         'cantidad',
         'ubicacion_origen_id',
@@ -30,6 +31,11 @@ class Movimiento extends Model
     public function itemUnidad(): BelongsTo
     {
         return $this->belongsTo(ItemUnidad::class);
+    }
+
+    public function entrega(): BelongsTo
+    {
+        return $this->belongsTo(Entrega::class);
     }
 
     public function ubicacionOrigen(): BelongsTo

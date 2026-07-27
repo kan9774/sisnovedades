@@ -427,6 +427,13 @@ return [
                     'can'    => 'viewAny-movimiento',
                 ],
                 [
+                    'text'   => 'Entregas',
+                    'url'    => 'admin/inventario/entregas',
+                    'icon'   => 'fa-solid fa-people-carry-box',
+                    'active' => ['admin/inventario/entregas*'],
+                    'can'    => 'viewAny-entrega',
+                ],
+                [
                     'text'   => 'Unidades Individuales',
                     'url'    => 'admin/inventario/unidades-individuales',
                     'icon'   => 'fa-solid fa-hashtag',
@@ -441,6 +448,13 @@ return [
                     'can'    => 'viewAny-ubicacion',
                 ],
                 [
+                    'text'   => 'Proveedores',
+                    'url'    => 'admin/inventario/proveedores',
+                    'icon'   => 'fa-solid fa-truck-field',
+                    'active' => ['admin/inventario/proveedores*'],
+                    'can'    => 'viewAny-proveedor',
+                ],
+                [
                     'text'   => 'Categorías',
                     'url'    => 'admin/inventario/categorias',
                     'icon'   => 'fa-solid fa-tags',
@@ -451,6 +465,7 @@ return [
                     'text' => 'Tallas',
                     'icon' => 'fas fa-ruler',
                     'url' => 'admin/inventario/tallas',
+                    'active' => ['admin/inventario/tallas*'],
                     'can' => 'viewAny-talla',
                 ],
             ],
