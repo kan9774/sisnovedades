@@ -48,7 +48,10 @@ class ProveedoresCatalogo extends Component
     {
         $this->resetPage();
     }
-
+    public function paginationView(): string
+    {
+        return 'livewire::bootstrap';
+    }
     public function agregar(): void
     {
         $this->authorize('create', Proveedor::class);
@@ -118,7 +121,7 @@ class ProveedoresCatalogo extends Component
     public function render()
     {
         $proveedores = Proveedor::query()
-            ->when($this->busqueda, fn ($q) => $q->where('nombre', 'like', "%{$this->busqueda}%"))
+            ->when($this->busqueda, fn($q) => $q->where('nombre', 'like', "%{$this->busqueda}%"))
             ->orderBy('nombre')
             ->paginate(15);
 

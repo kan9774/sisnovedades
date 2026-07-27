@@ -111,6 +111,9 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             })->name('entregas');
             Route::get('/entregas/{entrega}/comprobante', [EntregaController::class, 'comprobante'])
                 ->name('entregas.comprobante');
+            Route::get('/lotes', function () {
+                return view('livewire.inventario.lotes-layout');
+            })->name('lotes');
         });
         Route::get('/', function () {
             $dashboard = new App\Livewire\AdminDashboard();

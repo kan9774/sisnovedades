@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('subtitle', 'Inventario - Talles')
+@section('subtitle', 'Inventario - Lotes')
 @section('content_header_title', 'Inventario')
-@section('content_header_subtitle', 'Talles')
+@section('content_header_subtitle', 'Lotes')
 
 @section('content_body')
 <div class="container-fluid">
-    <livewire:inventario.tallas-catalogo />
+    <livewire:inventario.lotes-stock />
 </div>
 @stop

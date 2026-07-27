@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,25 @@ class Item extends Model
         'stock_minimo' => 'integer',
         'vida_util_meses' => 'integer',
     ];
+    protected function codigo(): Attribute
+    {
+        return Attribute::make(
+            set: fn(string $value) => strtoupper(trim($value)),
+        );
+    }
+
+    protected function nombre(): Attribute
+    {
+        return Attribute::make(
+            set: fn(string $value) => strtoupper(trim($value)),
+        );
+    }
+    protected function unidadMedida(): Attribute
+    {
+        return Attribute::make(
+            set: fn(?string $value) => $value !== null ? strtoupper(trim($value)) : null,
+        );
+    }
 
     public function categoria(): BelongsTo
     {

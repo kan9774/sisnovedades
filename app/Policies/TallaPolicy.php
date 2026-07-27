@@ -14,7 +14,7 @@ class TallaPolicy
 
     public function view(User $user, Talla $talla): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('crear_talla');
+        return $user->isAdmin() || $user->HasPermisos('ver_talla');
     }
 
     /**

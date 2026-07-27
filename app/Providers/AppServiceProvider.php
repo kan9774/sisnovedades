@@ -121,11 +121,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-movimiento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
         Gate::define('viewAny-unidad', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
         Gate::define('viewAny-entrega', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
-        Gate::define('viewAny-categoria', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_categorias'));
-        Gate::define('viewAny-talla', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_tallas'));
-        Gate::define('viewAny-ubicacion', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_ubicaciones'));
+        Gate::define('viewAny-categoria', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_categoria'));
+        Gate::define('viewAny-talla', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_talla'));
+        Gate::define('viewAny-ubicacion', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_ubicacion'));
         Gate::define('viewAny-proveedor', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_proveedores'));
-
+        Gate::define('viewAny-lote', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
         // Gates de los adjuntos de la Guardia
         Gate::define('upload-attach', function (User $user, News $news) {
             if ($user->isAdmin()) {

@@ -56,6 +56,10 @@ class UbicacionesCatalogo extends Component
         $this->reset(['referencia_id']);
         $this->resetErrorBag('referencia_id');
     }
+    public function paginationView(): string
+    {
+        return 'livewire::bootstrap';
+    }
 
     public function updatedReferenciaId(): void
     {
@@ -182,8 +186,8 @@ class UbicacionesCatalogo extends Component
 
         $enUso = Stock::where('ubicacion_id', $ubicacion->id)->where('cantidad', '>', 0)->exists()
             || Movimiento::where('ubicacion_origen_id', $ubicacion->id)
-                ->orWhere('ubicacion_destino_id', $ubicacion->id)
-                ->exists()
+            ->orWhere('ubicacion_destino_id', $ubicacion->id)
+            ->exists()
             || ItemUnidad::where('ubicacion_actual_id', $ubicacion->id)->exists();
 
         if ($enUso) {
@@ -251,8 +255,8 @@ class UbicacionesCatalogo extends Component
     public function render()
     {
         $ubicaciones = Ubicacion::query()
-            ->when($this->busqueda, fn ($q) => $q->where('nombre', 'like', "%{$this->busqueda}%"))
-            ->when($this->filtroTipo, fn ($q) => $q->where('tipo', $this->filtroTipo))
+            ->when($this->busqueda, fn($q) => $q->where('nombre', 'like', "%{$this->busqueda}%"))
+            ->when($this->filtroTipo, fn($q) => $q->where('tipo', $this->filtroTipo))
             ->orderBy('nombre')
             ->paginate(15);
 

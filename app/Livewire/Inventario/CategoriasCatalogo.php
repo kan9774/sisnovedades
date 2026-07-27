@@ -44,6 +44,10 @@ class CategoriasCatalogo extends Component
     {
         $this->authorize('viewAny', Categoria::class);
     }
+    public function paginationView(): string
+    {
+        return 'livewire::bootstrap';
+    }
 
     public function updatingBusqueda(): void
     {
@@ -118,8 +122,9 @@ class CategoriasCatalogo extends Component
     public function render()
     {
         $categorias = Categoria::query()
-            ->when($this->busqueda, fn ($q) => $q->where('nombre', 'like', "%{$this->busqueda}%")
-                ->orWhere('codigo_abreviatura', 'like', "%{$this->busqueda}%"))
+            ->when($this->busqueda, fn($q) => $q->where(fn($q2) => $q2
+                ->where('nombre', 'like', "%{$this->busqueda}%")
+                ->orWhere('codigo_abreviatura', 'like', "%{$this->busqueda}%")))
             ->withCount('items')
             ->orderBy('nombre')
             ->paginate(15);

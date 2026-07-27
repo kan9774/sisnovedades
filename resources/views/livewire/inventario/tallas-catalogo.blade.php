@@ -132,7 +132,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="text-center text-muted py-4">
-                                    No hay tallas que coincidan con la búsqueda.
+                                    No hay talles que coincidan con la búsqueda.
                                 </td>
                             </tr>
                         @endforelse

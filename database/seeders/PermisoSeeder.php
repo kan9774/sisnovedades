@@ -284,14 +284,17 @@ class PermisoSeeder extends Seeder
             ['name' => 'eliminar_item', 'description' => 'Eliminar ítems del catálogo de inventario'], // <-- AGREGADO
 
             // Catálogos
-            ['name' => 'crear_categoria_item', 'description' => 'Crear categorías de ítems'], // <-- AGREGADO
-            ['name' => 'editar_categoria_item', 'description' => 'Editar categorías de ítems'], // <-- AGREGADO
-            ['name' => 'eliminar_categoria_item', 'description' => 'Eliminar categorías de ítems'], // <-- AGREGADO
+            ['name' => 'ver_categoria', 'description' => 'Ver categorías de ítems'], // <-- AGREGADO
+            ['name' => 'crear_categoria', 'description' => 'Crear categorías de ítems'], // <-- AGREGADO (renombrado desde crear_categoria_item)
+            ['name' => 'editar_categoria', 'description' => 'Editar categorías de ítems'], // <-- AGREGADO (renombrado desde editar_categoria_item)
+            ['name' => 'eliminar_categoria', 'description' => 'Eliminar categorías de ítems'], // <-- AGREGADO (renombrado desde eliminar_categoria_item)
 
+            ['name' => 'ver_talla', 'description' => 'Ver tallas de ítems'], // <-- AGREGADO
             ['name' => 'crear_talla', 'description' => 'Crear tallas de ítems'], // <-- AGREGADO
             ['name' => 'editar_talla', 'description' => 'Editar tallas de ítems'], // <-- AGREGADO
             ['name' => 'eliminar_talla', 'description' => 'Eliminar tallas de ítems'], // <-- AGREGADO
 
+            ['name' => 'ver_ubicacion', 'description' => 'Ver ubicaciones de depósito'], // <-- AGREGADO
             ['name' => 'crear_ubicacion', 'description' => 'Crear ubicaciones de depósito'], // <-- AGREGADO
             ['name' => 'editar_ubicacion', 'description' => 'Editar ubicaciones de depósito'], // <-- AGREGADO
             ['name' => 'eliminar_ubicacion', 'description' => 'Eliminar ubicaciones de depósito'], // <-- AGREGADO

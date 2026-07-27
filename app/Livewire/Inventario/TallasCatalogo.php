@@ -76,6 +76,10 @@ class TallasCatalogo extends Component
         $this->editOrden = $talla->orden;
         $this->resetErrorBag();
     }
+    public function paginationView(): string
+    {
+        return 'livewire::bootstrap';
+    }
 
     public function saveEdit(): void
     {
@@ -130,7 +134,7 @@ class TallasCatalogo extends Component
     public function render()
     {
         $tallas = Talla::query()
-            ->when($this->busqueda, fn ($q) => $q->where('valor', 'like', "%{$this->busqueda}%")
+            ->when($this->busqueda, fn($q) => $q->where('valor', 'like', "%{$this->busqueda}%")
                 ->orWhere('sistema', 'like', "%{$this->busqueda}%"))
             ->withCount('items')
             ->orderBy('orden')

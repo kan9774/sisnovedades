@@ -9,12 +9,12 @@ class UbicacionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_ubicacione');
+        return $user->isAdmin() || $user->HasPermisos('ver_ubicacion');
     }
 
     public function view(User $user, Ubicacion $ubicacion): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_ubicacione');
+        return $user->isAdmin() || $user->HasPermisos('ver_ubicacion');
     }
 
     /**
