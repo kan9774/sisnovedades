@@ -221,8 +221,15 @@ class EntregasInventario extends Component
             return;
         }
 
-        return redirect()->route('admin.inventario.entregas.comprobante', $entrega);
+        $this->dispatch(
+            'comprobante-listo',
+            url: route('admin.inventario.entregas.comprobante', $entrega),
+        );
+
+        session()->flash('success', 'Entrega registrada correctamente.');
+        $this->reset(['origenId', 'destinoId', 'motivo', 'lineas', 'lineaItemId', 'lineaCantidad', 'lineaItemUnidadId']);
     }
+    
 
     private function limpiarFormularioLinea(): void
     {

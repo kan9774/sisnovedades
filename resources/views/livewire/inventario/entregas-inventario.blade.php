@@ -1,4 +1,7 @@
-<div>
+<div
+x-data
+x-on:comprobante-listo.window="window.open($event.detail.url,'_blank')"
+>
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}

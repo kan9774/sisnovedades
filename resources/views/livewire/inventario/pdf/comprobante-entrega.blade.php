@@ -26,16 +26,16 @@
             <td>{{ $entrega->esDevolucion() ? 'Devolución' : 'Entrega' }}</td>
         </tr>
         <tr>
-            <td>Ubicación origen:</td>
+            <td>Origen:</td>
             <td>{{ $entrega->ubicacionOrigen->nombre ?? '—' }}</td>
         </tr>
         <tr>
-            <td>Ubicación destino:</td>
+            <td>Destino:</td>
             <td>{{ $entrega->ubicacionDestino->nombre ?? '—' }}</td>
         </tr>
         <tr>
             <td>Responsable:</td>
-            <td>{{ $entrega->usuario->name ?? '—' }}</td>
+            <td>{{ $entrega->usuario->name ?? '—' }} {{ $entrega->usuario->last_name ?? '—'}}</td>
         </tr>
         @if ($entrega->motivo)
             <tr>
@@ -50,7 +50,7 @@
             <tr>
                 <th>Ítem</th>
                 <th>N° Serie</th>
-                <th style="text-align: right;">Cantidad</th>
+                <th style="text-align: center;">Cantidad</th>
             </tr>
         </thead>
         <tbody>
@@ -58,7 +58,7 @@
                 <tr>
                     <td>{{ $movimiento->item->codigo ?? '—' }} — {{ $movimiento->item->nombre ?? '—' }}</td>
                     <td>{{ $movimiento->itemUnidad->numero_serie ?? '—' }}</td>
-                    <td style="text-align: right;">{{ $movimiento->cantidad ?? '—' }}</td>
+                    <td style="text-align: center;">{{ $movimiento->cantidad ?? '—' }}</td>
                 </tr>
             @empty
                 <tr>

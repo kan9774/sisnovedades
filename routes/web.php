@@ -33,6 +33,7 @@ use App\Livewire\Inventario\ItemsCatalogo;
 use App\Livewire\Inventario\MovimientosInventario;
 use App\Livewire\Inventario\UnidadesIndividuales;
 use App\Livewire\Inventario\CategoriasCatalogo;
+use App\Livewire\Inventario\ListadoDepositoGeneral;
 use App\Livewire\Inventario\UbicacionesCatalogo;
 
 // Pública

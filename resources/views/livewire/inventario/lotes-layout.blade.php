@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('subtitle', 'Inventario - Lotes')
+@section('subtitle', 'Inventario - Depósito General')
 @section('content_header_title', 'Inventario')
-@section('content_header_subtitle', 'Lotes')
+@section('content_header_subtitle', 'Depósito General')
 
 @section('content_body')
 <div class="container-fluid">

@@ -469,7 +469,7 @@ return [
                     'can' => 'viewAny-talla',
                 ],
                 [
-                    'text'   => 'Lotes en Depósito',
+                    'text'   => 'Depósito General',
                     'url'    => 'admin/inventario/lotes',
                     'icon'   => 'fa-solid fa-boxes-packing',
                     'active' => ['admin/inventario/lotes*'],
