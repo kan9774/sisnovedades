@@ -46,8 +46,16 @@ class PalomaController extends Controller
             'color' => 'nullable|string|max:50',
             'raza' => 'nullable|string|max:100',
             'origen' => 'nullable|string|max:255',
-            'padre_id' => 'nullable|exists:palomas,id',
-            'madre_id' => 'nullable|exists:palomas,id',
+            'padre_id' => ['nullable', 'exists:palomas,id', function ($attribute, $value, $fail) {
+                if ($value && Paloma::find($value)?->sexo !== 'macho') {
+                    $fail('La paloma seleccionada como padre debe tener sexo macho.');
+                }
+            }],
+            'madre_id' => ['nullable', 'exists:palomas,id', function ($attribute, $value, $fail) {
+                if ($value && Paloma::find($value)?->sexo !== 'hembra') {
+                    $fail('La paloma seleccionada como madre debe tener sexo hembra.');
+                }
+            }],
             'estado_id' => 'required|exists:estados_paloma,id',
             'estado_sanitario' => 'required|in:Bien,Enferma',
             'observaciones' => 'nullable|string',
@@ -108,8 +116,16 @@ class PalomaController extends Controller
             'color' => 'nullable|string|max:50',
             'raza' => 'nullable|string|max:100',
             'origen' => 'nullable|string|max:255',
-            'padre_id' => 'nullable|exists:palomas,id',
-            'madre_id' => 'nullable|exists:palomas,id',
+            'padre_id' => ['nullable', 'exists:palomas,id', function ($attribute, $value, $fail) {
+                if ($value && Paloma::find($value)?->sexo !== 'macho') {
+                    $fail('La paloma seleccionada como padre debe tener sexo macho.');
+                }
+            }],
+            'madre_id' => ['nullable', 'exists:palomas,id', function ($attribute, $value, $fail) {
+                if ($value && Paloma::find($value)?->sexo !== 'hembra') {
+                    $fail('La paloma seleccionada como madre debe tener sexo hembra.');
+                }
+            }],
             'estado_id' => 'required|exists:estados_paloma,id',
             'estado_sanitario' => 'required|in:Bien,Enferma',
             'observaciones' => 'nullable|string',

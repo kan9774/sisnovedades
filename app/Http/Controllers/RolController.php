@@ -69,7 +69,7 @@ class RolController extends Controller
 
     public function update(Request $request, Rol $rol)
     {
-        
+
         $this->authorize('update', $rol);
 
         $data = $request->validate([
@@ -112,18 +112,34 @@ class RolController extends Controller
     }
 
     /**
-     * Agrupa una colección de permisos por módulo, usando el prefijo
-     * del name antes del primer guion bajo (ej: "novedades_crear" -> "novedades").
-     * Los permisos sin guion bajo caen en el grupo "general".
+     * Agrupa una colección de permisos por su modelo/tabla asociado
+     * (columna `permissions.model`, ej: "Guardia", "NovedadPersonal").
+     * Los permisos sin modelo asignado caen en el grupo "General".
+     *
+     * Las claves del resultado ya vienen formateadas para mostrar en la
+     * vista (ej: "NovedadPersonal" -> "Novedad Personal"), así que las
+     * blades no necesitan tocar la clave, solo mostrarla.
      */
     private function agruparPermisosPorModulo($permisos)
     {
         return $permisos
-            ->groupBy(function ($permiso) {
-                return str_contains($permiso->name, '_')
-                    ? strstr($permiso->name, '_', true)
-                    : 'general';
-            })
-            ->sortKeys();
+            ->groupBy(fn ($permiso) => $permiso->model ?: 'General')
+            ->sortKeys()
+            ->mapWithKeys(function ($grupoDePermisos, $modelo) {
+                return [$this->formatearNombreModulo($modelo) => $grupoDePermisos];
+            });
+    }
+
+    /**
+     * Convierte un nombre de modelo en PascalCase (ej: "NovedadPersonal")
+     * a un texto legible con espacios (ej: "Novedad Personal").
+     */
+    private function formatearNombreModulo(string $modelo): string
+    {
+        if ($modelo === 'General') {
+            return 'General';
+        }
+
+        return trim(preg_replace('/(?<!^)(?=[A-Z])/', ' ', $modelo));
     }
 }

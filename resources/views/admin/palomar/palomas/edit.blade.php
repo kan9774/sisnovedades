@@ -212,7 +212,7 @@
                                     style="border-radius: 50px; padding: 10px 20px;">
                                     <option value="">Seleccionar...</option>
                                     @foreach ($palomasDisponibles as $p)
-                                        @if ($p->id != $paloma->id)
+                                        @if ($p->id != $paloma->id && $p->sexo === 'macho')
                                             <option value="{{ $p->id }}"
                                                 {{ old('padre_id', $paloma->padre_id) == $p->id ? 'selected' : '' }}>
                                                 {{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}
@@ -234,7 +234,7 @@
                                     style="border-radius: 50px; padding: 10px 20px;">
                                     <option value="">Seleccionar...</option>
                                     @foreach ($palomasDisponibles as $p)
-                                        @if ($p->id != $paloma->id)
+                                        @if ($p->id != $paloma->id && $p->sexo === 'hembra')
                                             <option value="{{ $p->id }}"
                                                 {{ old('madre_id', $paloma->madre_id) == $p->id ? 'selected' : '' }}>
                                                 {{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}

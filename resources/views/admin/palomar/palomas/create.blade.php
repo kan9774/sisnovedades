@@ -40,7 +40,30 @@
             <div class="card-body">
                 <form action="{{ route('admin.palomas.store') }}" method="POST">
                     @csrf
-                    <input type="hidden" name="palomar_id" value="{{ $palomarId }}">
+
+                    {{-- Bloque 0: Palomar --}}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="palomar_id">
+                                    <i class="fa-solid fa-house text-muted mr-1"></i> Palomar <span class="text-danger">*</span>
+                                </label>
+                                <select name="palomar_id" id="palomar_id"
+                                    class="form-control @error('palomar_id') is-invalid @enderror" required>
+                                    <option value="">Seleccionar...</option>
+                                    @foreach ($palomares as $palomar)
+                                        <option value="{{ $palomar->id }}"
+                                            {{ old('palomar_id', $palomarId) == $palomar->id ? 'selected' : '' }}>
+                                            {{ $palomar->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('palomar_id')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
 
                     {{-- Bloque 1: Identificación Básica --}}
                     <div class="row">
@@ -160,10 +183,12 @@
                                     class="form-control @error('padre_id') is-invalid @enderror">
                                     <option value="">Seleccionar...</option>
                                     @foreach ($palomasDisponibles as $p)
-                                        <option value="{{ $p->id }}"
-                                            {{ old('padre_id') == $p->id ? 'selected' : '' }}>
-                                            {{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}
-                                        </option>
+                                        @if ($p->sexo === 'macho')
+                                            <option value="{{ $p->id }}"
+                                                {{ old('padre_id') == $p->id ? 'selected' : '' }}>
+                                                {{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}
+                                            </option>
+                                        @endif
                                     @endforeach
                                 </select>
                                 @error('padre_id')
@@ -180,10 +205,12 @@
                                     class="form-control @error('madre_id') is-invalid @enderror">
                                     <option value="">Seleccionar...</option>
                                     @foreach ($palomasDisponibles as $p)
-                                        <option value="{{ $p->id }}"
-                                            {{ old('madre_id') == $p->id ? 'selected' : '' }}>
-                                            {{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}
-                                        </option>
+                                        @if ($p->sexo === 'hembra')
+                                            <option value="{{ $p->id }}"
+                                                {{ old('madre_id') == $p->id ? 'selected' : '' }}>
+                                                {{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}
+                                            </option>
+                                        @endif
                                     @endforeach
                                 </select>
                                 @error('madre_id')

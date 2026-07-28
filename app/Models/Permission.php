@@ -23,7 +23,7 @@ class Permission extends Model
 
 
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'model'];
     protected $table = 'permissions';
     /**
      * The roles that belong to the permission.
