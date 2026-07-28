@@ -1,12 +1,57 @@
 <div>
+    @if ($resumenReposicion->isNotEmpty())
+        <div class="card card-outline card-warning mb-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-triangle-exclamation"></i> A reponer con el proveedor</h3>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ítem</th>
+                            <th class="text-center">Vigente en depósito</th>
+                            <th class="text-center">Vencido en depósito</th>
+                            <th class="text-center">Mínimo configurado</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($resumenReposicion as $r)
+                            <tr>
+                                <td>{{ $r['item']->codigo }} — {{ $r['item']->nombre }}</td>
+                                <td class="text-center">{{ $r['vigente'] }}</td>
+                                <td class="text-center">
+                                    @if ($r['vencido'] > 0)
+                                        <span class="badge badge-danger">{{ $r['vencido'] }}</span>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="text-center">{{ $r['item']->stock_minimo ?? '—' }}</td>
+                                <td>
+                                    @if ($r['bajoMinimo'])
+                                        <span class="badge badge-warning">Bajo mínimo</span>
+                                    @endif
+                                    @if ($r['vencido'] > 0)
+                                        <span class="badge badge-danger">Tiene stock vencido</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-header">
             <div class="row align-items-center">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <input type="text" wire:model.live.debounce.400ms="busqueda"
                            class="form-control" placeholder="Buscar por ítem o código...">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <select wire:model.live="filtroItemId" class="form-control">
                         <option value="">Todos los ítems</option>
                         @foreach ($items as $item)
@@ -15,14 +60,6 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select wire:model.live="filtroUbicacionId" class="form-control">
-                        <option value="">Todas las ubicaciones</option>
-                        @foreach ($ubicaciones as $ubicacion)
-                            <option value="{{ $ubicacion->id }}">{{ $ubicacion->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
                     <select wire:model.live="filtroEstado" class="form-control">
                         <option value="">Todos</option>
                         <option value="con_stock">Con stock</option>
@@ -37,7 +74,6 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>Ítem</th>
-                        <th>Ubicación</th>
                         <th>Proveedor</th>
                         <th>Fecha recibido</th>
                         <th>Vencimiento</th>
@@ -50,7 +86,6 @@
                     @forelse ($lotes as $lote)
                         <tr wire:key="lote-{{ $lote->id }}" class="{{ $lote->vencido ? 'table-danger' : '' }}">
                             <td>{{ $lote->item->codigo }} — {{ $lote->item->nombre }}</td>
-                            <td>{{ $lote->ubicacion->nombre }}</td>
                             <td>{{ $lote->proveedor->nombre ?? '—' }}</td>
                             <td>{{ $lote->fecha_recibido->format('d/m/Y') }}</td>
                             <td>
@@ -65,7 +100,7 @@
                             </td>
                             <td class="text-center">{{ $lote->cantidad_inicial }}</td>
                             <td class="text-center">
-                                <span class="badge {{ $lote->cantidad_actual > 0 ? 'badge-secondary' : 'badge-light text-muted' }}">
+                                <span class="badge {{ $lote->cantidad_actual > 0 ? 'badge-success' : 'badge-light text-muted' }}">
                                     {{ $lote->cantidad_actual }}
                                 </span>
                             </td>
@@ -73,8 +108,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
-                                No hay lotes que coincidan con los filtros.
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No hay lotes en depósito que coincidan con los filtros.
                             </td>
                         </tr>
                     @endforelse

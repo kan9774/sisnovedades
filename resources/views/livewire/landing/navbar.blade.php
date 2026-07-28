@@ -155,6 +155,9 @@ SIDEBAR
                         <div class="sidebar-user__name">{{ Auth::user()->name }} {{ Auth::user()->last_name ?? '' }}
                         </div>
                         <div class="sidebar-user__role">{{ Auth::user()->roles_list ?? 'Sin rol' }}</div>
+                        @if (Auth::user()->oficina)
+                            <div class="sidebar-user__role">{{ Auth::user()->oficina->nombre }}</div>
+                        @endif
                     </div>
                     <i class="fas fa-ellipsis-v text-muted"></i>
                 </div>
@@ -167,6 +170,11 @@ SIDEBAR
                         <div class="user-role">
                             <i class="fas fa-user-tag mr-1"></i> {{ Auth::user()->roles_list ?? 'Sin rol' }}
                         </div>
+                        @if (Auth::user()->oficina)
+                            <div class="user-role">
+                                <i class="fas fa-building mr-1"></i> {{ Auth::user()->oficina->nombre }}
+                            </div>
+                        @endif
                         <div class="user-email">
                             <i class="fas fa-envelope mr-1"></i> {{ Auth::user()->email }}
                         </div>

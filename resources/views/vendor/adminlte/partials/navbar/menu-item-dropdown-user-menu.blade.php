@@ -51,7 +51,12 @@
                     <i class="fas fa-user-tag mr-1"></i>
                     {{ $user->roles_list ?? 'Sin rol' }}
                 </small>
-                <br>
+                @if ($user->oficina)
+                    <br>
+                    <small style="color: #6c757d !important; display: block; margin-top: 4px;">
+                        <i class="fas fa-building mr-1"></i> {{ $user->oficina->nombre }}
+                    </small>
+                @endif
                 <small style="color: #6c757d !important; display: block; margin-top: 4px;">
                     <i class="fas fa-envelope mr-1"></i> {{ $user->email }}
                 </small>

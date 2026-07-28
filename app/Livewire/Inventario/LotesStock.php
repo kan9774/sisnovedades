@@ -14,7 +14,6 @@ class LotesStock extends Component
 
     public string $busqueda = '';
     public ?int $filtroItemId = null;
-    public ?int $filtroUbicacionId = null;
     public string $filtroEstado = ''; // '', 'vencidos', 'con_stock'
 
     public function mount(): void
@@ -32,11 +31,6 @@ class LotesStock extends Component
         $this->resetPage();
     }
 
-    public function updatingFiltroUbicacionId(): void
-    {
-        $this->resetPage();
-    }
-
     public function updatingFiltroEstado(): void
     {
         $this->resetPage();
@@ -44,13 +38,15 @@ class LotesStock extends Component
 
     public function render()
     {
+        $depositos = Ubicacion::where('tipo', 'deposito')->pluck('id');
+
         $lotes = LoteStock::query()
+            ->whereIn('ubicacion_id', $depositos)
             ->with(['item', 'ubicacion', 'proveedor'])
             ->when($this->busqueda, fn ($q) => $q->whereHas('item', fn ($q) => $q
                 ->where('nombre', 'like', "%{$this->busqueda}%")
                 ->orWhere('codigo', 'like', "%{$this->busqueda}%")))
             ->when($this->filtroItemId, fn ($q) => $q->where('item_id', $this->filtroItemId))
-            ->when($this->filtroUbicacionId, fn ($q) => $q->where('ubicacion_id', $this->filtroUbicacionId))
             ->when($this->filtroEstado === 'con_stock', fn ($q) => $q->where('cantidad_actual', '>', 0))
             ->orderBy('fecha_recibido')
             ->orderBy('id')
@@ -68,7 +64,37 @@ class LotesStock extends Component
         return view('livewire.inventario.lotes-stock', [
             'lotes' => $lotes,
             'items' => Item::where('tipo_seguimiento', 'cantidad')->orderBy('nombre')->get(),
-            'ubicaciones' => Ubicacion::orderBy('nombre')->get(),
+            'resumenReposicion' => $this->calcularResumenReposicion($depositos),
         ]);
+    }
+
+    /**
+     * Por cada item con lotes en depósito, suma cuánto queda vigente vs.
+     * vencido, y marca si el stock vigente ya cayó al/bajo el mínimo
+     * configurado. Solo se listan los items que necesitan atención (algo
+     * vencido, o por debajo del mínimo) — no todo el catálogo.
+     */
+    private function calcularResumenReposicion($depositos)
+    {
+        return LoteStock::whereIn('ubicacion_id', $depositos)
+            ->where('cantidad_actual', '>', 0)
+            ->with('item')
+            ->get()
+            ->groupBy('item_id')
+            ->map(function ($lotesDelItem) {
+                $item = $lotesDelItem->first()->item;
+                $vigente = $lotesDelItem->filter(fn (LoteStock $l) => ! $l->vencido)->sum('cantidad_actual');
+                $vencido = $lotesDelItem->filter(fn (LoteStock $l) => $l->vencido)->sum('cantidad_actual');
+
+                return [
+                    'item' => $item,
+                    'vigente' => $vigente,
+                    'vencido' => $vencido,
+                    'bajoMinimo' => $item->stock_minimo !== null && $vigente <= $item->stock_minimo,
+                ];
+            })
+            ->filter(fn ($r) => $r['vencido'] > 0 || $r['bajoMinimo'])
+            ->sortByDesc(fn ($r) => $r['vencido'])
+            ->values();
     }
 }

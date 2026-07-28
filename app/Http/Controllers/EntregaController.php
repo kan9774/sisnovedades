@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Inventario;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Entrega;
+use App\Support\EntregaPdfGenerator;
 
 class EntregaController extends Controller
 {
@@ -11,16 +11,7 @@ class EntregaController extends Controller
     {
         $this->authorize('view', $entrega);
 
-        $entrega->load([
-            'ubicacionOrigen',
-            'ubicacionDestino',
-            'usuario',
-            'movimientos.item',
-            'movimientos.itemUnidad',
-        ]);
-
-        return view('admin.inventario.comprobante-entrega', [
-            'entrega' => $entrega,
-        ]);
+        return EntregaPdfGenerator::generar($entrega)
+            ->stream(EntregaPdfGenerator::nombreArchivo($entrega));
     }
 }

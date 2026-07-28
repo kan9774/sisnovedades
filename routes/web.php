@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Admin\BackupController;
-use App\Http\Controllers\Admin\Inventario\EntregaController;
+use App\Http\Controllers\EntregaController;
 use App\Http\Controllers\AdjuntoController;
 use App\Http\Controllers\Admin\EstadoPalomaController;
 use App\Http\Controllers\ForzarCambioPasswordController;
@@ -114,6 +114,12 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
             Route::get('/lotes', function () {
                 return view('livewire.inventario.lotes-layout');
             })->name('lotes');
+            Route::get('/vencidos-terceros', function () {
+                return view('livewire.inventario.vencidos-terceros-layout');
+            })->name('vencidos-terceros');
+            Route::get('/entregas/historial', function () {
+                return view('livewire.inventario.entregas-historial-layout');
+            })->name('entregas.historial');
         });
         Route::get('/', function () {
             $dashboard = new App\Livewire\AdminDashboard();
