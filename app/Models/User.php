@@ -164,10 +164,16 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 
     /**
      * Verificar si el usuario tiene un rol determinado por nombre.
+     * Comparación case-insensitive: los roles se crean desde el form de
+     * Roles y el casing con que se guardan (p. ej. "Escribiente",
+     * "Capitan_de_Servicio") no siempre coincide con el string en minúscula
+     * que usan los métodos isX() de este modelo.
      */
     public function tieneRol(string $nombre): bool
     {
-        return $this->roles->contains('name', $nombre);
+        return $this->roles->contains(
+            fn($rol) => strcasecmp($rol->name, $nombre) === 0
+        );
     }
 
     /**
