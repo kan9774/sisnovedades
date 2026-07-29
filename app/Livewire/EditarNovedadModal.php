@@ -111,11 +111,14 @@ class EditarNovedadModal extends Component
         $this->novedad->update($payload);
 
         // La mayoría de los campos se muestran fuera de este componente
-        // (en el blade padre), así que refrescamos la página vía navigate
-        // para reflejarlos sin perder la sensación de SPA.
-        return $this->redirect(
-            route('admin.guardias.novedades.show', [$this->guardia, $this->novedad]),
-            navigate: true
+        // (en el blade padre), así que refrescamos la página para
+        // reflejarlos. Redirect normal (sin navigate): en esta página
+        // wire:navigate estaba cayendo a una recarga dura de todos modos
+        // (arrastrando un error preexistente de DataTables que dejaba el
+        // preloader de AdminLTE trabado), así que usamos un redirect común.
+        return redirect()->route(
+            'admin.guardias.novedades.show',
+            [$this->guardia, $this->novedad]
         );
     }
 

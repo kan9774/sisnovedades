@@ -14,27 +14,36 @@
             </div>
         @endif
 
-        <div class="card card-primary card-outline">
-            <div class="card-header ">
-                <h3 class="card-title">
-                    <i class="fas fa-file-alt"></i> Novedad #{{ $novedad->id }}
-                    @php
-                        $colores = [
-                            'Rutinario' => 'info',
-                            'Prioritario' => 'primary',
-                            'Urgente' => 'warning',
-                            'Destello' => 'danger',
-                        ];
-                    @endphp
-                    <span class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }} ml-2">
-                        {{ $novedad->clasification }}
+        <div class="card card-outline-ops">
+            <div class="card-header card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title card-title-ops mb-0">
+                        <i class="fas fa-file-alt"></i> Novedad #{{ $novedad->id }}
+                        @php
+                            $colores = [
+                                'Rutinario' => 'info',
+                                'Prioritario' => 'primary',
+                                'Urgente' => 'warning',
+                                'Destello' => 'danger',
+                            ];
+                        @endphp
+                        <span class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }} ml-2">
+                            {{ $novedad->clasification }}
+                        </span>
+                        <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :key="'estado-novedad-' . $novedad->id" />
+                    </h3>
+                    <span class="card-header-ops__eyebrow">
+                        <i class="fas fa-user-check"></i>
+                        Registrado por
+                        {{ $novedad->escribiente->grade ?? '' }} {{ $novedad->escribiente->name ?? '' }}
+                        {{ $novedad->escribiente->last_name ?? '' }}
+                        &middot; {{ $novedad->created_at->format('d/m/Y H:i') }}
                     </span>
-                </h3>
-                <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :key="'estado-novedad-' . $novedad->id" />
+                </div>
                 <div class="card-tools ml-2">
                     <!-- Botón Volver -->
-                    <a href="{{ route('admin.guardias.show', $guardia) }}" class="btn btn-outline-secondary btn-sm mr-1"
-                        style="background-color: rgba(108, 117, 125, 0.08);" aria-label="Volver a la guardia">
+                    <a href="{{ route('admin.guardias.show', $guardia) }}" class="btn btn-outline-light btn-sm mr-1"
+                        aria-label="Volver a la guardia">
                         <i class="fas fa-arrow-left"></i> Volver
                     </a>
                     <livewire:editar-novedad-modal :novedad="$novedad" :guardia="$guardia"
@@ -46,8 +55,7 @@
                             class="d-inline" onsubmit="return confirm('¿Eliminar esta novedad?')">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-outline-danger btn-sm" style="background-color: rgba(220, 53, 69, 0.08);"
-                                aria-label="Eliminar novedad">
+                            <button class="btn btn-outline-light btn-sm" aria-label="Eliminar novedad">
                                 <i class="fas fa-trash"></i> Eliminar
                             </button>
                         </form>
@@ -94,20 +102,14 @@
                 <!-- Texto de la novedad -->
                 <div class="row mb-3">
                     <div class="col-12">
-                        <strong>Texto:</strong>
-                        <div class="p-3 mt-1 bg-white border rounded shadow-sm">
-                            {{ $novedad->text }}
+                        <div class="novedad-texto">
+                            <span class="novedad-texto__eyebrow">
+                                <i class="fas fa-align-left"></i> Texto de la novedad
+                            </span>
+                            <div class="novedad-texto__body">
+                                {{ $novedad->text }}
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Registrado por -->
-                <div class="row">
-                    <div class="col-12 text-muted small">
-                        <strong>Registrado por:</strong>
-                        {{ $novedad->escribiente->grade ?? '' }} {{ $novedad->escribiente->name ?? '' }}
-                        {{ $novedad->escribiente->last_name ?? '' }}
-                        — {{ $novedad->created_at->format('d/m/Y H:i') }}
                     </div>
                 </div>
             </div>

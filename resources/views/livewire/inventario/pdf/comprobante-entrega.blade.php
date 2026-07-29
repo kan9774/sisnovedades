@@ -35,7 +35,7 @@
         </tr>
         <tr>
             <td>Responsable:</td>
-            <td>{{ $entrega->usuario->name ?? '—' }} {{ $entrega->usuario->last_name ?? '—'}}</td>
+            <td>{{ $entrega->usuario->grade }} {{ $entrega->usuario->name ?? '—' }} {{ $entrega->usuario->last_name ?? '—'}}</td>
         </tr>
         @if ($entrega->motivo)
             <tr>

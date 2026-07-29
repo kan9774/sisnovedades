@@ -152,13 +152,16 @@ body.ops-panel-open {
 }
 
 .ops-modal {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     max-width: 420px;
+    max-height: calc(100vh - 3rem);
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
     overflow: hidden;
-    margin: 1rem;
+    margin: 1.5rem;
 }
 
 .ops-modal__header {
@@ -199,6 +202,8 @@ body.ops-panel-open {
 
 .ops-modal__body {
     padding: 1.25rem;
+    overflow-y: auto;
+    flex: 1 1 auto;
 }
 
 .ops-modal__footer {
@@ -207,4 +212,107 @@ body.ops-panel-open {
     display: flex;
     justify-content: flex-end;
     gap: .5rem;
+}
+/* Variante ancha del ops-modal, para formularios con más campos */
+.ops-modal--lg {
+    max-width: 700px;
+}
+
+.ops-modal__save-btn {
+    background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important;
+    color: #0B2545 !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important;
+    border: none;
+}
+/*
+ * Addendum a ops-panel.css — AGREGAR AL FINAL del archivo existente
+ * (no reemplaza nada, son clases nuevas: .card-header-ops-*, .novedad-texto-*)
+ *
+ * Header de card estilo ops (BCOM1) para vistas de detalle (ej: show de
+ * Novedad, y reusable en Palomar/Vehículos/etc), + bloque de texto
+ * destacado dentro del body.
+ */
+
+.card-outline-ops {
+    border-top: none;
+}
+
+.card-header-ops {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .5rem;
+    background: linear-gradient(135deg, #0B2545 0%, #0F3460 100%);
+    border-bottom: 4px solid #FFD200;
+    padding: 1rem 1.25rem;
+}
+
+.card-header-ops__title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.card-title-ops {
+    color: #fff;
+}
+
+.card-header-ops__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+}
+
+.card-header-ops__eyebrow i {
+    color: #FFD200;
+}
+
+/* Bloque de texto destacado dentro del card-body */
+.novedad-texto {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #FFD200;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.novedad-texto__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #0B2545;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+}
+
+.novedad-texto__body {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #1f2933;
+    white-space: pre-line;
+}
+
+/*
+ * Variante ancha del ops-modal, para formularios con más campos
+ * (usada en editar-novedad-modal.blade.php)
+ */
+.ops-modal--lg {
+    max-width: 700px;
+}
+
+.ops-modal__save-btn {
+    background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important;
+    color: #0B2545 !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important;
+    border: none;
 }
