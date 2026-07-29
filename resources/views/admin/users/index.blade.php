@@ -39,7 +39,7 @@
                 <table class="table table-striped table-hover mb-0">
                     <thead class="thead-dark">
                         <tr>
-                            <th>#</th>  
+                            
                             <th>Grado</th>
                             <th>Nombre</th>
                             <th>Email</th>
@@ -50,7 +50,7 @@
                     </thead>
                     <tbody>
                         @forelse($users as $user)
-                            <td>{{$user->id}}</t>
+                            
                                 <td>{{ $user->grade }}</td>
                                 <td>{{ $user->name }} {{ $user->last_name }}</td>
                                 <td>{{ $user->email }}</td>
