@@ -1,7 +1,8 @@
 <div>
     @if ($guardia->status === 'open' && $puedeOperarGuardia)
         <div class="d-flex justify-content-end mb-2">
-            <button type="button" class="btn btn-info btn-sm" wire:click="abrirCrear" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3); border: none;">
+            <button type="button" class="btn btn-info btn-sm" wire:click="abrirCrear"
+                style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3); border: none;">
                 <i class="fas fa-plus-circle"></i> Registrar Tráfico
             </button>
         </div>
@@ -10,28 +11,35 @@
     @php
         $direcciones = [
             'Recibido' => ['icono' => 'fa-inbox', 'color' => '#1e7e34', 'bg' => '#e6f4ea', 'label' => 'RECIBIDOS'],
-            'Expedido' => ['icono' => 'fa-paper-plane', 'color' => '#8a6d00', 'bg' => '#fff8e1', 'label' => 'EXPEDIDOS'],
+            'Expedido' => [
+                'icono' => 'fa-paper-plane',
+                'color' => '#8a6d00',
+                'bg' => '#fff8e1',
+                'label' => 'EXPEDIDOS',
+            ],
         ];
         $tiposMeta = [
-            'Radio'               => ['icono' => 'fa-satellite-dish', 'label' => 'Radios'],
-            'Correo Electrónico'  => ['icono' => 'fa-envelope',        'label' => 'Correos'],
-            'Fax'                 => ['icono' => 'fa-fax',             'label' => 'Fax'],
+            'Radio' => ['icono' => 'fa-satellite-dish', 'label' => 'Radios'],
+            'Correo Electrónico' => ['icono' => 'fa-envelope', 'label' => 'Correos'],
+            'Fax' => ['icono' => 'fa-fax', 'label' => 'Fax'],
         ];
         $hayNovedades = $this->novedadesAgrupadas->flatten(1)->isNotEmpty();
     @endphp
 
-    @if (! $hayNovedades)
+    @if (!$hayNovedades)
         <div class="text-center text-muted py-4">
             No hay tráficos registrados en esta guardia.
         </div>
     @else
         @foreach ($direcciones as $direccionKey => $meta)
-            @continue(! $this->novedadesAgrupadas->has($direccionKey))
+            @continue(!$this->novedadesAgrupadas->has($direccionKey))
             <div class="mb-4">
-                <div class="d-flex align-items-center px-3 py-2 mb-2" style="background: {{ $meta['bg'] }}; border-left: 4px solid {{ $meta['color'] }}; border-radius: 4px;">
+                <div class="d-flex align-items-center px-3 py-2 mb-2"
+                    style="background: {{ $meta['bg'] }}; border-left: 4px solid {{ $meta['color'] }}; border-radius: 4px;">
                     <i class="fas {{ $meta['icono'] }} mr-2" style="color: {{ $meta['color'] }};"></i>
                     <strong style="color: {{ $meta['color'] }}; letter-spacing: .03em;">{{ $meta['label'] }}</strong>
-                    <span class="badge badge-light ml-2">{{ $this->novedadesAgrupadas[$direccionKey]->flatten(1)->count() }}</span>
+                    <span
+                        class="badge badge-light ml-2">{{ $this->novedadesAgrupadas[$direccionKey]->flatten(1)->count() }}</span>
                 </div>
 
                 @foreach ($this->novedadesAgrupadas[$direccionKey] as $tipoKey => $items)
@@ -39,7 +47,8 @@
                     <div class="mb-3 pl-3">
                         <div class="d-flex align-items-center mb-1">
                             <i class="fas {{ $tipoMeta['icono'] }} text-muted mr-2"></i>
-                            <span class="text-muted small text-uppercase font-weight-bold">{{ $tipoMeta['label'] }} por hora</span>
+                            <span class="text-muted small text-uppercase font-weight-bold">{{ $tipoMeta['label'] }} por
+                                hora</span>
                             <span class="badge badge-secondary ml-2">{{ $items->count() }}</span>
                         </div>
                         <div class="table-responsive">
@@ -72,14 +81,15 @@
                                                         'Destello' => 'danger',
                                                     ];
                                                 @endphp
-                                                <span class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }}">
+                                                <span
+                                                    class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }}">
                                                     {{ $novedad->clasification }}
                                                 </span>
                                             </td>
                                             <td>{{ $novedad->oficina->nombre ?? '—' }}</td>
                                             <td>
-                                                <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :compacto="true"
-                                                    :key="'estado-novedad-tabla-' . $novedad->id" />
+                                                <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia"
+                                                    :compacto="true" :key="'estado-novedad-tabla-' . $novedad->id" />
                                             </td>
                                             <td class="text-center align-middle">
                                                 <div class="d-flex justify-content-center">
@@ -88,12 +98,17 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @if ($guardia->status === 'open' && $puedeOperarGuardia)
-                                                        <button type="button" wire:click="abrirEditar({{ $novedad->id }})"
+                                                        <button type="button"
+                                                            wire:click="abrirEditar({{ $novedad->id }})"
                                                             class="btn btn-outline-warning btn-xs mr-1">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button type="button" wire:click="eliminar({{ $novedad->id }})"
-                                                            wire:confirm="¿Eliminar esta novedad?" class="btn btn-outline-danger btn-xs">
+                                                        <button type="button"
+                                                            wire:click="eliminar({{ $novedad->id }})"
+                                                            wire:confirm="¿Eliminar esta novedad?"
+                                                            wire:loading.attr="disabled"
+                                                            wire:target="eliminar({{ $novedad->id }})"
+                                                            class="btn btn-outline-danger btn-xs">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     @endif
@@ -112,230 +127,238 @@
 
     {{-- Panel pantalla completa --}}
     <template x-teleport="body">
-    <div class="ops-panel-overlay" id="modalNovedad" wire:ignore.self>
-        <div class="ops-panel">
-            <form wire:submit="guardar" class="ops-panel__form">
-                <div class="ops-panel__header">
-                    <div class="ops-panel__title-wrap">
-                        <span class="ops-panel__eyebrow">BCOM1 · Tráfico de Guardia</span>
-                        <h5 class="ops-panel__title">{{ $editandoId ? 'Editar Novedad' : 'Registrar Novedad' }}</h5>
+        <div class="ops-panel-overlay" id="modalNovedad" wire:ignore.self>
+            <div class="ops-panel">
+                <form wire:submit="guardar" class="ops-panel__form">
+                    <div class="ops-panel__header">
+                        <div class="ops-panel__title-wrap">
+                            <span class="ops-panel__eyebrow">BCOM1 · Tráfico de Guardia</span>
+                            <h5 class="ops-panel__title">{{ $editandoId ? 'Editar Novedad' : 'Registrar Novedad' }}
+                            </h5>
+                        </div>
+                        <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalNovedad')"
+                            title="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalNovedad')" title="Cerrar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
 
-                <div class="ops-panel__body">
-                    <div class="ops-panel__content">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Tipo <span class="text-danger">*</span></label>
-                                    <select wire:model="type" class="form-control @error('type') is-invalid @enderror">
-                                        <option value="">-- Seleccionar --</option>
-                                        <option value="Radio">Radio</option>
-                                        <option value="Fax">Fax</option>
-                                        <option value="Correo Electrónico">Correo Electrónico</option>
-                                    </select>
-                                    @error('type')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Dirección <span class="text-danger">*</span></label>
-                                    <select wire:model.live="direction"
-                                        class="form-control @error('direction') is-invalid @enderror">
-                                        <option value="">-- Seleccionar --</option>
-                                        <option value="Recibido">Recibido</option>
-                                        <option value="Expedido">Expedido</option>
-                                    </select>
-                                    @error('direction')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            @if ($direction === 'Expedido')
-                                <div class="col-md-6">
+                    <div class="ops-panel__body">
+                        <div class="ops-panel__content">
+                            <div class="row">
+                                <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Destino</label>
-                                        <input type="text" wire:model="destino"
-                                            class="form-control @error('destino') is-invalid @enderror"
-                                            placeholder="Ej: Cte.Rva.Gral.E.">
-                                        @error('destino')
+                                        <label>Tipo <span class="text-danger">*</span></label>
+                                        <select wire:model="type"
+                                            class="form-control @error('type') is-invalid @enderror">
+                                            <option value="">-- Seleccionar --</option>
+                                            <option value="Radio">Radio</option>
+                                            <option value="Fax">Fax</option>
+                                            <option value="Correo Electrónico">Correo Electrónico</option>
+                                        </select>
+                                        @error('type')
                                             <span class="invalid-feedback d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
-                            @elseif ($direction === 'Recibido')
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>¿Quién expide?</label>
-                                        <select wire:model="organismo_id" class="form-control">
+                                        <label>Dirección <span class="text-danger">*</span></label>
+                                        <select wire:model.live="direction"
+                                            class="form-control @error('direction') is-invalid @enderror">
                                             <option value="">-- Seleccionar --</option>
-                                            @foreach ($this->organismos as $organismo)
-                                                <option value="{{ $organismo->id }}">{{ $organismo->name }}</option>
-                                            @endforeach
+                                            <option value="Recibido">Recibido</option>
+                                            <option value="Expedido">Expedido</option>
                                         </select>
-                                        <small class="text-muted d-block mt-1">O escribí uno nuevo:</small>
-                                        <input type="text" wire:model="organismo_nuevo" class="form-control mt-1"
-                                            placeholder="Nuevo organismo...">
+                                        @error('direction')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                 </div>
-                            @endif
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Número <span class="text-danger">*</span></label>
-                                    <input type="text" wire:model="number"
-                                        class="form-control @error('number') is-invalid @enderror">
-                                    @error('number')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Hora <span class="text-danger">*</span></label>
-                                    <input type="time" wire:model="time"
-                                        class="form-control @error('time') is-invalid @enderror">
-                                    @error('time')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Oficina <span class="text-danger">*</span></label>
-                                    <select wire:model="office_id"
-                                        class="form-control @error('office_id') is-invalid @enderror">
-                                        <option value="">-- Seleccionar --</option>
-                                        @foreach ($this->oficinas as $oficina)
-                                            <option value="{{ $oficina->id }}">{{ $oficina->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('office_id')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Clasificación <span class="text-danger">*</span></label>
-                                    <select wire:model="clasification"
-                                        class="form-control @error('clasification') is-invalid @enderror">
-                                        <option value="">-- Seleccionar --</option>
-                                        <option value="Rutinario">Rutinario</option>
-                                        <option value="Prioritario">Prioritario</option>
-                                        <option value="Urgente">Urgente</option>
-                                        <option value="Destello">Destello</option>
-                                    </select>
-                                    @error('clasification')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Asunto <small class="text-muted">(opcional)</small></label>
-                                    <input type="text" wire:model="affair"
-                                        class="form-control @error('affair') is-invalid @enderror">
-                                    @error('affair')
-                                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Texto <span class="text-danger">*</span></label>
-                            <textarea wire:model="text" rows="5" class="form-control @error('text') is-invalid @enderror"></textarea>
-                            @error('text')
-                                <span class="invalid-feedback d-block">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        @if (!$editandoId)
-                            <div class="form-group">
-                                <label>
-                                    Adjuntos
-                                    <small class="text-muted">(opcional, hasta 5 archivos, max: 10MB c/u)</small>
-                                </label>
-
-                                <input type="file" wire:model="archivos" multiple
-                                    class="form-control @error('archivos') is-invalid @enderror @error('archivos.*') is-invalid @enderror"
-                                    accept=".pdf,.jpg,.jpeg,.png">
-
-                                <div wire:loading wire:target="archivos" class="text-muted small mt-2">
-                                    <i class="fas fa-spinner fa-spin"></i> Subiendo archivo(s)...
-                                </div>
-
-                                @error('archivos')
-                                    <span class="invalid-feedback d-block">{{ $message }}</span>
-                                @enderror
-                                @error('archivos.*')
-                                    <span class="invalid-feedback d-block">{{ $message }}</span>
-                                @enderror
-
-                                @if (!empty($archivos))
-                                    <div wire:loading.remove wire:target="archivos" class="mt-2">
-                                        @foreach ($archivos as $index => $archivoItem)
-                                            <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-1"
-                                                wire:key="archivo-preview-{{ $index }}">
-                                                <div class="d-flex align-items-center">
-                                                    @if (str_starts_with($archivoItem->getMimeType() ?? '', 'image/'))
-                                                        <img src="{{ $archivoItem->temporaryUrl() }}" alt="Vista previa"
-                                                            class="rounded mr-2"
-                                                            style="width: 42px; height: 42px; object-fit: cover;">
-                                                    @else
-                                                        <i class="fas fa-file-pdf text-danger fa-2x mr-2"></i>
-                                                    @endif
-                                                    <div>
-                                                        <div class="font-weight-bold" style="font-size: 0.875rem;">
-                                                            {{ $archivoItem->getClientOriginalName() }}
-                                                        </div>
-                                                        <small class="text-muted">
-                                                            {{ number_format($archivoItem->getSize() / 1024, 0) }} KB
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                                <button type="button" wire:click="quitarArchivo({{ $index }})"
-                                                    class="btn btn-outline-danger btn-xs" title="Quitar">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        @endforeach
+                                @if ($direction === 'Expedido')
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Destino</label>
+                                            <input type="text" wire:model="destino"
+                                                class="form-control @error('destino') is-invalid @enderror"
+                                                placeholder="Ej: Cte.Rva.Gral.E.">
+                                            @error('destino')
+                                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                @elseif ($direction === 'Recibido')
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>¿Quién expide?</label>
+                                            <select wire:model="organismo_id" class="form-control">
+                                                <option value="">-- Seleccionar --</option>
+                                                @foreach ($this->organismos as $organismo)
+                                                    <option value="{{ $organismo->id }}">{{ $organismo->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <small class="text-muted d-block mt-1">O escribí uno nuevo:</small>
+                                            <input type="text" wire:model="organismo_nuevo"
+                                                class="form-control mt-1" placeholder="Nuevo organismo...">
+                                        </div>
                                     </div>
                                 @endif
                             </div>
-                        @else
-                            <div class="form-group">
-                                <label class="font-weight-bold">Adjunto</label>
-                                <livewire:gestion-adjuntos :novedad="$this->guardia->novedades()->find($editandoId)"
-                                    :guardia="$guardia" :key="'adjuntos-modal-' . $editandoId" />
-                            </div>
-                        @endif
-                    </div>
-                </div>
 
-                <div class="ops-panel__footer">
-                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalNovedad')">Cancelar</button>
-                    <button type="submit" class="btn" wire:loading.attr="disabled" wire:target="guardar" style="background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important; color: #0B2545 !important; font-weight: 700; box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important; border: none;">
-                        <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
-                        <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
-                            Guardando...</span>
-                    </button>
-                </div>
-            </form>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Número <span class="text-danger">*</span></label>
+                                        <input type="text" wire:model="number"
+                                            class="form-control @error('number') is-invalid @enderror">
+                                        @error('number')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Hora <span class="text-danger">*</span></label>
+                                        <input type="time" wire:model="time"
+                                            class="form-control @error('time') is-invalid @enderror">
+                                        @error('time')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Oficina <span class="text-danger">*</span></label>
+                                        <select wire:model="office_id"
+                                            class="form-control @error('office_id') is-invalid @enderror">
+                                            <option value="">-- Seleccionar --</option>
+                                            @foreach ($this->oficinas as $oficina)
+                                                <option value="{{ $oficina->id }}">{{ $oficina->nombre }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('office_id')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Clasificación <span class="text-danger">*</span></label>
+                                        <select wire:model="clasification"
+                                            class="form-control @error('clasification') is-invalid @enderror">
+                                            <option value="">-- Seleccionar --</option>
+                                            <option value="Rutinario">Rutinario</option>
+                                            <option value="Prioritario">Prioritario</option>
+                                            <option value="Urgente">Urgente</option>
+                                            <option value="Destello">Destello</option>
+                                        </select>
+                                        @error('clasification')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Asunto <small class="text-muted">(opcional)</small></label>
+                                        <input type="text" wire:model="affair"
+                                            class="form-control @error('affair') is-invalid @enderror">
+                                        @error('affair')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Texto <span class="text-danger">*</span></label>
+                                <textarea wire:model="text" rows="5" class="form-control @error('text') is-invalid @enderror"></textarea>
+                                @error('text')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            @if (!$editandoId)
+                                <div class="form-group">
+                                    <label>
+                                        Adjuntos
+                                        <small class="text-muted">(opcional, hasta 5 archivos, max: 10MB c/u)</small>
+                                    </label>
+
+                                    <input type="file" wire:model="archivos" multiple
+                                        class="form-control @error('archivos') is-invalid @enderror @error('archivos.*') is-invalid @enderror"
+                                        accept=".pdf,.jpg,.jpeg,.png">
+
+                                    <div wire:loading wire:target="archivos" class="text-muted small mt-2">
+                                        <i class="fas fa-spinner fa-spin"></i> Subiendo archivo(s)...
+                                    </div>
+
+                                    @error('archivos')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+                                    @error('archivos.*')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+
+                                    @if (!empty($archivos))
+                                        <div wire:loading.remove wire:target="archivos" class="mt-2">
+                                            @foreach ($archivos as $index => $archivoItem)
+                                                <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-1"
+                                                    wire:key="archivo-preview-{{ $index }}">
+                                                    <div class="d-flex align-items-center">
+                                                        @if (str_starts_with($archivoItem->getMimeType() ?? '', 'image/'))
+                                                            <img src="{{ $archivoItem->temporaryUrl() }}"
+                                                                alt="Vista previa" class="rounded mr-2"
+                                                                style="width: 42px; height: 42px; object-fit: cover;">
+                                                        @else
+                                                            <i class="fas fa-file-pdf text-danger fa-2x mr-2"></i>
+                                                        @endif
+                                                        <div>
+                                                            <div class="font-weight-bold"
+                                                                style="font-size: 0.875rem;">
+                                                                {{ $archivoItem->getClientOriginalName() }}
+                                                            </div>
+                                                            <small class="text-muted">
+                                                                {{ number_format($archivoItem->getSize() / 1024, 0) }}
+                                                                KB
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button"
+                                                        wire:click="quitarArchivo({{ $index }})"
+                                                        class="btn btn-outline-danger btn-xs" title="Quitar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @else
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Adjunto</label>
+                                    <livewire:gestion-adjuntos :novedad="$this->guardia->novedades()->find($editandoId)" :guardia="$guardia" :key="'adjuntos-modal-' . $editandoId" />
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="ops-panel__footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                            onclick="cerrarOpsPanel('modalNovedad')">Cancelar</button>
+                        <button type="submit" class="btn" wire:loading.attr="disabled" wire:target="guardar"
+                            style="background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important; color: #0B2545 !important; font-weight: 700; box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important; border: none;">
+                            <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
+                            <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
+                                Guardando...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
     </template>
 </div>
 
@@ -344,7 +367,7 @@
 @script
     <script>
         if (!window.cerrarOpsPanel) {
-            window.cerrarOpsPanel = function (id) {
+            window.cerrarOpsPanel = function(id) {
                 const overlay = document.getElementById(id);
                 if (overlay) {
                     overlay.classList.remove('is-open');

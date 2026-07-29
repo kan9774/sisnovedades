@@ -76,8 +76,8 @@ new class extends Component
             ->map(function ($porDireccion) use ($ordenTipos) {
                 return $porDireccion
                     ->groupBy('type')
-                    ->sortBy(fn ($grupo, $tipo) => $ordenTipos[$tipo] ?? 99)
-                    ->map(fn ($grupo) => $grupo->sortBy('time')->values());
+                    ->sortBy(fn($grupo, $tipo) => $ordenTipos[$tipo] ?? 99)
+                    ->map(fn($grupo) => $grupo->sortBy('time')->values());
             });
     }
 
@@ -274,10 +274,23 @@ new class extends Component
 
     public function eliminar(int $id): void
     {
-        $novedad = $this->guardia->novedades()->findOrFail($id);
+        $novedad = $this->guardia->novedades()->find($id);
+
+        if (!$novedad) {
+            unset($this->novedadesAgrupadas);
+            return;
+        }
+
         $this->authorize('delete', $novedad);
 
+        // Si estabas editando justo esta novedad, resetea el ID para evitar que la modal falle
+        if ($this->editandoId === $id) {
+            $this->editandoId = null;
+        }
+
         $novedad->delete();
+
+        // Limpia la propiedad computada para obligar a reagrupar las novedades
         unset($this->novedadesAgrupadas);
 
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);

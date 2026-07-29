@@ -48,6 +48,11 @@ class GuardiaPolicy
         if ($guardia->oficer_id === $user->id) {
             return $user->HasPermisos('cerrar_guardia');
         }
+        //Escribiente de la guardia
+        if ($guardia->escribiente()->where('users.id', $user->id)->exists()) {
+            return $user->HasPermisos('cerrar_guardia');
+        }
+
 
         return $user->isAdmin();
     }
