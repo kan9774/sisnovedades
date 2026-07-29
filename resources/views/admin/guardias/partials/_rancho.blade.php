@@ -5,8 +5,8 @@
     @php $bloqueado = $guardia->status !== 'open' || !$puedeOperarGuardia; @endphp
 
     <div class="form-row mb-3">
-        @foreach (['desayuno' => 'Desayuno', 'almuerzo' => 'Almuerzo', 'merienda' => 'Merienda', 'cena' => 'Cena'] as $key => $label)
-            <div class="col-md-3">
+        @foreach (['desayuno' => 'Desayuno', 'colacion' => 'Colación', 'almuerzo' => 'Almuerzo', 'merienda' => 'Merienda', 'cena' => 'Cena'] as $key => $label)
+            <div class="col">
                 <label class="small mb-1">Menú {{ $label }}</label>
                 <input type="text" name="menu_{{ $key }}"
                     value="{{ old('menu_' . $key, $guardia->ranchoMenu->{'menu_' . $key} ?? '') }}"
@@ -21,6 +21,7 @@
             <tr>
                 <th>Unidad</th>
                 <th style="width:100px;">Desayuno</th>
+                <th style="width:100px;">Colación</th>
                 <th style="width:100px;">Almuerzo</th>
                 <th style="width:100px;">Merienda</th>
                 <th style="width:100px;">Cena</th>
@@ -32,7 +33,7 @@
                 @php $registro = $rancho->get($unidad->id); @endphp
                 <tr>
                     <td class="align-middle"><strong>{{ $unidad->nombre }}</strong></td>
-                    @foreach (['desayuno', 'almuerzo', 'merienda', 'cena'] as $comida)
+                    @foreach (['desayuno', 'colacion', 'almuerzo', 'merienda', 'cena'] as $comida)
                         <td>
                             <input type="number" min="0" name="unidades[{{ $unidad->id }}][{{ $comida }}]"
                                 value="{{ old("unidades.$unidad->id.$comida", $registro->{$comida} ?? '') }}"

@@ -27,7 +27,6 @@ new class extends Component
     public string $boleta_hora_entra = '';
     public string $boleta_kms_entra = '';
     public string $boleta_observaciones = '';
-    public ?SalidaVehiculo $salida = null;
 
     public string $vehiculo_id = '';
     public string $conductor_id = '';
@@ -43,7 +42,7 @@ new class extends Component
         $this->guardia = $guardia;
         $this->puedeOperarGuardia = $puedeOperarGuardia;
     }
-    #[On('salidas-actualizadas')]
+    #[On('salida-actualizada')]
     public function refrescarSalidas(): void
     {
         // Refresca las salidas aquí si es necesario
@@ -60,6 +59,20 @@ new class extends Component
     public function conductores()
     {
         return Conductor::where('activo', true)->orderBy('primer_apellido')->get();
+    }
+
+    #[Computed]
+    public function salida(): ?SalidaVehiculo
+    {
+        if (! $this->boletaSalidaId) {
+            return null;
+        }
+
+        // find() en vez de findOrFail(): si la salida fue borrada mientras
+        // el panel de boleta estaba abierto (p. ej. desde otra pestaña),
+        // no debe romper la re-hidratación del componente en el próximo poll.
+        return SalidaVehiculo::with(['vehiculo', 'conductor', 'guardia', 'boletaCierre'])
+            ->find($this->boletaSalidaId);
     }
 
     /**
@@ -217,9 +230,10 @@ new class extends Component
     public function abrirBoleta(int $salidaId): void
     {
         $this->resetValidation();
-        $this->salida = SalidaVehiculo::with(['vehiculo', 'conductor', 'guardia', 'boletaCierre'])->findOrFail($salidaId);
-        $this->authorize('update', $this->salida);
+        $salida = SalidaVehiculo::findOrFail($salidaId);
+        $this->authorize('update', $salida);
         $this->boletaSalidaId = $salidaId;
+        unset($this->salida);
         $this->boleta_fecha_entra = ''; // se llena automáticamente si ya existe
         $this->boleta_hora_entra = '';
         $this->boleta_kms_entra = '';
@@ -240,7 +254,7 @@ new class extends Component
     public function cerrarBoletaModal(): void
     {
         $this->boletaSalidaId = null;
-        $this->salida = null;
+        unset($this->salida);
     }
 
     public function guardarBoleta(): void
@@ -268,6 +282,7 @@ new class extends Component
         $boleta = BoletaCierre::updateOrCreate(
             ['salida_id' => $this->boletaSalidaId],
             [
+                'guardia_id' => $this->guardia->id,
                 'fecha_entra' => $data['boleta_fecha_entra'],
                 'hora_entra' => $data['boleta_hora_entra'],
                 'kms_entra' => $data['boleta_kms_entra'],
@@ -276,6 +291,7 @@ new class extends Component
         );
 
         // La relación boleta->salida recalcula automáticamente kms_recorridos y litros
+        unset($this->salida);
 
         $this->dispatch('salida-actualizada');
         $this->cerrarBoletaModal();

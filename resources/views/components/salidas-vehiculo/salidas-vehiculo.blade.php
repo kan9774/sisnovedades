@@ -240,7 +240,7 @@
                     <div class="ops-panel__title-wrap">
                         <span class="ops-panel__eyebrow">BCOM1 · Salidas de Vehículos</span>
                         <h5 class="ops-panel__title">
-                            @if ($salida?->boletaCierre)
+                            @if ($this->salida?->boletaCierre)
                                 Editar Boleta de Cierre
                             @else
                                 Boleta de Cierre
@@ -254,11 +254,16 @@
 
                 <div class="ops-panel__body">
                     <div class="ops-panel__content">
-                        @if ($salida)
+                        @if (! $this->salida && $boletaSalidaId)
+                            <div class="alert alert-warning mb-3">
+                                Esta salida ya no existe (pudo haber sido eliminada). Cerrá este panel.
+                            </div>
+                        @elseif ($this->salida)
+                            @php($salida = $this->salida)
                             {{-- Info de la salida --}}
                             <div class="alert alert-info mb-3">
-                                <strong>Salida #{{ $salida->id }}</strong> — {{ $salida->vehiculo->matricula }}<br>
-                                Conductor: {{ $salida->conductor->nombre_visible }}<br>
+                                <strong>Salida #{{ $salida->id }}</strong> — {{ $salida->vehiculo->matricula ?? '—' }}<br>
+                                Conductor: {{ $salida->conductor->nombre_visible ?? '—' }}<br>
                                 Salida: {{ $salida->guardia->date->format('d/m/Y') }} a las {{ $salida->hora_sale?->format('H:i') }}<br>
                                 @if ($salida->kms_sale)
                                     Km Sale: <strong>{{ $salida->kms_sale }}</strong>

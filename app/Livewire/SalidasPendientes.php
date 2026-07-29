@@ -6,6 +6,7 @@ use App\Models\BoletaCierre;
 use App\Models\Guard;
 use App\Models\SalidaVehiculo;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -17,7 +18,10 @@ class SalidasPendientes extends Component
 
     public $guardia;
     public $mostrarBoleta = false;
-    public $salidaPendiente = null;
+
+    #[Locked]
+    public ?int $salidaPendienteId = null;
+
     public $boleta_hora_entra = '';
     public $boleta_kms_entra = '';
     public $boleta_observaciones = '';
@@ -25,6 +29,20 @@ class SalidasPendientes extends Component
     public function mount($guardia)
     {
         $this->guardia = $guardia;
+    }
+
+    #[Computed]
+    public function salidaPendiente(): ?SalidaVehiculo
+    {
+        if (! $this->salidaPendienteId) {
+            return null;
+        }
+
+        // find() en vez de findOrFail(): si la salida fue borrada entre
+        // que se abrió el panel y se guarda la boleta, no debe romper
+        // la re-hidratación del componente.
+        return SalidaVehiculo::with(['vehiculo', 'conductor', 'guardia'])
+            ->find($this->salidaPendienteId);
     }
 
     #[Computed]
@@ -48,9 +66,12 @@ class SalidasPendientes extends Component
 
     public function abrirBoleta(int $salidaId)
     {
-        $this->salidaPendiente = SalidaVehiculo::with(['vehiculo', 'conductor', 'guardia'])->findOrFail($salidaId);
-        $this->authorize('update', $this->salidaPendiente);
+        $salida = SalidaVehiculo::findOrFail($salidaId);
+        $this->authorize('update', $salida);
         abort_unless($this->guardia->status === 'open', 403);
+
+        $this->salidaPendienteId = $salidaId;
+        unset($this->salidaPendiente);
 
         $this->mostrarBoleta = true;
         $this->boleta_hora_entra = '';
@@ -61,11 +82,18 @@ class SalidasPendientes extends Component
     public function cerrarBoleta()
     {
         $this->mostrarBoleta = false;
-        $this->salidaPendiente = null;
+        $this->salidaPendienteId = null;
+        unset($this->salidaPendiente);
     }
 
     public function guardarBoleta()
     {
+        if (! $this->salidaPendiente) {
+            $this->cerrarBoleta();
+            session()->flash('error', 'Esta salida ya no existe (pudo haber sido eliminada). Actualizá la lista.');
+            return;
+        }
+
         $this->authorize('update', $this->salidaPendiente);
         abort_unless($this->guardia->status === 'open', 403);
 

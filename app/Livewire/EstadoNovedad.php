@@ -6,24 +6,41 @@ use App\Models\Guard;
 use App\Models\News;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class EstadoNovedad extends Component
 {
-    public News $novedad;
+    #[Locked]
+    public int $novedadId;
+
     public Guard $guardia;
     public bool $compacto = false;
 
     public function mount(News $novedad, Guard $guardia, bool $compacto = false): void
     {
-        $this->novedad  = $novedad;
-        $this->guardia  = $guardia;
-        $this->compacto = $compacto;
+        $this->novedadId = $novedad->id;
+        $this->guardia   = $guardia;
+        $this->compacto  = $compacto;
+    }
+
+    #[Computed]
+    public function novedad(): ?News
+    {
+        // find() en vez de findOrFail(): si la novedad fue borrada
+        // (p. ej. entre un poll y el siguiente), no debe romper la
+        // re-hidratación del componente.
+        return News::find($this->novedadId);
     }
 
     public function tomar(): void
     {
+        if (! $this->novedad) {
+            return;
+        }
+
         $this->authorize('tomar', $this->novedad);
 
         if ($this->novedad->estado_atencion !== 'pendiente') {
@@ -40,13 +57,13 @@ class EstadoNovedad extends Component
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        $this->novedad->refresh();
+        unset($this->novedad);
     }
 
     // Llamado por el polling: trae el estado actual por si otro usuario ya la tomó
     public function refrescar(): void
     {
-        $this->novedad->refresh();
+        unset($this->novedad);
     }
 
     // Llamado cuando novedades-guardia reabre o cierra la atención de esta novedad
@@ -55,8 +72,8 @@ class EstadoNovedad extends Component
     #[On('novedad-estado-actualizado')]
     public function onEstadoActualizado(int $novedadId): void
     {
-        if ($novedadId === $this->novedad->id) {
-            $this->novedad->refresh();
+        if ($novedadId === $this->novedadId) {
+            unset($this->novedad);
         }
     }
 

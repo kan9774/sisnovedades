@@ -57,13 +57,13 @@
     @endif
 
     {{-- Modal Boleta de Cierre --}}
-    @if ($mostrarBoleta && $salidaPendiente)
+    @if ($mostrarBoleta && $this->salidaPendiente)
         <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5);" wire:ignore.self>
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header bg-success text-white">
                         <h5 class="modal-title">
-                            <i class="fas fa-check-circle"></i> Cerrar Salida - {{ $salidaPendiente->vehiculo->matricula }}
+                            <i class="fas fa-check-circle"></i> Cerrar Salida - {{ $this->salidaPendiente->vehiculo->matricula ?? '—' }}
                         </h5>
                         <button type="button" class="close text-white" wire:click="cerrarBoleta">
                             <span>&times;</span>
@@ -71,10 +71,10 @@
                     </div>
                     <div class="modal-body">
                         <div class="alert alert-info">
-                            <strong>Fecha de salida:</strong> {{ $salidaPendiente->guardia->date->format('d/m/Y') }}<br>
-                            <strong>Hora de salida:</strong> {{ $salidaPendiente->hora_sale->format('H:i') }}<br>
-                            <strong>Km de salida:</strong> {{ $salidaPendiente->kms_sale }}<br>
-                            <strong>Conductor:</strong> {{ $salidaPendiente->conductor->primer_apellido }}, {{ $salidaPendiente->conductor->primer_nombre }}
+                            <strong>Fecha de salida:</strong> {{ $this->salidaPendiente->guardia->date->format('d/m/Y') }}<br>
+                            <strong>Hora de salida:</strong> {{ $this->salidaPendiente->hora_sale->format('H:i') }}<br>
+                            <strong>Km de salida:</strong> {{ $this->salidaPendiente->kms_sale }}<br>
+                            <strong>Conductor:</strong> {{ $this->salidaPendiente->conductor->primer_apellido ?? '—' }}, {{ $this->salidaPendiente->conductor->primer_nombre ?? '' }}
                         </div>
 
                         <div class="form-group">
@@ -87,7 +87,7 @@
                         <div class="form-group">
                             <label>Km de retorno *</label>
                             <input type="number" class="form-control" wire:model="boleta_kms_entra" min="0">
-                            <small class="text-muted">Debe ser mayor o igual a {{ $salidaPendiente->kms_sale }} km</small>
+                            <small class="text-muted">Debe ser mayor o igual a {{ $this->salidaPendiente->kms_sale }} km</small>
                             @error('boleta_kms_entra') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
 

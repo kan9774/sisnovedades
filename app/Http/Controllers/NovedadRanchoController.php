@@ -19,10 +19,12 @@ class NovedadRanchoController extends Controller
         $data = $request->validate([
             'unidades'            => 'required|array',
             'unidades.*.desayuno' => 'nullable|integer|min:0',
+            'unidades.*.colacion' => 'nullable|integer|min:0',
             'unidades.*.almuerzo' => 'nullable|integer|min:0',
             'unidades.*.merienda' => 'nullable|integer|min:0',
             'unidades.*.cena'     => 'nullable|integer|min:0',
             'menu_desayuno'       => 'nullable|string|max:255',
+            'menu_colacion'       => 'nullable|string|max:255',
             'menu_almuerzo'       => 'nullable|string|max:255',
             'menu_merienda'       => 'nullable|string|max:255',
             'menu_cena'           => 'nullable|string|max:255',
@@ -39,7 +41,7 @@ class NovedadRanchoController extends Controller
             }
         }
 
-        $menus = collect($data)->only(['menu_desayuno', 'menu_almuerzo', 'menu_merienda', 'menu_cena'])
+        $menus = collect($data)->only(['menu_desayuno', 'menu_colacion', 'menu_almuerzo', 'menu_merienda', 'menu_cena'])
             ->filter(fn($v) => filled($v));
 
         if ($menus->isNotEmpty()) {
