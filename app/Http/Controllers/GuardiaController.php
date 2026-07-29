@@ -20,7 +20,7 @@ class GuardiaController extends Controller
     {
         $this->authorize('viewAny', Guard::class);
 
-        $guardias = Guard::with(['capitan', 'oficial'])
+        $guardias = Guard::with(['capitan', 'oficial','escribiente'])
             ->withCount('novedades')
             ->orderByDesc('date')
             ->paginate(15);

@@ -40,19 +40,11 @@ class GuardiaPolicy
         if ($guardia->status === 'closed') {
             return false;
         }
-        //Capitan de guardia
-        if ($guardia->captain_id === $user->id) {
-            return $user->HasPermisos('cerrar_guardia');
-        }
-        //Oficiales de guardia
-        if ($guardia->oficer_id === $user->id) {
-            return $user->HasPermisos('cerrar_guardia');
-        }
-        //Escribiente de la guardia
-        if ($guardia->escribiente()->where('users.id', $user->id)->exists()) {
-            return $user->HasPermisos('cerrar_guardia');
-        }
 
+        // Capitán, oficial de día o escribiente de la guardia
+        if ($guardia->esMiembro($user)) {
+            return $user->HasPermisos('cerrar_guardia');
+        }
 
         return $user->isAdmin();
     }

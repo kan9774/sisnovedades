@@ -126,9 +126,17 @@ class Guard extends Model
             return false;
         }
 
-        return $this->captain_id === $user->id
-            || $this->oficer_id === $user->id
-            || $this->escribiente()->where('users.id', $user->id)->exists();
+        if ($this->captain_id === $user->id || $this->oficer_id === $user->id) {
+            return true;
+        }
+
+        // Si la relación ya fue precargada (with('escribiente') en el listado),
+        // se revisa en memoria en vez de disparar una query nueva por cada guardia.
+        if ($this->relationLoaded('escribiente')) {
+            return $this->escribiente->contains('id', $user->id);
+        }
+
+        return $this->escribiente()->where('users.id', $user->id)->exists();
     }
     public function isAbiertaNoDelete(): bool
     {
