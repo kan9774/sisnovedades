@@ -256,12 +256,13 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width:22%">Unidad</th>
-                    <th style="width:15%">Desayuno</th>
-                    <th style="width:15%">Almuerzo</th>
-                    <th style="width:15%">Merienda</th>
-                    <th style="width:15%">Cena</th>
-                    <th style="width:18%">Total</th>
+                    <th style="width:20%">Unidad</th>
+                    <th style="width:13%">Desayuno</th>
+                    <th style="width:13%">Colación</th>
+                    <th style="width:13%">Almuerzo</th>
+                    <th style="width:13%">Merienda</th>
+                    <th style="width:13%">Cena</th>
+                    <th style="width:15%">Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -269,6 +270,7 @@
                     <tr>
                         <td>{{ $item->unidad->nombre }}</td>
                         <td class="text-center">{{ $item->desayuno ?? '-' }}</td>
+                        <td class="text-center">{{ $item->colacion ?? '-' }}</td>
                         <td class="text-center">{{ $item->almuerzo ?? '-' }}</td>
                         <td class="text-center">{{ $item->merienda ?? '-' }}</td>
                         <td class="text-center">{{ $item->cena ?? '-' }}</td>
@@ -276,14 +278,14 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="sin-novedades">S/N.</td>
+                        <td colspan="7" class="sin-novedades">S/N.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
         @if ($guardia->ranchoMenu)
             <p style="margin-left:20px; margin-top:2px; font-size:10px;">
-                @foreach (['menu_desayuno' => 'Desayuno', 'menu_almuerzo' => 'Almuerzo', 'menu_merienda' => 'Merienda', 'menu_cena' => 'Cena'] as $campo => $label)
+                @foreach (['menu_desayuno' => 'Desayuno', 'menu_colacion' => 'Colación', 'menu_almuerzo' => 'Almuerzo', 'menu_merienda' => 'Merienda', 'menu_cena' => 'Cena'] as $campo => $label)
                     @if ($guardia->ranchoMenu->{$campo})
                         <strong>{{ $label }}:</strong> {{ $guardia->ranchoMenu->{$campo} }}&nbsp;&nbsp;
                     @endif
