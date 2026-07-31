@@ -30,10 +30,16 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Grado</label>
-                                <input type="text" name="grade"
-                                    class="form-control @error('grade') is-invalid @enderror"
-                                    value="{{ old('grade', $user->grade) }}" required>
-                                @error('grade')
+                                <select name="grado_id" class="form-control @error('grado_id') is-invalid @enderror"
+                                    required>
+                                    <option value="">Seleccionar...</option>
+                                    @foreach ($grados as $grado)
+                                        <option value="{{ $grado->id }}" @selected(old('grado_id', $user->grado_id ?? null) == $grado->id)>
+                                            {{ $grado->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('grado_id')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>

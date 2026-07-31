@@ -354,6 +354,13 @@ return [
                     'can'     => 'viewAny-user',
                 ],
                 [
+                    'text'   => 'Grados',
+                    'url'    => 'admin/grados',
+                    'icon'   => 'fa-solid fa-star',
+                    'active' => ['admin/grados/grados*'],
+                    'can'    => 'viewAny-grado',
+                ],
+                [
                     'text'   => 'Unidades Ámbito',
                     'url'    => 'admin/unidades',
                     'icon'   => 'fas fa-building',

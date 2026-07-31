@@ -23,12 +23,13 @@ class SuperAdminSeeder extends Seeder
         }
 
         // Crear o actualizar el Super Admin
+        $gradoId = \App\Models\Grado::firstOrCreate(['nombre' => 'Sgto.(EC)'])->id;
         User::updateOrCreate(
             ['email' => 'superadmin@example.com'],
             [
                 'name' => 'Super',
                 'last_name' => 'Admin',
-                'grade' => 'My.',
+                'grado_id' => $gradoId,
                 'email' => 'superadmin@example.com',
                 'password' => Hash::make('password'),
                 'rol_id' => $rolAdmin->id,

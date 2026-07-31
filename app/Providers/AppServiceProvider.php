@@ -8,6 +8,7 @@ use App\Models\Conductor;
 use App\Models\Documento;
 use App\Models\EstadoPaloma;
 use App\Models\Entrega;
+use App\Models\Grado;
 use App\Models\Guard;
 use App\Models\Item;
 use App\Models\ItemUnidad;
@@ -34,6 +35,8 @@ use App\Policies\ConductorPolicy;
 use App\Policies\DocumentoPolicy;
 use App\Policies\EstadoPalomaPolicy;
 use App\Policies\EntregaPolicy;
+use App\Policies\GradoPolicy;
+use App\Policies\GuardiaPdfDestinatarioPolicy;
 use App\Policies\GuardiaPolicy;
 use App\Policies\ItemPolicy;
 use App\Policies\ItemUnidadPolicy;
@@ -115,7 +118,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-log', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_log'));
         Gate::define('viewAny-oficina', fn($user) => $user->isAdmin());
         Gate::define('viewAny-palomar', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_palomar'));
-
+        Gate::define('viewAny-grado', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_grado'));
         // Gates para el módulo de inventario
         Gate::define('viewAny-item', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
         Gate::define('viewAny-movimiento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
@@ -170,6 +173,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Ubicacion::class, UbicacionPolicy::class);
         Gate::policy(Proveedor::class, ProveedorPolicy::class);
         Gate::policy(Talla::class, TallaPolicy::class);
+        Gate::policy(Grado::class, GradoPolicy::class);
 
 
         // Observers

@@ -215,7 +215,7 @@ class UbicacionesCatalogo extends Component
         return match ($tipo) {
             'oficina' => Oficina::orderBy('nombre')->get(['id', 'nombre']),
             'vehiculo' => Vehiculo::orderBy('matricula')->get(),
-            'persona' => User::orderBy('name')->get(['id', 'name', 'last_name', 'grade', 'email']),
+            'persona' => User::orderBy('name')->with('grado')->get(['id', 'name', 'last_name', 'grado_id', 'email']),
             default => collect(),
         };
     }

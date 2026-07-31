@@ -35,7 +35,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'last_name', 'grade', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin'])]
+#[Fillable(['name', 'last_name', 'grado_id', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {
@@ -123,7 +123,21 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     {
         return $this->belongsTo(Oficina::class);
     }
+    
+    public function grado(): BelongsTo
+    {
+        return $this->belongsTo(Grado::class);
+    }
 
+    /**
+     * Compatibilidad: todo el código que hace {{ $user->grade }} sigue
+     * funcionando sin tocarlo, porque Eloquent resuelve este accessor
+     * como si fuera la columna original.
+     */
+    public function getGradeAttribute(): ?string
+    {
+        return $this->grado?->nombre;
+    }
     /**
      * Permisos asignados directamente al usuario, además de los de sus roles.
      */

@@ -57,18 +57,17 @@
 
         <div class="form-group">
             <div class="input-group mb-3">
-                <input type="text" name="grade"
-                    class="form-control guest-form-control @error('grade') is-invalid @enderror" value="{{ old('grade') }}"
-                    placeholder="Grado (opcional)">
-                <div class="input-group-append">
-                    <span class="input-group-text guest-input-group-text">
-                        <i class="fas fa-user-shield"></i>
-                    </span>
-                </div>
-                @error('grade')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
+                <label>Grado</label>
+                <select name="grado_id" class="form-control @error('grado_id') is-invalid @enderror" required>
+                    <option value="">Seleccionar...</option>
+                    @foreach ($grados as $grado)
+                        <option value="{{ $grado->id }}" @selected(old('grado_id', $user->grado_id ?? null) == $grado->id)>
+                            {{ $grado->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('grado_id')
+                    <span class="invalid-feedback">{{ $message }}</span>
                 @enderror
             </div>
         </div>

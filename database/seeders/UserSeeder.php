@@ -14,47 +14,50 @@ class UserSeeder extends Seeder
     {
         //
         $roles = \App\Models\Rol::pluck('id', 'name');
+        $gradoIdSgto = \App\Models\Grado::firstOrCreate(['nombre' => 'Sgto.(EC)'])->id;
+        $gradoIdCabo = \App\Models\Grado::firstOrCreate(['nombre' => 'Cabo 1°'])->id;
+        $gradoIdCap = \App\Models\Grado::firstOrCreate(['nombre' => 'Capitán'])->id;
 
         $usuarios = [
             [
                 'name' => 'Carlos',
                 'last_name' => 'Pereyra',
-                'grade' => 'Sgto.(EC)',
+                'grado_id' => $gradoIdSgto,
                 'email' => 'carlos@example.com',
                 'rol_id' => $roles['admin'],
             ],
             [
                 'name'   => 'Juan',
                 'last_name' => 'Perez',
-                'grade' => 'Capitán',
+                'grado_id' => $gradoIdCap,
                 'email'    => 'capitan@sistema.com',
                 'rol_id'   => $roles['capitan_de_servicio'],
             ],
-                        [
+            [
                 'name'   => 'Fulano',
                 'last_name' => 'Fulanito',
-                'grade' => 'Capitán',
+                'grado_id' => $gradoIdCap,
                 'email'    => 'capitan2@sistema.com',
                 'rol_id'   => $roles['capitan_de_servicio'],
             ],
             [
                 'name'   => 'Pedro',
                 'last_name' => 'Gomez',
-                'grade' => 'S.O.M.',
+                'grado_id' => $gradoIdSgto,
                 'email'    => 'oficial@sistema.com',
                 'rol_id'   => $roles['oficial_de_dia'],
             ],
             [
                 'name'   => 'Ana',
                 'last_name' => 'Lopez',
-                'grade' => 'Cabo 1ra',
+                'grado_id' => $gradoIdCabo,
                 'email'    => 'escribiente@sistema.com',
                 'rol_id'   => $roles['escribiente'],
             ],
-                        [
+            [
                 'name'   => 'Nadia',
                 'last_name' => 'Lopez',
-                'grade' => 'Sdo.1ra',
+                'grado_id' => $gradoIdCabo,
                 'email'    => 'escribiente@sistema.com',
                 'rol_id'   => $roles['escribiente'],
             ],
@@ -65,7 +68,7 @@ class UserSeeder extends Seeder
                 [
                     'name' => $datos['name'] ?? $datos['nombre'],
                     'last_name' => $datos['last_name'],
-                    'grade' => $datos['grade'],
+                    'grado_id'  => $datos['grado_id'], 
                     'status' => 'active', // Cambia el estado según tus necesidades
                     'rol_id' => $datos['rol_id'],
                     'password' => bcrypt('password'), // Cambia la contraseña según tus necesidades

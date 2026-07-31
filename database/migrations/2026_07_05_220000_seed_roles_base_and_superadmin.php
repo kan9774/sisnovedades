@@ -35,12 +35,13 @@ return new class extends Migration
         }
 
         // 3. Usuario SuperAdmin inicial (solo si no existe ninguno todavía)
+        $gradoId = \App\Models\Grado::firstOrCreate(['nombre' => 'Sgto.(EC)'])->id;
         $existeSuperAdmin = DB::table('users')->where('is_super_admin', true)->exists();
         if (!$existeSuperAdmin) {
             DB::table('users')->insert([
                 'name' => 'Super',
                 'last_name' => 'Admin',
-                'grade' => 'N/A',
+                'grado_id' => $gradoId,
                 'email' => 's1bcom1@ejercito.mil.uy',
                 'password' => Hash::make('password'),
                 'rol_id' => $adminId,

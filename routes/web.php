@@ -122,6 +122,11 @@ Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
                 return view('livewire.inventario.entregas-historial-layout');
             })->name('entregas.historial');
         });
+        Route::prefix('grados')->name('grados.')->group(function () {
+            Route::get('/', function () {
+                return view('livewire.grados.grados-layout');
+            })->name('index');
+        });
         Route::get('/', function () {
             $dashboard = new App\Livewire\AdminDashboard();
             $dashboard->mount();

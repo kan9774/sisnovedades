@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Grado;
 use App\Models\Oficina;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -23,14 +24,18 @@ class UserController extends Controller
 
         if (auth()->user()->isSuperAdmin()) {
             // El SuperAdmin ve a todos, incluidos admins y a sí mismo.
-            $users = User::with('roles')->get();
+            $users = User::with(['roles', 'grado'])->get();
         } else {
             // Un admin normal no ve a nadie que tenga el rol admin, ni a SuperAdmins.
-            $users = User::with('roles')
+            $users = User::with(['roles', 'grado'])
                 ->whereDoesntHave('roles', fn($q) => $q->where('name', 'admin'))
                 ->where('is_super_admin', false)
                 ->get();
         }
+
+        // Orden jerárquico (columna 'orden' del catálogo Grado), no alfabético.
+        // Los usuarios sin grado asignado quedan al final.
+        $users = $users->sortBy(fn($user) => $user->grado->orden ?? PHP_INT_MAX)->values();
 
         return view('admin.users.index', compact('users'));
     }
@@ -88,10 +93,11 @@ class UserController extends Controller
         } else {
             $roles = Rol::where('name', '!=', 'admin')->get();
         }
+        $grados = Grado::where('activo', true)->orderBy('orden')->orderBy('nombre')->get();
         $unidades = Unidad::where('activo', true)->orderBy('nombre')->get();
         $oficinas = Oficina::where('activo', true)->orderBy('nombre')->get();
 
-        return view('admin.users.create', compact('roles', 'unidades', 'oficinas'));
+        return view('admin.users.create', compact('roles', 'unidades', 'oficinas', 'grados'));
     }
 
     public function store(Request $request)
@@ -101,7 +107,7 @@ class UserController extends Controller
         $data = $request->validate([
             'name'       => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
-            'grade'      => 'required|string|max:255',
+            'grado_id' => 'required|exists:grados,id',
             'email'      => 'required|email|unique:users,email',
             'password'   => 'required|string|min:6|confirmed',
             'roles'      => 'required|array|min:1',
@@ -119,7 +125,7 @@ class UserController extends Controller
         $user = User::create([
             'name'           => $data['name'],
             'last_name'      => $data['last_name'],
-            'grade'          => $data['grade'],
+            'grado_id' => $data['grado_id'],
             'email'          => $data['email'],
             'password'       => Hash::make($data['password']),
             'unidad_id'      => $data['unidad_id'],
@@ -152,6 +158,7 @@ class UserController extends Controller
         } else {
             $roles = Rol::where('name', '!=', 'admin')->get();
         }
+        $grados = Grado::where('activo', true)->orderBy('orden')->orderBy('nombre')->get();
 
         $permisos = Permission::orderBy('name')->get();
         $unidades = Unidad::where('activo', true)
@@ -163,7 +170,7 @@ class UserController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        return view('admin.users.edit', compact('user', 'roles', 'permisos', 'unidades', 'oficinas'));
+        return view('admin.users.edit', compact('user', 'roles', 'permisos', 'unidades', 'oficinas', 'grados'));
     }
 
     public function update(Request $request, string $id)
@@ -174,7 +181,7 @@ class UserController extends Controller
         $data = $request->validate([
             'name'       => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
-            'grade'      => 'required|string|max:255',
+            'grado_id' => 'required|exists:grados,id',
             'email'      => 'required|email|unique:users,email,' . $user->id,
             'roles'      => 'required|array|min:1',
             'roles.*'    => 'exists:rols,id',
@@ -187,7 +194,7 @@ class UserController extends Controller
 
         $user->name      = $data['name'];
         $user->last_name = $data['last_name'];
-        $user->grade     = $data['grade'];
+        $user->grado_id   = $data['grado_id'];
         $user->email     = $data['email'];
         $user->unidad_id = $data['unidad_id'];
         $user->oficina_id = $data['oficina_id'] ?? null;
