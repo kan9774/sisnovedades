@@ -23,9 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified.if-enabled' => \App\Http\Middleware\EnsureEmailIsVerifiedIfEnabled::class,
             'require.password-change' => \App\Http\Middleware\RequirePasswordChange::class,
         ]);
-        $middleware->web(append: [
-            \App\Http\Middleware\RequirePasswordChange::class,
-        ]);
+      
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

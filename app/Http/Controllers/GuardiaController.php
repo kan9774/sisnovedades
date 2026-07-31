@@ -20,7 +20,7 @@ class GuardiaController extends Controller
     {
         $this->authorize('viewAny', Guard::class);
 
-        $guardias = Guard::with(['capitan', 'oficial','escribiente'])
+        $guardias = Guard::with(['capitan.grado', 'oficial.grado', 'escribiente.grado'])
             ->withCount('novedades')
             ->orderByDesc('date')
             ->paginate(15);
@@ -35,7 +35,7 @@ class GuardiaController extends Controller
         $this->authorize('viewTrashed', Guard::class);
 
         $guardias = Guard::onlyTrashed()
-            ->with(['capitan', 'oficial'])
+            ->with(['capitan.grado', 'oficial.grado'])
             ->withCount('novedades')
             ->orderByDesc('date')
             ->paginate(15);
@@ -115,11 +115,12 @@ class GuardiaController extends Controller
         //
         $this->authorize('create', Guard::class);
         $capitanes = User::whereHas('roles', fn($q) => $q->where('name', 'capitan_de_servicio'))
+            ->with('grado')
             ->get()
             ->reject(fn($u) => $u->isSuperAdmin())
             ->values();
-        $oficiales = User::whereHas('roles', fn($q) => $q->where('name', 'oficial_de_dia'))->get();
-        $escribientes = User::whereHas('roles', fn($q) => $q->where('name', 'escribiente'))->get();
+        $oficiales = User::whereHas('roles', fn($q) => $q->where('name', 'oficial_de_dia'))->with('grado')->get();
+        $escribientes = User::whereHas('roles', fn($q) => $q->where('name', 'escribiente'))->with('grado')->get();
         $tiposVehiculo = TipoVehiculo::where('activo', true)->orderBy('nombre')->get();
 
         return view('admin.guardias.create', compact('capitanes', 'oficiales', 'escribientes', 'tiposVehiculo'));
@@ -166,11 +167,12 @@ class GuardiaController extends Controller
         $this->authorize('update', $guardia);
 
         $capitanes = User::whereHas('roles', fn($q) => $q->where('name', 'capitan_de_servicio'))
+            ->with('grado')
             ->get()
             ->reject(fn($u) => $u->isSuperAdmin())
             ->values();
-        $oficiales = User::whereHas('roles', fn($q) => $q->where('name', 'oficial_de_dia'))->get();
-        $escribientes = User::whereHas('roles', fn($q) => $q->where('name', 'escribiente'))->get();
+        $oficiales = User::whereHas('roles', fn($q) => $q->where('name', 'oficial_de_dia'))->with('grado')->get();
+        $escribientes = User::whereHas('roles', fn($q) => $q->where('name', 'escribiente'))->with('grado')->get();
 
         return view('admin.guardias.edit', compact('guardia', 'capitanes', 'oficiales', 'escribientes'));
     }
@@ -206,6 +208,7 @@ class GuardiaController extends Controller
             $guardia->escribiente()->sync([$escribienteNuevoId]);
 
             $nombresAnteriores = User::whereIn('id', $escribientesAnterioresIds)
+                ->with('grado')
                 ->get()
                 ->map(fn($u) => "{$u->grade} {$u->name} {$u->last_name}")
                 ->implode(', ') ?: '—';
@@ -231,7 +234,7 @@ class GuardiaController extends Controller
     {
         $this->authorize('view', $guardia);
 
-        $guardia->load(['capitan', 'oficial', 'escribiente', 'ranchoMenu']);
+        $guardia->load(['capitan.grado', 'oficial.grado', 'escribiente.grado', 'ranchoMenu']);
 
         $unidadesActivas = \App\Models\Unidad::where('activo', true)->orderBy('nombre')->get();
         $rancho = $guardia->novedadesRancho->keyBy('unidad_id');

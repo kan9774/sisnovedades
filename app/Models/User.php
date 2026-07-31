@@ -35,7 +35,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'last_name', 'grado_id', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin'])]
+#[Fillable(['name', 'last_name', 'grado_id', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin', 'must_change_password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {

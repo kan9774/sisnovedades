@@ -57,15 +57,20 @@
 
         <div class="form-group">
             <div class="input-group mb-3">
-                <label>Grado</label>
-                <select name="grado_id" class="form-control @error('grado_id') is-invalid @enderror" required>
+                <select name="grado_id" class="form-control guest-form-control @error('grado_id') is-invalid @enderror"
+                    required>
                     <option value="">Seleccionar...</option>
                     @foreach ($grados as $grado)
-                        <option value="{{ $grado->id }}" @selected(old('grado_id', $user->grado_id ?? null) == $grado->id)>
+                        <option value="{{ $grado->id }}" @selected(old('grado_id') == $grado->id)>
                             {{ $grado->nombre }}
                         </option>
                     @endforeach
                 </select>
+                <div class="input-group-append">
+                    <span class="input-group-text guest-input-group-text">
+                        <i class="fas fa-star"></i>
+                    </span>
+                </div>
                 @error('grado_id')
                     <span class="invalid-feedback">{{ $message }}</span>
                 @enderror

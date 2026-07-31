@@ -76,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/password/forzar-cambio', [ForzarCambioPasswordController::class, 'update'])
         ->name('password.forzar-cambio.update');
 });
-Route::middleware(['auth', 'verified.if-enabled'])->group(function () {
+Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->group(function () {
     // Admin
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('inventario')->name('inventario.')->group(function () {

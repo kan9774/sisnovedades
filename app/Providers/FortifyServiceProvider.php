@@ -49,8 +49,9 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::loginView(fn() => view('auth.login'));
         Fortify::registerView(function () {
             $unidades = Unidad::where('activo', true)->orderBy('nombre')->get();
+            $grados   = \App\Models\Grado::where('activo', true)->orderBy('orden')->orderBy('nombre')->get();
 
-            return view('auth.register', compact('unidades'));
+            return view('auth.register', compact('unidades','grados'));
         });
         Fortify::requestPasswordResetLinkView(fn() => view('auth.forgot-password'));
         Fortify::resetPasswordView(fn($request) => view('auth.reset-password', ['request' => $request]));

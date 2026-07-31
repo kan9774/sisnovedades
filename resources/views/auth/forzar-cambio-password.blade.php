@@ -22,7 +22,7 @@
 
     <form action="{{ route('password.forzar-cambio.update') }}" method="POST">
         @csrf
-
+        @method('PUT')
         <div class="form-group">
             <div class="input-group mb-3">
                 <input type="password" name="password"
