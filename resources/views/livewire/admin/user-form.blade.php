@@ -112,13 +112,6 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" wire:model="email" class="form-control @error('email') is-invalid @enderror"
-                            @disabled(!$this->puedeEditarDatosBasicos())>
-                        @error('email') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                    </div>
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -145,35 +138,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>{{ $user?->exists ? 'Nueva contraseña' : 'Contraseña' }}
-                                    @if ($user?->exists) <small class="text-muted">(opcional)</small> @endif
-                                </label>
-                                <input type="password" wire:model="password" class="form-control @error('password') is-invalid @enderror">
-                                @error('password') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Confirmar contraseña</label>
-                                <input type="password" wire:model="password_confirmation" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-
-                    @if (auth()->user()->isSuperAdmin())
-                        <div class="form-group form-check">
-                            <input type="checkbox" wire:model="is_super_admin" class="form-check-input" id="is_super_admin"
-                                {{ $user?->id === auth()->id() ? 'disabled' : '' }}>
-                            <label class="form-check-label" for="is_super_admin">Este usuario es SuperAdmin</label>
-                            @if ($user?->id === auth()->id())
-                                <small class="text-muted d-block">No podés quitarte el rol de SuperAdmin a vos mismo.</small>
-                            @endif
-                        </div>
-                    @endif
                 </div>
 
                 {{-- TAB: DIRECCIÓN --}}
@@ -253,9 +217,36 @@
                 <div class="{{ $activeTab === 'roles' ? '' : 'd-none' }}">
                     @if ($user?->exists && !$this->puedeEditarDatosBasicos())
                         <div class="alert alert-warning py-2">
-                            <i class="fas fa-lock"></i> Los roles de este usuario solo pueden ser modificados por un administrador.
+                            <i class="fas fa-lock"></i> El acceso (email, contraseña) y los roles de este usuario solo pueden ser modificados por un administrador.
                         </div>
                     @endif
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" wire:model="email" class="form-control @error('email') is-invalid @enderror"
+                            @disabled(!$this->puedeEditarDatosBasicos())>
+                        @error('email') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ $user?->exists ? 'Nueva contraseña' : 'Contraseña' }}
+                                    @if ($user?->exists) <small class="text-muted">(opcional)</small> @endif
+                                </label>
+                                <input type="password" wire:model="password" class="form-control @error('password') is-invalid @enderror"
+                                    @disabled(!$this->puedeEditarDatosBasicos())>
+                                @error('password') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Confirmar contraseña</label>
+                                <input type="password" wire:model="password_confirmation" class="form-control"
+                                    @disabled(!$this->puedeEditarDatosBasicos())>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="form-group">
                         <label>Roles</label>
@@ -278,6 +269,17 @@
                         </div>
                         @error('roles') <span class="text-danger small d-block mt-1">{{ $message }}</span> @enderror
                     </div>
+
+                    @if (auth()->user()->isSuperAdmin())
+                        <div class="form-group form-check">
+                            <input type="checkbox" wire:model="is_super_admin" class="form-check-input" id="is_super_admin"
+                                {{ $user?->id === auth()->id() ? 'disabled' : '' }}>
+                            <label class="form-check-label" for="is_super_admin">Este usuario es SuperAdmin</label>
+                            @if ($user?->id === auth()->id())
+                                <small class="text-muted d-block">No podés quitarte el rol de SuperAdmin a vos mismo.</small>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 <div class="d-flex justify-content-between mt-3">

@@ -45,6 +45,15 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     use MustVerifyEmailTrait {
         MustVerifyEmailTrait::sendEmailVerificationNotification as protected traitSendEmailVerificationNotification;
     }
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'is_super_admin' => 'boolean',
+            'status' => \App\Enums\UserStatus::class,
+        ];
+    }
 
     /**
      * Envía el mail de verificación SOLO si la feature está activada en config.
@@ -100,14 +109,6 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_super_admin' => 'boolean',
-        ];
-    }
 
     /**
      * Get the user's initials
@@ -137,6 +138,25 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     public function grado(): BelongsTo
     {
         return $this->belongsTo(Grado::class);
+    }
+
+    /**
+     * Historial completo de cambios de grado (ascensos y degradaciones),
+     * del más reciente al más antiguo.
+     */
+    public function historialGrados(): HasMany
+    {
+        return $this->hasMany(HistorialGrado::class)->latest('fecha_cambio');
+    }
+
+    /**
+     * Último cambio de grado registrado (el que determina el grado
+     * vigente). Devuelve null si todavía no se cargó ningún historial
+     * para este usuario.
+     */
+    public function ultimoCambioGrado(): ?HistorialGrado
+    {
+        return $this->historialGrados()->first();
     }
 
     /**
@@ -330,5 +350,44 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
         $conPuntos = number_format((int) $this->ci, 0, '', '.');
 
         return "{$conPuntos}-{$this->ci_dv}";
+    }
+    /**
+     * Historial completo de altas/bajas del Ejército, del más reciente
+     * al más antiguo. Distinto de `users.status` (activo en la app):
+     * esto es si está activo en el Ejército o no.
+     */
+    public function historialEstados(): HasMany
+    {
+        return $this->hasMany(HistorialEstado::class)->latest('fecha');
+    }
+
+    /**
+     * Último movimiento de alta/baja registrado. Null si todavía no se
+     * cargó ningún historial para este usuario.
+     */
+    public function ultimoEstado(): ?HistorialEstado
+    {
+        return $this->historialEstados()->first();
+    }
+
+    /**
+     * true si el último movimiento fue un alta (está activo en el
+     * Ejército). Un usuario sin historial se considera sin definir,
+     * no activo.
+     */
+    public function estaActivoEnElEjercito(): bool
+    {
+        return $this->ultimoEstado()?->tipo === 'alta';
+    }
+
+    /**
+     * Cuántas altas le quedan disponibles antes de agotar el máximo de
+     * ingreso + reingresos (HistorialEstado::MAX_ALTAS).
+     */
+    public function altasRestantes(): int
+    {
+        $altasUsadas = $this->historialEstados()->where('tipo', 'alta')->count();
+
+        return max(0, HistorialEstado::MAX_ALTAS - $altasUsadas);
     }
 }

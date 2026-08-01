@@ -67,7 +67,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if ($user->status === 'active')
+                                    @if ($user->status === \App\Enums\UserStatus::Active)
                                         <span class="badge badge-success">Activo</span>
                                     @else
                                         <span class="badge badge-secondary">Inactivo</span>

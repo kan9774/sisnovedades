@@ -54,9 +54,15 @@ class UserForm extends Component
         $this->user = $user;
 
         if ($this->user?->exists) {
-            $this->authorize('assignPermissions', $this->user);
+            $this->authorize('update', $this->user);
         } else {
             $this->authorize('create', User::class);
+
+            // Todo ingreso nuevo arranca en Sdo. 1° (el grado de menor
+            // jerarquía = mayor `orden`) por defecto. Sigue siendo
+            // editable desde el <select>, para el caso de un pase que
+            // llega con otro grado.
+            $this->grado_id = Grado::where('activo', true)->orderByDesc('orden')->value('id');
         }
 
         if ($this->user?->exists) {
@@ -124,9 +130,10 @@ class UserForm extends Component
     }
 
     /**
-     * Los datos básicos (C.I. a Email) y los Roles de un usuario ya
-     * guardado solo pueden ser modificados por admin o superadmin.
-     * Un usuario nuevo (todavía no guardado) siempre es editable.
+     * Los datos básicos (C.I. a Segundo Apellido), el acceso (Email y
+     * Contraseña) y los Roles de un usuario ya guardado solo pueden ser
+     * modificados por admin o superadmin. Un usuario nuevo (todavía no
+     * guardado) siempre es editable.
      */
     public function puedeEditarDatosBasicos(): bool
     {
@@ -188,9 +195,9 @@ class UserForm extends Component
     public function setTab(string $tab): void
     {
         $camposPorTab = [
-            'general' => ['ci', 'fecha_nacimiento', 'grado_id', 'name', 'segundo_nombre', 'last_name', 'segundo_apellido', 'email', 'unidad_id', 'oficina_id', 'password'],
+            'general' => ['ci', 'fecha_nacimiento', 'grado_id', 'name', 'segundo_nombre', 'last_name', 'segundo_apellido', 'unidad_id', 'oficina_id'],
             'direccion' => ['departamento_id', 'localidad', 'calle', 'numero', 'esquina', 'apartamento', 'barrio', 'codigo_postal', 'referencia'],
-            'roles' => ['roles'],
+            'roles' => ['email', 'password', 'roles'],
         ];
 
         if (isset($camposPorTab[$this->activeTab])) {
@@ -204,6 +211,42 @@ class UserForm extends Component
         }
 
         $this->activeTab = $tab;
+    }
+
+    /**
+     * Registra en historial_grados el cambio de grado, si hubo uno.
+     * Detecta automáticamente si es ascenso o degradación comparando el
+     * campo `orden` del grado nuevo contra el del anterior. En esta app
+     * `orden` va de mayor jerarquía a menor (Coronel = 3, Sdo. 1° = 15),
+     * así que un ascenso es cuando el `orden` nuevo es MENOR que el
+     * anterior, y una degradación cuando es MAYOR. Si no había grado
+     * anterior (usuario nuevo), lo trata como el grado de ingreso.
+     *
+     * Nace sin numero_orden/resolución/observaciones: esos datos se van
+     * a cargar aparte, desde una pantalla de historial dedicada.
+     */
+    private function registrarCambioDeGrado(?int $gradoAnteriorId, int $gradoNuevoId): void
+    {
+        if ($gradoAnteriorId === $gradoNuevoId) {
+            return;
+        }
+
+        $tipo = 'ascenso';
+
+        if ($gradoAnteriorId) {
+            $ordenAnterior = Grado::find($gradoAnteriorId)?->orden;
+            $ordenNuevo = Grado::find($gradoNuevoId)?->orden;
+
+            if ($ordenAnterior !== null && $ordenNuevo !== null && $ordenNuevo > $ordenAnterior) {
+                $tipo = 'degradacion';
+            }
+        }
+
+        $this->user->historialGrados()->create([
+            'grado_id' => $gradoNuevoId,
+            'tipo' => $tipo,
+            'fecha_cambio' => now()->toDateString(),
+        ]);
     }
 
     /**
@@ -235,12 +278,16 @@ class UserForm extends Component
             $this->last_name = $this->user->last_name;
             $this->segundo_apellido = $this->user->segundo_apellido;
             $this->email = $this->user->email;
+            $this->password = '';
+            $this->password_confirmation = '';
             $this->roles = $this->user->roles->pluck('id')->toArray();
         }
 
         $validated = $this->validate();
 
         DB::transaction(function () use ($validated) {
+            $gradoAnteriorId = $this->user?->grado_id;
+
             $data = [
                 'ci' => $validated['ci'],
                 'fecha_nacimiento' => $validated['fecha_nacimiento'],
@@ -271,6 +318,8 @@ class UserForm extends Component
             } else {
                 $this->user->update($data);
             }
+
+            $this->registrarCambioDeGrado($gradoAnteriorId, $validated['grado_id']);
 
             $roles = $this->filtrarRolesPermitidos($this->roles);
             $this->user->roles()->sync($roles);

@@ -84,9 +84,6 @@ SIDEBAR
                 <a class="btn btn-sm btn-login" href="{{ route('login') }}">
                     <i class="fas fa-sign-in-alt"></i> Iniciar sesión
                 </a>
-                <a class="btn btn-sm btn-register" href="{{ route('register') }}">
-                    <i class="fas fa-user-plus"></i> Registrarse
-                </a>
             </div>
         @endguest
 
