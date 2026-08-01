@@ -10,6 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Unidad extends Model
 {
     use LogsActivity;
+    protected $table = 'unidades';
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -18,8 +19,6 @@ class Unidad extends Model
             ->logOnlyDirty()
             ->useLogName('Unidades'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
     }
-
-    protected $table = 'unidades';
 
     protected $fillable = [
         'nombre',

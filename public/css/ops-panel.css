@@ -111,20 +111,29 @@
 }
 
 @keyframes opsPanelFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 body.ops-panel-open {
     overflow: hidden;
 }
-.ops-panel__save-btn{
+
+.ops-panel__save-btn {
     background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important;
     color: #0B2545 !important;
     font-weight: 700;
     box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important;
     border: none;
 }
+
 /*
  * Addendum a ops-panel.css — AGREGAR AL FINAL del archivo existente
  * (no reemplaza nada, son clases nuevas: .ops-modal-*)
@@ -140,7 +149,8 @@ body.ops-panel-open {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 1070; /* por encima de .ops-panel-overlay (1060) */
+    z-index: 1070;
+    /* por encima de .ops-panel-overlay (1060) */
     background: rgba(11, 37, 69, 0.55);
     align-items: center;
     justify-content: center;
@@ -213,6 +223,7 @@ body.ops-panel-open {
     justify-content: flex-end;
     gap: .5rem;
 }
+
 /* Variante ancha del ops-modal, para formularios con más campos */
 .ops-modal--lg {
     max-width: 700px;
@@ -225,6 +236,7 @@ body.ops-panel-open {
     box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important;
     border: none;
 }
+
 /*
  * Addendum a ops-panel.css — AGREGAR AL FINAL del archivo existente
  * (no reemplaza nada, son clases nuevas: .card-header-ops-*, .novedad-texto-*)
@@ -315,4 +327,113 @@ body.ops-panel-open {
     font-weight: 700;
     box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important;
     border: none;
+}
+
+/*
+ * Addendum a ops-panel.css — AGREGAR AL FINAL del archivo existente
+ * (no reemplaza nada, son clases nuevas: .wizard-*)
+ *
+ * Indicador de pasos (círculos numerados + línea conectora) para
+ * formularios multi-paso tipo wizard (ej: alta de usuario). Reusa
+ * .btn-ops-primary para el botón de avanzar, no define un gradiente
+ * propio.
+ */
+
+.wizard-steps {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: 560px;
+    margin: 0.5rem auto 2rem;
+}
+
+.wizard-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.wizard-step__circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    background: #E9ECEF;
+    color: #6C757D;
+    border: 2px solid #E9ECEF;
+    transition: all .2s ease;
+}
+
+.wizard-step__label {
+    margin-top: .5rem;
+    font-size: .8rem;
+    color: #6C757D;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.wizard-step.is-active .wizard-step__circle {
+    background: #0B2545;
+    border-color: #0B2545;
+    color: #FFD200;
+    box-shadow: 0 0 0 4px rgba(11, 37, 69, 0.12);
+}
+
+.wizard-step.is-active .wizard-step__label {
+    color: #0B2545;
+}
+
+.wizard-step.is-done .wizard-step__circle {
+    background: #FFD200;
+    border-color: #FFD200;
+    color: #0B2545;
+}
+
+.wizard-step.is-done .wizard-step__label {
+    color: #0B2545;
+}
+
+.wizard-step__line {
+    flex: 1 1 60px;
+    height: 2px;
+    background: #E9ECEF;
+    margin-top: 21px;
+    transition: background .2s ease;
+}
+
+.wizard-step__line.is-done {
+    background: #FFD200;
+}
+
+.wizard-panel {
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.wizard-panel__title {
+    font-weight: 700;
+    color: #0B2545;
+    margin-bottom: 1.25rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid #F1F3F5;
+}
+
+.wizard-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #F1F3F5;
+}
+
+.wizard-btn-secondary {
+    background: #fff !important;
+    color: #0B2545 !important;
+    border: 1px solid #0B2545 !important;
+    font-weight: 600;
 }

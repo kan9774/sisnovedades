@@ -34,7 +34,7 @@ class UserPolicy
             return false;
         }
 
-        return $user->isAdmin();
+        return $user->isSuperAdmin() || $user->isAdmin();
     }
     public function assignPermissions(User $user, User $model): bool
     {

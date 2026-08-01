@@ -6,6 +6,6 @@
 
 @section('content_body')
     <div class="container-fluid">
-        <livewire:admin.user-form />
+         <livewire:admin.user-wizard :user="$user ?? null" />
     </div>
 @stop

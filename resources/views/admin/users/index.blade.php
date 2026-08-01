@@ -21,6 +21,66 @@
             </div>
         @endif
 
+        @if ($usersIncompletos->isNotEmpty())
+            <div class="card card-outline card-warning">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        Usuarios incompletos
+                        <span class="badge badge-warning ml-1">{{ $usersIncompletos->count() }}</span>
+                    </h3>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>C.I.</th>
+                                <th>Creado</th>
+                                <th>Paso alcanzado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($usersIncompletos as $user)
+                                <tr>
+                                    <td>{{ $user->ci_formateado ?? $user->ci }}</td>
+                                    <td>{{ $user->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>
+                                        @if ($user->grado_id && $user->paseVigente())
+                                            <span class="badge badge-info">Paso 2 — falta datos personales</span>
+                                        @else
+                                            <span class="badge badge-secondary">Paso 1 — solo C.I.</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="d-flex justify-content-center">
+                                            <a href="{{ route('admin.users.create.resume', $user->id) }}"
+                                                class="btn btn-outline-info btn-xs mr-1"
+                                                style="background-color: rgba(23, 162, 184, 0.08);"
+                                                aria-label="Retomar wizard">
+                                                <i class="fas fa-play"></i> Retomar
+                                            </a>
+                                            <form action="{{ route('admin.users.destroy-incompleto', $user->id) }}"
+                                                method="POST" class="d-inline"
+                                                onsubmit="return confirm('Esto borra el registro por completo, incluido cualquier historial ya generado. ¿Continuar?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-outline-danger btn-xs"
+                                                    style="background-color: rgba(220, 53, 69, 0.08);"
+                                                    aria-label="Eliminar por completo">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
         <div class="card card-outline card-primary">
             <div class="card-header">
                 <h3 class="card-title">Usuarios del sistema</h3>

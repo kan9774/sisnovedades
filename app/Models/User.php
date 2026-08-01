@@ -52,6 +52,7 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
             'password' => 'hashed',
             'is_super_admin' => 'boolean',
             'status' => \App\Enums\UserStatus::class,
+            'fecha_nacimiento' => 'date',
         ];
     }
 
@@ -139,7 +140,26 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     {
         return $this->belongsTo(Grado::class);
     }
+    /**
+     * Historial completo de destinos (pases), del más reciente al más
+     * antiguo.
+     */
+    /**
+     * Historial completo de pases, del más reciente al más antiguo.
+     */
+    public function pases(): HasMany
+    {
+        return $this->hasMany(Pase::class)->latest('fecha_desde');
+    }
 
+    /**
+     * Pase actualmente vigente (fecha_hasta null). Null si todavía no
+     * se cargó ningún pase para este usuario.
+     */
+    public function paseVigente(): ?Pase
+    {
+        return $this->pases()->whereNull('fecha_hasta')->first();
+    }
     /**
      * Historial completo de cambios de grado (ascensos y degradaciones),
      * del más reciente al más antiguo.
@@ -298,7 +318,12 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 
         return $roles;
     }
-    protected static function calcularDigitoVerificadorCi(string $ci): int
+    /**
+     * Público (antes protected) para que UserForm pueda reusarlo como
+     * preview en vivo mientras el usuario tipea la C.I., sin reimplementar
+     * el mismo algoritmo dos veces.
+     */
+    public static function calcularDigitoVerificadorCi(string $ci): int
     {
         $ci = str_pad($ci, 7, '0', STR_PAD_LEFT);
         $coeficientes = [2, 9, 8, 7, 6, 3, 4];
@@ -389,5 +414,23 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
         $altasUsadas = $this->historialEstados()->where('tipo', 'alta')->count();
 
         return max(0, HistorialEstado::MAX_ALTAS - $altasUsadas);
+    }
+    /**
+     * Historial completo de comisiones (servicio transitorio en otra
+     * unidad, sin dejar la unidad formal), del más reciente al más
+     * antiguo.
+     */
+    public function comisiones(): HasMany
+    {
+        return $this->hasMany(Comision::class)->latest('fecha_inicio');
+    }
+
+    /**
+     * Comisión actualmente vigente (fecha_fin null). Null si no tiene
+     * ninguna comisión abierta en este momento.
+     */
+    public function comisionVigente(): ?Comision
+    {
+        return $this->comisiones()->whereNull('fecha_fin')->first();
     }
 }

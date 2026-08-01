@@ -167,6 +167,11 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
 
         // Usuarios
         Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/create/{id}/resume', [UserController::class, 'create'])
+                ->name('create.resume');
+
+            Route::delete('/{id}/incompleto', [UserController::class, 'destroyIncompleto'])
+                ->name('destroy-incompleto');
             Route::get('/',                     [UserController::class, 'index'])->name('index');
             Route::get('/create',               [UserController::class, 'create'])->name('create');
             Route::get('/{id}/edit',            [UserController::class, 'edit'])->name('edit');

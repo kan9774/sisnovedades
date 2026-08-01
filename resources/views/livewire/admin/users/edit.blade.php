@@ -13,5 +13,11 @@
         <div class="mt-4">
             <livewire:admin.historial-estado-panel :user="$user" />
         </div>
+        <div class="mt-4">
+            <livewire:admin.pase-panel :user="$user" />
+        </div>
+        <div class="mt-4">
+            <livewire:admin.comision-panel :user="$user" />
+        </div>
     </div>
 @stop

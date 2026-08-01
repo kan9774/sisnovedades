@@ -106,9 +106,9 @@ class UserForm extends Component
     }
 
     /**
-     * Calcula el dígito verificador de la cédula de identidad uruguaya.
-     * Algoritmo estándar: C.I. normalizada a 7 dígitos, multiplicada por
-     * los coeficientes [2,9,8,7,6,3,4], sumada y reducida módulo 10.
+     * Preview en vivo del dígito verificador mientras el usuario tipea,
+     * antes de guardar. Reusa el mismo algoritmo que User::setCiAttribute()
+     * aplica al persistir, para que nunca puedan desincronizarse.
      */
     private function calcularDigitoVerificador(): void
     {
@@ -117,16 +117,7 @@ class UserForm extends Component
             return;
         }
 
-        $ci = str_pad($this->ci, 7, '0', STR_PAD_LEFT);
-        $coeficientes = [2, 9, 8, 7, 6, 3, 4];
-        $suma = 0;
-
-        foreach ($coeficientes as $i => $coeficiente) {
-            $suma += ((int) $ci[$i]) * $coeficiente;
-        }
-
-        $resto = $suma % 10;
-        $this->digito_verificador = $resto === 0 ? 0 : 10 - $resto;
+        $this->digito_verificador = User::calcularDigitoVerificadorCi($this->ci);
     }
 
     /**
