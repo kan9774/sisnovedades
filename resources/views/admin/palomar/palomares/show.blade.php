@@ -1,5 +1,6 @@
 @extends('layouts.app')
-
+@section('plugins.Datatables', true)
+@section('plugins.DatatablesPlugins', true)
 
 @section('subtitle', 'Palomar: ' . $palomar->nombre)
 @section('content_header_title', 'Palomares')

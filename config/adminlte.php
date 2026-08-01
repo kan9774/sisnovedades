@@ -304,7 +304,6 @@ return [
             'type'         => 'fullscreen-widget',
             'topnav_right' => true,
         ],
-        ['header' => 'I N I C I O'],
         [
             'text' => 'Inicio',
             'url' => 'admin',
@@ -312,6 +311,7 @@ return [
             'active' => ['admin']
         ],
         // Guardias — todos pueden ver
+        ['header' => 'P E R S O N A L'],
         [
             'text' => 'Guardias y Novedades',
             'icon' => 'fa-solid fa-person-military-pointing',
@@ -384,6 +384,7 @@ return [
             ],
         ],
         // Vehículos
+        ['header' => 'L O G I S T I C A'],
         [
             'text'   => 'Parque Vehículos',
             'icon'   => 'fa-solid fa-car',
@@ -499,28 +500,7 @@ return [
             ],
         ],
 
-        // Roles y Permisos — solo admin
-        [
-            'text'    => 'Permisos de Usuarios',
-            'icon'   => 'fa-solid fa-user-lock',
-            'can'    => 'viewAny-rol',
-            'submenu' => [
-                [
-                    'text'    => 'Roles',
-                    'url'     => 'admin/roles',
-                    'icon'    => 'fas fa-key',
-                    'active'  => ['admin/roles*'],
-                    'can'     => 'viewAny-rol',
-                ],
-                [
-                    'text'   => 'Permisos',
-                    'url'    => 'admin/permisos',
-                    'icon'   => 'fas fa-shield-alt',
-                    'active' => ['admin/permisos*'],
-                    'can'    => 'viewAny-user',
-                ],
-            ]
-        ],
+
         // Palomar
         [
             'text'    => 'Palomar Militar',
@@ -583,6 +563,28 @@ return [
         [
             'header' => 'A U D I T O R Í A',
             'can'    => 'viewAny-log',
+        ],
+                // Roles y Permisos — solo admin
+        [
+            'text'    => 'Permisos de Usuarios',
+            'icon'   => 'fa-solid fa-user-lock',
+            'can'    => 'viewAny-rol',
+            'submenu' => [
+                [
+                    'text'    => 'Roles',
+                    'url'     => 'admin/roles',
+                    'icon'    => 'fas fa-key',
+                    'active'  => ['admin/roles*'],
+                    'can'     => 'viewAny-rol',
+                ],
+                [
+                    'text'   => 'Permisos',
+                    'url'    => 'admin/permisos',
+                    'icon'   => 'fas fa-shield-alt',
+                    'active' => ['admin/permisos*'],
+                    'can'    => 'viewAny-user',
+                ],
+            ]
         ],
         [
             'text'   => 'Log de Actividad',

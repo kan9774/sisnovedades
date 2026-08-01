@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -35,7 +36,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'last_name', 'grado_id', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin', 'must_change_password'])]
+#[Fillable(['name', 'last_name', 'grado_id', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin', 'must_change_password', 'segundo_nombre', 'segundo_apellido', 'fecha_nacimiento', 'ci'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {
@@ -85,6 +86,15 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
         return $this->belongsTo(Unidad::class);
     }
 
+    public function direcciones(): HasMany
+    {
+        return $this->hasMany(Direccion::class);
+    }
+
+    public function direccionPrincipal(): HasOne
+    {
+        return $this->hasOne(Direccion::class)->where('es_principal', true);
+    }
     /**
      * Get the attributes that should be cast.
      *
@@ -123,7 +133,7 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     {
         return $this->belongsTo(Oficina::class);
     }
-    
+
     public function grado(): BelongsTo
     {
         return $this->belongsTo(Grado::class);
@@ -267,5 +277,58 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
         })->implode(', ') ?: 'Sin rol';
 
         return $roles;
+    }
+    protected static function calcularDigitoVerificadorCi(string $ci): int
+    {
+        $ci = str_pad($ci, 7, '0', STR_PAD_LEFT);
+        $coeficientes = [2, 9, 8, 7, 6, 3, 4];
+        $suma = 0;
+
+        foreach (str_split($ci) as $i => $digito) {
+            $suma += (int) $digito * $coeficientes[$i];
+        }
+
+        $resto = $suma % 10;
+
+        return $resto === 0 ? 0 : 10 - $resto;
+    }
+
+    public function setCiAttribute(?string $value): void
+    {
+        if (blank($value)) {
+            $this->attributes['ci'] = null;
+            $this->attributes['ci_dv'] = null;
+            return;
+        }
+
+        // Limpia puntos, guiones, espacios - solo deja dígitos
+        $ci = preg_replace('/\D/', '', $value);
+
+        // Si vino con 8 dígitos (incluye el verificador ya cargado), lo recorta a 7
+        if (strlen($ci) === 8) {
+            $ci = substr($ci, 0, 7);
+        }
+
+        $ci = str_pad($ci, 7, '0', STR_PAD_LEFT);
+
+        $this->attributes['ci'] = $ci;
+        $this->attributes['ci_dv'] = self::calcularDigitoVerificadorCi($ci);
+    }
+
+    public function getCiCompletoAttribute(): ?string
+    {
+        return $this->ci ? "{$this->ci}-{$this->ci_dv}" : null;
+    }
+
+    public function getCiFormateadoAttribute(): ?string
+    {
+        if (!$this->ci) {
+            return null;
+        }
+
+        // Formato tipo 1.234.567-8
+        $conPuntos = number_format((int) $this->ci, 0, '', '.');
+
+        return "{$conPuntos}-{$this->ci_dv}";
     }
 }

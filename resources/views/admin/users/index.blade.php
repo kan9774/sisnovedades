@@ -39,7 +39,7 @@
                 <table class="table table-striped table-hover mb-0">
                     <thead class="thead-dark">
                         <tr>
-                            
+
                             <th>Grado</th>
                             <th>Nombre</th>
                             <th>Email</th>
@@ -50,7 +50,7 @@
                     </thead>
                     <tbody>
                         @forelse($users as $user)
-                            
+                            <tr>
                                 <td>{{ $user->grade }}</td>
                                 <td>{{ $user->name }} {{ $user->last_name }}</td>
                                 <td>{{ $user->email }}</td>
@@ -62,7 +62,7 @@
                                     @empty
                                         <span class="badge badge-secondary mb-1">Sin rol</span>
                                     @endforelse
-                                    @if($user->isSuperAdmin())
+                                    @if ($user->isSuperAdmin())
                                         <span class="badge badge-dark mb-1">SuperAdmin</span>
                                     @endif
                                 </td>

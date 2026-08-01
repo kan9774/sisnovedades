@@ -35,6 +35,8 @@ use App\Livewire\Inventario\UnidadesIndividuales;
 use App\Livewire\Inventario\CategoriasCatalogo;
 use App\Livewire\Inventario\ListadoDepositoGeneral;
 use App\Livewire\Inventario\UbicacionesCatalogo;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 // Pública
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -167,9 +169,7 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/',                     [UserController::class, 'index'])->name('index');
             Route::get('/create',               [UserController::class, 'create'])->name('create');
-            Route::post('/',                    [UserController::class, 'store'])->name('store'); // ← falta esta
             Route::get('/{id}/edit',            [UserController::class, 'edit'])->name('edit');
-            Route::put('/{id}',                 [UserController::class, 'update'])->name('update'); // ← y esta
             Route::post('/{id}/restore',        [UserController::class, 'restore'])->name('restore');
             Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])->name('force-delete');
             Route::delete('/{id}',              [UserController::class, 'destroy'])->name('destroy');

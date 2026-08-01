@@ -8,8 +8,7 @@
 @stop
 
 {{-- Extend and customize the page content header --}}
-@section('plugins.Datatables', true)
-@section('plugins.DatatablesPlugins', true)
+
 @section('plugins.Sweetalert2', true)
 @section('content_header')
     @hasSection('content_header_title')

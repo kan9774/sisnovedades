@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             VueloSeeder::class,
             CategoriaDocumentoSeeder::class,
             UnidadSeeder::class,
+            DepartamentosSeeder::class,
         ]);
 
         $rolAdmin = \App\Models\Rol::where('name', 'admin')->first();

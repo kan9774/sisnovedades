@@ -86,61 +86,7 @@ class UserController extends Controller
 
     public function create()
     {
-        $this->authorize('create', User::class);
-
-        if (auth()->user()->isSuperAdmin()) {
-            $roles = Rol::all();
-        } else {
-            $roles = Rol::where('name', '!=', 'admin')->get();
-        }
-        $grados = Grado::where('activo', true)->orderBy('orden')->orderBy('nombre')->get();
-        $unidades = Unidad::where('activo', true)->orderBy('nombre')->get();
-        $oficinas = Oficina::where('activo', true)->orderBy('nombre')->get();
-
-        return view('admin.users.create', compact('roles', 'unidades', 'oficinas', 'grados'));
-    }
-
-    public function store(Request $request)
-    {
-        $this->authorize('create', User::class);
-
-        $data = $request->validate([
-            'name'       => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'grado_id' => 'required|exists:grados,id',
-            'email'      => 'required|email|unique:users,email',
-            'password'   => 'required|string|min:6|confirmed',
-            'roles'      => 'required|array|min:1',
-            'roles.*'    => 'exists:rols,id',
-            'unidad_id'  => 'required|exists:unidades,id',
-            'oficina_id' => 'nullable|exists:oficinas,id',
-        ]);
-
-        $isSuperAdmin = $request->boolean('is_super_admin') && auth()->user()->isSuperAdmin();
-
-        // Solo un SuperAdmin puede asignar el rol "admin", aunque alguien
-        // manipule el form y mande ese id igual.
-        $roles = $this->filtrarRolesPermitidos($data['roles']);
-
-        $user = User::create([
-            'name'           => $data['name'],
-            'last_name'      => $data['last_name'],
-            'grado_id' => $data['grado_id'],
-            'email'          => $data['email'],
-            'password'       => Hash::make($data['password']),
-            'unidad_id'      => $data['unidad_id'],
-            'status'         => 'active',
-            'is_super_admin' => $isSuperAdmin,
-            'oficina_id'     => $data['oficina_id'] ?? null,
-            // Vos definiste la contraseña a mano, así que la tiene que
-            // cambiar apenas entre por primera vez.
-            'must_change_password' => true,
-        ]);
-
-        $user->roles()->sync($roles);
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario creado correctamente.');
+        return view('admin.users.create');
     }
 
     public function show(string $id)
@@ -150,92 +96,10 @@ class UserController extends Controller
 
     public function edit(string $id)
     {
-        $user = User::with('roles')->findOrFail($id);
+        $user = User::findOrFail($id);
         $this->authorize('update', $user);
 
-        if (auth()->user()->isSuperAdmin()) {
-            $roles = Rol::all();
-        } else {
-            $roles = Rol::where('name', '!=', 'admin')->get();
-        }
-        $grados = Grado::where('activo', true)->orderBy('orden')->orderBy('nombre')->get();
-
-        $permisos = Permission::orderBy('name')->get();
-        $unidades = Unidad::where('activo', true)
-            ->orWhere('id', $user->unidad_id)
-            ->orderBy('nombre')
-            ->get();
-        $oficinas = Oficina::where('activo', true)
-            ->orWhere('id', $user->oficina_id)
-            ->orderBy('nombre')
-            ->get();
-
-        return view('admin.users.edit', compact('user', 'roles', 'permisos', 'unidades', 'oficinas', 'grados'));
+        return view('admin.users.edit', compact('user'));
     }
 
-    public function update(Request $request, string $id)
-    {
-        $user = User::findOrFail($id);
-        $this->authorize('assignPermissions', $user);
-
-        $data = $request->validate([
-            'name'       => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'grado_id' => 'required|exists:grados,id',
-            'email'      => 'required|email|unique:users,email,' . $user->id,
-            'roles'      => 'required|array|min:1',
-            'roles.*'    => 'exists:rols,id',
-            'unidad_id'  => 'required|exists:unidades,id',
-            'password'   => 'nullable|string|min:6|confirmed',
-            'permisos_directos'   => 'nullable|array',
-            'permisos_directos.*' => 'exists:permissions,id',
-            'oficina_id' => 'nullable|exists:oficinas,id',
-        ]);
-
-        $user->name      = $data['name'];
-        $user->last_name = $data['last_name'];
-        $user->grado_id   = $data['grado_id'];
-        $user->email     = $data['email'];
-        $user->unidad_id = $data['unidad_id'];
-        $user->oficina_id = $data['oficina_id'] ?? null;
-
-        if ($request->filled('password')) {
-            $user->password = Hash::make($data['password']);
-            // Fue el admin quien la definió, así que la tiene que cambiar
-            // en su próximo login.
-            $user->must_change_password = true;
-        }
-
-        $user->save();
-
-        $roles = $this->filtrarRolesPermitidos($data['roles']);
-        $user->roles()->sync($roles);
-
-        // Solo un admin puede otorgar permisos individuales, para evitar que
-        // alguien con permiso de "editar usuarios" se autoasigne privilegios extra.
-        if (auth()->user()->isAdmin()) {
-            $user->permisosDirectos()->sync($data['permisos_directos'] ?? []);
-        }
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario actualizado correctamente.');
-    }
-
-    /**
-     * Quita el rol "admin" del listado si quien está armando/editando el
-     * usuario no es SuperAdmin, sin importar lo que haya venido en el form.
-     *
-     * @param array<int> $rolesIds
-     * @return array<int>
-     */
-    private function filtrarRolesPermitidos(array $rolesIds): array
-    {
-        if (auth()->user()->isSuperAdmin()) {
-            return $rolesIds;
-        }
-
-        $adminRolId = Rol::where('name', 'admin')->value('id');
-
-        return array_values(array_diff($rolesIds, [$adminRolId]));
-    }
 }
