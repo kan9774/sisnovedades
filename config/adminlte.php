@@ -311,7 +311,6 @@ return [
             'active' => ['admin']
         ],
         // Guardias — todos pueden ver
-        ['header' => 'P E R S O N A L'],
         [
             'text' => 'Guardias y Novedades',
             'icon' => 'fa-solid fa-person-military-pointing',
@@ -384,7 +383,6 @@ return [
             ],
         ],
         // Vehículos
-        ['header' => 'L O G I S T I C A'],
         [
             'text'   => 'Parque Vehículos',
             'icon'   => 'fa-solid fa-car',
@@ -598,7 +596,7 @@ return [
             'url'    => 'admin/backup',
             'icon'   => 'fas fa-database',
             'active' => ['admin/backup*'],
-            'can'    => 'viewAny-log',
+            'can'    => 'viewAny-backup',
         ],
         // Configuración
         // ['header' => 'C U E N T A'],

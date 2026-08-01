@@ -55,6 +55,21 @@
                     @error('description')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="model">Módulo <small class="text-muted">(agrupa este permiso al asignar roles; opcional)</small></label>
+                    <input type="text" name="model" id="model" list="modulosList"
+                           class="form-control @error('model') is-invalid @enderror"
+                           value="{{ old('model') }}"
+                           placeholder="Ej: Guardia, Novedad, Inventario...">
+                    <datalist id="modulosList">
+                        @foreach ($modulos as $modulo)
+                            <option value="{{ $modulo }}">
+                        @endforeach
+                    </datalist>
+                    <small class="text-muted">Elegí uno existente o escribí uno nuevo. Si lo dejás vacío, el permiso queda en "General".</small>
+                    @error('model')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                </div>
+
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-outline-primary btn-sm"
                             style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);"

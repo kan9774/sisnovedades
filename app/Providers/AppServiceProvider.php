@@ -15,6 +15,7 @@ use App\Models\ItemUnidad;
 use App\Models\MantenimientoVehiculo;
 use App\Models\Movimiento;
 use App\Models\News;
+use App\Models\Oficina;
 use App\Models\Paloma;
 use App\Models\Palomar;
 use App\Models\Proveedor;
@@ -43,6 +44,7 @@ use App\Policies\ItemUnidadPolicy;
 use App\Policies\MantenimientoVehiculoPolicy;
 use App\Policies\MovimientoPolicy;
 use App\Policies\NovedadPolicy;
+use App\Policies\OficinaPolicy;
 use App\Policies\PalomaPolicy;
 use App\Policies\PalomarPolicy;
 use App\Policies\ProveedorPolicy;
@@ -106,7 +108,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         //Gates para el sidebar de AdminLTE
-        Gate::define('viewAny-user', fn($user) => $user->isAdmin());
+        Gate::define('viewAny-user', fn($user) => $user->isAdmin()|| $user->HasPermisos('ver_usuario'));
         Gate::define('viewAny-rol', fn($user) => $user->isAdmin());
         Gate::define('viewAny-vehiculo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_vehiculo'));
         Gate::define('viewAny-conductor', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_conductor'));
@@ -116,7 +118,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('view_guardias', fn($user) => $user->isAdmin() || $user->isSuperAdmin() || $user->HasPermisos('ver_guardia'));
         Gate::define('ver_destinatarios_pdf', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_destinatarios_pdf'));
         Gate::define('viewAny-log', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_log'));
-        Gate::define('viewAny-oficina', fn($user) => $user->isAdmin());
+        Gate::define('viewAny-oficina', [OficinaPolicy::class, 'viewAny']);
         Gate::define('viewAny-palomar', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_palomar'));
         Gate::define('viewAny-grado', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_grado'));
         // Gates para el módulo de inventario
@@ -174,6 +176,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Proveedor::class, ProveedorPolicy::class);
         Gate::policy(Talla::class, TallaPolicy::class);
         Gate::policy(Grado::class, GradoPolicy::class);
+        Gate::policy(Oficina::class, OficinaPolicy::class);
 
 
         // Observers

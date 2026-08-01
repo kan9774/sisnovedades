@@ -14,7 +14,7 @@ class OficinaController extends Controller
 
     public function index()
     {
-        abort_unless(auth()->user()->isAdmin(), 403);
+        $this->authorize('viewAny', Oficina::class);
 
         $oficinas = Oficina::withCount('users')->orderBy('nombre')->paginate(15);
 
@@ -23,14 +23,14 @@ class OficinaController extends Controller
 
     public function create()
     {
-        abort_unless(auth()->user()->isAdmin(), 403);
+        $this->authorize('create', Oficina::class);
 
         return view('admin.oficinas.create');
     }
 
     public function store(Request $request)
     {
-        abort_unless(auth()->user()->isAdmin(), 403);
+        $this->authorize('create', Oficina::class);
 
         $data = $request->validate([
             'nombre' => 'required|string|max:150|unique:oficinas,nombre',
@@ -48,14 +48,14 @@ class OficinaController extends Controller
 
     public function edit(Oficina $oficina)
     {
-        abort_unless(auth()->user()->isAdmin(), 403);
+        $this->authorize('update', $oficina);
 
         return view('admin.oficinas.edit', compact('oficina'));
     }
 
     public function update(Request $request, Oficina $oficina)
     {
-        abort_unless(auth()->user()->isAdmin(), 403);
+        $this->authorize('update', $oficina);
 
         $data = $request->validate([
             'nombre' => 'required|string|max:150|unique:oficinas,nombre,' . $oficina->id,
@@ -73,7 +73,7 @@ class OficinaController extends Controller
 
     public function destroy(Oficina $oficina)
     {
-        abort_unless(auth()->user()->isAdmin(), 403);
+        $this->authorize('delete', $oficina);
 
         if ($oficina->users()->count() > 0) {
             return redirect()->route('admin.oficinas.index')

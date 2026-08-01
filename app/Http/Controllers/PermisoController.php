@@ -24,7 +24,12 @@ class PermisoController extends Controller
     {
         $this->authorize('create', Permission::class);
 
-        return view('admin.permisos.create');
+        $modulos = Permission::whereNotNull('model')
+            ->distinct()
+            ->orderBy('model')
+            ->pluck('model');
+
+        return view('admin.permisos.create', compact('modulos'));
     }
 
     public function store(Request $request)
@@ -34,11 +39,13 @@ class PermisoController extends Controller
         $request->validate([
             'name'       => 'required|string|max:255|unique:permissions,name',
             'description' => 'nullable|string|max:255',
+            'model'      => 'nullable|string|max:255',
         ]);
 
         Permission::create([
             'name'       => $request->name,
             'description' => $request->description,
+            'model'      => $request->model,
         ]);
 
         return redirect()->route('admin.permisos.index')
@@ -49,7 +56,12 @@ class PermisoController extends Controller
     {
         $this->authorize('update', $permiso);
 
-        return view('admin.permisos.edit', compact('permiso'));
+        $modulos = Permission::whereNotNull('model')
+            ->distinct()
+            ->orderBy('model')
+            ->pluck('model');
+
+        return view('admin.permisos.edit', compact('permiso', 'modulos'));
     }
 
     public function update(Request $request, Permission $permiso)
@@ -59,11 +71,13 @@ class PermisoController extends Controller
         $request->validate([
             'name'       => 'required|string|max:255|unique:permissions,name,' . $permiso->id,
             'description' => 'nullable|string|max:255',
+            'model'      => 'nullable|string|max:255',
         ]);
 
         $permiso->update([
             'name'       => $request->name,
             'description' => $request->description,
+            'model'      => $request->model,
         ]);
 
         return redirect()->route('admin.permisos.index')
