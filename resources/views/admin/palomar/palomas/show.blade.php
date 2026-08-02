@@ -31,7 +31,7 @@
             {{-- Columna izquierda: Datos de la paloma e historial --}}
             <div class="col-lg-4 col-md-5 mb-4">
                 {{-- Card: Datos de la paloma --}}
-                <div class="card card-outline card-primary mb-3">
+                <div class="card card-outline-ops mb-3">
                     <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #0d6efd;">
                         <h5 class="card-title">
                             <i class="fas fa-info-circle text-primary"></i> Datos de la Paloma
@@ -39,20 +39,20 @@
                         <div class="card-tools">
                             <div class="btn-group btn-group-sm mt-2 mt-sm-0" role="group">
                                 {{-- Botón: Volver al listado de palomas --}}
-                                <a href="{{ route('admin.palomas.index') }}" class="btn btn-outline-secondary"
+                                <a href="{{ route('admin.palomas.index') }}" class="btn-ops btn-ops-secondary"
                                     style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);"
                                     aria-label="Volver al listado de palomas" title="Volver al listado">
                                     <i class="fas fa-list"></i>
                                 </a>
                                 {{-- Botón: Volver al palomar --}}
                                 <a href="{{ route('admin.palomares.show', $paloma->palomar_id) }}"
-                                    class="btn btn-outline-secondary"
+                                    class="btn-ops btn-ops-secondary"
                                     style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);"
                                     aria-label="Volver al palomar" title="Volver al palomar">
                                     <i class="fas fa-home"></i>
                                 </a>
                                 {{-- Botón: Editar --}}
-                                <a href="{{ route('admin.palomas.edit', $paloma) }}" class="btn btn-outline-warning"
+                                <a href="{{ route('admin.palomas.edit', $paloma) }}" class="btn-ops btn-ops-warning"
                                     style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);"
                                     aria-label="Editar paloma" title="Editar paloma">
                                     <i class="fas fa-edit"></i>
@@ -88,7 +88,7 @@
                                 <div class="col-6 col-sm-4 text-muted"><i class="fas fa-venus-mars mr-1"></i> Sexo:</div>
                                 <div class="col-6 col-sm-8">
                                     @if ($paloma->sexo === 'macho')
-                                        <span class="badge bg-primary"><i class="fas fa-mars mr-1"></i> Macho</span>
+                                        <span class="badge-ops badge-ops-primary"><i class="fas fa-mars mr-1"></i> Macho</span>
                                     @elseif($paloma->sexo === 'hembra')
                                         <span class="badge bg-danger"><i class="fas fa-venus mr-1"></i> Hembra</span>
                                     @else
@@ -168,9 +168,9 @@
                                     <div class="mb-2">
                                         
                                         @if ($paloma->estado_sanitario === 'Bien')
-                                            <span class="badge badge-success">Bien</span>
+                                            <span class="badge-ops badge-ops-success">Bien</span>
                                         @else
-                                            <span class="badge badge-danger">Enferma</span>
+                                            <span class="badge-ops badge-ops-danger">Enferma</span>
                                         @endif
                                     </div>
                                 </dd>
@@ -216,13 +216,13 @@
                 </div>
 
                 {{-- Card: Historial de cambios --}}
-                <div class="card card-outline card-primary collapsed-card">
+                <div class="card card-outline-ops collapsed-card">
                     <div class="card-header" style="background: #f8f9fa;">
                         <h5 class="card-title text-secondary">
                             <i class="fas fa-history text-secondary"></i> Historial de cambios
                         </h5>
                         <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn-ops btn-ops-secondary" data-card-widget="collapse">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -230,7 +230,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-sm table-hover mb-0">
-                                <thead class="thead-light">
+                                <thead class="thead-ops">
                                     <tr>
                                         <th>Fecha</th>
                                         <th>Evento</th>
@@ -242,7 +242,7 @@
                                     @forelse($paloma->historial->sortByDesc('fecha_evento') as $h)
                                         <tr>
                                             <td class="text-nowrap">
-                                                <span class="badge bg-light text-dark">
+                                                <span class="badge-ops badge-ops-light">
                                                     <i class="far fa-calendar-alt mr-1"></i>
                                                     {{ $h->fecha_evento->format('d/m/Y') }}
                                                 </span>
@@ -278,7 +278,7 @@
 
             {{-- Columna derecha: Vuelos --}}
             <div class="col-lg-8 col-md-7">
-                <div class="card card-outline card-success">
+                <div class="card card-outline-ops">
                     <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #28a745;">
                         <h5 class="card-title">
                             <i class="fas fa-plane text-success"></i> Vuelos registrados
@@ -296,7 +296,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-striped table-hover mb-0 table-sm">
-                                <thead class="thead-dark">
+                                <thead class="thead-ops">
                                     <tr>
                                         <th>Fecha</th>
                                         <th>Tipo</th>
@@ -313,7 +313,7 @@
                                     @forelse($paloma->vuelos->sortByDesc('fecha') as $vuelo)
                                         <tr>
                                             <td class="text-nowrap">
-                                                <span class="badge bg-light text-dark">
+                                                <span class="badge-ops badge-ops-light">
                                                     <i class="far fa-calendar-alt mr-1"></i>
                                                     {{ $vuelo->fecha->format('d/m/Y') }}
                                                 </span>
@@ -334,7 +334,7 @@
                                             <td>{{ optional($vuelo->pivot->hora_llegada)->format('H:i') ?? '-' }}</td>
                                             <td>
                                                 @if ($vuelo->pivot->tiempo_vuelo)
-                                                    <span class="badge bg-light text-dark">
+                                                    <span class="badge-ops badge-ops-light">
                                                         <i class="fas fa-clock mr-1"></i>
                                                         {{ \Carbon\Carbon::parse($vuelo->pivot->tiempo_vuelo)->format('H:i') }}
                                                     </span>
@@ -345,7 +345,7 @@
                                             <td>
                                                 @if ($vuelo->pivot->velocidad_media)
                                                     <span
-                                                        class="badge bg-primary">{{ number_format($vuelo->pivot->velocidad_media, 2) }}
+                                                        class="badge-ops badge-ops-primary">{{ number_format($vuelo->pivot->velocidad_media, 2) }}
                                                         m/min</span>
                                                 @else
                                                     -

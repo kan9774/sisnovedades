@@ -63,7 +63,7 @@
             {{-- TABLA --}}
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Valor</th>
                             <th>Sistema</th>

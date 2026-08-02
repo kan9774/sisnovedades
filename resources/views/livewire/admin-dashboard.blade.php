@@ -57,19 +57,21 @@
         {{-- COLUMNA IZQUIERDA (ANCHEZA: col-md-7) --}}
         <div class="col-md-7">
             <!-- Salidas de Vehículos -->
-            <div class="card card-outline card-primary">
-                <div class="card-header border-transparent">
-                    <h3 class="card-title"><i class="fas fa-truck-moving mr-1"></i> Últimas Salidas de Vehículos</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" wire:click="$refresh">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0"><i class="fas fa-truck-moving"></i> Últimas Salidas de Vehículos</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" wire:click="$refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table m-0 table-hover text-sm">
-                            <thead>
+                            <thead class="thead-ops">
                                 <tr>
                                     <th>Matrícula</th>
                                     <th>Conductor</th>
@@ -85,9 +87,9 @@
                                     <td>{{ $salida->hora_sale }}</td>
                                     <td>
                                         @if($salida->hora_entra)
-                                            <span class="badge badge-success">Retornado</span>
+                                            <span class="badge-ops badge-ops-success">Retornado</span>
                                         @else
-                                            <span class="badge badge-warning">En Ruta</span>
+                                            <span class="badge-ops badge-ops-warning">En Ruta</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -104,13 +106,15 @@
 
             <!-- Novedades de la Guardia -->
             @if($guardiaHoy)
-            <div class="card card-outline card-dark">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-history mr-1"></i> Diario de Novedades (Actualizado en Tiempo Real)</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" wire:click="$refresh">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0"><i class="fas fa-history"></i> Diario de Novedades (Actualizado en Tiempo Real)</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" wire:click="$refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -118,9 +122,11 @@
                 </div>
             </div>
             @else
-            <div class="card card-outline card-dark">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-history mr-1"></i> Diario de Novedades</h3>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0"><i class="fas fa-history"></i> Diario de Novedades</h3>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="text-center py-3 text-muted">
@@ -134,13 +140,15 @@
         {{-- COLUMNA DERECHA (ESTRECHA: col-md-5) --}}
         <div class="col-md-5">
             <!-- Alertas Documentación -->
-            <div class="card card-outline card-danger">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-exclamation-circle mr-1"></i> Control de Vencimientos</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" wire:click="$refresh">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0"><i class="fas fa-exclamation-circle"></i> Control de Vencimientos</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" wire:click="$refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-2">
@@ -158,18 +166,20 @@
             </div>
 
             <!-- Resumen de Vuelos Colombofilia -->
-            <div class="card card-outline card-warning">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-dove mr-1"></i> Monitoreo de Vuelos</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" wire:click="$refresh">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0"><i class="fas fa-dove"></i> Monitoreo de Vuelos</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" wire:click="$refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <table class="table m-0 table-striped text-xs">
-                        <thead>
+                        <thead class="thead-ops">
                             <tr>
                                 <th>Punto Suelta</th>
                                 <th>Palomas</th>
@@ -180,7 +190,7 @@
                             @forelse($ultimosVuelos as $vuelo)
                             <tr>
                                 <td><strong>{{ $vuelo->punto_liberacion ?? 'Entrenamiento' }}</strong></td>
-                                <td><span class="badge badge-secondary">{{ $vuelo->palomas_count }}</span></td>
+                                <td><span class="badge-ops badge-ops-secondary">{{ $vuelo->palomas_count }}</span></td>
                                 <td>{{ $vuelo->hora_liberacion ?? '--:--' }}</td>
                             </tr>
                             @empty

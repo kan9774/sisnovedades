@@ -15,11 +15,14 @@
             </div>
         @endif
 
-        <div class="card card-outline card-primary">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-dove"></i> Todas las palomas</h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0"><i class="fas fa-dove"></i> Todas las palomas</h3>
+                    <span class="card-header-ops__eyebrow">{{ $palomas->count() }} registros</span>
+                </div>
                 <div class="card-tools">
-                    <a href="{{ route('admin.palomas.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.palomas.create') }}" class="btn-ops btn-ops-primary btn-sm">
                         <i class="fas fa-plus-circle"></i> Nueva Paloma
                     </a>
                 </div>
@@ -27,7 +30,7 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="tabla-palomas" class="table table-striped table-hover table-bordered" style="width:100%">
-                        <thead>
+                        <thead class="thead-ops">
                             <tr>
                                 <th>Anilla</th>
                                 <th>Nombre</th>
@@ -46,11 +49,11 @@
                                     <td>{{ $paloma->palomar->nombre ?? '-' }}</td>
                                     <td>
                                         @if ($paloma->sexo === 'macho')
-                                            <span class="badge bg-primary"><i class="fas fa-mars mr-1"></i> Macho</span>
+                                            <span class="badge-ops badge-ops-primary"><i class="fas fa-mars mr-1"></i> Macho</span>
                                         @elseif($paloma->sexo === 'hembra')
-                                            <span class="badge bg-danger"><i class="fas fa-venus mr-1"></i> Hembra</span>
+                                            <span class="badge-ops badge-ops-danger"><i class="fas fa-venus mr-1"></i> Hembra</span>
                                         @else
-                                            <span class="badge bg-secondary">Desconocido</span>
+                                            <span class="badge-ops badge-ops-secondary">Desconocido</span>
                                         @endif
                                     </td>
                                     <td>
@@ -77,14 +80,12 @@
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
                                             <a href="{{ route('admin.palomas.show', $paloma) }}"
-                                                class="btn btn-outline-info btn-xs"
-                                                style="background-color: rgba(23, 162, 184, 0.08); border-color: rgba(23, 162, 184, 0.25);"
+                                                class="btn-ops btn-ops-info btn-xs"
                                                 aria-label="Ver paloma">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{{ route('admin.palomas.edit', $paloma) }}"
-                                                class="btn btn-outline-warning btn-xs"
-                                                style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);"
+                                                class="btn-ops btn-ops-warning btn-xs"
                                                 aria-label="Editar paloma">
                                                 <i class="fas fa-edit"></i>
                                             </a>
@@ -92,8 +93,7 @@
                                                 style="display:inline-block;"
                                                 onsubmit="return confirm('¿Eliminar esta paloma?')">
                                                 @csrf @method('DELETE')
-                                                <button class="btn btn-outline-danger btn-xs"
-                                                    style="background-color: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.25);"
+                                                <button class="btn-ops btn-ops-danger btn-xs"
                                                     aria-label="Eliminar paloma">
                                                     <i class="fas fa-trash"></i>
                                                 </button>

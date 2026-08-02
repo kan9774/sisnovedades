@@ -1,6 +1,6 @@
 <div class="d-flex justify-content-end mb-2">
     @if ($guardia->status === 'open' && $puedeOperarGuardia)
-        <a href="{{ route('admin.guardias.salidas.create', $guardia) }}" class="btn btn-outline-info btn-sm">
+        <a href="{{ route('admin.guardias.salidas.create', $guardia) }}" class="btn-ops btn-ops-info btn-sm">
             <i class="fas fa-plus-circle"></i> Registrar Salida
         </a>
     @endif
@@ -8,7 +8,7 @@
 
 @if ($salidas->total() > 0)
     <table class="table table-striped table-hover mb-0" style="width: 100%">
-        <thead class="thead-dark">
+        <thead class="thead-ops">
             <tr>
                 <th>#</th>
                 <th>Vehículo</th>

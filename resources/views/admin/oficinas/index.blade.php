@@ -6,12 +6,14 @@
 
 @section('content_body')
     <div class="container-fluid">
-        <div class="card card-outline card-primary">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-building"></i> Oficinas</h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0"><i class="fas fa-building"></i> Oficinas</h3>
+                    <span class="card-header-ops__eyebrow">{{ $oficinas->count() }} registros</span>
+                </div>
                 <div class="card-tools">
-                    <a href="{{ route('admin.oficinas.create') }}" class="btn btn-outline-primary btn-sm"
-                        style="background-color: rgba(0, 123, 255, 0.08);">
+                    <a href="{{ route('admin.oficinas.create') }}" class="btn-ops btn-ops-primary btn-sm">
                         <i class="fas fa-plus"></i> Nueva Oficina
                     </a>
                 </div>
@@ -33,7 +35,7 @@
 
                 <div class="table-responsive">
                     <table class="table table-sm table-striped">
-                        <thead>
+                        <thead class="thead-ops">
                             <tr>
                                 <th>Nombre</th>
                                 <th>Usuarios</th>
@@ -48,21 +50,21 @@
                                     <td>{{ $oficina->users_count }}</td>
                                     <td>
                                         @if ($oficina->activo)
-                                            <span class="badge badge-success">Activa</span>
+                                            <span class="badge-ops badge-ops-success">Activa</span>
                                         @else
-                                            <span class="badge badge-secondary">Inactiva</span>
+                                            <span class="badge-ops badge-ops-secondary">Inactiva</span>
                                         @endif
                                     </td>
                                     <td class="text-right">
                                         <a href="{{ route('admin.oficinas.edit', $oficina) }}"
-                                            class="btn btn-outline-primary btn-sm">
+                                            class="btn-ops btn-ops-warning btn-sm">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('admin.oficinas.destroy', $oficina) }}" method="POST"
                                             class="d-inline" onsubmit="return confirm('¿Eliminar esta oficina?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <button type="submit" class="btn-ops btn-ops-danger btn-sm">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>

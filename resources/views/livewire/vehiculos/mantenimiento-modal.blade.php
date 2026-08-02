@@ -1,5 +1,5 @@
 <div>
-    <div class="card card-outline card-primary shadow-sm border-0" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px) saturate(180%); -webkit-backdrop-filter: blur(12px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);">
+    <div class="card card-outline-ops shadow-sm border-0" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px) saturate(180%); -webkit-backdrop-filter: blur(12px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);">
         <div class="card-header">
             <h3 class="card-title">
                 <i class="fas fa-tools text-info"></i> Mantenimientos
@@ -22,7 +22,7 @@
         </div>
         <div class="card-body p-0">
             <table class="table table-striped table-hover mb-0">
-                <thead class="thead-dark">
+                <thead class="thead-ops">
                     <tr>
                         <th>Fecha</th>
                         <th>Tipo</th>
@@ -38,7 +38,7 @@
                     @forelse ($items as $item)
                         <tr wire:key="mant-{{ $item->id }}">
                             <td>{{ $item->fecha->format('d/m/Y') }}</td>
-                            <td><span class="badge badge-secondary">{{ $item->tipo_label }}</span></td>
+                            <td><span class="badge-ops badge-ops-secondary">{{ $item->tipo_label }}</span></td>
                             <td>{{ $item->kilometraje ?? '-' }}</td>
                             <td>{{ $item->descripcion }}</td>
                             <td>{{ $item->costo ? '$' . number_format($item->costo, 2, ',', '.') : '-' }}</td>

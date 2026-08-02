@@ -1,10 +1,12 @@
-<div class="card card-outline card-dark" wire:poll.15000ms="refreshNews">
-    <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-history mr-1"></i> Diario de Novedades (Actualizado en Tiempo Real)</h3>
-        <div class="card-tools">
-            <button type="button" class="btn btn-tool" wire:click="refreshNews">
-                <i class="fas fa-sync-alt"></i>
-            </button>
+<div class="card card-outline-ops" wire:poll.15000ms="refreshNews">
+    <div class="card-header-ops">
+        <div class="card-header-ops__title-wrap">
+            <h3 class="card-title-ops mb-0"><i class="fas fa-history"></i> Diario de Novedades (Actualizado en Tiempo Real)</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" wire:click="refreshNews">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="card-body p-0">
@@ -12,7 +14,7 @@
             <div class="row">
                 {{-- COLUMNA: RECIBIDOS --}}
                 <div class="col-md-6">
-                    <h5 class="text-center bg-info text-white py-1 mb-0">
+                    <h5 class="text-center py-1 mb-0" style="background: linear-gradient(135deg, #0B2545, #1a3a5c); color: white;">
                         <i class="fas fa-inbox mr-1"></i> Recibidos
                     </h5>
                     <ul class="products-list product-list-in-card pl-2 pr-2" style="max-height: 300px; overflow-y: auto;">
@@ -21,7 +23,7 @@
                                 <div class="product-info ml-2">
                                     <div>
                                         <strong>N° {{ $novedad->number }}</strong>
-                                        <span class="badge badge-{{ $novedad->esUrgente() ? 'danger' : 'info' }} float-right">{{ $novedad->clasification }}</span>
+                                        <span class="badge-ops badge-ops-{{ $novedad->esUrgente() ? 'danger' : 'info' }} float-right">{{ $novedad->clasification }}</span>
                                     </div>
                                     <span class="text-xs d-block"><strong>Destinatario:</strong> {{ $novedad->organismo?->name ?? 'Sin especificar' }}</span>
                                     <span class="text-xs d-block"><strong>Oficina:</strong> {{ $novedad->oficina?->nombre ?? 'N/A' }}</span>
@@ -39,7 +41,7 @@
 
                 {{-- COLUMNA: EXPEDIDOS --}}
                 <div class="col-md-6">
-                    <h5 class="text-center bg-success text-white py-1 mb-0">
+                    <h5 class="text-center py-1 mb-0" style="background: linear-gradient(135deg, #0B2545, #1a3a5c); color: white;">
                         <i class="fas fa-paper-plane mr-1"></i> Expedidos
                     </h5>
                     <ul class="products-list product-list-in-card pl-2 pr-2" style="max-height: 300px; overflow-y: auto;">
@@ -48,7 +50,7 @@
                                 <div class="product-info ml-2">
                                     <div>
                                         <strong>N° {{ $novedad->number }}</strong>
-                                        <span class="badge badge-{{ $novedad->esUrgente() ? 'danger' : 'success' }} float-right">{{ $novedad->clasification }}</span>
+                                        <span class="badge-ops badge-ops-{{ $novedad->esUrgente() ? 'danger' : 'success' }} float-right">{{ $novedad->clasification }}</span>
                                     </div>
                                     <span class="text-xs d-block"><strong>Destinatario:</strong> {{ $novedad->destino ?? 'Sin especificar' }}</span>
                                     <span class="text-xs d-block"><strong>Oficina:</strong> {{ $novedad->oficina?->nombre ?? 'N/A' }}</span>

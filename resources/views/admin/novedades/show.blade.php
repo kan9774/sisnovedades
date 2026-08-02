@@ -15,7 +15,7 @@
         @endif
 
         <div class="card card-outline-ops">
-            <div class="card-header card-header-ops">
+            <div class="card-header-ops">
                 <div class="card-header-ops__title-wrap">
                     <h3 class="card-title card-title-ops mb-0">
                         <i class="fas fa-file-alt"></i> Novedad #{{ $novedad->id }}
@@ -27,7 +27,7 @@
                                 'Destello' => 'danger',
                             ];
                         @endphp
-                        <span class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }} ml-2">
+                        <span class="badge-ops badge-ops-{{ $colores[$novedad->clasification] ?? 'secondary' }} ml-2">
                             {{ $novedad->clasification }}
                         </span>
                         <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia" :key="'estado-novedad-' . $novedad->id" />
@@ -72,7 +72,7 @@
                     <div class="col-md-3">
                         <strong>Dirección:</strong><br>
                         @if ($novedad->direction === 'Recibido')
-                            <span class="badge badge-success">Recibido</span>
+                            <span class="badge-ops badge-ops-success">Recibido</span>
                         @else
                             <span class="badge badge-warning">Expedido</span>
                         @endif
@@ -81,7 +81,7 @@
                         <strong>Número:</strong><br>{{ $novedad->number }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Hora:</strong><br><span class="badge badge-info"> {{ $novedad->time->format('H:i') }} </span>
+                        <strong>Hora:</strong><br><span class="badge-ops badge-ops-info"> {{ $novedad->time->format('H:i') }} </span>
                     </div>
                 </div>
 
@@ -128,7 +128,7 @@
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-striped mb-0">
-                        <thead class="thead-dark">
+                        <thead class="thead-ops">
                             <tr>
                                 <th>Acción</th>
                                 <th>Usuario</th>

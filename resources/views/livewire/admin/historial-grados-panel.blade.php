@@ -1,13 +1,15 @@
 <div>
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-history"></i> Historial de Grados</h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0"><i class="fas fa-history"></i> Historial de Grados</h3>
+            </div>
         </div>
 
         <div class="card-body p-0">
             @if ($this->historial->isNotEmpty())
                 <table class="table table-striped table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Grado</th>
                             <th>Tipo</th>
@@ -26,9 +28,9 @@
                                 <td>{{ $registro->grado->nombre ?? '—' }}</td>
                                 <td>
                                     @if ($registro->tipo === 'ascenso')
-                                        <span class="badge badge-success">Ascenso</span>
+                                        <span class="badge-ops badge-ops-success">Ascenso</span>
                                     @else
-                                        <span class="badge badge-danger">Degradación</span>
+                                        <span class="badge-ops badge-ops-danger">Degradación</span>
                                     @endif
                                 </td>
                                 <td>{{ $registro->fecha_cambio->format('d/m/Y') }}</td>

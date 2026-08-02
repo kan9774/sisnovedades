@@ -22,17 +22,19 @@
         @endif
 
         @if ($usersIncompletos->isNotEmpty())
-            <div class="card card-outline card-warning">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-exclamation-triangle text-warning"></i>
-                        Usuarios incompletos
-                        <span class="badge badge-warning ml-1">{{ $usersIncompletos->count() }}</span>
-                    </h3>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0">
+                            <i class="fas fa-exclamation-triangle" style="color: #FFD200; margin-right: 8px;"></i>
+                            Usuarios incompletos
+                        </h3>
+                        <span class="card-header-ops__eyebrow">{{ $usersIncompletos->count() }} registros pendientes</span>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-striped table-hover mb-0">
-                        <thead class="thead-dark">
+                        <thead class="thead-ops">
                             <tr>
                                 <th>C.I.</th>
                                 <th>Creado</th>
@@ -46,17 +48,38 @@
                                     <td>{{ $user->ci_formateado ?? $user->ci }}</td>
                                     <td>{{ $user->created_at->format('d/m/Y H:i') }}</td>
                                     <td>
-                                        @if ($user->grado_id && $user->paseVigente())
-                                            <span class="badge badge-info">Paso 2 — falta datos personales</span>
-                                        @else
-                                            <span class="badge badge-secondary">Paso 1 — solo C.I.</span>
-                                        @endif
+                                        @php
+                                            $completoPaso2 = $user->grado_id && $user->paseVigente();
+                                        @endphp
+                                        <div class="mini-wizard">
+                                            @foreach (['Cédula', 'Grado / Unidad', 'Datos Personales'] as $idx => $etiqueta)
+                                                @php
+                                                    $stepNum = $idx + 1;
+                                                    $isDone = $completoPaso2 ? ($stepNum <= 2) : ($stepNum === 1);
+                                                    $isActive = !$isDone && ($stepNum === ($completoPaso2 ? 3 : 2));
+                                                @endphp
+                                                <div class="mini-wizard__step {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-done' : '' }}">
+                                                    <div class="mini-wizard__circle">
+                                                        @if ($isDone && $stepNum < 3)
+                                                            <i class="fas fa-check"></i>
+                                                        @elseif (!$isDone)
+                                                            {{ $stepNum }}
+                                                        @else
+                                                            <i class="fas fa-lock"></i>
+                                                        @endif
+                                                    </div>
+                                                    <div class="mini-wizard__label">{{ $etiqueta }}</div>
+                                                </div>
+                                                @if ($idx < 2)
+                                                    <div class="mini-wizard__line {{ $isDone ? 'is-done' : '' }}"></div>
+                                                @endif
+                                            @endforeach
+                                        </div>
                                     </td>
                                     <td class="text-center align-middle">
                                         <div class="d-flex justify-content-center">
                                             <a href="{{ route('admin.users.create.resume', $user->id) }}"
-                                                class="btn btn-outline-info btn-xs mr-1"
-                                                style="background-color: rgba(23, 162, 184, 0.08);"
+                                                class="btn-ops btn-ops-info btn-xs mr-1"
                                                 aria-label="Retomar wizard">
                                                 <i class="fas fa-play"></i> Retomar
                                             </a>
@@ -65,8 +88,7 @@
                                                 onsubmit="return confirm('Esto borra el registro por completo, incluido cualquier historial ya generado. ¿Continuar?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-outline-danger btn-xs"
-                                                    style="background-color: rgba(220, 53, 69, 0.08);"
+                                                <button class="btn-ops btn-ops-danger btn-xs"
                                                     aria-label="Eliminar por completo">
                                                     <i class="fas fa-trash"></i> Eliminar
                                                 </button>
@@ -81,25 +103,27 @@
             </div>
         @endif
 
-        <div class="card card-outline card-primary">
-            <div class="card-header">
-                <h3 class="card-title">Usuarios del sistema</h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">Usuarios del sistema</h3>
+                    <span class="card-header-ops__eyebrow">{{ $users->count() }} registros</span>
+                </div>
                 <div class="card-tools">
-                    <a href="{{ route('admin.users.userdelete') }}" class="btn btn-outline-secondary btn-sm mr-1"
-                        style="background-color: rgba(108, 117, 125, 0.08);" aria-label="Ver usuarios inactivos">
+                    <a href="{{ route('admin.users.userdelete') }}" class="btn-ops btn-ops-warning btn-sm mr-1"
+                        aria-label="Ver usuarios inactivos">
                         <i class="fas fa-user-slash"></i> Inactivos
                     </a>
-                    <a href="{{ route('admin.users.create') }}" class="btn btn-outline-primary btn-sm"
-                        style="background-color: rgba(0, 123, 255, 0.08);" aria-label="Crear nuevo usuario">
+                    <a href="{{ route('admin.users.create') }}" class="btn-ops btn-ops-primary btn-sm"
+                        aria-label="Crear nuevo usuario">
                         <i class="fas fa-plus"></i> Nuevo Usuario
                     </a>
                 </div>
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
-
                             <th>Grado</th>
                             <th>Nombre</th>
                             <th>Email</th>
@@ -116,36 +140,35 @@
                                 <td>{{ $user->email }}</td>
                                 <td>
                                     @forelse($user->roles as $rol)
-                                        <span class="badge badge-info mr-1 mb-1">
+                                        <span class="badge-ops badge-ops-info mr-1 mb-1">
                                             {{ ucfirst(str_replace('_', ' ', $rol->name)) }}
                                         </span>
                                     @empty
-                                        <span class="badge badge-secondary mb-1">Sin rol</span>
+                                        <span class="badge-ops badge-ops-secondary mb-1">Sin rol</span>
                                     @endforelse
                                     @if ($user->isSuperAdmin())
-                                        <span class="badge badge-dark mb-1">SuperAdmin</span>
+                                        <span class="badge-ops badge-ops-dark mb-1">SuperAdmin</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if ($user->status === \App\Enums\UserStatus::Active)
-                                        <span class="badge badge-success">Activo</span>
+                                        <span class="badge-ops badge-ops-success">Activo</span>
                                     @else
-                                        <span class="badge badge-secondary">Inactivo</span>
+                                        <span class="badge-ops badge-ops-secondary">Inactivo</span>
                                     @endif
                                 </td>
                                 <td class="text-center align-middle">
                                     <div class="d-flex justify-content-center">
                                         <a href="{{ route('admin.users.edit', $user->id) }}"
-                                            class="btn btn-outline-warning btn-xs mr-1"
-                                            style="background-color: rgba(255, 193, 7, 0.08);" aria-label="Editar usuario">
+                                            class="btn-ops btn-ops-warning btn-xs mr-1"
+                                            aria-label="Editar usuario">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST"
                                             class="d-inline" onsubmit="return confirm('¿Eliminar este usuario?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-outline-danger btn-xs"
-                                                style="background-color: rgba(220, 53, 69, 0.08);"
+                                            <button class="btn-ops btn-ops-danger btn-xs"
                                                 aria-label="Eliminar usuario">
                                                 <i class="fas fa-trash"></i>
                                             </button>

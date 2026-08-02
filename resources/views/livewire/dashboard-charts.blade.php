@@ -2,15 +2,17 @@
     
     {{-- GRÁFICO 1: Salidas vs Vuelos (últimos 7 días) --}}
     <div class="col-md-6">
-        <div class="card card-outline card-info">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-chart-line mr-1"></i> Actividad Semanal
-                </h3>
-                <div class="card-tools">
-                    <button type="button" class="btn btn-tool" wire:click="actualizar">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">
+                        <i class="fas fa-chart-line"></i> Actividad Semanal
+                    </h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" wire:click="actualizar">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
@@ -21,11 +23,13 @@
 
     {{-- GRÁFICO 2: Conductores por Estado --}}
     <div class="col-md-6">
-        <div class="card card-outline card-success">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-chart-pie mr-1"></i> Estado de Conductores
-                </h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">
+                        <i class="fas fa-chart-pie"></i> Estado de Conductores
+                    </h3>
+                </div>
             </div>
             <div class="card-body">
                 <canvas id="conductoresChart" style="min-height: 250px; height: 250px; max-height: 250px;"></canvas>
@@ -35,11 +39,13 @@
 
     {{-- GRÁFICO 3: Vehículos Hoy --}}
     <div class="col-md-6">
-        <div class="card card-outline card-warning">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-truck mr-1"></i> Vehículos en Ruta (Hoy)
-                </h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">
+                        <i class="fas fa-truck"></i> Vehículos en Ruta (Hoy)
+                    </h3>
+                </div>
             </div>
             <div class="card-body">
                 <canvas id="vehiculosChart" style="min-height: 250px; height: 250px; max-height: 250px;"></canvas>
@@ -49,11 +55,13 @@
 
     {{-- GRÁFICO 4: Novedades por Tipo --}}
     <div class="col-md-6">
-        <div class="card card-outline card-danger">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-clipboard-list mr-1"></i> Novedades por Tipo (Mes)
-                </h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">
+                        <i class="fas fa-clipboard-list"></i> Novedades por Tipo (Mes)
+                    </h3>
+                </div>
             </div>
             <div class="card-body">
                 <canvas id="novedadesChart" style="min-height: 250px; height: 250px; max-height: 250px;"></canvas>

@@ -6,7 +6,7 @@
 
 @section('content_body')
     <div class="container-fluid">
-        <div class="card card-outline card-primary">
+        <div class="card card-outline-ops">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-building"></i> Crear Oficina</h3>
                 <div class="card-tools">

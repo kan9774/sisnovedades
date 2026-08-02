@@ -10,7 +10,7 @@
     @if ($this->salidas->total() > 0)
         <div wire:poll.5s="refreshSalidas">
         <table class="table table-striped table-hover mb-0" style="width: 100%">
-            <thead class="thead-dark">
+            <thead class="thead-ops">
                 <tr>
                     <th>#</th>
                     <th>Vehículo</th>
@@ -81,12 +81,12 @@
                                         </button>
                                     @endif
                                     <button type="button" wire:click="eliminar({{ $salida->id }})"
-                                        wire:confirm="¿Eliminar esta salida?" class="btn btn-outline-danger btn-xs" title="Eliminar salida">
+                                        wire:confirm="¿Eliminar esta salida?" class="btn-ops btn-ops-danger btn-xs" title="Eliminar salida">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             @elseif ($salida->guardia_id !== $guardia->id)
-                                <span class="badge badge-light border" title="Salió en la guardia del {{ $salida->guardia->date->format('d/m/Y') }}">
+                                <span class="badge-ops badge-ops-light border" title="Salió en la guardia del {{ $salida->guardia->date->format('d/m/Y') }}">
                                     <i class="fas fa-undo"></i> Retorno
                                 </span>
                             @endif

@@ -13,11 +13,13 @@
         </div>
     @endif
 
-    <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-building"></i> Unidades
-            </h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0">
+                    <i class="fas fa-building"></i> Unidades
+                </h3>
+            </div>
             <div class="card-tools">
                 <input type="text"
                        wire:model.live.debounce.400ms="search"
@@ -63,7 +65,7 @@
 
         <div class="card-body p-0">
             <table class="table table-striped table-hover mb-0">
-                <thead class="thead-dark">
+                <thead class="thead-ops">
                     <tr>
                         <th>Nombre</th>
                         <th>Novedades</th>
@@ -80,14 +82,13 @@
                                 <div class="d-flex justify-content-center">
                                     <button type="button"
                                             wire:click="editar({{ $organismo->id }})"
-                                            class="btn btn-outline-warning btn-xs mr-1"
-                                            style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);">
+                                            class="btn-ops btn-ops-warning btn-xs mr-1">
                                         <i class="fas fa-edit"></i>
                                     </button>
 
                                     @if ($organismo->novedades_count > 0)
                                         <button type="button"
-                                                class="btn btn-outline-danger btn-xs"
+                                                class="btn-ops btn-ops-danger btn-xs"
                                                 style="opacity: .4;"
                                                 disabled
                                                 title="No se puede eliminar: tiene novedades asociadas">
@@ -97,8 +98,7 @@
                                         <button type="button"
                                                 wire:click="eliminar({{ $organismo->id }})"
                                                 wire:confirm="¿Eliminar este organismo?"
-                                                class="btn btn-outline-danger btn-xs"
-                                                style="background-color: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.25);">
+                                                class="btn-ops btn-ops-danger btn-xs">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     @endif

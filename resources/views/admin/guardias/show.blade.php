@@ -142,7 +142,7 @@
         </div>
 
         {{-- Tabs --}}
-        <div class="card card-primary card-outline card-outline-tabs">
+        <div class="card-outline-ops">
             <div class="card-header p-0 border-bottom-0">
                 <ul class="nav nav-tabs" id="guardia-tabs" role="tablist">
                     <li class="nav-item">

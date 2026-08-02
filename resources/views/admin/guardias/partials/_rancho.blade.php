@@ -17,7 +17,7 @@
     </div>
 
     <table class="table table-sm table-bordered">
-        <thead class="thead-dark">
+        <thead class="thead-ops">
             <tr>
                 <th>Unidad</th>
                 <th style="width:100px;">Desayuno</th>

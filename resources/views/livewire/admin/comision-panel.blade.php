@@ -1,14 +1,16 @@
 <div>
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-user-clock"></i> Comisiones</h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0"><i class="fas fa-user-clock"></i> Comisiones</h3>
+            </div>
             <div class="card-tools">
                 @if ($user->comisionVigente())
-                    <span class="badge badge-warning">
+                    <span class="badge-ops badge-ops-warning">
                         En comisión en: {{ $user->comisionVigente()->unidad->nombre ?? '—' }}
                     </span>
                 @else
-                    <span class="badge badge-secondary">Sin comisión vigente</span>
+                    <span class="badge-ops badge-ops-secondary">Sin comisión vigente</span>
                 @endif
             </div>
         </div>
@@ -16,7 +18,7 @@
         <div class="card-body p-0">
             @if ($this->historial->isNotEmpty())
                 <table class="table table-striped table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Unidad</th>
                             <th>Desde</th>
@@ -35,7 +37,7 @@
                                     @if ($registro->fecha_fin)
                                         {{ $registro->fecha_fin->format('d/m/Y') }}
                                     @else
-                                        <span class="badge badge-success">Vigente</span>
+                                        <span class="badge-ops badge-ops-success">Vigente</span>
                                     @endif
                                 </td>
                                 <td>{{ $registro->tipo_orden ?? '—' }}</td>

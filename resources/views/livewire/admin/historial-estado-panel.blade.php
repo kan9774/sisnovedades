@@ -1,9 +1,11 @@
 <div>
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-id-badge"></i> Altas / Bajas (Ejército)</h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0"><i class="fas fa-id-badge"></i> Altas / Bajas (Ejército)</h3>
+            </div>
             <div class="card-tools">
-                <span class="badge {{ $user->estaActivoEnElEjercito() ? 'badge-success' : 'badge-danger' }}">
+                <span class="badge-ops {{ $user->estaActivoEnElEjercito() ? 'badge-ops-success' : 'badge-ops-danger' }}">
                     {{ $user->estaActivoEnElEjercito() ? 'Activo' : 'De baja' }}
                 </span>
             </div>
@@ -12,7 +14,7 @@
         <div class="card-body p-0">
             @if ($this->historial->isNotEmpty())
                 <table class="table table-striped table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Tipo</th>
                             <th>Fecha</th>
@@ -24,9 +26,9 @@
                             <tr wire:key="historial-estado-{{ $registro->id }}">
                                 <td>
                                     @if ($registro->tipo === 'alta')
-                                        <span class="badge badge-success">Alta</span>
+                                        <span class="badge-ops badge-ops-success">Alta</span>
                                     @else
-                                        <span class="badge badge-danger">Baja</span>
+                                        <span class="badge-ops badge-ops-danger">Baja</span>
                                     @endif
                                 </td>
                                 <td>{{ $registro->fecha->format('d/m/Y') }}</td>

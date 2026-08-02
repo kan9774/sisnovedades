@@ -1,16 +1,18 @@
-<div class="card card-outline card-primary" wire:poll.10000ms="loadSalidas">
-    <div class="card-header border-transparent">
-        <h3 class="card-title"><i class="fas fa-truck-moving mr-1"></i> Últimas Salidas de Vehículos</h3>
-        <div class="card-tools">
-            <button type="button" class="btn btn-tool" wire:click="loadSalidas">
-                <i class="fas fa-sync-alt"></i>
-            </button>
+<div class="card card-outline-ops" wire:poll.10000ms="loadSalidas">
+    <div class="card-header-ops">
+        <div class="card-header-ops__title-wrap">
+            <h3 class="card-title-ops mb-0"><i class="fas fa-truck-moving"></i> Últimas Salidas de Vehículos</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" wire:click="loadSalidas">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table m-0 table-hover text-sm">
-                <thead>
+                <thead class="thead-ops">
                     <tr>
                         <th>Matrícula</th>
                         <th>Conductor</th>

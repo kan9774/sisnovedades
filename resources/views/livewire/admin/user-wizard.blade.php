@@ -1,4 +1,10 @@
-<div class="card card-outline card-primary">
+<div class="card card-outline-ops">
+    <div class="card-header-ops">
+        <div class="card-header-ops__title-wrap">
+            <h3 class="card-title-ops mb-0">Nuevo Usuario</h3>
+            <span class="card-header-ops__eyebrow">Completá los pasos para registrar un usuario</span>
+        </div>
+    </div>
     <div class="card-body">
 
         {{-- Indicador de pasos: círculos numerados + línea conectora --}}
@@ -46,7 +52,9 @@
                     </div>
 
                     <div class="wizard-nav">
-                        <span></span>
+                        <a href="{{ route('admin.users.index') }}" class="btn wizard-btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
                         <button type="submit" class="btn btn-ops-primary" wire:loading.attr="disabled"
                             wire:target="guardarPaso1">
                             Siguiente <i class="fas fa-arrow-right"></i>
@@ -116,7 +124,9 @@
                     </div>
 
                     <div class="wizard-nav">
-                        <span></span>
+                        <button type="button" class="btn wizard-btn-secondary" wire:click="volverPaso(1)">
+                            <i class="fas fa-arrow-left"></i> Atrás
+                        </button>
                         <button type="submit" class="btn btn-ops-primary" wire:loading.attr="disabled"
                             wire:target="guardarPaso2">
                             Siguiente <i class="fas fa-arrow-right"></i>

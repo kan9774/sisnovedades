@@ -6,23 +6,25 @@
 
 @section('content_body')
 <div class="container-fluid">
-    <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-building text-primary"></i> {{ $unidad->nombre }}
-                @if($unidad->activo)
-                    <span class="badge badge-success">Activo</span>
-                @else
-                    <span class="badge badge-secondary">Inactivo</span>
-                @endif
-            </h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0">
+                    <i class="fas fa-building"></i> {{ $unidad->nombre }}
+                    @if($unidad->activo)
+                        <span class="badge-ops badge-ops-success">Activo</span>
+                    @else
+                        <span class="badge-ops badge-ops-secondary">Inactivo</span>
+                    @endif
+                </h3>
+            </div>
             <div class="card-tools">
                 @can('update', $unidad)
-                    <a href="{{ route('admin.unidades.index', ['edit' => $unidad->id]) }}" class="btn btn-outline-warning btn-sm">
+                    <a href="{{ route('admin.unidades.index', ['edit' => $unidad->id]) }}" class="btn-ops btn-ops-warning btn-sm">
                         <i class="fas fa-edit"></i> Editar
                     </a>
                 @endcan
-                <a href="{{ route('admin.unidades.index') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="{{ route('admin.unidades.index') }}" class="btn-ops btn-ops-secondary btn-sm">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
@@ -37,7 +39,7 @@
 
             @if($unidad->vehiculos->isNotEmpty())
                 <table class="table table-striped table-hover">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Matrícula</th>
                             <th>Marca/Modelo</th>

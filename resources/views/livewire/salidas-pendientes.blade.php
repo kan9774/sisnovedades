@@ -7,7 +7,7 @@
 
         <div class="table-responsive">
             <table class="table table-striped table-hover">
-                <thead class="thead-dark">
+                <thead class="thead-ops">
                     <tr>
                         <th>#</th>
                         <th>Fecha Guardia</th>
@@ -29,14 +29,14 @@
                             <td>{{ $salida->hora_sale->format('H:i') }}</td>
                             <td>
                                 @if ($salida->tipo_combustible === 'gas_oil')
-                                    <span class="badge badge-info">Gas Oil</span>
+                                    <span class="badge-ops badge-ops-warning">Gas Oil</span>
                                 @else
-                                    <span class="badge badge-info">Nafta</span>
+                                    <span class="badge-ops badge-ops-info">Nafta</span>
                                 @endif
                             </td>
                             <td>{{ $salida->kms_sale ?? '-' }}</td>
                             <td>
-                                <button type="button" class="btn btn-success btn-sm" wire:click="abrirBoleta({{ $salida->id }})">
+                                <button type="button" class="btn-ops btn-ops-success btn-sm" wire:click="abrirBoleta({{ $salida->id }})">
                                     <i class="fas fa-check-circle"></i> Cerrar Salida
                                 </button>
                             </td>
@@ -98,10 +98,10 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="cerrarBoleta">
+                        <button type="button" class="btn-ops btn-ops-secondary" wire:click="cerrarBoleta">
                             <i class="fas fa-times"></i> Cancelar
                         </button>
-                        <button type="button" class="btn btn-success" wire:click="guardarBoleta">
+                        <button type="button" class="btn-ops btn-ops-success" wire:click="guardarBoleta">
                             <i class="fas fa-check"></i> Confirmar Cierre
                         </button>
                     </div>

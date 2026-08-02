@@ -1,6 +1,6 @@
 <div>
     @if ($resumenReposicion->isNotEmpty())
-        <div class="card card-outline card-warning mb-3">
+        <div class="card-outline-ops mb-3">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-triangle-exclamation"></i> A reponer con el proveedor</h3>
             </div>
@@ -22,7 +22,7 @@
                                 <td class="text-center">{{ $r['vigente'] }}</td>
                                 <td class="text-center">
                                     @if ($r['vencido'] > 0)
-                                        <span class="badge badge-danger">{{ $r['vencido'] }}</span>
+                                        <span class="badge-ops badge-ops-danger">{{ $r['vencido'] }}</span>
                                     @else
                                         —
                                     @endif
@@ -33,7 +33,7 @@
                                         <span class="badge badge-warning">Bajo mínimo</span>
                                     @endif
                                     @if ($r['vencido'] > 0)
-                                        <span class="badge badge-danger">Tiene stock vencido</span>
+                                        <span class="badge-ops badge-ops-danger">Tiene stock vencido</span>
                                     @endif
                                 </td>
                             </tr>
@@ -89,7 +89,7 @@
         <div class="card-body table-responsive p-0">
             @if ($tab === 'lotes')
                 <table class="table table-sm table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Ítem</th>
                             <th>Proveedor</th>
@@ -135,7 +135,7 @@
                 </table>
             @else
                 <table class="table table-sm table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Ítem</th>
                             <th>N° de serie</th>

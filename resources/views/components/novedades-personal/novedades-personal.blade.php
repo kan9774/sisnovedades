@@ -30,7 +30,7 @@
     @endif
 
     <table class="table table-sm table-striped">
-        <thead class="thead-dark">
+        <thead class="thead-ops">
             <tr>
                 <th style="width: 80px;">Hora</th>
                 <th style="width: 160px;">Tipo</th>

@@ -13,11 +13,13 @@
         </div>
     @endif
 
-    <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-building"></i> Unidades
-            </h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0">
+                    <i class="fas fa-building"></i> Unidades
+                </h3>
+            </div>
             <div class="card-tools">
                 <input type="text"
                        wire:model.live.debounce.400ms="search"
@@ -75,7 +77,7 @@
 
         <div class="card-body p-0">
             <table class="table table-striped table-hover mb-0">
-                <thead class="thead-dark">
+                <thead class="thead-ops">
                     <tr>
                         <th>Nombre</th>
                         <th>Vehículos</th>
@@ -93,9 +95,9 @@
                             <td>{{ $unidad->usuarios_count }}</td>
                             <td>
                                 @if ($unidad->activo)
-                                    <span class="badge badge-success">Activo</span>
+                                    <span class="badge-ops badge-ops-success">Activo</span>
                                 @else
-                                    <span class="badge badge-secondary">Inactivo</span>
+                                    <span class="badge-ops badge-ops-secondary">Inactivo</span>
                                 @endif
                             </td>
                             <td class="text-center align-middle">
@@ -104,15 +106,14 @@
                                     @can('update', $unidad)
                                         <button type="button"
                                                 wire:click="editar({{ $unidad->id }})"
-                                                class="btn btn-outline-warning btn-xs mr-1"
-                                                style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);">
+                                                class="btn-ops btn-ops-warning btn-xs mr-1">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                     @endcan
                                     @can('delete', $unidad)
                                         @if ($tieneRelaciones)
                                             <button type="button"
-                                                    class="btn btn-outline-danger btn-xs"
+                                                    class="btn-ops btn-ops-danger btn-xs"
                                                     style="opacity: .4;"
                                                     disabled
                                                     title="No se puede eliminar: tiene vehículos o usuarios asignados">
@@ -122,8 +123,7 @@
                                             <button type="button"
                                                     wire:click="eliminar({{ $unidad->id }})"
                                                     wire:confirm="¿Eliminar esta unidad?"
-                                                    class="btn btn-outline-danger btn-xs"
-                                                    style="background-color: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.25);">
+                                                    class="btn-ops btn-ops-danger btn-xs">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         @endif

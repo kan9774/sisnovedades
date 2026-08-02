@@ -6,9 +6,12 @@
 
 @section('content_body')
     <div class="container-fluid">
-        <div class="card card-outline card-primary">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-history"></i> Registro de actividad</h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0"><i class="fas fa-history"></i> Registro de actividad</h3>
+                    <span class="card-header-ops__eyebrow">{{ $logs->total() ?? $logs->count() }} registros</span>
+                </div>
             </div>
             <div class="card-body">
 
@@ -30,13 +33,13 @@
                     <input type="date" name="desde" class="form-control mr-2 mb-2" value="{{ request('desde') }}">
                     <input type="date" name="hasta" class="form-control mr-2 mb-2" value="{{ request('hasta') }}">
 
-                    <button type="submit" class="btn btn-outline-primary mb-2"><i class="fas fa-filter"></i> Filtrar</button>
-                    <a href="{{ route('admin.logs.index') }}" class="btn btn-outline-secondary mb-2 ml-2">Limpiar</a>
+                    <button type="submit" class="btn-ops btn-ops-primary mb-2"><i class="fas fa-filter"></i> Filtrar</button>
+                    <a href="{{ route('admin.logs.index') }}" class="btn-ops btn-ops-secondary mb-2 ml-2">Limpiar</a>
                 </form>
 
                 <div class="table-responsive">
                     <table class="table table-sm table-striped">
-                        <thead>
+                        <thead class="thead-ops">
                             <tr>
                                 <th>Fecha</th>
                                 <th>Entidad</th>
@@ -50,12 +53,12 @@
                             @forelse ($logs as $log)
                                 <tr>
                                     <td>{{ $log->created_at->format('d/m/Y H:i') }}</td>
-                                    <td><span class="badge badge-secondary">{{ $log->log_name }}</span></td>
+                                    <td><span class="badge-ops badge-ops-secondary">{{ $log->log_name }}</span></td>
                                     <td>{{ ucfirst($log->event) }}</td>
                                     <td>{{ $log->description }}</td>
                                     <td>{{ $log->causer?->name ?? 'Sistema' }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-info" type="button"
+                                        <button class="btn-ops btn-ops-info btn-sm" type="button"
                                             data-toggle="collapse" data-target="#detalle-{{ $log->id }}">
                                             <i class="fas fa-eye"></i>
                                         </button>

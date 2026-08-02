@@ -14,29 +14,30 @@
         </div>
     @endif
 
-    <div class="card card-outline card-info">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-tools"></i> Mantenimientos de {{ $vehiculo->matricula }}
-            </h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0">
+                    <i class="fas fa-tools"></i> Mantenimientos de {{ $vehiculo->matricula }}
+                </h3>
+                <span class="card-header-ops__eyebrow">{{ $mantenimientos->count() }} registros</span>
+            </div>
             <div class="card-tools">
                 @can('create', App\Models\MantenimientoVehiculo::class)
                     <a href="{{ route('admin.vehiculos.mantenimientos.create', $vehiculo) }}"
-                       class="btn btn-outline-primary btn-sm"
-                       style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
+                       class="btn-ops btn-ops-primary btn-sm">
                         <i class="fas fa-plus-circle"></i> Registrar Mantenimiento
                     </a>
                 @endcan
                 <a href="{{ route('admin.vehiculos.show', $vehiculo) }}"
-                   class="btn btn-outline-secondary btn-sm"
-                   style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
+                   class="btn-ops btn-ops-secondary btn-sm">
                     <i class="fas fa-arrow-left"></i> Volver al vehículo
                 </a>
             </div>
         </div>
         <div class="card-body p-0">
             <table class="table table-striped table-hover mb-0">
-                <thead class="thead-dark">
+                <thead class="thead-ops">
                     <tr>
                         <th>Fecha</th>
                         <th>Tipo</th>
@@ -52,7 +53,7 @@
                     @forelse($mantenimientos as $mantenimiento)
                         <tr>
                             <td>{{ $mantenimiento->fecha->format('d/m/Y') }}</td>
-                            <td><span class="badge badge-secondary">{{ $mantenimiento->tipo_label }}</span></td>
+                            <td><span class="badge-ops badge-ops-secondary">{{ $mantenimiento->tipo_label }}</span></td>
                             <td>{{ $mantenimiento->kilometraje ?? '-' }}</td>
                             <td>{{ $mantenimiento->descripcion }}</td>
                             <td>{{ $mantenimiento->costo ? '$' . number_format($mantenimiento->costo, 2, ',', '.') : '-' }}</td>
@@ -75,8 +76,7 @@
                                               onsubmit="return confirm('¿Eliminar este mantenimiento?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-outline-danger btn-xs"
-                                                    style="background-color: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.25);">
+                                            <button class="btn-ops btn-ops-danger btn-xs">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>

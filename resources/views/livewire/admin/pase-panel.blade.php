@@ -1,9 +1,11 @@
 <div>
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-map-marker-alt"></i> Pases</h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0"><i class="fas fa-map-marker-alt"></i> Pases</h3>
+            </div>
             <div class="card-tools">
-                <span class="badge badge-info">
+                <span class="badge-ops badge-ops-info">
                     Unidad vigente: {{ $user->paseVigente()?->unidad->nombre ?? $user->unidad?->nombre ?? '—' }}
                 </span>
             </div>
@@ -12,7 +14,7 @@
         <div class="card-body p-0">
             @if ($this->historial->isNotEmpty())
                 <table class="table table-striped table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Unidad</th>
                             <th>Desde</th>
@@ -30,7 +32,7 @@
                                     @if ($registro->fecha_hasta)
                                         {{ $registro->fecha_hasta->format('d/m/Y') }}
                                     @else
-                                        <span class="badge badge-success">Vigente</span>
+                                        <span class="badge-ops badge-ops-success">Vigente</span>
                                     @endif
                                 </td>
                                 <td>{{ $registro->numero_orden ?? '—' }}</td>

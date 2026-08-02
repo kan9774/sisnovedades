@@ -6,7 +6,7 @@
 
 @section('content_body')
 <div class="container-fluid">
-    <div class="card card-outline card-primary">
+    <div class="card card-outline-ops">
         <div class="card-header">
             <h3 class="card-title">Editar rol: {{ ucfirst(str_replace('_', ' ', $rol->name)) }}</h3>
         </div>
@@ -56,7 +56,7 @@
                         <input type="text" id="buscadorPermisos" class="form-control"
                                placeholder="Buscar permiso por nombre, descripción o módulo...">
                         <div class="input-group-append">
-                            <button type="button" id="limpiarBuscadorPermisos" class="btn btn-outline-secondary" title="Limpiar búsqueda">
+                            <button type="button" id="limpiarBuscadorPermisos" class="btn-ops btn-ops-secondary" title="Limpiar búsqueda">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -64,7 +64,7 @@
                     <small id="contadorPermisos" class="text-muted d-block mb-2"></small>
 
                     @foreach($permisosPorModulo as $modulo => $permisosModulo)
-                        <div class="card card-outline card-secondary mb-3" data-modulo-card
+                        <div class="card card-outline-ops mb-3" data-modulo-card
                              data-modulo-buscar="{{ strtolower(str_replace('_', ' ', $modulo)) }}">
                             <div class="card-header py-2">
                                 <h3 class="card-title mb-0">

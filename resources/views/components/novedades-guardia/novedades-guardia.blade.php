@@ -53,7 +53,7 @@
                         </div>
                         <div class="table-responsive">
                             <table class="table table-sm table-striped table-hover mb-0" style="width: 100%">
-                                <thead class="thead-dark">
+                                <thead class="thead-ops">
                                     <tr>
                                         <th style="width: 40px;">#</th>
                                         <th style="width: 90px;">Hora</th>
@@ -82,7 +82,7 @@
                                                     ];
                                                 @endphp
                                                 <span
-                                                    class="badge badge-{{ $colores[$novedad->clasification] ?? 'secondary' }}">
+                                                    class="badge-ops badge-ops-{{ $colores[$novedad->clasification] ?? 'secondary' }}">
                                                     {{ $novedad->clasification }}
                                                 </span>
                                             </td>

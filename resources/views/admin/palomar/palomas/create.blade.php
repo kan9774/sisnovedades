@@ -22,7 +22,7 @@
             </div>
         @endif
 
-        <div class="card card-outline card-primary">
+        <div class="card card-outline-ops">
             <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #0d6efd;">
                 <h3 class="card-title">
                     <i class="fa-solid fa-dove text-primary"></i> Nueva Paloma
@@ -280,7 +280,7 @@
                                     <i class="fa-solid fa-floppy-disk"></i> Guardar
                                 </button>
                                 <a href="{{ $palomarId ? route('admin.palomares.show', $palomarId) : route('admin.palomas.index') }}"
-                                    class="btn btn-outline-secondary"
+                                    class="btn-ops btn-ops-secondary"
                                     style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
                                     <i class="fa-solid fa-xmark"></i> Cancelar
                                 </a>

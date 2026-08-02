@@ -64,7 +64,7 @@
     @endif
 
     {{-- Tarjeta: Lista de Backups --}}
-    <div class="card card-outline card-dark">
+    <div class="card-outline-ops">
         <div class="card-header">
             <h3 class="card-title">
                 <i class="fas fa-history mr-1"></i> Backups Existentes
@@ -96,10 +96,10 @@
                                     <code>{{ $backup['name'] }}</code>
                                 </td>
                                 <td>
-                                    <span class="badge badge-secondary">{{ $backup['size'] }}</span>
+                                    <span class="badge-ops badge-ops-secondary">{{ $backup['size'] }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-success">
+                                    <span class="badge-ops badge-ops-success">
                                         <i class="fas fa-check-circle mr-1"></i> Completo
                                     </span>
                                 </td>
@@ -127,7 +127,7 @@
     </div>
 
     {{-- Tarjeta: Info --}}
-    <div class="card card-outline card-info mt-3">
+    <div class="card-outline-ops mt-3">
         <div class="card-header">
             <h3 class="card-title">
                 <i class="fas fa-info-circle mr-1"></i> Información

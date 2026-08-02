@@ -14,18 +14,21 @@
         </div>
     @endif
 
-    <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">Usuarios eliminados</h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0">Usuarios eliminados</h3>
+                <span class="card-header-ops__eyebrow">{{ $userDelete->count() }} registros en papelera</span>
+            </div>
             <div class="card-tools">
-            <a href="{{ route('admin.users.index') }}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
+                <a href="{{ route('admin.users.index') }}" class="btn-ops btn-ops-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
             </div>
         </div>
         <div class="card-body p-0">
             <table class="table table-striped table-hover mb-0">
-                <thead class="thead-dark">
+                <thead class="thead-ops">
                     <tr>
                         <th>Grado</th>
                         <th>Nombre</th>
@@ -42,7 +45,7 @@
                             <td>{{ $user->name }} {{ $user->last_name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>
-                                <span class="badge badge-secondary">
+                                <span class="badge-ops badge-ops-secondary">
                                     {{ $user->rol->name ?? '-' }}
                                 </span>
                             </td>
@@ -53,7 +56,7 @@
                                       method="POST" class="d-inline"
                                       onsubmit="return confirm('¿Restaurar este usuario?')">
                                     @csrf
-                                    <button class="btn btn-success btn-xs">
+                                    <button class="btn-ops btn-ops-success btn-xs">
                                         <i class="fas fa-undo"></i> Restaurar
                                     </button>
                                 </form>
@@ -64,7 +67,7 @@
                                       onsubmit="return confirm('¿Eliminar permanentemente? Esta acción no se puede deshacer.')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-danger btn-xs">
+                                    <button class="btn-ops btn-ops-danger btn-xs">
                                         <i class="fas fa-trash"></i> Eliminar
                                     </button>
                                 </form>

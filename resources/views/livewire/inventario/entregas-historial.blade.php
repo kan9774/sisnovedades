@@ -25,7 +25,7 @@
 
         <div class="card-body table-responsive p-0">
             <table class="table table-sm table-hover mb-0">
-                <thead class="thead-dark">
+                <thead class="thead-ops">
                     <tr>
                         <th>Fecha</th>
                         <th>Tipo</th>

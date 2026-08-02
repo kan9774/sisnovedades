@@ -21,15 +21,17 @@
             </div>
         @endif
 
-        <div class="card card-outline card-primary">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-building"></i> Unidades
-                </h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">
+                        <i class="fas fa-building"></i> Unidades
+                    </h3>
+                    <span class="card-header-ops__eyebrow">{{ $organismos->count() }} registros</span>
+                </div>
                 <div class="card-tools">
                     <a href="{{ route('admin.organismos.create') }}" 
-                       class="btn btn-outline-primary btn-sm"
-                       style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);"
+                       class="btn-ops btn-ops-primary btn-sm"
                        aria-label="Crear nueva unidad">
                         <i class="fas fa-plus-circle"></i> Nueva Unidad
                     </a>
@@ -37,7 +39,7 @@
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Nombre</th>
                             <th>Novedades</th>
@@ -53,8 +55,7 @@
                                     <div class="d-flex justify-content-center">
                                         {{-- Botón Editar --}}
                                         <a href="{{ route('admin.organismos.edit', $organismo) }}"
-                                           class="btn btn-outline-warning btn-xs mr-1"
-                                           style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);"
+                                           class="btn-ops btn-ops-warning btn-xs mr-1"
                                            aria-label="Editar organismo">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -66,8 +67,7 @@
                                               onsubmit="return confirm('¿Eliminar este organismo?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-outline-danger btn-xs"
-                                                    style="background-color: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.25);"
+                                            <button class="btn-ops btn-ops-danger btn-xs"
                                                     aria-label="Eliminar organismo">
                                                 <i class="fas fa-trash"></i>
                                             </button>

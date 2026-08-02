@@ -16,7 +16,7 @@
                 <input type="text" name="texto" class="form-control form-control-sm" required>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary btn-sm btn-block">
+                <button type="submit" class="btn-ops btn-ops-primary btn-sm btn-block">
                     <i class="fas fa-plus"></i> Agregar
                 </button>
             </div>
@@ -28,7 +28,7 @@
 @endif
 
 <table class="table table-sm table-striped">
-    <thead class="thead-dark">
+    <thead class="thead-ops">
         <tr>
             <th style="width: 80px;">Hora</th>
             <th style="width: 160px;">Tipo</th>

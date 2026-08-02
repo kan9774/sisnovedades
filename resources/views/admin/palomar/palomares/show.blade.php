@@ -11,9 +11,9 @@
         <div class="row">
             {{-- Resumen del palomar (sin cambios) --}}
             <div class="col-lg-4 col-md-5 mb-4">
-                <div class="card card-outline card-primary">
-                    <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #0d6efd;">
-                        <h5 class="mb-0"><i class="fas fa-chart-pie text-primary"></i> Resumen del Palomar</h5>
+                <div class="card card-outline-ops">
+                    <div class="card-header-ops">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Resumen del Palomar</h5>
                     </div>
                     <div class="card-body">
                         @php
@@ -33,37 +33,35 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-dove mr-2"></i> Total existencias</span>
-                                <span class="badge bg-primary rounded-pill">{{ $total }}</span>
+                                <span class="badge-ops badge-ops-primary rounded-pill">{{ $total }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-user-check mr-2"></i> Adultas</span>
-                                <span class="badge bg-success rounded-pill">{{ $adultas }}</span>
+                                <span class="badge-ops badge-ops-success rounded-pill">{{ $adultas }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-baby mr-2"></i> Pichones</span>
-                                <span class="badge bg-info rounded-pill">{{ $pichones }}</span>
+                                <span class="badge-ops badge-ops-info rounded-pill">{{ $pichones }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-heart mr-2"></i> Reproductoras</span>
-                                <span class="badge bg-warning text-dark rounded-pill">{{ $reproductoras }}</span>
+                                <span class="badge-ops badge-ops-warning rounded-pill">{{ $reproductoras }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-plane-departure mr-2"></i> Ausentes</span>
-                                <span class="badge bg-secondary rounded-pill">{{ $ausentes }}</span>
+                                <span class="badge-ops badge-ops-secondary rounded-pill">{{ $ausentes }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-skull mr-2"></i> Bajas</span>
-                                <span class="badge bg-danger rounded-pill">{{ $bajas }}</span>
+                                <span class="badge-ops badge-ops-danger rounded-pill">{{ $bajas }}</span>
                             </li>
                         </ul>
                         <div class="mt-3">
-                            <a href="{{ route('admin.palomares.reporte', $palomar) }}" class="btn btn-outline-danger btn-sm"
-                                style="background-color: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.25);"
+                            <a href="{{ route('admin.palomares.reporte', $palomar) }}" class="btn-ops btn-ops-danger btn-sm"
                                 target="_blank">
                                 <i class="fas fa-file-pdf"></i> Generar Parte Diario
                             </a>
-                            <a href="{{ route('admin.palomares.index') }}" class="btn btn-outline-secondary btn-sm"
-                                style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
+                            <a href="{{ route('admin.palomares.index') }}" class="btn-ops btn-ops-secondary btn-sm">
                                 <i class="fas fa-arrow-left"></i> Volver
                             </a>
                         </div>
@@ -73,16 +71,17 @@
 
             {{-- Listado de palomas con DataTable --}}
             <div class="col-lg-8 col-md-7">
-                <div class="card card-outline card-success">
-                    <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #28a745;">
-                        <h5 class="card-title">
-                            <i class="fas fa-dove text-success"></i> Palomas del Palomar
-                            <span class="badge bg-success ml-2">{{ $palomar->palomas->count() }}</span>
-                        </h5>
+                <div class="card card-outline-ops">
+                    <div class="card-header-ops">
+                        <div class="card-header-ops__title-wrap">
+                            <h5 class="card-title-ops mb-0">
+                                <i class="fas fa-dove"></i> Palomas del Palomar
+                                <span class="badge-ops badge-ops-success ml-2">{{ $palomar->palomas->count() }}</span>
+                            </h5>
+                        </div>
                         <div class="card-tools">
                             <a href="{{ route('admin.palomas.create', ['palomar_id' => $palomar->id]) }}"
-                                class="btn btn-outline-primary btn-sm mt-2 mt-sm-0"
-                                style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
+                                class="btn-ops btn-ops-primary btn-sm mt-2 mt-sm-0">
                                 <i class="fas fa-plus-circle"></i> Agregar Paloma
                             </a>
                         </div>
@@ -90,7 +89,7 @@
                     <div class="card-body">
                         <div class="table-responsive">
                             <table id="tabla-palomas" class="table table-striped table-hover">
-                                <thead class="thead-dark">
+                                <thead class="thead-ops">
                                     <tr>
                                         <th>Anilla</th>
                                         <th>Nombre</th>
@@ -107,13 +106,13 @@
                                             <td>{{ $paloma->nombre ?? '-' }}</td>
                                             <td>
                                                 @if ($paloma->sexo === 'macho')
-                                                    <span class="badge bg-primary"><i class="fas fa-mars mr-1"></i>
+                                                    <span class="badge-ops badge-ops-primary"><i class="fas fa-mars mr-1"></i>
                                                         Macho</span>
                                                 @elseif($paloma->sexo === 'hembra')
-                                                    <span class="badge bg-danger"><i class="fas fa-venus mr-1"></i>
+                                                    <span class="badge-ops badge-ops-danger"><i class="fas fa-venus mr-1"></i>
                                                         Hembra</span>
                                                 @else
-                                                    <span class="badge bg-secondary">Desconocido</span>
+                                                    <span class="badge-ops badge-ops-secondary">Desconocido</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -129,7 +128,7 @@
                                             </td>
                                             <td>
                                                 @if ($paloma->fecha_nacimiento)
-                                                    <span class="badge bg-light text-dark">
+                                                    <span class="badge-ops badge-ops-light">
                                                         <i class="far fa-clock mr-1"></i>
                                                         {{ intval($paloma->fecha_nacimiento->diffInMonths(now())) }} meses
                                                     </span>
@@ -140,13 +139,11 @@
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-1 flex-wrap">
                                                     <a href="{{ route('admin.palomas.show', $paloma) }}"
-                                                        class="btn btn-outline-info btn-xs mr-1"
-                                                        style="background-color: rgba(23, 162, 184, 0.08); border-color: rgba(23, 162, 184, 0.25);">
+                                                        class="btn-ops btn-ops-info btn-xs mr-1">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <a href="{{ route('admin.palomas.edit', $paloma) }}"
-                                                        class="btn btn-outline-warning btn-xs mr-1"
-                                                        style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);">
+                                                        class="btn-ops btn-ops-warning btn-xs mr-1">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 </div>

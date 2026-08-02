@@ -6,7 +6,7 @@
 
 @section('content_body')
 <div class="container-fluid">
-    <div class="card card-outline card-primary">
+    <div class="card card-outline-ops">
         <div class="card-header">
             <h3 class="card-title">
                 <i class="fas fa-key text-primary"></i> Crear permiso

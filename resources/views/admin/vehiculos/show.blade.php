@@ -14,26 +14,25 @@
             </div>
         @endif
 
-        <div class="card card-outline card-primary">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-truck text-primary"></i> {{ $vehiculo->matricula }}
-                    @if ($vehiculo->activo)
-                        <span class="badge badge-success">Activo</span>
-                    @else
-                        <span class="badge badge-secondary">Inactivo</span>
-                    @endif
-                    <span class="{{ $vehiculo->estado_badge_class }}">{{ $vehiculo->estado_label }}</span>
-                </h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">
+                        <i class="fas fa-truck"></i> {{ $vehiculo->matricula }}
+                        @if ($vehiculo->activo)
+                            <span class="badge-ops badge-ops-success">Activo</span>
+                        @else
+                            <span class="badge-ops badge-ops-secondary">Inactivo</span>
+                        @endif
+                    </h3>
+                </div>
                 <div class="card-tools">
                     @can('update', $vehiculo)
-                        <a href="{{ route('admin.vehiculos.edit', $vehiculo) }}" class="btn btn-outline-warning btn-sm"
-                            style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);">
+                        <a href="{{ route('admin.vehiculos.edit', $vehiculo) }}" class="btn-ops btn-ops-warning btn-sm">
                             <i class="fas fa-edit"></i> Editar
                         </a>
                     @endcan
-                    <a href="{{ route('admin.vehiculos.index') }}" class="btn btn-outline-secondary btn-sm"
-                        style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
+                    <a href="{{ route('admin.vehiculos.index') }}" class="btn-ops btn-ops-secondary btn-sm">
                         <i class="fas fa-arrow-left"></i> Volver
                     </a>
                 </div>
@@ -73,7 +72,7 @@
                         <p class="text-muted">
                             {{ $vehiculo->tipoRodado->nombre ?? '-' }}
                             @if ($vehiculo->tipoRodado?->presion_recomendada)
-                                <span class="badge badge-light border">{{ $vehiculo->tipoRodado->presion_recomendada }}
+                                <span class="badge-ops badge-ops-light border">{{ $vehiculo->tipoRodado->presion_recomendada }}
                                     PSI</span>
                             @endif
                         </p>
@@ -82,9 +81,9 @@
                         <strong>Odómetro</strong>
                         <p class="text-muted">
                             @if ($vehiculo->sin_cuentakilometros)
-                                <span class="badge badge-danger">S/ODO</span>
+                                <span class="badge-ops badge-ops-danger">S/ODO</span>
                             @else
-                                <span class="badge badge-success">C/ODO</span>
+                                <span class="badge-ops badge-ops-success">C/ODO</span>
                             @endif
                         </p>
                     </div>
@@ -114,7 +113,7 @@
                     <p class="text-muted">
                         @if ($vehiculo->acta)
                             <a href="{{ asset('storage/' . $vehiculo->acta) }}" target="_blank"
-                                class="btn btn-outline-info btn-xs">
+                                class="btn-ops btn-ops-info btn-xs">
                                 <i class="fas fa-file-download"></i> Ver / Descargar Acta
                             </a>
                         @else
@@ -127,15 +126,17 @@
 
         @livewire('vehiculos.mantenimiento-modal', ['vehiculo' => $vehiculo])
 
-        <div class="card card-outline card-secondary">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-route text-secondary"></i> Últimas Salidas
-                </h3>
+        <div class="card card-outline-ops">
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">
+                        <i class="fas fa-route"></i> Últimas Salidas
+                    </h3>
+                </div>
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Guardia</th>
                             <th>Conductor</th>

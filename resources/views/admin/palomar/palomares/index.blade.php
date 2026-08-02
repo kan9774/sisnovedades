@@ -16,11 +16,14 @@
         </div>
     @endif
 
-    <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-dove"></i> Palomares registrados</h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0"><i class="fas fa-dove"></i> Palomares registrados</h3>
+                <span class="card-header-ops__eyebrow">{{ $palomares->count() }} registros</span>
+            </div>
             <div class="card-tools">
-                <a href="{{ route('admin.palomares.create') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('admin.palomares.create') }}" class="btn-ops btn-ops-primary btn-sm">
                     <i class="fas fa-plus-circle"></i> Nuevo Palomar
                 </a>
             </div>
@@ -28,7 +31,7 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table id="tabla-palomares" class="table table-striped table-hover table-bordered" style="width:100%">
-                    <thead>
+                    <thead class="thead-ops">
                         <tr>
                             <th>#</th>
                             <th>Nombre</th>
@@ -49,22 +52,20 @@
                                 <td>{{ $palomar->palomas_count ?? $palomar->palomas->count() }}</td>
                                 <td>
                                     @if($palomar->activo)
-                                        <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Activo</span>
+                                        <span class="badge-ops badge-ops-success"><i class="fas fa-check-circle mr-1"></i> Activo</span>
                                     @else
-                                        <span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i> Inactivo</span>
+                                        <span class="badge-ops badge-ops-danger"><i class="fas fa-times-circle mr-1"></i> Inactivo</span>
                                     @endif
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
                                         <a href="{{ route('admin.palomares.show', $palomar) }}" 
-                                           class="btn btn-outline-info btn-xs"
-                                           style="background-color: rgba(23, 162, 184, 0.08); border-color: rgba(23, 162, 184, 0.25);"
+                                           class="btn-ops btn-ops-info btn-xs"
                                            aria-label="Ver palomar">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <a href="{{ route('admin.palomares.edit', $palomar) }}" 
-                                           class="btn btn-outline-warning btn-xs"
-                                           style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);"
+                                           class="btn-ops btn-ops-warning btn-xs"
                                            aria-label="Editar palomar">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -73,8 +74,7 @@
                                               style="display:inline-block;" 
                                               onsubmit="return confirm('¿Eliminar este palomar?')">
                                             @csrf @method('DELETE')
-                                            <button class="btn btn-outline-danger btn-xs"
-                                                    style="background-color: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.25);"
+                                            <button class="btn-ops btn-ops-danger btn-xs"
                                                     aria-label="Eliminar palomar">
                                                 <i class="fas fa-trash"></i>
                                             </button>

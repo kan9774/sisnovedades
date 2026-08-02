@@ -73,9 +73,11 @@
             @if($guardiaHoy)
             <livewire:real-time-news :guardia="$guardiaHoy" :key="'real-time-news-' . $guardiaHoy->id" />
             @else
-            <div class="card card-outline card-dark">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-history mr-1"></i> Diario de Novedades</h3>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0"><i class="fas fa-history"></i> Diario de Novedades</h3>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="text-center py-3 text-muted">
@@ -89,9 +91,11 @@
         {{-- COLUMNA DERECHA (ESTRECHA: col-md-5) --}}
         <div class="col-md-5">
             <!-- Alertas Documentación -->
-            <div class="card card-outline card-danger">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-exclamation-circle mr-1"></i> Control de Vencimientos</h3>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0"><i class="fas fa-exclamation-circle"></i> Control de Vencimientos</h3>
+                    </div>
                 </div>
                 <div class="card-body p-2">
                     @forelse($conductoresAlertas as $con)
@@ -108,13 +112,15 @@
             </div>
 
             <!-- Resumen de Vuelos Colombofilia -->
-            <div class="card card-outline card-warning">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-dove mr-1"></i> Monitoreo de Vuelos</h3>
+            <div class="card card-outline-ops">
+                <div class="card-header-ops">
+                    <div class="card-header-ops__title-wrap">
+                        <h3 class="card-title-ops mb-0"><i class="fas fa-dove"></i> Monitoreo de Vuelos</h3>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <table class="table m-0 table-striped text-xs">
-                        <thead>
+                        <thead class="thead-ops">
                             <tr>
                                 <th>Punto Suelta</th>
                                 <th>Palomas</th>
@@ -125,7 +131,7 @@
                             @forelse($ultimosVuelos as $vuelo)
                             <tr>
                                 <td><strong>{{ $vuelo->punto_liberacion ?? 'Entrenamiento' }}</strong></td>
-                                <td><span class="badge badge-secondary">{{ $vuelo->palomas_count }}</span></td>
+                                <td><span class="badge-ops badge-ops-secondary">{{ $vuelo->palomas_count }}</span></td>
                                 <td>{{ $vuelo->hora_liberacion ?? '--:--' }}</td>
                             </tr>
                             @empty

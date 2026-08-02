@@ -112,7 +112,7 @@
             {{-- TABLA --}}
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>Nombre</th>
                             <th style="width: 25%">Tipo</th>

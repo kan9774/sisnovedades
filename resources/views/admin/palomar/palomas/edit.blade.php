@@ -22,19 +22,19 @@
             </div>
         @endif
 
-        <div class="card card-outline card-primary">
+        <div class="card card-outline-ops">
             <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #0d6efd;">
                 <h3 class="card-title">
                     <i class="fas fa-dove text-primary"></i> Editar Paloma
                 </h3>
                 <div class="card-tools">
                     <div class="btn-group btn-group-sm">
-                        <a href="{{ route('admin.palomas.show', $paloma) }}" class="btn btn-outline-info"
+                        <a href="{{ route('admin.palomas.show', $paloma) }}" class="btn-ops btn-ops-info"
                             style="background-color: rgba(23, 162, 184, 0.08); border-color: rgba(23, 162, 184, 0.25);"
                             aria-label="Ver paloma" title="Ver paloma">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="{{ route('admin.palomares.show', $paloma->palomar_id) }}" class="btn btn-outline-secondary"
+                        <a href="{{ route('admin.palomares.show', $paloma->palomar_id) }}" class="btn-ops btn-ops-secondary"
                             style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);"
                             aria-label="Volver al palomar" title="Volver al palomar">
                             <i class="fas fa-arrow-left"></i> Volver
@@ -291,13 +291,13 @@
                                 <i class="fas fa-save mr-2"></i> Actualizar
                             </button>
                             <a href="{{ route('admin.palomares.show', $paloma->palomar_id) }}"
-                                class="btn btn-outline-secondary"
+                                class="btn-ops btn-ops-secondary"
                                 style="border-radius: 50px; padding: 10px 30px; font-weight: 600; background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
                                 <i class="fas fa-times mr-2"></i> Cancelar
                             </a>
                         </div>
                         <div>
-                            <a href="{{ route('admin.palomas.show', $paloma) }}" class="btn btn-outline-info"
+                            <a href="{{ route('admin.palomas.show', $paloma) }}" class="btn-ops btn-ops-info"
                                 style="border-radius: 50px; padding: 10px 30px; font-weight: 600; background-color: rgba(23, 162, 184, 0.08); border-color: rgba(23, 162, 184, 0.25);">
                                 <i class="fas fa-eye mr-2"></i> Ver Paloma
                             </a>

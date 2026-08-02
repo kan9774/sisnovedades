@@ -21,15 +21,16 @@
         </div>
     @endif
 
-    <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-trash"></i> Guardias Eliminadas
-            </h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0">
+                    <i class="fas fa-trash"></i> Guardias Eliminadas
+                </h3>
+            </div>
             <div class="card-tools">
                 <a href="{{ route('admin.guardias.index') }}"
-                   class="btn btn-outline-secondary btn-sm"
-                   style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);"
+                   class="btn-ops btn-ops-secondary btn-sm"
                    aria-label="Volver al listado">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
@@ -37,7 +38,7 @@
         </div>
         <div class="card-body p-0">
             <table class="table table-striped table-hover mb-0">
-                <thead class="thead-dark">
+                <thead class="thead-ops">
                     <tr>
                         <th>Fecha</th>
                         <th>Capitán</th>

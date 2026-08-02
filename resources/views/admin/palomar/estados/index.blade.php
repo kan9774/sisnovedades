@@ -27,16 +27,17 @@
         </div>
     @endif
 
-    <div class="card card-outline card-primary">
-        <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #0d6efd;">
-            <h3 class="card-title">
-                <i class="fas fa-tags text-primary"></i> Estados de palomas
-                <span class="badge bg-primary ml-2">{{ $estados->total() ?? $estados->count() }}</span>
-            </h3>
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="card-header-ops__title-wrap">
+                <h3 class="card-title-ops mb-0">
+                    <i class="fas fa-tags"></i> Estados de palomas
+                </h3>
+                <span class="card-header-ops__eyebrow">{{ $estados->total() ?? $estados->count() }} registros</span>
+            </div>
             <div class="card-tools">
                 <a href="{{ route('admin.estados-paloma.create') }}" 
-                   class="btn btn-outline-primary btn-sm"
-                   style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);"
+                   class="btn-ops btn-ops-primary btn-sm"
                    aria-label="Crear nuevo estado">
                     <i class="fas fa-plus-circle"></i> Nuevo Estado
                 </a>
@@ -45,7 +46,7 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-striped table-hover mb-0">
-                    <thead class="thead-dark">
+                    <thead class="thead-ops">
                         <tr>
                             <th>#</th>
                             <th>Nombre</th>
@@ -73,11 +74,11 @@
                                 </td>
                                 <td>
                                     @if($estado->activo)
-                                        <span class="badge badge-success">
+                                        <span class="badge-ops badge-ops-success">
                                             <i class="fas fa-check-circle mr-1"></i> Activo
                                         </span>
                                     @else
-                                        <span class="badge badge-secondary">
+                                        <span class="badge-ops badge-ops-secondary">
                                             <i class="fas fa-times-circle mr-1"></i> Inactivo
                                         </span>
                                     @endif
@@ -85,8 +86,7 @@
                                 <td class="text-center align-middle">
                                     <div class="d-flex justify-content-center flex-wrap gap-1">
                                         <a href="{{ route('admin.estados-paloma.edit', $estado) }}"
-                                           class="btn btn-outline-warning btn-xs"
-                                           style="background-color: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.25);"
+                                           class="btn-ops btn-ops-warning btn-xs"
                                            aria-label="Editar estado"
                                            title="Editar estado">
                                             <i class="fas fa-edit"></i>
@@ -95,8 +95,7 @@
                                               method="POST" class="d-inline"
                                               onsubmit="return confirm('¿Eliminar este estado?')">
                                             @csrf @method('DELETE')
-                                            <button class="btn btn-outline-danger btn-xs"
-                                                    style="background-color: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.25);"
+                                            <button class="btn-ops btn-ops-danger btn-xs"
                                                     aria-label="Eliminar estado"
                                                     title="Eliminar estado">
                                                 <i class="fas fa-trash"></i>
