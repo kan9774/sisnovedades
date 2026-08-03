@@ -27,6 +27,7 @@ use App\Http\Controllers\SalidaVehiculoController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VueloController;
 use App\Models\Documento;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use App\Livewire\Inventario\ItemsCatalogo;
@@ -162,19 +163,22 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
 
         // Novedades (vista general)
         Route::get('/novedades', [NovedadesController::class, 'index'])->name('novedades.index');
-
-
-
         // Usuarios
         Route::prefix('users')->name('users.')->group(function () {
-            Route::get('/create/{id}/resume', [UserController::class, 'create'])
-                ->name('create.resume');
+            Route::get('/create/{user}/resume', function (?User $user = null) {
+                return view('livewire.admin.users.create', ['user' => $user]);
+            })->name('create.resume');
 
             Route::delete('/{id}/incompleto', [UserController::class, 'destroyIncompleto'])
                 ->name('destroy-incompleto');
             Route::get('/',                     [UserController::class, 'index'])->name('index');
-            Route::get('/create',               [UserController::class, 'create'])->name('create');
-            Route::get('/{id}/edit',            [UserController::class, 'edit'])->name('edit');
+            Route::get('/create', function () {
+                \Illuminate\Support\Facades\Gate::authorize('create', \App\Models\User::class);
+                return view('livewire.admin.users.create');
+            })->name('create');
+            Route::get('/{id}/edit', function ($id) {
+                return view('livewire.admin.users.edit', ['user' => User::findOrFail($id)]);
+            })->name('edit');
             Route::post('/{id}/restore',        [UserController::class, 'restore'])->name('restore');
             Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])->name('force-delete');
             Route::delete('/{id}',              [UserController::class, 'destroy'])->name('destroy');

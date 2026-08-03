@@ -15,7 +15,7 @@
 
         <div class="card-header p-0 pt-1">
             <ul class="nav nav-tabs" role="tablist">
-                @foreach (['general' => 'General', 'direccion' => 'Dirección', 'roles' => 'Roles'] as $tab => $label)
+                @foreach (['general' => 'General', 'direccion' => 'Dirección', 'roles' => 'Roles', 'altas-bajas' => 'Altas/Bajas', 'pases' => 'Pases', 'comisiones' => 'Comisiones', 'historial-grados' => 'Historial de Grados'] as $tab => $label)
                     <li class="nav-item">
                         <a class="nav-link {{ $activeTab === $tab ? 'active' : '' }}" href="#"
                             wire:click.prevent="setTab('{{ $tab }}')">
@@ -336,6 +336,26 @@
                     @endif
                 </div>
 
+                {{-- TAB: ALTAS/BAJAS --}}
+                <div class="{{ $activeTab === 'altas-bajas' ? '' : 'd-none' }}">
+                    <livewire:admin.historial-estado-panel :user="$user" />
+                </div>
+
+                {{-- TAB: PASES --}}
+                <div class="{{ $activeTab === 'pases' ? '' : 'd-none' }}">
+                    <livewire:admin.pase-panel :user="$user" />
+                </div>
+
+                {{-- TAB: COMISIONES --}}
+                <div class="{{ $activeTab === 'comisiones' ? '' : 'd-none' }}">
+                    <livewire:admin.comision-panel :user="$user" />
+                </div>
+
+                {{-- TAB: HISTORIAL DE GRADOS --}}
+                <div class="{{ $activeTab === 'historial-grados' ? '' : 'd-none' }}">
+                    <livewire:admin.historial-grados-panel :user="$user" />
+                </div>
+
             </form>
         </div>
 
@@ -352,3 +372,4 @@
         </div>
 
     </div>
+</div>

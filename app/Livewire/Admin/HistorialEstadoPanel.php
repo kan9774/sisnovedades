@@ -9,12 +9,12 @@ use Livewire\Component;
 
 class HistorialEstadoPanel extends Component
 {
-    public User $user;
+    public ?User $user = null;
 
     public string $fecha = '';
     public string $motivo = '';
 
-    public function mount(User $user): void
+    public function mount(?User $user = null): void
     {
         $this->user = $user;
     }

@@ -48,8 +48,8 @@ class UserWizard extends Component
     public function mount(?User $user = null): void
     {
         $this->authorize('create', User::class);
-
         if ($user) {
+
             abort_if($user->perfil_completo_at !== null, 404);
 
             $this->user = $user;
@@ -57,7 +57,6 @@ class UserWizard extends Component
             $this->updatedCi();
 
             $paseVigente = $user->paseVigente();
-
             if ($user->grado_id && $paseVigente) {
                 // Ya completó el Paso 2: retoma en el Paso 3 con los
                 // datos personales que falten.

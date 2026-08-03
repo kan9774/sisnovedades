@@ -717,3 +717,33 @@ body.ops-panel-open {
     color: #0B2545 !important;
     text-decoration: none;
 }
+/* ==========================================================================
+   Botón ops "solo ícono" — circular, para grupos de acción en tablas
+   (ver/editar/eliminar). Reusa los colores de .btn-ops-{variant} ya
+   definidos, solo cambia la forma a círculo y quita el gap de texto.
+   ========================================================================== */
+.btn-ops-icon {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+}
+
+.ops-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+/* Variantes de tamaño para .btn-ops-icon (default 34px) */
+.btn-ops-icon.btn-ops-icon--xs {
+    width: 26px;
+    height: 26px;
+    font-size: .7rem;
+}
+
+.btn-ops-icon.btn-ops-icon--sm {
+    width: 30px;
+    height: 30px;
+    font-size: .8rem;
+}

@@ -1,10 +1,9 @@
 <div>
     @if ($guardia->status === 'open' && $puedeOperarGuardia)
         <div class="d-flex justify-content-end mb-2">
-            <button type="button" class="btn btn-info btn-sm" wire:click="abrirCrear"
-                style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3); border: none;">
-                <i class="fas fa-plus-circle"></i> Registrar Tráfico
-            </button>
+            <x-btn-ops wire:click="abrirCrear" icon="plus-circle" color="info" size="sm" title="Registrar Tráfico">
+                Registrar Tráfico
+            </x-btn-ops>
         </div>
     @endif
 
@@ -92,27 +91,13 @@
                                                     :compacto="true" :key="'estado-novedad-tabla-' . $novedad->id" />
                                             </td>
                                             <td class="text-center align-middle">
-                                                <div class="d-flex justify-content-center">
-                                                    <a href="{{ route('admin.guardias.novedades.show', [$guardia, $novedad]) }}"
-                                                        class="btn btn-outline-info btn-xs mr-1">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    @if ($guardia->status === 'open' && $puedeOperarGuardia)
-                                                        <button type="button"
-                                                            wire:click="abrirEditar({{ $novedad->id }})"
-                                                            class="btn btn-outline-warning btn-xs mr-1">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button type="button"
-                                                            wire:click="eliminar({{ $novedad->id }})"
-                                                            wire:confirm="¿Eliminar esta novedad?"
-                                                            wire:loading.attr="disabled"
-                                                            wire:target="eliminar({{ $novedad->id }})"
-                                                            class="btn btn-outline-danger btn-xs">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    @endif
-                                                </div>
+                                                <x-ops-actions :view="route('admin.guardias.novedades.show', [$guardia, $novedad])"
+                                                    edit="abrirEditar({{ $novedad->id }})"
+                                                    delete="eliminar({{ $novedad->id }})" :show-edit="$guardia->status === 'open' && $puedeOperarGuardia"
+                                                    :show-delete="$guardia->status === 'open' && $puedeOperarGuardia" 
+                                                    size="xs"
+                                                    />
+                                                    
                                             </td>
                                         </tr>
                                     @endforeach
@@ -199,8 +184,8 @@
                                                 @endforeach
                                             </select>
                                             <small class="text-muted d-block mt-1">O escribí uno nuevo:</small>
-                                            <input type="text" wire:model="organismo_nuevo"
-                                                class="form-control mt-1" placeholder="Nuevo organismo...">
+                                            <input type="text" wire:model="organismo_nuevo" class="form-control mt-1"
+                                                placeholder="Nuevo organismo...">
                                         </div>
                                     </div>
                                 @endif

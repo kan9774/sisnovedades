@@ -189,6 +189,12 @@ class UserForm extends Component
             'general' => ['ci', 'fecha_nacimiento', 'grado_id', 'name', 'segundo_nombre', 'last_name', 'segundo_apellido', 'unidad_id', 'oficina_id'],
             'direccion' => ['departamento_id', 'localidad', 'calle', 'numero', 'esquina', 'apartamento', 'barrio', 'codigo_postal', 'referencia'],
             'roles' => ['email', 'password', 'roles'],
+            // Los tabs de historial (altas-bajas, pases, comisiones, historial-grados) no tienen campos propios
+            // en UserForm, ya que los paneles manejan su propia lógica y validación.
+            'altas-bajas' => [],
+            'pases' => [],
+            'comisiones' => [],
+            'historial-grados' => [],
         ];
 
         if (isset($camposPorTab[$this->activeTab])) {

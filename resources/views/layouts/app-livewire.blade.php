@@ -31,7 +31,7 @@
 </head>
 
 <body class="@yield('classes_body', 'sidebar-collapse')">
-    @yield('body')
+    {{ $slot }}
 
     {{-- Base Scripts --}}
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>

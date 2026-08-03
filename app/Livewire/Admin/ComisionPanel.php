@@ -10,7 +10,7 @@ use Livewire\Component;
 
 class ComisionPanel extends Component
 {
-    public User $user;
+    public ?User $user = null;
 
     // Form: iniciar comisión
     public string $fecha_inicio = '';
@@ -22,7 +22,7 @@ class ComisionPanel extends Component
     // Form: finalizar comisión vigente
     public string $fecha_fin = '';
 
-    public function mount(User $user): void
+    public function mount(?User $user = null): void
     {
         $this->user = $user;
     }

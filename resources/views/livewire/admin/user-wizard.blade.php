@@ -33,7 +33,9 @@
         <div class="wizard-panel">
             {{-- PASO 1: Cédula --}}
             @if ($step === 1)
-                <h5 class="wizard-panel__title"> Ingrese el documento sin el dígito conprobador, el sistema lo comprueba automáticamente.</h5>                <form wire:submit="guardarPaso1">
+                <h5 class="wizard-panel__title"> Ingrese el documento sin el dígito conprobador, el sistema lo comprueba
+                    automáticamente.</h5>
+                <form wire:submit="guardarPaso1">
                     <div class="form-group">
                         <label>Cédula</label>
                         <div class="input-group" style="max-width: 220px;">

@@ -1,9 +1,9 @@
 <div>
     @if ($guardia->status === 'open' && $puedeOperarGuardia)
         <div class="d-flex justify-content-end mb-2">
-            <button type="button" class="btn btn-outline-info btn-sm" wire:click="abrirCrear">
-                <i class="fas fa-plus-circle"></i> Registrar Salida
-            </button>
+        <x-btn-ops wire:click="abrirCrear" icon="plus-circle" color="info" size="sm" title="Registrar Salida">
+            Registrar Salida
+        </x-btn-ops>
         </div>
     @endif
 

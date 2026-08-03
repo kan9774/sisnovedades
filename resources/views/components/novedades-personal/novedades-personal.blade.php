@@ -16,11 +16,10 @@
                     <input type="text" wire:model="texto" class="form-control form-control-sm @error('texto') is-invalid @enderror">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary btn-sm btn-block"
-                        wire:loading.attr="disabled" wire:target="agregar">
-                        <span wire:loading.remove wire:target="agregar"><i class="fas fa-plus"></i> Agregar</span>
+                    <x-btn-ops type="submit" icon="plus" variant="primary" size="sm" title="Agregar Novedad" wire:loading.attr="disabled" wire:target="agregar">
+                        <span wire:loading.remove wire:target="agregar"> Agregar</span>
                         <span wire:loading wire:target="agregar"><i class="fas fa-spinner fa-spin"></i></span>
-                    </button>
+                    </x-btn-ops>
                 </div>
             </div>
             @error('hora') <small class="text-danger d-block">{{ $message }}</small> @enderror
@@ -48,10 +47,8 @@
                     <td>{{ $item->texto }}</td>
                     @if ($guardia->status === 'open' && $puedeOperarGuardia)
                         <td class="text-center">
-                            <button wire:click="eliminar({{ $item->id }})" wire:confirm="¿Eliminar este registro?"
-                                class="btn btn-outline-danger btn-xs">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <x-btn-ops wire:click="eliminar({{ $item->id }})" wire:conirm="¿Eliminar este registro?" icon="trash" variant="danger" size="xs" title="Eliminar">
+                            </x-btn-ops>
                         </td>
                     @endif
                 </tr>

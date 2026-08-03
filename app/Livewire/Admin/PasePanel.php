@@ -10,14 +10,14 @@ use Livewire\Component;
 
 class PasePanel extends Component
 {
-    public User $user;
+    public ?User $user = null;
 
     public string $fecha = '';
     public string $unidad_id = '';
     public string $numero_orden = '';
     public string $motivo = '';
 
-    public function mount(User $user): void
+    public function mount(?User $user = null): void
     {
         $this->user = $user;
     }

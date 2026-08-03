@@ -8,7 +8,7 @@ use Livewire\Component;
 
 class HistorialGradosPanel extends Component
 {
-    public User $user;
+    public ?User $user = null;
 
     public ?int $editandoId = null;
 
@@ -16,7 +16,7 @@ class HistorialGradosPanel extends Component
     public string $resolucion = '';
     public string $observaciones = '';
 
-    public function mount(User $user): void
+    public function mount(?User $user = null): void
     {
         $this->user = $user;
     }

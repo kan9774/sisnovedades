@@ -9,7 +9,14 @@ class RanchoMenu extends Model
 {
     protected $table = 'rancho_menus';
 
-    protected $fillable = ['guard_id', 'menu_desayuno', 'menu_almuerzo', 'menu_merienda', 'menu_cena'];
+    protected $fillable = [
+    'guard_id', 
+    'menu_desayuno', 
+    'menu_colacion', // <--- Añade este campo
+    'menu_almuerzo', 
+    'menu_merienda', 
+    'menu_cena'
+];
 
     public function guardia(): BelongsTo
     {

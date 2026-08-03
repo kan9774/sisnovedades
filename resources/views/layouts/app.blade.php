@@ -35,13 +35,14 @@
 
 @section('footer')
     <div class="float-right">
-        Version: {{ config('app.version', '1.0.0') }}
+        <strong>
+            <a href="{{ config('app.company_url', '#') }}">
+                {{ config('app.company_name', 'My company') }}
+            </a>
+        </strong>
     </div>
-
-    <strong>
-        <a href="{{ config('app.company_url', '#') }}">
-            {{ config('app.company_name', 'My company') }}
-        </a>
+    <strong class="text-muted">
+        Version: {{ config('app.version', '1.0.0') }}
     </strong>
 @stop
 
@@ -60,6 +61,7 @@
 {{-- Add common CSS customizations --}}
 
 @push('css')
+<link rel="stylesheet" href="{{ asset('css/ops-panel.css') }}">
 <style type="text/css">
 
     {{-- You can add AdminLTE customizations here --}}

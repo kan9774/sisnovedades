@@ -9,12 +9,14 @@ class NovedadRancho extends Model
 {
     protected $table = 'novedades_rancho';
 
-    protected $fillable = ['guard_id', 'unidad_id', 'desayuno', 'almuerzo', 'merienda', 'cena', 'menu'];
+    // 1. Añade 'colacion' a los fillable
+    protected $fillable = ['guard_id', 'unidad_id', 'desayuno', 'colacion', 'almuerzo', 'merienda', 'cena', 'menu'];
 
     protected function casts(): array
     {
         return [
             'desayuno' => 'integer',
+            'colacion' => 'integer', // 2. Añade colacion al cast
             'almuerzo' => 'integer',
             'merienda' => 'integer',
             'cena'     => 'integer',
@@ -33,6 +35,7 @@ class NovedadRancho extends Model
 
     public function getTotalAttribute(): int
     {
-        return (int) $this->desayuno + (int) $this->almuerzo + (int) $this->merienda + (int) $this->cena;
+        // 3. Incluye colacion en el cálculo del total
+        return (int) $this->desayuno + (int) $this->colacion + (int) $this->almuerzo + (int) $this->merienda + (int) $this->cena;
     }
 }
