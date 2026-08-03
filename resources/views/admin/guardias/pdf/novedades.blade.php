@@ -454,7 +454,7 @@
             <tr>
                 <td colspan="3" style="text-align: right; padding-right: 60px; border: none; font-size: 11px;">
                     Cuartel en Peñarol,
-                    {{ $guardia->date->format('d') }}0830{{ strtoupper($guardia->date->format('My')) }}.
+                    {{ $guardia->date->copy()->addDay()->format('d') }}0830{{ strtoupper($guardia->date->copy()->addDay()->format('My')) }}.
                 </td>
             </tr>
             <tr>
