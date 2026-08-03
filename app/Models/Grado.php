@@ -15,4 +15,9 @@ class Grado extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function historialGrados(): HasMany
+    {
+        return $this->hasMany(HistorialGrado::class);
+    }
 }

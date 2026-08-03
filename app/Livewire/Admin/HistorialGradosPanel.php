@@ -79,6 +79,38 @@ class HistorialGradosPanel extends Component
 
         session()->flash('success', 'Historial de grado actualizado correctamente.');
     }
+    public function eliminar(int $id): void
+    {
+        abort_unless($this->puedeEditar(), 403);
+
+        $registro = $this->user->historialGrados()->findOrFail($id);
+
+        // Si el registro que se borra es el más reciente (el que define el
+        // grado actual del usuario), el usuario vuelve a quedar con el grado
+        // del movimiento anterior. Si no queda ninguno, no tocamos users.grado_id
+        // porque significaría que el usuario se queda sin grado.
+        $esElMasReciente = $this->user->historialGrados()
+            ->orderByDesc('fecha_cambio')
+            ->orderByDesc('id')
+            ->value('id') === $registro->id;
+
+        $registro->delete();
+
+        if ($esElMasReciente) {
+            $anterior = $this->user->historialGrados()
+                ->orderByDesc('fecha_cambio')
+                ->orderByDesc('id')
+                ->first();
+
+            if ($anterior) {
+                $this->user->update(['grado_id' => $anterior->grado_id]);
+            }
+        }
+
+        unset($this->historial);
+
+        session()->flash('success', 'Movimiento de historial eliminado.');
+    }
 
     public function render()
     {

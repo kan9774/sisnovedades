@@ -53,9 +53,7 @@ class GuardiaPolicy
         if ($guardia->status === 'open') {
             return false;
         }
-        return $guardia->captain_id === $user->id
-            || $guardia->oficer_id === $user->id
-            || $user->isAdmin();
+        return $guardia->esMiembro($user) || $user->isAdmin();
     }
 
     /**

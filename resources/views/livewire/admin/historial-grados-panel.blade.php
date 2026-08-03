@@ -39,10 +39,13 @@
                                 <td>{{ $registro->observaciones ?? '—' }}</td>
                                 @if ($this->puedeEditar())
                                     <td class="text-center align-middle">
-                                        <button type="button" wire:click="abrirEditar({{ $registro->id }})"
-                                            class="btn btn-outline-warning btn-xs" title="Editar datos del cambio de grado">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
+                                        <x-btn-ops wire:click="abrirEditar({{ $registro->id }})" variant="warning" icon="edit"
+                                            class="btn-sm" title="Editar datos del cambio de grado">
+                                        </x-btn-ops>
+                                        <x-btn-ops wire:click="eliminar({{ $registro->id }})"
+                                            wire:confirm="¿Seguro que querés eliminar este movimiento? Si es el más reciente, el grado actual del usuario volverá al anterior."
+                                            variant="danger" icon="trash" class="btn-sm">
+                                        </x-btn-ops>
                                     </td>
                                 @endif
                             </tr>
@@ -60,63 +63,72 @@
 
     {{-- Panel pantalla completa: editar datos del cambio de grado --}}
     <template x-teleport="body">
-    <div class="ops-panel-overlay" id="modalHistorialGrado" wire:ignore.self>
-        <div class="ops-panel">
-            <form wire:submit="guardar" class="ops-panel__form">
-                <div class="ops-panel__header">
-                    <div class="ops-panel__title-wrap">
-                        <span class="ops-panel__eyebrow">BCOM1 · Historial de Grados</span>
-                        <h5 class="ops-panel__title">Editar Cambio de Grado</h5>
+        <div class="ops-panel-overlay" id="modalHistorialGrado" wire:ignore.self>
+            <div class="ops-panel">
+                <form wire:submit="guardar" class="ops-panel__form">
+                    <div class="ops-panel__header">
+                        <div class="ops-panel__title-wrap">
+                            <span class="ops-panel__eyebrow">BCOM1 · Historial de Grados</span>
+                            <h5 class="ops-panel__title">Editar Cambio de Grado</h5>
+                        </div>
+                        <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalHistorialGrado')"
+                            title="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalHistorialGrado')" title="Cerrar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
 
-                <div class="ops-panel__body">
-                    <div class="ops-panel__content">
-                        <div class="form-group">
-                            <label>N° de Orden</label>
-                            <input type="text" wire:model="numero_orden" maxlength="50" placeholder="016/2026"
-                                class="form-control @error('numero_orden') is-invalid @enderror">
-                            <small class="text-muted">Formato: número/año, ej. 016/2026</small>
-                            @error('numero_orden') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                        </div>
+                    <div class="ops-panel__body">
+                        <div class="ops-panel__content">
+                            <div class="form-group">
+                                <label>N° de Orden</label>
+                                <input type="text" wire:model="numero_orden" maxlength="50" placeholder="016/2026"
+                                    class="form-control @error('numero_orden') is-invalid @enderror">
+                                <small class="text-muted">Formato: número/año, ej. 016/2026</small>
+                                @error('numero_orden')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                        <div class="form-group">
-                            <label>Resolución</label>
-                            <input type="text" wire:model="resolucion" maxlength="255"
-                                class="form-control @error('resolucion') is-invalid @enderror">
-                            @error('resolucion') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                        </div>
+                            <div class="form-group">
+                                <label>Resolución</label>
+                                <input type="text" wire:model="resolucion" maxlength="255"
+                                    class="form-control @error('resolucion') is-invalid @enderror">
+                                @error('resolucion')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                        <div class="form-group">
-                            <label>Observaciones</label>
-                            <textarea wire:model="observaciones" rows="3" maxlength="500"
-                                class="form-control @error('observaciones') is-invalid @enderror"></textarea>
-                            @error('observaciones') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            <div class="form-group">
+                                <label>Observaciones</label>
+                                <textarea wire:model="observaciones" rows="3" maxlength="500"
+                                    class="form-control @error('observaciones') is-invalid @enderror"></textarea>
+                                @error('observaciones')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="ops-panel__footer">
-                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalHistorialGrado')">Cancelar</button>
-                    <button type="submit" class="btn" wire:loading.attr="disabled" wire:target="guardar"
-                        style="background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important; color: #0B2545 !important; font-weight: 700; box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important; border: none;">
-                        <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
-                        <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
-                    </button>
-                </div>
-            </form>
+                    <div class="ops-panel__footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                            onclick="cerrarOpsPanel('modalHistorialGrado')">Cancelar</button>
+                        <button type="submit" class="btn" wire:loading.attr="disabled" wire:target="guardar"
+                            style="background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%) !important; color: #0B2545 !important; font-weight: 700; box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35) !important; border: none;">
+                            <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
+                            <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
+                                Guardando...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
     </template>
 </div>
 
 @script
     <script>
         if (!window.cerrarOpsPanel) {
-            window.cerrarOpsPanel = function (id) {
+            window.cerrarOpsPanel = function(id) {
                 const overlay = document.getElementById(id);
                 if (overlay) {
                     overlay.classList.remove('is-open');

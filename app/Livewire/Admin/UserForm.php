@@ -263,9 +263,15 @@ class UserForm extends Component
 
         return array_values(array_diff($rolesIds, [$adminRolId]));
     }
+    private function normalizarSelectsVacios(): void
+    {
+        $this->oficina_id = $this->oficina_id === '' ? null : $this->oficina_id;
+        $this->departamento_id = $this->departamento_id === '' ? null : $this->departamento_id;
+    }
 
     public function save(): void
     {
+        $this->normalizarSelectsVacios();
         if ($this->user?->exists && !$this->puedeEditarDatosBasicos()) {
             $this->ci = $this->user->ci;
             $this->fecha_nacimiento = $this->user->fecha_nacimiento?->format('Y-m-d');

@@ -65,7 +65,25 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php $fechaAnteriorFila = null; @endphp
                                     @foreach ($items as $novedad)
+                                        @php
+                                            $fechaNovedad = $novedad->time?->copy();
+                                            $mostrarSeparadorFecha =
+                                                $fechaNovedad &&
+                                                (!$fechaAnteriorFila || !$fechaNovedad->isSameDay($fechaAnteriorFila));
+                                            if ($mostrarSeparadorFecha) {
+                                                $fechaAnteriorFila = $fechaNovedad->copy();
+                                            }
+                                        @endphp
+                                        @if ($mostrarSeparadorFecha)
+                                            <tr class="table-secondary">
+                                                <td colspan="8" class="text-left font-weight-bold py-1"
+                                                    style="letter-spacing: .05em; background: #eef1f5;">
+                                                    {{ strtoupper($fechaNovedad->locale('es')->isoFormat('DDMMMYY')) }}
+                                                </td>
+                                            </tr>
+                                        @endif
                                         <tr wire:key="novedad-{{ $novedad->id }}">
                                             <td>{{ $loop->iteration }}</td>
                                             <td><strong>{{ $novedad->time?->format('H:i') }}</strong></td>
@@ -94,10 +112,8 @@
                                                 <x-ops-actions :view="route('admin.guardias.novedades.show', [$guardia, $novedad])"
                                                     edit="abrirEditar({{ $novedad->id }})"
                                                     delete="eliminar({{ $novedad->id }})" :show-edit="$guardia->status === 'open' && $puedeOperarGuardia"
-                                                    :show-delete="$guardia->status === 'open' && $puedeOperarGuardia" 
-                                                    size="xs"
-                                                    />
-                                                    
+                                                    :show-delete="$guardia->status === 'open' && $puedeOperarGuardia" size="xs" />
+
                                             </td>
                                         </tr>
                                     @endforeach

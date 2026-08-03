@@ -19,7 +19,7 @@ class Documentos extends Component
     // Extensiones permitidas
     private array $allowedMimes = [
         'pdf', 'jpg', 'jpeg', 'png', 'gif',
-        'doc', 'docx',
+        'doc', 'docx', 'rtf',
         'xls', 'xlsx',
         'ppt', 'pptx',
         'txt', 'csv',

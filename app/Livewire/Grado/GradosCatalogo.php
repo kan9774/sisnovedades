@@ -118,6 +118,11 @@ class GradosCatalogo extends Component
             return;
         }
 
+        if ($grado->historialGrados()->exists()) {
+            session()->flash('error', 'No se puede eliminar: el grado tiene movimientos en el historial (ascensos/pases). Podés desactivarlo en su lugar.');
+            return;
+        }
+
         $grado->delete();
         session()->flash('success', 'Grado eliminado.');
     }

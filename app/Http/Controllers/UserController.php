@@ -19,34 +19,54 @@ class UserController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
-    {
-        $this->authorize('viewAny', User::class);
+public function index(Request $request)
+{
+    $this->authorize('viewAny', User::class);
 
-        $baseQuery = auth()->user()->isSuperAdmin()
-            // El SuperAdmin ve a todos, incluidos admins y a sí mismo.
-            ? User::with(['roles', 'grado'])
-            // Un admin normal no ve a nadie que tenga el rol admin, ni a SuperAdmins.
-            : User::with(['roles', 'grado'])
-                ->whereDoesntHave('roles', fn($q) => $q->where('name', 'admin'))
-                ->where('is_super_admin', false);
+    $search = $request->query('search');
 
-        $users = (clone $baseQuery)->whereNotNull('perfil_completo_at')->get();
+    $baseQuery = auth()->user()->isSuperAdmin()
+        // El SuperAdmin ve a todos, incluidos admins y a sí mismo.
+        ? User::query()
+        // Un admin normal no ve a nadie que tenga el rol admin, ni a SuperAdmins.
+        : User::query()
+            ->whereDoesntHave('roles', fn($q) => $q->where('name', 'admin'))
+            ->where('is_super_admin', false);
 
+    $users = (clone $baseQuery)
+        ->with(['roles', 'grado'])
+        ->whereNotNull('perfil_completo_at')
+        ->when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('segundo_nombre', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('segundo_apellido', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('ci', 'like', "%{$search}%");
+            });
+        })
         // Orden jerárquico (columna 'orden' del catálogo Grado), no alfabético.
-        // Los usuarios sin grado asignado quedan al final.
-        $users = $users->sortBy(fn($user) => $user->grado->orden ?? PHP_INT_MAX)->values();
+        // Los usuarios sin grado asignado quedan al final. Se hace acá a nivel
+        // SQL (leftJoin) en vez de con sortBy() en memoria, para que la
+        // paginación corte las páginas ya ordenadas correctamente.
+        ->leftJoin('grados', 'grados.id', '=', 'users.grado_id')
+        ->orderByRaw('grados.orden IS NULL, grados.orden ASC')
+        ->select('users.*')
+        ->paginate(15)
+        ->withQueryString();
 
-        // Usuarios que quedaron a mitad del wizard (Paso 1 o 2 sin
-        // terminar): no tienen perfil_completo_at. Se muestran aparte
-        // para poder retomarlos o eliminarlos por completo.
-        $usersIncompletos = (clone $baseQuery)
-            ->whereNull('perfil_completo_at')
-            ->orderByDesc('created_at')
-            ->get();
+    // Usuarios que quedaron a mitad del wizard (Paso 1 o 2 sin
+    // terminar): no tienen perfil_completo_at. Se muestran aparte
+    // para poder retomarlos o eliminarlos por completo.
+    $usersIncompletos = (clone $baseQuery)
+        ->with(['roles', 'grado'])
+        ->whereNull('perfil_completo_at')
+        ->orderByDesc('created_at')
+        ->get();
 
-        return view('admin.users.index', compact('users', 'usersIncompletos'));
-    }
+    return view('admin.users.index', compact('users', 'usersIncompletos'));
+}
 
     public function UserDelete()
     {
@@ -143,5 +163,4 @@ class UserController extends Controller
 
         return view('admin.users.edit', compact('user'));
     }
-
 }

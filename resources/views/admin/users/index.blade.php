@@ -55,10 +55,11 @@
                                             @foreach (['Cédula', 'Grado / Unidad', 'Datos Personales'] as $idx => $etiqueta)
                                                 @php
                                                     $stepNum = $idx + 1;
-                                                    $isDone = $completoPaso2 ? ($stepNum <= 2) : ($stepNum === 1);
-                                                    $isActive = !$isDone && ($stepNum === ($completoPaso2 ? 3 : 2));
+                                                    $isDone = $completoPaso2 ? $stepNum <= 2 : $stepNum === 1;
+                                                    $isActive = !$isDone && $stepNum === ($completoPaso2 ? 3 : 2);
                                                 @endphp
-                                                <div class="mini-wizard__step {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-done' : '' }}">
+                                                <div
+                                                    class="mini-wizard__step {{ $isActive ? 'is-active' : '' }} {{ $isDone ? 'is-done' : '' }}">
                                                     <div class="mini-wizard__circle">
                                                         @if ($isDone && $stepNum < 3)
                                                             <i class="fas fa-check"></i>
@@ -79,8 +80,7 @@
                                     <td class="text-center align-middle">
                                         <div class="d-flex justify-content-center">
                                             <a href="{{ route('admin.users.create.resume', $user->id) }}"
-                                                class="btn-ops btn-ops-info btn-xs mr-1"
-                                                aria-label="Retomar wizard">
+                                                class="btn-ops btn-ops-info btn-xs mr-1" aria-label="Retomar wizard">
                                                 <i class="fas fa-play"></i> Retomar
                                             </a>
                                             <form action="{{ route('admin.users.destroy-incompleto', $user->id) }}"
@@ -107,7 +107,7 @@
             <div class="card-header-ops">
                 <div class="card-header-ops__title-wrap">
                     <h3 class="card-title-ops mb-0">Usuarios del sistema</h3>
-                    <span class="card-header-ops__eyebrow">{{ $users->count() }} registros</span>
+                    <span class="card-header-ops__eyebrow">{{ $users->total() }} registros</span>
                 </div>
                 <div class="card-tools">
                     <a href="{{ route('admin.users.userdelete') }}" class="btn-ops btn-ops-warning btn-sm mr-1"
@@ -119,6 +119,25 @@
                         <i class="fas fa-plus"></i> Nuevo Usuario
                     </a>
                 </div>
+            </div>
+            <div class="card-body pb-0 mb-2">
+                <form method="GET" action="{{ route('admin.users.index') }}" class="form-inline">
+                    <div class="input-group" style="max-width: 600px;">
+                        <input type="text" name="search" value="{{ request('search') }}" class="form-control"
+                            placeholder="Buscar por nombre, apellido, email o C.I.">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn-ops btn-ops-primary" aria-label="Buscar">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            @if (request('search'))
+                                <a href="{{ route('admin.users.index') }}" class="btn-ops btn-ops-secondary"
+                                    aria-label="Limpiar búsqueda">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped table-hover mb-0">
@@ -160,16 +179,14 @@
                                 <td class="text-center align-middle">
                                     <div class="d-flex justify-content-center">
                                         <a href="{{ route('admin.users.edit', $user->id) }}"
-                                            class="btn-ops btn-ops-warning btn-xs mr-1"
-                                            aria-label="Editar usuario">
+                                            class="btn-ops btn-ops-warning btn-xs mr-1" aria-label="Editar usuario">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST"
                                             class="d-inline" onsubmit="return confirm('¿Eliminar este usuario?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn-ops btn-ops-danger btn-xs"
-                                                aria-label="Eliminar usuario">
+                                            <button class="btn-ops btn-ops-danger btn-xs" aria-label="Eliminar usuario">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -186,6 +203,11 @@
                     </tbody>
                 </table>
             </div>
+            @if ($users->hasPages())
+                <div class="card-footer">
+                    {{ $users->links() }}
+                </div>
+            @endif
         </div>
     </div>
 @stop

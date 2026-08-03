@@ -76,7 +76,7 @@
                                 <label>Grado</label>
                                 <select wire:model="grado_id"
                                     class="form-control @error('grado_id') is-invalid @enderror"
-                                    @disabled(!$this->puedeEditarDatosBasicos())>
+                                    @disabled(!$this->puedeEditarDatosBasicos()) disabled>
                                     <option value="">Seleccionar...</option>
                                     @foreach ($grados as $grado)
                                         <option value="{{ $grado->id }}">{{ $grado->nombre }}</option>
