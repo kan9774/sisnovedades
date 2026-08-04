@@ -41,7 +41,7 @@ class SalidasPendientes extends Component
         // find() en vez de findOrFail(): si la salida fue borrada entre
         // que se abrió el panel y se guarda la boleta, no debe romper
         // la re-hidratación del componente.
-        return SalidaVehiculo::with(['vehiculo', 'conductor', 'guardia'])
+        return SalidaVehiculo::with(['vehiculo', 'conductor', 'guardia','tipoCombustible'])
             ->find($this->salidaPendienteId);
     }
 
@@ -55,10 +55,17 @@ class SalidasPendientes extends Component
         })
             ->where(function ($query) {
                 $query->whereDoesntHave('boletaCierre')
-                    ->whereNull('hora_entra')
-                    ->orWhereNull('kms_entra');
+                    ->where(function ($q) {
+                        $q->whereNull('hora_entra')
+                            ->orWhere(function ($q2) {
+                                $q2->whereNull('kms_entra')
+                                    ->whereHas('vehiculo', function ($vq) {
+                                        $vq->where('sin_cuentakilometros', false);
+                                    });
+                            });
+                    });
             })
-            ->with(['vehiculo', 'conductor', 'guardia'])
+            ->with(['vehiculo', 'conductor', 'guardia', 'tipoCombustible'])
             ->orderBy('guardia_id', 'desc')
             ->orderBy('hora_sale', 'desc')
             ->paginate(10);
@@ -97,9 +104,13 @@ class SalidasPendientes extends Component
         $this->authorize('update', $this->salidaPendiente);
         abort_unless($this->guardia->status === 'open', 403);
 
+        $sinCuentakilometros = $this->salidaPendiente->vehiculo?->sin_cuentakilometros;
+
         $this->validate([
             'boleta_hora_entra' => 'required|date_format:H:i',
-            'boleta_kms_entra' => 'required|integer|min:0|gte:salidaPendiente.kms_sale',
+            'boleta_kms_entra' => $sinCuentakilometros
+                ? 'nullable|integer|min:0'
+                : 'required|integer|min:0|gte:salidaPendiente.kms_sale',
             'boleta_observaciones' => 'nullable|string|max:500',
         ]);
 

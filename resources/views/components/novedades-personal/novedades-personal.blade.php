@@ -35,23 +35,54 @@
                 <th style="width: 160px;">Tipo</th>
                 <th>Detalle</th>
                 @if ($guardia->status === 'open' && $puedeOperarGuardia)
-                    <th class="text-center" style="width: 60px;">-</th>
+                    <th class="text-center" style="width: 90px;">-</th>
                 @endif
             </tr>
         </thead>
         <tbody>
             @forelse ($this->novedades as $item)
-                <tr wire:key="novedad-personal-{{ $item->id }}">
-                    <td>{{ $item->hora->format('H:i') }}</td>
-                    <td>{{ $item->tipo }}</td>
-                    <td>{{ $item->texto }}</td>
-                    @if ($guardia->status === 'open' && $puedeOperarGuardia)
-                        <td class="text-center">
-                            <x-btn-ops wire:click="eliminar({{ $item->id }})" wire:conirm="¿Eliminar este registro?" icon="trash" variant="danger" size="xs" title="Eliminar">
+                @if ($guardia->status === 'open' && $puedeOperarGuardia && $editingId === $item->id)
+                    {{-- Fila en modo edición inline --}}
+                    <tr wire:key="novedad-personal-edit-{{ $item->id }}">
+                        <td>
+                            <input type="time" wire:model="editHora"
+                                class="form-control form-control-sm @error('editHora') is-invalid @enderror">
+                            @error('editHora') <small class="text-danger d-block">{{ $message }}</small> @enderror
+                        </td>
+                        <td>
+                            <input type="text" wire:model="editTipo"
+                                class="form-control form-control-sm @error('editTipo') is-invalid @enderror">
+                            @error('editTipo') <small class="text-danger d-block">{{ $message }}</small> @enderror
+                        </td>
+                        <td>
+                            <input type="text" wire:model="editTexto"
+                                class="form-control form-control-sm @error('editTexto') is-invalid @enderror">
+                            @error('editTexto') <small class="text-danger d-block">{{ $message }}</small> @enderror
+                        </td>
+                        <td class="text-center text-nowrap">
+                            <x-btn-ops wire:click="guardarEdicion" icon="check" variant="success" size="xs" title="Guardar"
+                                wire:loading.attr="disabled" wire:target="guardarEdicion">
+                            </x-btn-ops>
+                            <x-btn-ops wire:click="cancelarEdicion" icon="times" variant="secondary" size="xs" title="Cancelar">
                             </x-btn-ops>
                         </td>
-                    @endif
-                </tr>
+                    </tr>
+                @else
+                    {{-- Fila normal --}}
+                    <tr wire:key="novedad-personal-{{ $item->id }}">
+                        <td>{{ $item->hora->format('H:i') }}</td>
+                        <td>{{ $item->tipo }}</td>
+                        <td>{{ $item->texto }}</td>
+                        @if ($guardia->status === 'open' && $puedeOperarGuardia)
+                            <td class="text-center text-nowrap">
+                                <x-btn-ops wire:click="editar({{ $item->id }})" icon="pen" variant="warning" size="xs" title="Editar">
+                                </x-btn-ops>
+                                <x-btn-ops wire:click="eliminar({{ $item->id }})" wire:confirm="¿Eliminar este registro?" icon="trash" variant="danger" size="xs" title="Eliminar">
+                                </x-btn-ops>
+                            </td>
+                        @endif
+                    </tr>
+                @endif
             @empty
                 <tr>
                     <td colspan="4" class="text-center text-muted py-3">Sin novedades de personal registradas.</td>

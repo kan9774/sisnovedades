@@ -27,7 +27,7 @@ class SalidaVehiculo extends Model
         'guardia_id',
         'vehiculo_id',
         'conductor_id',
-        'tipo_combustible',
+        'tipo_combustible_id',
         'hora_sale',
         'hora_entra',
         'kms_sale',
@@ -70,12 +70,30 @@ class SalidaVehiculo extends Model
         return $this->hasOne(BoletaCierre::class, 'salida_id');
     }
 
+    public function tipoCombustible()
+    {
+        return $this->belongsTo(TipoCombustible::class);
+    }
+
     /**
      * Attribute: devuelve true si la salida tiene retorno registrado (boleta o datos en la salida).
      */
     public function getTieneBoletaAttribute(): bool
     {
-        return $this->boletaCierre !== null || ($this->hora_entra !== null && $this->kms_entra !== null);
+        if ($this->boletaCierre !== null) {
+            return true;
+        }
+
+        if ($this->hora_entra === null) {
+            return false;
+        }
+
+        // Si el vehículo no tiene cuentakilómetros, no exigimos kms_entra
+        if ($this->vehiculo && $this->vehiculo->sin_cuentakilometros) {
+            return true;
+        }
+
+        return $this->kms_entra !== null;
     }
 
     /**

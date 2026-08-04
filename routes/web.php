@@ -23,7 +23,6 @@ use App\Http\Controllers\PalomaController;
 use App\Http\Controllers\PalomarController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\RolController;
-use App\Http\Controllers\SalidaVehiculoController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VueloController;
 use App\Models\Documento;
@@ -291,15 +290,6 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
         Route::resource('conductores', ConductorController::class)
             ->except(['show'])
             ->parameters(['conductores' => 'conductor']); // Opcional: si no necesitas vista show
-
-        // Salidas de vehículos (anidadas a guardia)
-        Route::prefix('guardias/{guardia}/salidas')->name('guardias.salidas.')->group(function () {
-            Route::get('/create', [SalidaVehiculoController::class, 'create'])->name('create');
-            Route::post('/', [SalidaVehiculoController::class, 'store'])->name('store');
-            Route::get('/{salida}/edit', [SalidaVehiculoController::class, 'edit'])->name('edit');
-            Route::put('/{salida}', [SalidaVehiculoController::class, 'update'])->name('update');
-            Route::delete('/{salida}', [SalidaVehiculoController::class, 'destroy'])->name('destroy');
-        });
 
         // Novedades de personal y rancho (anidadas a guardia)
         Route::prefix('guardias/{guardia}')->name('guardias.')->group(function () {

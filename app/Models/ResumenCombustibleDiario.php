@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -26,7 +27,7 @@ class ResumenCombustibleDiario extends Model
     protected $fillable = [
         'fecha',
         'guardia_id',
-        'tipo_combustible',
+        'tipo_combustible_id',
         'total_kms',
         'total_litros',
         'cantidad_salidas',
@@ -39,8 +40,12 @@ class ResumenCombustibleDiario extends Model
         'cantidad_salidas' => 'integer',
     ];
 
-    public function guardia()
+    public function guardia(): BelongsTo
     {
         return $this->belongsTo(Guard::class);
+    }
+    public function tipoCombustible(): BelongsTo
+    {
+        return $this->belongsTo(TipoCombustible::class);
     }
 }

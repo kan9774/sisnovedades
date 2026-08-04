@@ -43,12 +43,12 @@
                         @endif
                     </td>
                     <td>
-                        @if ($salida->tipo_combustible === 'gas_oil')
+                        @if ($salida->tipoCombustible->nombre)
                             <span class="badge badge-warning">Gas Oil</span>
-                        @elseif($salida->tipo_combustible === 'nafta')
+                        @elseif($salida->tipoCombustible->nombre)
                             <span class="badge badge-info">Nafta</span>
                         @else
-                            <span class="badge badge-secondary">{{ $salida->tipo_combustible }}</span>
+                            <span class="badge badge-secondary">{{ $salida->tipoCombustible->nombre }}</span>
                         @endif
                     </td>
                     <td>{{ $salida->hora_sale?->format('H:i') }}</td>
@@ -88,12 +88,12 @@
                     <tr class="font-weight-bold" style="background: #f8f9fa;">
                         <td colspan="6" class="text-right">
                             TOTAL
-                            @if ($resumen->tipo_combustible === 'gas_oil')
+                            @if ($resumen->tipoCombustible->nombre)
                                 <span class="badge badge-warning">Gas Oil</span>
-                            @elseif ($resumen->tipo_combustible === 'nafta')
+                            @elseif ($resumen->tipoCombustible->nombre)
                                 <span class="badge badge-info">Nafta</span>
                             @else
-                                <span class="badge badge-secondary">{{ $resumen->tipo_combustible }}</span>
+                                <span class="badge badge-secondary">{{ $resumen->tipoCombustible->nombre }}</span>
                             @endif :
                         </td>
                         <td>{{ $resumen->total_kms ?? 0 }}</td>

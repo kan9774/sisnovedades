@@ -4,6 +4,7 @@ use App\Models\BoletaCierre;
 use App\Models\Conductor;
 use App\Models\Guard;
 use App\Models\SalidaVehiculo;
+use App\Models\TipoCombustible;
 use App\Models\Vehiculo;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -30,7 +31,7 @@ new class extends Component
 
     public string $vehiculo_id = '';
     public string $conductor_id = '';
-    public string $tipo_combustible = '';
+    public string $tipo_combustible_id = '';
     public string $hora_sale = '';
     public string $hora_entra = '';
     public string $kms_sale = '';
@@ -94,14 +95,14 @@ new class extends Component
         }
 
         $misSalidas = $this->guardia->salidasVehiculos()
-            ->with(['vehiculo', 'conductor', 'boletaCierre', 'guardia'])
+            ->with(['vehiculo', 'conductor', 'boletaCierre', 'guardia', 'tipoCombustible'])
             ->get();
 
         $retornos = SalidaVehiculo::whereHas('boletaCierre', function ($q) {
-                $q->where('guardia_id', $this->guardia->id);
-            })
+            $q->where('guardia_id', $this->guardia->id);
+        })
             ->where('guardia_id', '!=', $this->guardia->id)
-            ->with(['vehiculo', 'conductor', 'boletaCierre', 'guardia'])
+            ->with(['vehiculo', 'conductor', 'boletaCierre', 'guardia', 'tipoCombustible'])
             ->get();
 
         return $this->todasSalidasCache = $misSalidas->concat($retornos)->sortBy('hora_sale')->values();
@@ -127,9 +128,9 @@ new class extends Component
     public function getResumenCombustibleProperty()
     {
         return $this->todasSalidasCollection()
-            ->groupBy('tipo_combustible')
-            ->map(fn ($grupo, $tipo) => (object) [
-                'tipo_combustible' => $tipo,
+            ->groupBy('tipo_combustible_id')
+            ->map(fn($grupo) => (object) [
+                'tipo_combustible' => $grupo->first()->tipoCombustible->nombre ?? 'Sin especificar',
                 'total_kms' => $grupo->sum('kms_recorridos'),
                 'total_litros' => $grupo->sum('litros'),
             ])
@@ -144,7 +145,7 @@ new class extends Component
     public function abrirCrear(): void
     {
         $this->resetValidation();
-        $this->reset(['editandoId', 'vehiculo_id', 'conductor_id', 'tipo_combustible', 'hora_sale', 'hora_entra', 'kms_sale', 'kms_entra', 'comision']);
+        $this->reset(['editandoId', 'vehiculo_id', 'conductor_id', 'tipo_combustible_id', 'hora_sale', 'hora_entra', 'kms_sale', 'kms_entra', 'comision']);
         $this->dispatch('abrir-modal-salida');
     }
 
@@ -157,7 +158,7 @@ new class extends Component
         $this->editandoId = $salida->id;
         $this->vehiculo_id = (string) $salida->vehiculo_id;
         $this->conductor_id = (string) $salida->conductor_id;
-        $this->tipo_combustible = $salida->tipo_combustible;
+        $this->tipo_combustible_id = (string) $salida->tipo_combustible_id;
         $this->hora_sale = $salida->hora_sale?->format('H:i') ?? '';
         $this->hora_entra = $salida->hora_entra?->format('H:i') ?? '';
         $this->kms_sale = (string) ($salida->kms_sale ?? '');
@@ -166,7 +167,11 @@ new class extends Component
 
         $this->dispatch('abrir-modal-salida');
     }
-
+    #[Computed]
+    public function tiposCombustible()
+    {
+        return TipoCombustible::where('activo', true)->orderBy('nombre')->get();
+    }
     public function cerrarModal(): void
     {
         $this->editandoId = null;
@@ -177,14 +182,14 @@ new class extends Component
         abort_unless($this->puedeOperarGuardia && $this->guardia->status === 'open', 403);
 
         $rules = [
-            'vehiculo_id'      => 'required|exists:vehiculos,id',
-            'conductor_id'     => 'required|exists:conductores,id',
-            'tipo_combustible' => 'required|in:gas_oil,nafta',
-            'hora_sale'        => 'required|date_format:H:i',
-            'hora_entra'       => 'nullable|date_format:H:i|after:hora_sale',
-            'kms_sale'         => 'nullable|integer|min:0',
-            'kms_entra'        => 'nullable|integer|min:0|gte:kms_sale',
-            'comision'         => 'required|string',
+            'vehiculo_id'          => 'required|exists:vehiculos,id',
+            'conductor_id'         => 'required|exists:conductores,id',
+            'tipo_combustible_id'  => 'required|exists:tipos_combustible,id',
+            'hora_sale'            => 'required|date_format:H:i',
+            'hora_entra'           => 'nullable|date_format:H:i|after:hora_sale',
+            'kms_sale'             => 'nullable|integer|min:0',
+            'kms_entra'            => 'nullable|integer|min:0|gte:kms_sale',
+            'comision'             => 'required|string',
         ];
 
         $vehiculo = Vehiculo::find($this->vehiculo_id);
@@ -296,6 +301,29 @@ new class extends Component
         $this->dispatch('salida-actualizada');
         $this->cerrarBoletaModal();
         $this->dispatch('cerrar-modal-boleta');
+    }
+    public function updatedVehiculoId($value): void
+    {
+        if (! $value) {
+            return;
+        }
+
+        $vehiculo = Vehiculo::find($value);
+
+        if ($vehiculo?->tipo_combustible_id) {
+            $this->tipo_combustible_id = (string) $vehiculo->tipo_combustible_id;
+        }
+    }
+
+    private function mapearTipoCombustible(?string $nombre): string
+    {
+        $nombre = mb_strtolower((string) $nombre);
+
+        return match (true) {
+            str_contains($nombre, 'nafta') => 'nafta',
+            str_contains($nombre, 'gas')   => 'gas_oil',
+            default => '',
+        };
     }
 
     public function render()

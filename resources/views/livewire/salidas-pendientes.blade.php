@@ -22,21 +22,24 @@
                 <tbody>
                     @foreach ($this->salidasPendientes as $index => $salida)
                         <tr wire:key="salida-{{ $salida->id }}">
-                            <td>{{ $index + 1 + ($this->salidasPendientes->currentPage() - 1) * $this->salidasPendientes->perPage() }}</td>
+                            <td>{{ $index + 1 + ($this->salidasPendientes->currentPage() - 1) * $this->salidasPendientes->perPage() }}
+                            </td>
                             <td>{{ $salida->guardia->date->format('d/m/Y') }}</td>
-                            <td>{{ $salida->vehiculo->matricula }} - {{ $salida->vehiculo->tipo . ' ' . $salida->vehiculo->marca }}</td>
+                            <td>{{ $salida->vehiculo->matricula }} -
+                                {{ $salida->vehiculo->tipo . ' ' . $salida->vehiculo->marca }}</td>
                             <td>{{ $salida->conductor->primer_apellido }}, {{ $salida->conductor->primer_nombre }}</td>
                             <td>{{ $salida->hora_sale->format('H:i') }}</td>
                             <td>
-                                @if ($salida->tipo_combustible === 'gas_oil')
-                                    <span class="badge-ops badge-ops-warning">Gas Oil</span>
+                                @if ($salida->tipoCombustible)
+                                    <span class="badge badge-info">{{ $salida->tipoCombustible->nombre }}</span>
                                 @else
-                                    <span class="badge-ops badge-ops-info">Nafta</span>
+                                    <span class="text-muted">-</span>
                                 @endif
                             </td>
                             <td>{{ $salida->kms_sale ?? '-' }}</td>
                             <td>
-                                <button type="button" class="btn-ops btn-ops-success btn-sm" wire:click="abrirBoleta({{ $salida->id }})">
+                                <button type="button" class="btn-ops btn-ops-success btn-sm"
+                                    wire:click="abrirBoleta({{ $salida->id }})">
                                     <i class="fas fa-check-circle"></i> Cerrar Salida
                                 </button>
                             </td>
@@ -63,7 +66,8 @@
                 <div class="modal-content">
                     <div class="modal-header bg-success text-white">
                         <h5 class="modal-title">
-                            <i class="fas fa-check-circle"></i> Cerrar Salida - {{ $this->salidaPendiente->vehiculo->matricula ?? '—' }}
+                            <i class="fas fa-check-circle"></i> Cerrar Salida -
+                            {{ $this->salidaPendiente->vehiculo->matricula ?? '—' }}
                         </h5>
                         <button type="button" class="close text-white" wire:click="cerrarBoleta">
                             <span>&times;</span>
@@ -71,30 +75,38 @@
                     </div>
                     <div class="modal-body">
                         <div class="alert alert-info">
-                            <strong>Fecha de salida:</strong> {{ $this->salidaPendiente->guardia->date->format('d/m/Y') }}<br>
+                            <strong>Fecha de salida:</strong>
+                            {{ $this->salidaPendiente->guardia->date->format('d/m/Y') }}<br>
                             <strong>Hora de salida:</strong> {{ $this->salidaPendiente->hora_sale->format('H:i') }}<br>
                             <strong>Km de salida:</strong> {{ $this->salidaPendiente->kms_sale }}<br>
-                            <strong>Conductor:</strong> {{ $this->salidaPendiente->conductor->primer_apellido ?? '—' }}, {{ $this->salidaPendiente->conductor->primer_nombre ?? '' }}
+                            <strong>Conductor:</strong>
+                            {{ $this->salidaPendiente->conductor->primer_apellido ?? '—' }},
+                            {{ $this->salidaPendiente->conductor->primer_nombre ?? '' }}
                         </div>
 
                         <div class="form-group">
                             <label>Hora de retorno *</label>
                             <input type="time" class="form-control" placeholder="HH:MM"
-                                   wire:model="boleta_hora_entra" maxlength="5">
-                            @error('boleta_hora_entra') <span class="text-danger">{{ $message }}</span> @enderror
+                                wire:model="boleta_hora_entra" maxlength="5">
+                            @error('boleta_hora_entra')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         <div class="form-group">
                             <label>Km de retorno *</label>
                             <input type="number" class="form-control" wire:model="boleta_kms_entra" min="0">
-                            <small class="text-muted">Debe ser mayor o igual a {{ $this->salidaPendiente->kms_sale }} km</small>
-                            @error('boleta_kms_entra') <span class="text-danger">{{ $message }}</span> @enderror
+                            <small class="text-muted">Debe ser mayor o igual a {{ $this->salidaPendiente->kms_sale }}
+                                km</small>
+                            @error('boleta_kms_entra')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         <div class="form-group">
                             <label>Observaciones</label>
                             <textarea class="form-control" wire:model="boleta_observaciones" rows="3"
-                                      placeholder="Observaciones adicionales..."></textarea>
+                                placeholder="Observaciones adicionales..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">

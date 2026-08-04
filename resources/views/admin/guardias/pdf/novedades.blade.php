@@ -355,7 +355,7 @@
 
     @foreach ($tiposCombustible as $tipo => $label)
         @php
-            $salidas = $todasSalidas->where('tipo_combustible', $tipo)->values();
+            $salidas = $todasSalidas->where('tipo_combustible_id', $tipo)->values();
             $totalKms = $salidas->sum('kms_recorridos');
             $totalLts = $salidas->sum('litros');
         @endphp
