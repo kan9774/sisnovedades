@@ -48,7 +48,7 @@ class News extends Model
         return [
             'confirmed'    => 'boolean',
             'confirmed_at' => 'datetime',
-            'time'         => 'datetime:H:i',
+            'time'         => 'datetime',
             'tomado_en'    => 'datetime',
         ];
     }

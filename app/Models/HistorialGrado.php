@@ -38,4 +38,5 @@ class HistorialGrado extends Model
     {
         return $this->belongsTo(Grado::class);
     }
+    
 }

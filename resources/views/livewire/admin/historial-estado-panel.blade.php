@@ -18,6 +18,7 @@
                         <tr>
                             <th>Tipo</th>
                             <th>Fecha</th>
+                            <th>Causal</th>
                             <th>Motivo</th>
                         </tr>
                     </thead>
@@ -32,6 +33,16 @@
                                     @endif
                                 </td>
                                 <td>{{ $registro->fecha->format('d/m/Y') }}</td>
+                                <td>
+                                    @if ($registro->causal)
+                                        {{ $registro->causal->nombre }}
+                                        @unless ($registro->causal->permite_reingreso)
+                                            <i class="fas fa-ban text-danger ml-1" title="No permite reingreso"></i>
+                                        @endunless
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td>{{ $registro->motivo ?? '—' }}</td>
                             </tr>
                         @endforeach
@@ -87,18 +98,48 @@
                     <div class="ops-panel__content">
                         @error('tipo') <div class="alert alert-danger py-2">{{ $message }}</div> @enderror
 
-                        <div class="form-group">
-                            <label>Fecha</label>
-                            <input type="date" wire:model="fecha" class="form-control @error('fecha') is-invalid @enderror">
-                            @error('fecha') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                        </div>
+                        @if ($this->proximoTipo === 'baja')
+                            <div class="form-group">
+                                <label>Causal <span class="text-danger">*</span></label>
+                                <select wire:model="causal_id" class="form-control @error('causal_id') is-invalid @enderror">
+                                    <option value="">-- Seleccionar --</option>
+                                    @foreach ($this->causales as $causal)
+                                        <option value="{{ $causal->id }}">{{ $causal->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('causal_id') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            </div>
 
-                        <div class="form-group">
-                            <label>Motivo <small class="text-muted">(opcional)</small></label>
-                            <input type="text" wire:model="motivo" maxlength="255"
-                                class="form-control @error('motivo') is-invalid @enderror">
-                            @error('motivo') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                        </div>
+                            <div class="form-group">
+                                <label>Fecha</label>
+                                <input type="date" wire:model="fecha" class="form-control @error('fecha') is-invalid @enderror">
+                                @error('fecha') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label>Motivo <small class="text-muted">(opcional)</small></label>
+                                <input type="text" wire:model="motivo" maxlength="255"
+                                    class="form-control @error('motivo') is-invalid @enderror">
+                                @error('motivo') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            </div>
+                        @else
+                            <div class="form-group">
+                                <label>Fecha <span class="text-danger">*</span></label>
+                                <input type="date" wire:model="fecha" class="form-control @error('fecha') is-invalid @enderror">
+                                <small class="text-muted d-block mt-1">
+                                    Debe ser el 1° de un mes futuro (el mes en curso ya no está disponible).
+                                </small>
+                                @error('fecha') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label>Procedencia <span class="text-danger">*</span></label>
+                                <input type="text" wire:model="procedencia" maxlength="255"
+                                    class="form-control @error('procedencia') is-invalid @enderror"
+                                    placeholder="Ej: Bda.Inf.Mec.N°4, sin destino previo, etc.">
+                                @error('procedencia') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                            </div>
+                        @endif
                     </div>
                 </div>
 

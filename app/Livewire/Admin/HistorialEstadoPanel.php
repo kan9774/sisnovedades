@@ -13,6 +13,8 @@ class HistorialEstadoPanel extends Component
 
     public string $fecha = '';
     public string $motivo = '';
+    public string $causal_id = '';
+    public string $procedencia = '';
 
     public function mount(?User $user = null): void
     {
@@ -58,8 +60,10 @@ class HistorialEstadoPanel extends Component
         }
 
         $this->resetValidation();
-        $this->fecha = now()->toDateString();
+        $this->fecha = '';
         $this->motivo = '';
+        $this->causal_id = '';
+        $this->procedencia = '';
 
         $this->dispatch('abrir-modal-historial-estado');
     }
@@ -69,22 +73,66 @@ class HistorialEstadoPanel extends Component
         // El form no guarda estado propio más allá de fecha/motivo,
         // así que no hace falta resetear nada más acá.
     }
+    #[Computed]
+    public function causales()
+    {
+        return \App\Models\CausalBaja::where('activo', true)->orderBy('nombre')->get();
+    }
 
     public function guardar(): void
     {
         abort_unless($this->puedeEditar(), 403);
 
-        $data = $this->validate([
-            'fecha' => ['required', 'date'],
-            'motivo' => ['nullable', 'string', 'max:255'],
-        ]);
+        if ($this->proximoTipo === 'baja') {
+            $data = $this->validate([
+                'fecha'     => ['required', 'date'],
+                'causal_id' => ['required', 'exists:causales_baja,id'],
+                'motivo'    => ['nullable', 'string', 'max:255'],
+            ]);
+        } else {
+            // Reingreso: siempre 1° de un mes que todavía no arrancó.
+            $primerMesValido = now()->startOfMonth()->addMonthNoOverflow();
+
+            $data = $this->validate([
+                'fecha' => [
+                    'required',
+                    'date',
+                    'after_or_equal:' . $primerMesValido->toDateString(),
+                    function ($attribute, $value, $fail) {
+                        if (\Carbon\Carbon::parse($value)->day !== 1) {
+                            $fail('La fecha de reingreso debe ser el 1° de un mes.');
+                        }
+                    },
+                ],
+                'procedencia' => ['required', 'string', 'max:255'],
+            ]);
+        }
 
         try {
-            $this->user->historialEstados()->create([
-                'tipo' => $this->proximoTipo,
-                'fecha' => $data['fecha'],
-                'motivo' => $data['motivo'],
-            ]);
+            \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+                if ($this->proximoTipo === 'alta') {
+                    $this->user->historialEstados()->create([
+                        'tipo'   => 'alta',
+                        'fecha'  => $data['fecha'],
+                        'motivo' => null,
+                    ]);
+
+                    $unidadFija = \App\Models\Unidad::where('nombre', 'B.Com.N°1')->firstOrFail();
+
+                    $this->user->pases()->create([
+                        'unidad_id'   => $unidadFija->id,
+                        'fecha_desde' => $data['fecha'],
+                        'motivo'      => $data['procedencia'],
+                    ]);
+                } else {
+                    $this->user->historialEstados()->create([
+                        'tipo'      => 'baja',
+                        'fecha'     => $data['fecha'],
+                        'causal_id' => $data['causal_id'],
+                        'motivo'    => $data['motivo'] ?? null,
+                    ]);
+                }
+            });
         } catch (ValidationException $e) {
             $this->addError('tipo', collect($e->errors())->flatten()->first());
             return;
@@ -92,9 +140,7 @@ class HistorialEstadoPanel extends Component
 
         $this->user->refresh();
         unset($this->historial, $this->proximoTipo, $this->altasRestantes);
-
         $this->dispatch('cerrar-modal-historial-estado');
-
         session()->flash('success', 'Movimiento registrado correctamente.');
     }
 

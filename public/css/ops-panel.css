@@ -747,3 +747,49 @@ body.ops-panel-open {
     height: 30px;
     font-size: .8rem;
 }
+.nav-tabs-ops {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0 1rem;
+    border-bottom: 2px solid #e9ecef;
+    gap: .25rem;
+}
+
+.nav-link-ops {
+    display: inline-block;
+    padding: .65rem 1rem;
+    color: #6c757d;
+    font-weight: 600;
+    font-size: .9rem;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+    border-radius: 4px 4px 0 0;
+}
+
+.nav-link-ops:hover {
+    color: #0B2545;
+    background-color: #f8f9fa;
+    text-decoration: none;
+}
+
+.nav-link-ops.active {
+    color: #0B2545;
+    border-bottom-color: #FFD200;
+    background-color: #fff;
+}
+.card-header-ops__eyebrow {
+    display: block;
+    font-size: .8rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, .75);
+    margin-top: .15rem;
+}
+.card-title-ops__suffix {
+    font-size: inherit;
+    font-weight: 400;
+    color: rgba(255, 255, 255, .8);
+    margin-left: .5rem;
+}

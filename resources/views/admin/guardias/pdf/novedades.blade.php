@@ -131,7 +131,7 @@
     {{-- Encabezado --}}
     <div class="header text-left">
         <h2>{{ config('app.name') }}</h2>
-        <h3>Novedades correspondientes al D.{{ strtoupper($guardia->date->format('dMy')) }}</h3>
+        <h3>Novedades correspondientes al D.{{ strtoupper($guardia->date->locale('es')->isoFormat('DDMMMYY')) }}</h3>
     </div>
 
     @php
@@ -153,7 +153,7 @@
 
     {{-- Recibidos por tipo --}}
     @foreach ($tipos as $tipo)
-        @php $items = $recibidos->where('type', $tipo); @endphp
+        @php $items = $recibidos->where('type', $tipo)->sortBy('time')->values(); @endphp
         <div class="seccion">
             <p class="seccion-titulo">Relación de {{ $labels[$tipo]['recibido'] }}:</p>
             <table>
@@ -167,10 +167,28 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($items->values() as $i => $novedad)
+                    @php $fechaAnteriorFila = null; @endphp
+                    @forelse($items as $i => $novedad)
+                        @php
+                            $fechaNovedad = $novedad->time ? \Carbon\Carbon::parse($novedad->time) : null;
+                            $esPrimeraDelDia =
+                                $fechaNovedad &&
+                                (!$fechaAnteriorFila || !$fechaNovedad->isSameDay($fechaAnteriorFila));
+                            if ($esPrimeraDelDia) {
+                                $fechaAnteriorFila = $fechaNovedad->copy();
+                            }
+                            $horaCelda = $fechaNovedad
+                                ? ($esPrimeraDelDia
+                                    ? $fechaNovedad->format('d') .
+                                        $fechaNovedad->format('Hi') .
+                                        strtoupper($fechaNovedad->locale('es')->isoFormat('MMM')) .
+                                        $fechaNovedad->format('y')
+                                    : $fechaNovedad->format('Hi'))
+                                : '-';
+                        @endphp
                         <tr>
                             <td class="text-center">{{ $i + 1 }}.</td>
-                            <td class="text-center">{{ \Carbon\Carbon::parse($novedad->time)->format('Hi') }}</td>
+                            <td class="text-center">{{ $horaCelda }}</td>
                             <td class="text-center">{{ $novedad->number }}</td>
                             <td>{{ $novedad->text }}</td>
                             <td>{{ $novedad->organismo->name ?? '-' }}</td>
@@ -187,7 +205,7 @@
 
     {{-- Expedidos por tipo --}}
     @foreach ($tipos as $tipo)
-        @php $items = $expedidos->where('type', $tipo); @endphp
+        @php $items = $expedidos->where('type', $tipo)->sortBy('time')->values(); @endphp
         <div class="seccion">
             <p class="seccion-titulo">Relación de {{ $labels[$tipo]['expedido'] }}:</p>
             <table>
@@ -201,10 +219,28 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($items->values() as $i => $novedad)
+                    @php $fechaAnteriorFila = null; @endphp
+                    @forelse($items as $i => $novedad)
+                        @php
+                            $fechaNovedad = $novedad->time ? \Carbon\Carbon::parse($novedad->time) : null;
+                            $esPrimeraDelDia =
+                                $fechaNovedad &&
+                                (!$fechaAnteriorFila || !$fechaNovedad->isSameDay($fechaAnteriorFila));
+                            if ($esPrimeraDelDia) {
+                                $fechaAnteriorFila = $fechaNovedad->copy();
+                            }
+                            $horaCelda = $fechaNovedad
+                                ? ($esPrimeraDelDia
+                                    ? $fechaNovedad->format('d') .
+                                        $fechaNovedad->format('Hi') .
+                                        strtoupper($fechaNovedad->locale('es')->isoFormat('MMM')) .
+                                        $fechaNovedad->format('y')
+                                    : $fechaNovedad->format('Hi'))
+                                : '-';
+                        @endphp
                         <tr>
                             <td class="text-center">{{ $i + 1 }}.</td>
-                            <td class="text-center">{{ \Carbon\Carbon::parse($novedad->time)->format('Hi') }}</td>
+                            <td class="text-center">{{ $horaCelda }}</td>
                             <td class="text-center">{{ $novedad->number }}</td>
                             <td>{{ $novedad->destino ?? '-' }}</td>
                             <td>{{ $novedad->text }}</td>

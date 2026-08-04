@@ -69,24 +69,28 @@
                                     @foreach ($items as $novedad)
                                         @php
                                             $fechaNovedad = $novedad->time?->copy();
-                                            $mostrarSeparadorFecha =
+                                            $esPrimeraDelDia =
                                                 $fechaNovedad &&
                                                 (!$fechaAnteriorFila || !$fechaNovedad->isSameDay($fechaAnteriorFila));
-                                            if ($mostrarSeparadorFecha) {
+                                            if ($esPrimeraDelDia) {
                                                 $fechaAnteriorFila = $fechaNovedad->copy();
                                             }
+
+                                            if (!$fechaNovedad) {
+                                                $horaCelda = '-';
+                                            } elseif ($esPrimeraDelDia) {
+                                                $dia = $fechaNovedad->format('d');
+                                                $horaMin = $fechaNovedad->format('Hi');
+                                                $mes = strtoupper($fechaNovedad->locale('es')->isoFormat('MMM'));
+                                                $anio = $fechaNovedad->format('y');
+                                                $horaCelda = $dia . $horaMin . $mes . $anio;
+                                            } else {
+                                                $horaCelda = $fechaNovedad->format('H:i');
+                                            }
                                         @endphp
-                                        @if ($mostrarSeparadorFecha)
-                                            <tr class="table-secondary">
-                                                <td colspan="8" class="text-left font-weight-bold py-1"
-                                                    style="letter-spacing: .05em; background: #eef1f5;">
-                                                    {{ strtoupper($fechaNovedad->locale('es')->isoFormat('DDMMMYY')) }}
-                                                </td>
-                                            </tr>
-                                        @endif
                                         <tr wire:key="novedad-{{ $novedad->id }}">
                                             <td>{{ $loop->iteration }}</td>
-                                            <td><strong>{{ $novedad->time?->format('H:i') }}</strong></td>
+                                            <td><strong>{{ $horaCelda }}</strong></td>
                                             <td>{{ $novedad->number }}</td>
                                             <td>{{ Str::limit($novedad->affair, 40) }}</td>
                                             <td>
@@ -208,7 +212,7 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Número <span class="text-danger">*</span></label>
                                         <input type="text" wire:model="number"
@@ -218,7 +222,17 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Fecha <span class="text-danger">*</span></label>
+                                        <input type="date" wire:model="fecha"
+                                            class="form-control @error('fecha') is-invalid @enderror">
+                                        @error('fecha')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Hora <span class="text-danger">*</span></label>
                                         <input type="time" wire:model="time"
@@ -228,7 +242,7 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Oficina <span class="text-danger">*</span></label>
                                         <select wire:model="office_id"

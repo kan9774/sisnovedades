@@ -20,7 +20,6 @@ new class extends Component
 
     public Guard $guardia;
     public bool $puedeOperarGuardia = false;
-
     public ?int $editandoId = null;
 
     public string $type = '';
@@ -29,6 +28,7 @@ new class extends Component
     public string $office_id = '';
     public string $number = '';
     public string $time = '';
+    public string $fecha = '';
     public string $affair = '';
     public string $text = '';
     public string $clasification = '';
@@ -38,6 +38,7 @@ new class extends Component
 
     public function mount(Guard $guardia, bool $puedeOperarGuardia = false): void
     {
+
         $this->guardia = $guardia;
         $this->puedeOperarGuardia = $puedeOperarGuardia;
     }
@@ -92,6 +93,7 @@ new class extends Component
             'office_id',
             'number',
             'time',
+            'fecha',
             'affair',
             'text',
             'clasification',
@@ -100,6 +102,7 @@ new class extends Component
             'archivos',
         ]);
         $this->time = now()->format('H:i');
+        $this->fecha = now()->format('Y-m-d');
         $this->dispatch('abrir-modal-novedad');
     }
 
@@ -116,6 +119,7 @@ new class extends Component
         $this->office_id = (string) $novedad->office_id;
         $this->number = $novedad->number;
         $this->time = $novedad->time?->format('H:i') ?? '';
+        $this->fecha = $novedad->time?->format('Y-m-d') ?? $this->guardia->date->format('Y-m-d');
         $this->affair = $novedad->affair ?? '';
         $this->text = $novedad->text;
         $this->clasification = $novedad->clasification;
@@ -140,6 +144,7 @@ new class extends Component
             'type'            => 'required|in:Radio,Fax,Correo Electrónico',
             'direction'       => 'required|in:Recibido,Expedido',
             'number'          => 'required|string|max:255',
+            'fecha'           => 'required|date_format:Y-m-d',
             'time'            => 'required|date_format:H:i',
             'office_id'       => 'required|exists:oficinas,id',
             'affair'          => 'nullable|string|max:255',
@@ -172,7 +177,7 @@ new class extends Component
             'destino'         => $data['destino'] ?: null,
             'office_id'       => $data['office_id'],
             'number'          => $data['number'],
-            'time'            => $data['time'],
+            'time' => $this->calcularFechaHora($data['fecha'], $data['time']),
             'affair'          => $data['affair'] ?: null,
             'text'            => $data['text'],
             'clasification'   => $data['clasification'],
@@ -271,7 +276,16 @@ new class extends Component
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
         $this->dispatch('cerrar-modal-novedad');
     }
+    private function calcularFechaHora(string $fecha, string $hora): \Carbon\Carbon
+    {
+        [$horas, $minutos] = explode(':', $hora);
 
+        
+        return \Carbon\Carbon::createFromFormat('Y-m-d', $fecha)
+            ->setTime((int) $horas, (int) $minutos);
+    }
+  
+  
     public function eliminar(int $id): void
     {
         $novedad = $this->guardia->novedades()->find($id);

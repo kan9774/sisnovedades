@@ -198,11 +198,13 @@
                             'puedeOperarGuardia' => $puedeOperarGuardia,
                         ])
                     </div>
+
                     @if ($puedeOperarGuardia)
                         <div class="tab-pane" id="tab-correos-fallidos" role="tabpanel">
                             <livewire:correos-fallidos :guardia="$guardia" :key="'correos-fallidos-' . $guardia->id" />
                         </div>
                     @endif
+
                 </div>
             </div>
         </div>
@@ -236,7 +238,7 @@
                 allowOutsideClick: false,
                 allowEscapeKey: false,
             }).then((result) => {
-                 if (result.isConfirmed || result.value) {
+                if (result.isConfirmed || result.value) {
                     document.getElementById('form-cerrar-guardia').submit();
                 }
             });

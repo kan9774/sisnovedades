@@ -65,4 +65,8 @@ class HistorialEstado extends Model
             ]);
         });
     }
+    public function causal()
+    {
+        return $this->belongsTo(CausalBaja::class);
+    }
 }
