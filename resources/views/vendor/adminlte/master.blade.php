@@ -103,6 +103,11 @@
     {{-- Body Content --}}
     @yield('body')
 
+    {{-- Watcher global de notificaciones (novedades, correos fallidos, etc.) --}}
+    @auth
+        <livewire:notificaciones-watcher />
+    @endauth
+
     {{-- Base Scripts (depends on Laravel asset bundling tool) --}}
     @if (config('adminlte.enabled_laravel_mix', false))
         <script src="{{ mix(config('adminlte.laravel_mix_js_path', 'js/app.js')) }}"></script>
@@ -131,6 +136,68 @@
     @if (config('adminlte.livewire'))
         <livewire:scripts />
     @endif
+
+    {{-- Notificaciones de escritorio + sonido de aviso --}}
+    @auth
+        <script>
+            (function() {
+                const sonidoNotificacion = new Audio('{{ asset('sounds/notificacion.mp3') }}');
+                sonidoNotificacion.volume = 0.6;
+
+                // Desbloquea el autoplay del audio en el primer click del usuario,
+                // por si la pestaña quedó abierta desde antes sin interacción.
+                document.addEventListener('click', function desbloquear() {
+                    sonidoNotificacion.play().then(() => {
+                        sonidoNotificacion.pause();
+                        sonidoNotificacion.currentTime = 0;
+                    }).catch(() => {});
+                    document.removeEventListener('click', desbloquear);
+                }, { once: true });
+
+                // Pide permiso de notificaciones del navegador una sola vez,
+                // sin bloquear la carga de la página.
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+
+                document.addEventListener('livewire:init', function() {
+                    Livewire.on('nueva-novedad', function(data) {
+                        const payload = Array.isArray(data) ? data[0] : data;
+
+                        sonidoNotificacion.play().catch(function(err) {
+                            console.warn('No se pudo reproducir el sonido de notificación:', err);
+                        });
+
+                        // Badge de la campanita del navbar admin (Blade plano,
+                        // no reactivo — lo actualizamos a mano acá).
+                        document.querySelectorAll('.navbar-badge').forEach(function(badge) {
+                            const actual = parseInt(badge.textContent, 10) || 0;
+                            badge.textContent = actual + 1;
+                            badge.style.display = '';
+                        });
+
+                        if (!('Notification' in window) || Notification.permission !== 'granted') {
+                            return;
+                        }
+
+                        const notif = new Notification(payload.titulo, {
+                            body: payload.cuerpo,
+                            icon: '{{ asset('image/logo/Heraldica.png') }}',
+                            tag: 'sisnovedades',
+                        });
+
+                        notif.onclick = function() {
+                            window.focus();
+                            if (payload.url) {
+                                window.location.href = payload.url;
+                            }
+                            notif.close();
+                        };
+                    });
+                });
+            })();
+        </script>
+    @endauth
 
     {{-- Custom Scripts --}}
     @yield('adminlte_js')

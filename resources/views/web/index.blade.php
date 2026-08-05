@@ -44,6 +44,7 @@
                 <livewire:landing.nosotros />
                 <livewire:landing.servicios />
                 <livewire:landing.documentos />
+                <livewire:landing.recreacion />
                 <livewire:landing.novedades-cerradas />
                 <livewire:landing.contacto-seccion />
             </main>
@@ -52,6 +53,13 @@
         </div>
 
     </div>
+
+    {{-- Watcher de notificaciones: el usuario puede estar logueado desde afuera
+         de la intranet (ej. accediendo por el dominio público), no solo desde
+         el panel interno --}}
+    @auth
+        <livewire:notificaciones-watcher />
+    @endauth
 
     <!-- ======= SCRIPTS ======= -->
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
@@ -82,6 +90,56 @@
         actualizarReloj();
         setInterval(actualizarReloj, 1000);
     </script>
+
+    {{-- Notificaciones de escritorio + sonido de aviso --}}
+    @auth
+        <script>
+            (function() {
+                const sonidoNotificacion = new Audio('{{ asset('sounds/notificacion.mp3') }}');
+                sonidoNotificacion.volume = 0.6;
+
+                document.addEventListener('click', function desbloquear() {
+                    sonidoNotificacion.play().then(() => {
+                        sonidoNotificacion.pause();
+                        sonidoNotificacion.currentTime = 0;
+                    }).catch(() => {});
+                    document.removeEventListener('click', desbloquear);
+                }, { once: true });
+
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+
+                document.addEventListener('livewire:init', function() {
+                    Livewire.on('nueva-novedad', function(data) {
+                        const payload = Array.isArray(data) ? data[0] : data;
+
+                        sonidoNotificacion.play().catch(function(err) {
+                            console.warn('No se pudo reproducir el sonido de notificación:', err);
+                        });
+
+                        if (!('Notification' in window) || Notification.permission !== 'granted') {
+                            return;
+                        }
+
+                        const notif = new Notification(payload.titulo, {
+                            body: payload.cuerpo,
+                            icon: '{{ asset('image/logo/Heraldica.png') }}',
+                            tag: 'sisnovedades',
+                        });
+
+                        notif.onclick = function() {
+                            window.focus();
+                            if (payload.url) {
+                                window.location.href = payload.url;
+                            }
+                            notif.close();
+                        };
+                    });
+                });
+            })();
+        </script>
+    @endauth
 
     @livewireScripts
 </body>

@@ -67,6 +67,7 @@ class UserWizard extends Component
                 $this->segundo_apellido = $user->segundo_apellido ?? '';
                 $this->fecha_nacimiento = optional($user->fecha_nacimiento)->toDateString() ?? '';
                 $this->email = $user->email ?? '';
+                $this->roles = $user->roles->pluck('id')->all();
             } else {
                 // Solo tiene la C.I. cargada (Paso 1): retoma en el Paso 2.
                 $this->step = 2;

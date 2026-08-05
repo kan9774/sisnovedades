@@ -75,6 +75,12 @@ SIDEBAR
                 <i class="fa-solid fa-newspaper"></i>
                 <span>Novedades</span>
             </a>
+            <a href="#" class="sidebar-link" @click.prevent="seccion = 'recreacion'; sidebarOpen = false"
+                :class="{ 'sidebar-link-active': seccion === 'recreacion' }">
+                <span class="sidebar-link__ch">08</span>
+                <i class="fa-solid fa-dice"></i>
+                <span>Recreación</span>
+            </a>
         </nav>
 
         <div class="sidebar-spacer"></div>

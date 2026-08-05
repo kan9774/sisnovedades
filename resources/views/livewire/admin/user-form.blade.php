@@ -17,7 +17,7 @@
                 'altas-bajas' => 'Altas/Bajas',
                 'pases' => 'Pases',
                 'comisiones' => 'Comisiones',
-                'historial-grados' => 'Historial de Grados',
+                'historial-grados' => 'Grados',
             ]"
             :active="$activeTab" />
         <form id="userForm" wire:submit="save">
