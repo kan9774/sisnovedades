@@ -21,6 +21,9 @@
                             <th>Hasta</th>
                             <th>N° Orden</th>
                             <th>Motivo</th>
+                            @if ($this->puedeEditar())
+                                <th class="text-right">Acciones</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -37,6 +40,20 @@
                                 </td>
                                 <td>{{ $registro->numero_orden ?? '—' }}</td>
                                 <td>{{ $registro->motivo ?? '—' }}</td>
+                                @if ($this->puedeEditar())
+                                    <td class="text-right">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            wire:click="abrirForm({{ $registro->id }})" title="Editar">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                            wire:click="eliminar({{ $registro->id }})"
+                                            wire:confirm="¿Eliminar este pase? Esta acción no se puede deshacer."
+                                            title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>
@@ -58,7 +75,7 @@
         @endif
     </div>
 
-    {{-- Panel pantalla completa: registrar pase --}}
+    {{-- Panel pantalla completa: registrar/editar pase --}}
     <template x-teleport="body">
     <div class="ops-panel-overlay" id="modalPase" wire:ignore.self>
         <div class="ops-panel">
@@ -66,7 +83,7 @@
                 <div class="ops-panel__header">
                     <div class="ops-panel__title-wrap">
                         <span class="ops-panel__eyebrow">BCOM1 · Pases</span>
-                        <h5 class="ops-panel__title">Registrar Pase</h5>
+                        <h5 class="ops-panel__title">{{ $pase_id ? 'Editar Pase' : 'Registrar Pase' }}</h5>
                     </div>
                     <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalPase')" title="Cerrar">
                         <i class="fas fa-times"></i>
@@ -75,14 +92,25 @@
 
                 <div class="ops-panel__body">
                     <div class="ops-panel__content">
-                        <div class="form-group">
-                            <label>Fecha en que se produce el pase</label>
-                            <input type="date" wire:model="fecha" class="form-control @error('fecha') is-invalid @enderror">
-                            @error('fecha') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                            <small class="text-muted">
-                                La unidad anterior se cierra el último día de este mes; la nueva arranca el 1° del mes siguiente.
-                            </small>
-                        </div>
+                        @if ($pase_id)
+                            <div class="form-group">
+                                <label>Fecha vigente desde</label>
+                                <input type="text" value="{{ \Illuminate\Support\Carbon::parse($fecha)->format('d/m/Y') }}"
+                                    class="form-control" disabled>
+                                <small class="text-muted">
+                                    La fecha de inicio no se puede editar. Si está mal, eliminá este pase y volvé a cargarlo.
+                                </small>
+                            </div>
+                        @else
+                            <div class="form-group">
+                                <label>Fecha en que se produce el pase</label>
+                                <input type="date" wire:model="fecha" class="form-control @error('fecha') is-invalid @enderror">
+                                @error('fecha') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                <small class="text-muted">
+                                    La unidad anterior se cierra el último día de este mes; la nueva arranca el 1° del mes siguiente.
+                                </small>
+                            </div>
+                        @endif
 
                         <div class="form-group">
                             <label>Unidad de destino</label>

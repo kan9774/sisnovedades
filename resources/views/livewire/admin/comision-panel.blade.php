@@ -26,6 +26,9 @@
                             <th>Tipo</th>
                             <th>N° Orden</th>
                             <th>Motivo</th>
+                            @if ($this->puedeEditar())
+                                <th class="text-right">Acciones</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -43,6 +46,20 @@
                                 <td>{{ $registro->tipo_orden ?? '—' }}</td>
                                 <td>{{ $registro->numero_orden ?? '—' }}</td>
                                 <td>{{ $registro->motivo ?? '—' }}</td>
+                                @if ($this->puedeEditar())
+                                    <td class="text-right">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            wire:click="abrirForm({{ $registro->id }})" title="Editar">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                            wire:click="eliminar({{ $registro->id }})"
+                                            wire:confirm="¿Eliminar esta comisión? Esta acción no se puede deshacer."
+                                            title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>
@@ -57,20 +74,19 @@
 
         @if ($this->puedeEditar())
             <div class="card-footer text-right">
+                <button type="button" class="btn btn-outline-info btn-sm" wire:click="abrirForm">
+                    <i class="fas fa-user-clock"></i> Iniciar Comisión
+                </button>
                 @if ($user->comisionVigente())
                     <button type="button" class="btn btn-outline-warning btn-sm" wire:click="abrirFormCierre">
                         <i class="fas fa-flag-checkered"></i> Finalizar Comisión
-                    </button>
-                @else
-                    <button type="button" class="btn btn-outline-info btn-sm" wire:click="abrirForm">
-                        <i class="fas fa-user-clock"></i> Iniciar Comisión
                     </button>
                 @endif
             </div>
         @endif
     </div>
 
-    {{-- Panel pantalla completa: iniciar comisión --}}
+    {{-- Panel pantalla completa: iniciar/editar comisión --}}
     <template x-teleport="body">
     <div class="ops-panel-overlay" id="modalComisionAbrir" wire:ignore.self>
         <div class="ops-panel">
@@ -78,7 +94,7 @@
                 <div class="ops-panel__header">
                     <div class="ops-panel__title-wrap">
                         <span class="ops-panel__eyebrow">BCOM1 · Comisiones</span>
-                        <h5 class="ops-panel__title">Iniciar Comisión</h5>
+                        <h5 class="ops-panel__title">{{ $comision_id ? 'Editar Comisión' : 'Iniciar Comisión' }}</h5>
                     </div>
                     <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalComisionAbrir')" title="Cerrar">
                         <i class="fas fa-times"></i>
@@ -92,6 +108,17 @@
                             <input type="date" wire:model="fecha_inicio" class="form-control @error('fecha_inicio') is-invalid @enderror">
                             @error('fecha_inicio') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
+
+                        @if ($editando_historica)
+                            <div class="form-group">
+                                <label>Fecha de finalización</label>
+                                <input type="date" wire:model="edit_fecha_fin" class="form-control @error('edit_fecha_fin') is-invalid @enderror">
+                                @error('edit_fecha_fin') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                <small class="text-muted">
+                                    Esta comisión ya está finalizada. Para reabrirla, eliminala y volvé a cargarla.
+                                </small>
+                            </div>
+                        @endif
 
                         <div class="form-group">
                             <label>Unidad en la que presta comisión</label>
