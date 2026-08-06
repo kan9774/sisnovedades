@@ -40,13 +40,29 @@
 
         <div class="content-col">
             <main class="app-main">
-                <livewire:landing.hero />
-                <livewire:landing.nosotros />
-                <livewire:landing.servicios />
-                <livewire:landing.documentos />
-                <livewire:landing.recreacion />
-                <livewire:landing.novedades-cerradas />
-                <livewire:landing.contacto-seccion />
+                <div x-show="seccion === 'inicio'" x-cloak>
+                    <livewire:landing.hero />
+                </div>
+                <div x-show="seccion === 'nosotros'" x-cloak>
+                    {{-- TODO: si "Organigrama" tiene su propio componente, moverlo a su propio
+                         div con x-show="seccion === 'organigrama'" --}}
+                    <livewire:landing.nosotros />
+                </div>
+                <div x-show="seccion === 'servicios'" x-cloak>
+                    <livewire:landing.servicios />
+                </div>
+                <div x-show="seccion === 'documentos'" x-cloak>
+                    <livewire:landing.documentos />
+                </div>
+                <div x-show="seccion === 'recreacion'" x-cloak>
+                    <livewire:landing.recreacion />
+                </div>
+                <div x-show="seccion === 'novedades-cerradas'" x-cloak>
+                    <livewire:landing.novedades-cerradas />
+                </div>
+                <div x-show="seccion === 'contacto'" x-cloak>
+                    <livewire:landing.contacto-seccion />
+                </div>
             </main>
 
             <livewire:landing.footer />

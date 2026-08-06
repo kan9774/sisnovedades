@@ -4,6 +4,11 @@
             <div class="card-header-ops__title-wrap">
                 <h3 class="card-title-ops mb-0"><i class="fas fa-history"></i> Historial de Grados</h3>
             </div>
+            @if ($this->puedeEditar())
+                <x-btn-ops wire:click="abrirNuevo" variant="primary" icon="plus">
+                    Registrar cambio de grado
+                </x-btn-ops>
+            @endif
         </div>
 
         <div class="card-body p-0">
@@ -79,6 +84,20 @@
 
                     <div class="ops-panel__body">
                         <div class="ops-panel__content">
+                            <div class="form-group">
+                                <label>Grado</label>
+                                <select wire:model="grado_id"
+                                    class="form-control @error('grado_id') is-invalid @enderror">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach ($this->grados as $grado)
+                                        <option value="{{ $grado->id }}">{{ $grado->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('grado_id')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
                             <div class="form-group">
                                 <label>N° de Orden</label>
                                 <input type="text" wire:model="numero_orden" maxlength="50" placeholder="016/2026"

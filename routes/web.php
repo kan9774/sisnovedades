@@ -129,6 +129,11 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
                 return view('livewire.grados.grados-layout');
             })->name('index');
         });
+        Route::prefix('jefes-unidad')->name('jefes-unidad.')->group(function () {
+            Route::get('/', function () {
+                return view('livewire.admin.jefes-unidad.jefes-unidad-layout');
+            })->name('index');
+        });
         Route::get('/', function () {
             $dashboard = new App\Livewire\AdminDashboard();
             $dashboard->mount();

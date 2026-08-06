@@ -793,3 +793,57 @@ body.ops-panel-open {
     color: rgba(255, 255, 255, .8);
     margin-left: .5rem;
 }
+
+/* ==========================================================================
+   Addendum a ops-panel.css — AGREGAR AL FINAL del archivo existente
+   Grilla de "plazo" para el panel de Contratos C.S.M. (csm-panel.blade.php).
+   Cada plazo se muestra como una tarjeta-botón cuadrada y prolija en vez
+   de un link de texto suelto envuelto en btn-ops-primary standalone.
+   ========================================================================== */
+
+.csm-plazos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: .6rem;
+}
+
+.csm-plazo-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .2rem;
+    padding: .85rem .5rem;
+    border-radius: .5rem;
+    border: 1px solid rgba(11, 37, 69, 0.12);
+    background: #fff;
+    cursor: pointer;
+    transition: all .15s ease;
+    text-align: center;
+}
+
+.csm-plazo-btn:hover {
+    background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%);
+    border-color: #FFD200;
+    box-shadow: 0 2px 8px rgba(255, 210, 0, 0.35);
+    transform: translateY(-1px);
+}
+
+.csm-plazo-btn__anios {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0B2545;
+    line-height: 1;
+}
+
+.csm-plazo-btn__label {
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #6c757d;
+}
+
+.csm-plazo-btn:hover .csm-plazo-btn__label {
+    color: #0B2545;
+}

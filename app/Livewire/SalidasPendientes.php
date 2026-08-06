@@ -105,12 +105,22 @@ class SalidasPendientes extends Component
         abort_unless($this->guardia->status === 'open', 403);
 
         $sinCuentakilometros = $this->salidaPendiente->vehiculo?->sin_cuentakilometros;
+        $kmsSale = $this->salidaPendiente->kms_sale;
 
         $this->validate([
             'boleta_hora_entra' => 'required|date_format:H:i',
             'boleta_kms_entra' => $sinCuentakilometros
                 ? 'nullable|integer|min:0'
-                : 'required|integer|min:0|gte:salidaPendiente.kms_sale',
+                : [
+                    'required',
+                    'integer',
+                    'min:0',
+                    function ($attribute, $value, $fail) use ($kmsSale) {
+                        if ($kmsSale !== null && $value < $kmsSale) {
+                            $fail("El km de retorno debe ser mayor o igual a {$kmsSale} km (km de salida).");
+                        }
+                    },
+                ],
             'boleta_observaciones' => 'nullable|string|max:500',
         ]);
 

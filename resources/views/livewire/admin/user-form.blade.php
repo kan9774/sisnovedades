@@ -5,21 +5,20 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
     @endif
-    <x-ops-card title="Editar Usuario: " icon="user-edit"
-        :title-suffix="$user?->exists ? trim($user->grado->nombre ?? '') . '  ' . $user->name . ' ' . $user->last_name : null">
+    <x-ops-card title="Editar Usuario: " icon="user-edit" :title-suffix="$user?->exists ? trim($user->grado->nombre ?? '') . '  ' . $user->name . ' ' . $user->last_name : null">
         <x-slot:header>
         </x-slot:header>
-        <x-nav-tabs-ops
-            :tabs="[
-                'general' => 'General',
-                'direccion' => 'Dirección',
-                'roles' => 'Roles',
-                'altas-bajas' => 'Altas/Bajas',
-                'pases' => 'Pases',
-                'comisiones' => 'Comisiones',
-                'historial-grados' => 'Grados',
-            ]"
-            :active="$activeTab" />
+        <x-nav-tabs-ops :tabs="[
+            'general' => 'General',
+            'direccion' => 'Dirección',
+            'roles' => 'Roles',
+            'altas-bajas' => 'Altas/Bajas',
+            'pases' => 'Pases',
+            'comisiones' => 'Comisiones',
+            'historial-grados' => 'Grados',
+            'csm' => 'C.S.M.',
+            'cc' => 'C.C.',
+        ]" :active="$activeTab" />
         <form id="userForm" wire:submit="save">
 
             {{-- TAB: GENERAL --}}
@@ -324,28 +323,50 @@
                     </div>
                 @endif
             </div>
-
-            {{-- TAB: ALTAS/BAJAS --}}
-            <div class="{{ $activeTab === 'altas-bajas' ? '' : 'd-none' }}">
-                <livewire:admin.historial-estado-panel :user="$user" />
-            </div>
-
-            {{-- TAB: PASES --}}
-            <div class="{{ $activeTab === 'pases' ? '' : 'd-none' }}">
-                <livewire:admin.pase-panel :user="$user" />
-            </div>
-
-            {{-- TAB: COMISIONES --}}
-            <div class="{{ $activeTab === 'comisiones' ? '' : 'd-none' }}">
-                <livewire:admin.comision-panel :user="$user" />
-            </div>
-
-            {{-- TAB: HISTORIAL DE GRADOS --}}
-            <div class="{{ $activeTab === 'historial-grados' ? '' : 'd-none' }}">
-                <livewire:admin.historial-grados-panel :user="$user" />
-            </div>
-
         </form>
+        {{-- TAB: ALTAS/BAJAS --}}
+        <div class="{{ $activeTab === 'altas-bajas' ? '' : 'd-none' }}">
+            <livewire:admin.historial-estado-panel :user="$user" />
+        </div>
+
+        {{-- TAB: PASES --}}
+        <div class="{{ $activeTab === 'pases' ? '' : 'd-none' }}">
+            <livewire:admin.pase-panel :user="$user" />
+        </div>
+
+        {{-- TAB: COMISIONES --}}
+        <div class="{{ $activeTab === 'comisiones' ? '' : 'd-none' }}">
+            <livewire:admin.comision-panel :user="$user" />
+        </div>
+
+        {{-- TAB: HISTORIAL DE GRADOS --}}
+        <div class="{{ $activeTab === 'historial-grados' ? '' : 'd-none' }}">
+            <livewire:admin.historial-grados-panel :user="$user" />
+        </div>
+
+        {{-- TAB: C.S.M. --}}
+        <div class="{{ $activeTab === 'csm' ? '' : 'd-none' }}">
+            @if ($user?->exists)
+                <livewire:admin.csm-panel :user="$user" />
+            @else
+                <p class="text-muted">
+                    Guardá el usuario primero para poder generar contratos C.S.M.
+                </p>
+            @endif
+        </div>
+
+        {{-- TAB: C.C. (Credencial Cívica + Jefe de Unidad) --}}
+        <div class="{{ $activeTab === 'cc' ? '' : 'd-none' }}">
+            @if ($user?->exists)
+                <livewire:admin.credencial-civica-panel :user="$user" />
+                <hr class="my-3">
+                <livewire:admin.jefes-unidad-panel />
+            @else
+                <p class="text-muted">
+                    Guardá el usuario primero para poder cargar la credencial cívica.
+                </p>
+            @endif
+        </div>
         <x-slot:footer>
             <div class="d-flex justify-content-between">
                 <a href="{{ route('admin.users.index') }}" class="btn-ops btn-ops-secondary footer-btn"

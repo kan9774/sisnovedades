@@ -27,6 +27,7 @@
         "setasign/fpdi": "^2.6",
         "spatie/laravel-activitylog": "^4.12",
         "spatie/laravel-backup": "^10.3",
+        "symfony/process": "^8.1",
         "webklex/laravel-imap": "^6.2"
     },
     "require-dev": {

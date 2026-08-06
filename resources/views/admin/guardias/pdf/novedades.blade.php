@@ -4,21 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
         @page {
-            margin: 60px 20px 40px 20px;
-            /* arriba, derecha, abajo, izquierda — ajustá según lo que ya tenías */
+            margin-top: 30px;
+            margin-right: 10px;
+            margin-bottom: 15px;
+            margin-left: 20px;
         }
 
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 11px;
+            font-size: 12px;
             color: #000;
         }
 
@@ -78,6 +75,10 @@
 
         table th {
             border: 1px solid #000;
+        }
+
+        table tr {
+            page-break-inside: avoid;
         }
 
         .text-center {

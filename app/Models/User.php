@@ -36,7 +36,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'last_name', 'grado_id', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin', 'must_change_password', 'segundo_nombre', 'segundo_apellido', 'fecha_nacimiento', 'ci','perfil_completo_at'])]
+#[Fillable(['name', 'last_name', 'grado_id', 'email', 'password', 'unidad_id', 'oficina_id', 'status', 'is_super_admin', 'must_change_password', 'segundo_nombre', 'segundo_apellido', 'fecha_nacimiento', 'ci', 'perfil_completo_at'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {
@@ -104,6 +104,16 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     public function direccionPrincipal(): HasOne
     {
         return $this->hasOne(Direccion::class)->where('es_principal', true);
+    }
+
+    public function credencialesCivicas(): HasMany
+    {
+        return $this->hasMany(CredencialCivica::class);
+    }
+
+    public function credencialVigente(): ?CredencialCivica
+    {
+        return $this->credencialesCivicas()->whereNull('fecha_hasta')->latest('fecha_desde')->first();
     }
     /**
      * Get the attributes that should be cast.
@@ -293,7 +303,7 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     /**
      * Accessor para obtener el primer rol (compatibilidad con código existente)
      */
-    public function getRolAttribute()
+    public function getRolAttribute(): ?Rol
     {
         return $this->roles()->first();
     }
@@ -301,7 +311,7 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     /**
      * Accessor para obtener el nombre del rol principal
      */
-    public function getRolNameAttribute()
+    public function getRolNameAttribute(): string
     {
         $roleName = $this->roles()->first()->name ?? 'Sin rol';
         return str_replace('_', ' ', $roleName);
@@ -310,7 +320,7 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
     /**
      * Accessor para obtener todos los roles como string
      */
-    public function getRolesListAttribute()
+    public function getRolesListAttribute(): string
     {
         $roles = $this->roles->pluck('name')->map(function ($name) {
             return str_replace('_', ' ', $name);
