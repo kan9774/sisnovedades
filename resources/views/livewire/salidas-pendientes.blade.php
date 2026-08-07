@@ -1,4 +1,10 @@
 <div wire:poll.5s class="mt-4">
+    @if (session('error'))
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+        </div>
+    @endif
+
     @if ($this->salidasPendientes->isNotEmpty())
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i>

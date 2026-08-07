@@ -179,23 +179,10 @@
                                         @enderror
                                     </div>
                                 </div>
-
-                                @if ($direction === 'Expedido')
+                                @if ($direction === 'Recibido' || $direction === 'Expedido')
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Destino</label>
-                                            <input type="text" wire:model="destino"
-                                                class="form-control @error('destino') is-invalid @enderror"
-                                                placeholder="Ej: Cte.Rva.Gral.E.">
-                                            @error('destino')
-                                                <span class="invalid-feedback d-block">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                @elseif ($direction === 'Recibido')
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>¿Quién expide?</label>
+                                            <label>{{ $direction === 'Recibido' ? '¿Quién expide?' : '¿A quién se expide?' }}</label>
                                             <select wire:model="organismo_id" class="form-control">
                                                 <option value="">-- Seleccionar --</option>
                                                 @foreach ($this->organismos as $organismo)
