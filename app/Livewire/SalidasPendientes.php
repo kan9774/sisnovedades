@@ -75,7 +75,11 @@ class SalidasPendientes extends Component
     {
         $salida = SalidaVehiculo::findOrFail($salidaId);
         $this->authorize('update', $salida);
-        abort_unless($this->guardia->status === 'open', 403);
+
+        if ($this->guardia->status !== 'open') {
+            session()->flash('error', 'No se puede cerrar esta salida porque la guardia actual ya no está abierta.');
+            return;
+        }
 
         $this->salidaPendienteId = $salidaId;
         unset($this->salidaPendiente);
@@ -102,7 +106,12 @@ class SalidasPendientes extends Component
         }
 
         $this->authorize('update', $this->salidaPendiente);
-        abort_unless($this->guardia->status === 'open', 403);
+
+        if ($this->guardia->status !== 'open') {
+            $this->cerrarBoleta();
+            session()->flash('error', 'No se puede cerrar esta salida porque la guardia actual ya no está abierta.');
+            return;
+        }
 
         $sinCuentakilometros = $this->salidaPendiente->vehiculo?->sin_cuentakilometros;
         $kmsSale = $this->salidaPendiente->kms_sale;
