@@ -132,6 +132,9 @@
     {{-- Extra Configured Plugins Scripts --}}
     @include('adminlte::plugins', ['type' => 'js'])
 
+    {{-- Helper global de confirmaciones (SweetAlert2) --}}
+    <script src="{{ asset('js/confirmaciones.js') }}"></script>
+
     {{-- Livewire Scripts --}}
     @if (config('adminlte.livewire'))
         <livewire:scripts />

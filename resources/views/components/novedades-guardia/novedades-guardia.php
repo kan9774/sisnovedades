@@ -309,6 +309,7 @@ new class extends Component
 
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
     }
+    
 
     public function render()
     {

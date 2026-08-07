@@ -399,5 +399,6 @@
         $wire.on('cerrar-modal-novedad', () => {
             cerrarOpsPanel('modalNovedad');
         });
+        
     </script>
 @endscript

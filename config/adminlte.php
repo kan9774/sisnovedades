@@ -562,7 +562,7 @@ return [
             'header' => 'A U D I T O R Í A',
             'can'    => 'viewAny-log',
         ],
-                // Roles y Permisos — solo admin
+        // Roles y Permisos — solo admin
         [
             'text'    => 'Permisos de Usuarios',
             'icon'   => 'fa-solid fa-user-lock',
@@ -693,7 +693,7 @@ return [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@8',
+                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@11', // antes: @8
                 ],
             ],
         ],

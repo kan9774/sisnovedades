@@ -1,7 +1,7 @@
 @props(['title' => null, 'titleSuffix' => null, 'eyebrow' => null, 'icon' => null])
 
 <div {{ $attributes->merge(['class' => 'card card-outline-ops']) }}>
-    @if($title || $eyebrow)
+    @if($title || $eyebrow || isset($actions))
         <div class="card-header-ops">
             <div class="card-header-ops__title-wrap">
                 @if($title)
@@ -19,6 +19,12 @@
                     <span class="card-header-ops__eyebrow">{{ $eyebrow }}</span>
                 @endif
             </div>
+
+            @isset($actions)
+                <div class="card-header-ops__actions">
+                    {{ $actions }}
+                </div>
+            @endisset
         </div>
     @endif
 

@@ -12,6 +12,10 @@
     'showDelete' => true,
     'showRestore' => true,
     'size' => null, // null (default 34px) | 'xs' | 'sm'
+
+    // Nuevos: texto configurable del SweetAlert2 de borrado, con default genérico
+    'deleteTitle' => '¿Eliminar registro?',
+    'deleteText' => 'Esta acción no se puede deshacer.',
 ])
 
 @php
@@ -39,14 +43,25 @@
     @if($delete && $showDelete && (!$model || auth()->user()->can($canDelete, $model)))
         <button
             type="button"
-            wire:click="{{ $delete }}"
-            wire:confirm="¿Confirmás que querés eliminar este registro?"
+            x-on:click="
+                confirmarAccion({
+                    title: @js($deleteTitle),
+                    text: @js($deleteText),
+                    confirmButtonText: 'Sí, eliminar',
+                    onConfirm: () => $wire.{{ $delete }},
+                })
+            "
             wire:loading.attr="disabled"
             wire:target="{{ $delete }}"
             class="btn-ops btn-ops-danger btn-ops-icon {{ $sizeClass }}"
             title="Eliminar"
         >
-            <i class="fas fa-trash"></i>
+            <span wire:loading.remove wire:target="{{ $delete }}">
+                <i class="fas fa-trash"></i>
+            </span>
+            <span wire:loading wire:target="{{ $delete }}">
+                <i class="fas fa-spinner fa-spin"></i>
+            </span>
         </button>
     @endif
 

@@ -54,4 +54,9 @@ class NovedadesController extends Controller
         return redirect()->route('admin.guardias.show', $guardia)
             ->with('success', 'Novedad eliminada correctamente.');
     }
+
+    public function confirmarEliminar($data): void
+    {
+        $this->dispatch('eliminar', ['id' => $data['id']]);
+    }
 }

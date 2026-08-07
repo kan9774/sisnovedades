@@ -286,6 +286,13 @@ body.ops-panel-open {
     color: #FFD200;
 }
 
+.card-header-ops__actions {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    flex-wrap: wrap;
+}
+
 /* Bloque de texto destacado dentro del card-body */
 .novedad-texto {
     background: #fff;
@@ -846,4 +853,8 @@ body.ops-panel-open {
 
 .csm-plazo-btn:hover .csm-plazo-btn__label {
     color: #0B2545;
+}
+.ops-swal-popup {
+    border-radius: 8px;
+    border-top: 4px solid #FF5A1F;
 }
