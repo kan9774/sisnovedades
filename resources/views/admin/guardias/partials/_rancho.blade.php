@@ -1,4 +1,4 @@
-<div x-data="{ editando: {{ session('success') ? 'false' : 'true' }} }">
+<div x-data="{ editando: {{ ($guardia->ranchoMenu || $rancho->isNotEmpty()) ? 'false' : 'true' }} }">
     <form action="{{ route('admin.guardias.rancho.update', $guardia) }}" method="POST">
         @csrf
         @method('PUT')
@@ -49,7 +49,7 @@
         <x-btn-ops type="button" icon="pen" variant="warning" size="sm"
             x-show="!editando" @click="editando = true"
             title="Habilitar edición">
-            Editar
+            Editar Novedades de Rancho
         </x-btn-ops>
 
         <!-- Botón Guardar -->

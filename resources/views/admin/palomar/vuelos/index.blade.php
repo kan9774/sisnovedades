@@ -19,39 +19,34 @@
         </div>
     @endif
 
-    <div class="card card-outline-ops">
-        <div class="card-header-ops">
-            <div class="card-header-ops__title-wrap">
-                <h3 class="card-title-ops mb-0"><i class="fas fa-plane"></i> Vuelos registrados</h3>
-                <span class="card-header-ops__eyebrow">{{ $vuelos->count() }} registros</span>
-            </div>
-            <div class="card-tools">
-                <a href="{{ route('admin.vuelos.create') }}" class="btn-ops btn-ops-primary btn-sm">
-                    <i class="fas fa-plus-circle"></i> Registrar Vuelo
-                </a>
-            </div>
-        </div>
-        <div class="card-body">
-            <form method="GET" class="mb-3">
-                <div class="row">
-                    <div class="col-md-3">
-                        <select name="paloma_id" class="form-control">
-                            <option value="">Todas las palomas</option>
-                            @foreach($palomas as $p)
-                                <option value="{{ $p->id }}" {{ request('paloma_id') == $p->id ? 'selected' : '' }}>
-                                    {{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn-ops btn-ops-primary btn-sm"><i class="fas fa-filter"></i> Filtrar</button>
-                        <a href="{{ route('admin.vuelos.index') }}" class="btn-ops btn-ops-secondary btn-sm">Limpiar</a>
-                    </div>
-                </div>
-            </form>
+    <x-ops-card title="Vuelos registrados" icon="plane" eyebrow="{{ $vuelos->count() }} registros">
+        <x-slot name="actions">
+            <a href="{{ route('admin.vuelos.create') }}" class="btn-ops btn-ops-primary btn-sm">
+                <i class="fas fa-plus-circle"></i> Registrar Vuelo
+            </a>
+        </x-slot>
 
-            <table class="table table-striped table-hover">
+        <form method="GET" class="mb-3">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <select name="paloma_id" class="form-control">
+                        <option value="">Todas las palomas</option>
+                        @foreach($palomas as $p)
+                            <option value="{{ $p->id }}" {{ request('paloma_id') == $p->id ? 'selected' : '' }}>
+                                {{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn-ops btn-ops-primary btn-sm"><i class="fas fa-filter"></i> Filtrar</button>
+                    <a href="{{ route('admin.vuelos.index') }}" class="btn-ops btn-ops-secondary btn-sm">Limpiar</a>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-ops-hover align-middle">
                 <thead class="thead-ops">
                     <tr>
                         <th>Fecha</th>
@@ -87,27 +82,32 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                @if($vuelo->estado === 'en_curso')
-                                    <a href="{{ route('admin.vuelos.resultados', $vuelo) }}" class="btn-ops btn-ops-success btn-sm" title="Cargar resultados">
-                                        <i class="fas fa-flag-checkered"></i>
+                                <div class="ops-actions">
+                                    @if($vuelo->estado === 'en_curso')
+                                        <a href="{{ route('admin.vuelos.resultados', $vuelo) }}" class="btn-ops btn-ops-success btn-ops-icon btn-ops-icon--sm" title="Cargar resultados">
+                                            <i class="fas fa-flag-checkered"></i>
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('admin.vuelos.edit', $vuelo) }}" class="btn-ops btn-ops-warning btn-ops-icon btn-ops-icon--sm" title="Editar">
+                                        <i class="fas fa-edit"></i>
                                     </a>
-                                @endif
-                                <a href="{{ route('admin.vuelos.edit', $vuelo) }}" class="btn-ops btn-ops-warning btn-sm" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('admin.vuelos.destroy', $vuelo) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('¿Eliminar este vuelo?')">
-                                    @csrf @method('DELETE')
-                                    <button class="btn-ops btn-ops-danger btn-sm" title="Eliminar"><i class="fas fa-trash"></i></button>
-                                </form>
+                                    <form action="{{ route('admin.vuelos.destroy', $vuelo) }}" method="POST" class="d-inline-block" onsubmit="return confirm('¿Eliminar este vuelo?')">
+                                        @csrf @method('DELETE')
+                                        <button class="btn-ops btn-ops-danger btn-ops-icon btn-ops-icon--sm" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="text-center">No hay vuelos registrados.</td></tr>
+                        <tr><td colspan="6" class="text-center py-3 text-muted">No hay vuelos registrados.</td></tr>
                     @endforelse
                 </tbody>
             </table>
-            {{ $vuelos->appends(request()->query())->links() }}
         </div>
-    </div>
+
+        <x-slot name="footer">
+            {{ $vuelos->appends(request()->query())->links() }}
+        </x-slot>
+    </x-ops-card>
 </div>
 @stop

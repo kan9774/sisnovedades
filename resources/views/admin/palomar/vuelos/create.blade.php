@@ -5,36 +5,43 @@
 @section('content_header_subtitle', 'Crear')
 
 @section('content_body')
-<div class="container-fluid">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-plane"></i> Registrar Vuelo</h3>
-        </div>
-        <div class="card-body">
+    <div class="container-fluid">
+        <x-ops-card title="Registrar Vuelo" icon="plane" eyebrow="Nuevo Registro">
             <form action="{{ route('admin.vuelos.store') }}" method="POST">
                 @csrf
 
                 <div class="row">
                     <div class="col-md-3 form-group">
                         <label for="fecha">Fecha <span class="text-danger">*</span></label>
-                        <input type="date" name="fecha" id="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old('fecha', date('Y-m-d')) }}" required>
-                        @error('fecha') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                        <input type="date" name="fecha" id="fecha"
+                            class="form-control @error('fecha') is-invalid @enderror"
+                            value="{{ old('fecha', date('Y-m-d')) }}" required>
+                        @error('fecha')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="col-md-3 form-group">
                         <label for="tipo">Tipo <span class="text-danger">*</span></label>
-                        <select name="tipo" id="tipo" class="form-control @error('tipo') is-invalid @enderror" required>
-                            <option value="entrenamiento" {{ old('tipo') == 'entrenamiento' ? 'selected' : '' }}>Entrenamiento</option>
-                            <option value="competicion" {{ old('tipo') == 'competicion' ? 'selected' : '' }}>Competición</option>
+                        <select name="tipo" id="tipo" class="form-control @error('tipo') is-invalid @enderror"
+                            required>
+                            <option value="entrenamiento" {{ old('tipo') == 'entrenamiento' ? 'selected' : '' }}>
+                                Entrenamiento</option>
+                            <option value="competicion" {{ old('tipo') == 'competicion' ? 'selected' : '' }}>Competición
+                            </option>
                         </select>
-                        @error('tipo') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                        @error('tipo')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="col-md-3 form-group">
                         <label for="hora_liberacion">Hora de liberación</label>
-                        <input type="time" name="hora_liberacion" id="hora_liberacion" class="form-control" value="{{ old('hora_liberacion') }}">
+                        <input type="time" name="hora_liberacion" id="hora_liberacion" class="form-control"
+                            value="{{ old('hora_liberacion') }}">
                     </div>
                     <div class="col-md-3 form-group">
                         <label for="punto_liberacion">Punto de liberación</label>
-                        <input type="text" name="punto_liberacion" id="punto_liberacion" class="form-control" value="{{ old('punto_liberacion') }}">
+                        <input type="text" name="punto_liberacion" id="punto_liberacion" class="form-control"
+                            value="{{ old('punto_liberacion') }}">
                     </div>
                 </div>
 
@@ -48,12 +55,15 @@
                 </div>
 
                 <hr>
-                <h5><i class="fas fa-dove"></i> Palomas participantes <span class="text-danger">*</span></h5>
-                @error('palomas') <div class="alert alert-danger py-2">{{ $message }}</div> @enderror
+                <h5 class="my-3 text-dark"><i class="fas fa-dove mr-1"></i> Palomas participantes <span
+                        class="text-danger">*</span></h5>
+                @error('palomas')
+                    <div class="alert alert-danger py-2">{{ $message }}</div>
+                @enderror
 
                 <div class="table-responsive">
-                    <table class="table table-sm table-bordered align-middle">
-                        <thead>
+                    <table class="table table-sm table-bordered align-middle table-ops-hover">
+                        <thead class="thead-ops">
                             <tr>
                                 <th style="width:40px;"></th>
                                 <th>Anilla</th>
@@ -63,18 +73,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($palomas as $paloma)
+                            @foreach ($palomas as $paloma)
                                 @php
-                                    $preseleccionadas = old('palomas', $palomaIdPreseleccionada ? [$palomaIdPreseleccionada] : []);
+                                    $preseleccionadas = old(
+                                        'palomas',
+                                        $palomaIdPreseleccionada ? [$palomaIdPreseleccionada] : [],
+                                    );
                                     $checked = in_array($paloma->id, $preseleccionadas);
                                 @endphp
                                 <tr>
-                                    <td>
-                                        <input type="checkbox" class="paloma-check" name="palomas[]" value="{{ $paloma->id }}" {{ $checked ? 'checked' : '' }}>
+                                    <td class="text-center">
+                                        <input type="checkbox" class="paloma-check" name="palomas[]"
+                                            value="{{ $paloma->id }}" {{ $checked ? 'checked' : '' }}>
                                     </td>
                                     <td>{{ $paloma->anilla }}</td>
                                     <td>{{ $paloma->nombre ?? '-' }}</td>
-                                    <td>{{ $paloma->estado->nombre ?? '-' }}</td>
+                                    <td><span
+                                            class="badge-ops badge-ops-secondary">{{ $paloma->estado->nombre ?? '-' }}</span>
+                                    </td>
                                     <td>
                                         <input type="text" name="datos[{{ $paloma->id }}][anilla_competicion]"
                                             class="form-control form-control-sm paloma-datos"
@@ -86,25 +102,29 @@
                         </tbody>
                     </table>
                 </div>
-                <small class="text-muted d-block mb-3">Distancia, hora de llegada y posición se cargan al finalizar el vuelo, desde "Cargar resultados".</small>
+                <small class="text-muted d-block mb-3">Distancia, hora de llegada y posición se cargan al finalizar el
+                    vuelo, desde "Cargar resultados".</small>
 
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
-                <a href="{{ route('admin.vuelos.index') }}" class="btn btn-secondary">Cancelar</a>
+                <div class="mt-4">
+                    <div class="mt-4">
+                        <x-btn-ops type="submit" icon="save">Guardar</x-btn-ops>
+                        <x-btn-ops href="{{ route('admin.vuelos.index') }}" variant="info">Cancelar</x-btn-ops>
+                    </div>
+                </div>
             </form>
-        </div>
+        </x-ops-card>
     </div>
-</div>
 @stop
 
 @push('js')
-<script>
-document.querySelectorAll('.paloma-check').forEach(function (checkbox) {
-    checkbox.addEventListener('change', function () {
-        var row = this.closest('tr');
-        row.querySelectorAll('.paloma-datos').forEach(function (input) {
-            input.disabled = !checkbox.checked;
+    <script>
+        document.querySelectorAll('.paloma-check').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                var row = this.closest('tr');
+                row.querySelectorAll('.paloma-datos').forEach(function(input) {
+                    input.disabled = !checkbox.checked;
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 @endpush
