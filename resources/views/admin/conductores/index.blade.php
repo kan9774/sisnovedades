@@ -76,28 +76,15 @@
                                 @endif
                             </td>
                             <td class="text-center align-middle">
-                                <div class="d-flex justify-content-center">
-                                    @can('update', $conductor)
-                                        <a href="{{ route('admin.conductores.edit', $conductor) }}"
-                                           class="btn-ops btn-ops-warning btn-xs mr-1"
-                                           aria-label="Editar conductor">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    @endcan
-                                    @can('delete', $conductor)
-                                        <form action="{{ route('admin.conductores.destroy', $conductor) }}"
-                                              method="POST"
-                                              class="d-inline"
-                                              onsubmit="return confirm('¿Eliminar este conductor?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn-ops btn-ops-danger btn-xs"
-                                                    aria-label="Eliminar conductor">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    @endcan
-                                </div>
+                                <x-ops-actions
+                                    :view="route('admin.conductores.show', $conductor)"
+                                    :edit-href="route('admin.conductores.edit', $conductor)"
+                                    :delete-action="route('admin.conductores.destroy', $conductor)"
+                                    :model="$conductor"
+                                    size="sm"
+                                    delete-title="¿Eliminar este conductor?"
+                                    class="justify-content-center"
+                                />
                             </td>
                         </tr>
                     @empty

@@ -56,7 +56,7 @@ class Contacto extends Component
         ];
 
         try {
-            Mail::to(config('mail.contacto_to', 'admin@sisnovedades.com'))
+            Mail::to(config('mail.contacto_to', 's1bcom1@ejercito.mil.uy'))
                 ->send(new ContactoMail($data));
         } catch (\Throwable $e) {
             report($e);
@@ -108,7 +108,7 @@ class Contacto extends Component
         // Sugerencia::create($data + ['adjunto_path' => $adjuntoPath]);
 
         try {
-            Mail::to(config('mail.sugerencias_to', 'admin@sisnovedades.com'))
+            Mail::to(config('mail.sugerencias_to', 's1bcom1@ejercito.mil.uy'))
                 ->send(new SugerenciaMail($data, $adjuntoPath, $adjuntoNombreOriginal));
         } catch (\Throwable $e) {
             report($e);

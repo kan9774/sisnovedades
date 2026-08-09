@@ -293,7 +293,6 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
 
         // Conductores - CRUD completo
         Route::resource('conductores', ConductorController::class)
-            ->except(['show'])
             ->parameters(['conductores' => 'conductor']); // Opcional: si no necesitas vista show
 
         // Novedades de personal y rancho (anidadas a guardia)
