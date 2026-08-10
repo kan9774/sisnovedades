@@ -137,8 +137,13 @@ class UbicacionesCatalogo extends Component
 
     public function saveEdit(): void
     {
-        $ubicacion = Ubicacion::findOrFail($this->editingId);
+        $$ubicacion = Ubicacion::findOrFail($this->editingId);
         $this->authorize('update', $ubicacion);
+
+        if ($ubicacion->es_general && $this->editTipo !== 'deposito') {
+            $this->addError('editTipo', 'El Depósito General no puede cambiar de tipo.');
+            return;
+        }
 
         $reglas = [
             'editNombre' => 'required|string|max:150|unique:ubicaciones,nombre,' . $this->editingId,
@@ -184,6 +189,11 @@ class UbicacionesCatalogo extends Component
         $ubicacion = Ubicacion::findOrFail($ubicacionId);
         $this->authorize('delete', $ubicacion);
 
+        if ($ubicacion->es_general) {
+            session()->flash('error', 'No se puede eliminar el Depósito General: es la ubicación central del sistema.');
+            return;
+        }
+
         $enUso = Stock::where('ubicacion_id', $ubicacion->id)->where('cantidad', '>', 0)->exists()
             || Movimiento::where('ubicacion_origen_id', $ubicacion->id)
             ->orWhere('ubicacion_destino_id', $ubicacion->id)
@@ -198,6 +208,7 @@ class UbicacionesCatalogo extends Component
         $ubicacion->delete();
         session()->flash('success', 'Ubicación eliminada.');
     }
+
 
     /*
     |--------------------------------------------------------------------

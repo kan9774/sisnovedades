@@ -35,6 +35,9 @@ class InventarioService
     ): Movimiento {
         $this->asegurarPorCantidad($item);
         $this->asegurarCantidadPositiva($cantidad);
+        $this->asegurarEsDepositoGeneral($destino, 'registrar una entrada de stock');
+        $this->asegurarPorCantidad($item);
+        $this->asegurarCantidadPositiva($cantidad);
 
         return DB::transaction(function () use ($item, $destino, $cantidad, $usuario, $motivo, $referencia, $proveedor, $fechaRecibido) {
             $this->incrementarStock($item, $destino, $cantidad);
@@ -244,6 +247,9 @@ class InventarioService
 
     public function marcarEnReparacion(ItemUnidad $unidad, User $usuario, ?string $motivo = null): Movimiento
     {
+        $ubicacionActual = Ubicacion::findOrFail($unidad->ubicacion_actual_id);
+        $this->asegurarEsDepositoGeneral($ubicacionActual, 'enviar a reparación');
+
         return DB::transaction(function () use ($unidad, $usuario, $motivo) {
             $unidad->update(['estado' => 'en_reparacion']);
 
@@ -267,6 +273,8 @@ class InventarioService
         ?Proveedor $proveedor = null,
         ?string $fechaRecibido = null,
     ): ItemUnidad {
+        $this->asegurarIndividual($item);
+        $this->asegurarEsDepositoGeneral($ubicacion, 'dar de alta una unidad');
         $this->asegurarIndividual($item);
 
         return DB::transaction(function () use ($item, $ubicacion, $usuario, $numeroSerie, $motivo, $proveedor, $fechaRecibido) {
@@ -299,6 +307,9 @@ class InventarioService
             throw new InvalidArgumentException('Esta unidad ya está dada de baja.');
         }
 
+        $ubicacionActual = Ubicacion::findOrFail($unidad->ubicacion_actual_id);
+        $this->asegurarEsDepositoGeneral($ubicacionActual, 'dar de baja una unidad');
+
         return DB::transaction(function () use ($unidad, $usuario, $motivo) {
             $origenId = $unidad->ubicacion_actual_id;
 
@@ -314,6 +325,26 @@ class InventarioService
                 'ubicacion_origen_id' => $origenId,
                 'usuario_id' => $usuario->id,
                 'motivo' => $motivo,
+            ]);
+        });
+    }
+
+    public function volverDeReparacion(ItemUnidad $unidad, User $usuario, ?string $motivo = null): Movimiento
+    {
+        if ($unidad->estado !== 'en_reparacion') {
+            throw new InvalidArgumentException('Esta unidad no está en reparación.');
+        }
+
+        return DB::transaction(function () use ($unidad, $usuario, $motivo) {
+            $unidad->update(['estado' => 'disponible']);
+
+            return Movimiento::create([
+                'item_id' => $unidad->item_id,
+                'item_unidad_id' => $unidad->id,
+                'tipo' => 'ajuste',
+                'ubicacion_origen_id' => $unidad->ubicacion_actual_id,
+                'usuario_id' => $usuario->id,
+                'motivo' => $motivo ?? 'Vuelta de reparación',
             ]);
         });
     }
@@ -502,7 +533,7 @@ class InventarioService
             // desincronización entre `stocks` y `lotes_stock`.
             throw new InvalidArgumentException(
                 "Los lotes registrados de \"{$item->nombre}\" no alcanzan a cubrir la cantidad solicitada "
-                . "(faltan {$restante} unidades sin lote asociado)."
+                    . "(faltan {$restante} unidades sin lote asociado)."
             );
         }
 
@@ -569,6 +600,25 @@ class InventarioService
     {
         if ($cantidad <= 0) {
             throw new InvalidArgumentException('La cantidad debe ser mayor a cero.');
+        }
+    }
+    private function depositoGeneral(): Ubicacion
+    {
+        try {
+            return Ubicacion::general();
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            throw new InvalidArgumentException(
+                'No existe un Depósito General configurado. Es la ubicación central del sistema: sin él no se puede dar de alta stock ni unidades.'
+            );
+        }
+    }
+
+    private function asegurarEsDepositoGeneral(Ubicacion $ubicacion, string $accion): void
+    {
+        if (! $ubicacion->is($this->depositoGeneral())) {
+            throw new InvalidArgumentException(
+                "Solo se puede {$accion} desde el Depósito General. Esta unidad está en \"{$ubicacion->nombre}\"; devolvela al Depósito General primero."
+            );
         }
     }
 }

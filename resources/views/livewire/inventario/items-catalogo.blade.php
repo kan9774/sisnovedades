@@ -13,14 +13,22 @@
         </div>
     @endif
 
-    <div class="card">
-        <div class="card-header">
+    <x-ops-card eyebrow="BCOM1 · Inventario" icon="boxes" title="Catálogo de ítems">
+        <x-slot:actions>
+            @can('create', \App\Models\Item::class)
+                <x-btn-ops variant="primary" icon="plus" wire:click="abrirModalCrear">
+                    Nuevo ítem
+                </x-btn-ops>
+            @endcan
+        </x-slot:actions>
+
+        <x-slot:header>
             <div class="row align-items-center">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <input type="text" wire:model.live.debounce.400ms="busqueda" class="form-control"
                         placeholder="Buscar por código o nombre...">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <select wire:model.live="filtroCategoriaId" class="form-control">
                         <option value="">Todas las categorías</option>
                         @foreach ($categorias as $categoria)
@@ -28,19 +36,12 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4 text-right">
-                    @can('create', \App\Models\Item::class)
-                        <button wire:click="abrirModalCrear" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Nuevo ítem
-                        </button>
-                    @endcan
-                </div>
             </div>
-        </div>
+        </x-slot:header>
 
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover">
-                <thead>
+        <div class="table-responsive">
+            <table class="table table-hover table-ops-hover mb-0">
+                <thead class="thead-ops">
                     <tr>
                         <th>Código</th>
                         <th>Nombre</th>
@@ -61,9 +62,9 @@
                             <td>{{ $item->talla->valor ?? '—' }}</td>
                             <td>
                                 @if ($item->tipo_seguimiento === 'individual')
-                                    <span class="badge badge-info">Individual</span>
+                                    <span class="badge-ops badge-ops-info">Individual</span>
                                 @else
-                                    <span class="badge badge-secondary">
+                                    <span class="badge-ops badge-ops-secondary">
                                         Cantidad ({{ $item->unidad_medida }})
                                     </span>
                                 @endif
@@ -77,19 +78,14 @@
                                 @endif
                             </td>
                             <td class="text-right">
-                                @can('update', $item)
-                                    <button wire:click="abrirModalEditar({{ $item->id }})"
-                                        class="btn btn-sm btn-outline-secondary" title="Editar">
-                                        <i class="fas fa-pen"></i>
-                                    </button>
-                                @endcan
-                                @can('delete', $item)
-                                    <button wire:click="eliminar({{ $item->id }})"
-                                        wire:confirm="¿Eliminar este ítem del catálogo?"
-                                        class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                @endcan
+                                <x-ops-actions
+                                    :model="$item"
+                                    :edit="'abrirModalEditar(' . $item->id . ')'"
+                                    :delete="'eliminar(' . $item->id . ')'"
+                                    size="sm"
+                                    deleteTitle="¿Eliminar este ítem del catálogo?"
+                                    deleteText="Esta acción no se puede deshacer."
+                                />
                             </td>
                         </tr>
                     @empty
@@ -103,10 +99,10 @@
             </table>
         </div>
 
-        <div class="card-footer">
+        <x-slot:footer>
             {{ $items->links() }}
-        </div>
-    </div>
+        </x-slot:footer>
+    </x-ops-card>
 
     {{-- Panel de alta/edición estilo ops --}}
     <template x-teleport="body">
@@ -241,14 +237,13 @@
                     </div>
 
                     <div class="ops-panel__footer">
-                        <button type="button" class="btn btn-outline-secondary"
+                        <button type="button" class="footer-btn btn-ops-secondary"
                             onclick="cerrarOpsPanel('modalItem')">Cancelar</button>
-                        <button type="submit" class="btn btn-ops-primary" wire:loading.attr="disabled"
-                            wire:target="guardar">
+                        <x-btn-ops type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar">
                             <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
                             <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
                                 Guardando...</span>
-                        </button>
+                        </x-btn-ops>
                     </div>
                 </form>
             </div>

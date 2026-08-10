@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Item;
+use App\Models\ItemUnidad;
 use App\Models\User;
 
 class ItemPolicy
@@ -30,5 +31,20 @@ class ItemPolicy
     public function delete(User $user, Item $item): bool
     {
         return $user->isAdmin();
+    }
+    /**
+     * Marcar la unidad como en reparación.
+     */
+    public function marcarEnReparacion(User $user, ItemUnidad $itemUnidad): bool
+    {
+        return $user->isAdmin() || $user->HasPermisos('reparar_item_unidad');
+    }
+
+    /**
+     * Volver a marcar como disponible una unidad que estaba en reparación.
+     */
+    public function volverDeReparacion(User $user, ItemUnidad $itemUnidad): bool
+    {
+        return $user->isAdmin() || $user->HasPermisos('reparar_item_unidad');
     }
 }

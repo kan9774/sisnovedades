@@ -6,14 +6,22 @@
         </div>
     @endif
 
-    <div class="card">
-        <div class="card-header">
+    <x-ops-card title="Unidades individuales" eyebrow="BCOM1 · Inventario" icon="barcode">
+        <x-slot:actions>
+            @can('create', \App\Models\ItemUnidad::class)
+                <x-btn-ops variant="primary" icon="plus" wire:click="abrirModalAlta">
+                    Nueva unidad
+                </x-btn-ops>
+            @endcan
+        </x-slot:actions>
+
+        <x-slot:header>
             <div class="row align-items-center">
-                <div class="col-md-3">
-                    <input type="text" wire:model.live.debounce.400ms="busqueda"
-                           class="form-control" placeholder="Buscar por nº de serie...">
+                <div class="col-md-4">
+                    <input type="text" wire:model.live.debounce.400ms="busqueda" class="form-control"
+                        placeholder="Buscar por nº de serie...">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <select wire:model.live="filtroItemId" class="form-control">
                         <option value="">Todos los ítems</option>
                         @foreach ($items as $item)
@@ -21,7 +29,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <select wire:model.live="filtroEstado" class="form-control">
                         <option value="">Todos los estados</option>
                         <option value="disponible">Disponible</option>
@@ -30,19 +38,12 @@
                         <option value="baja">Dado de baja</option>
                     </select>
                 </div>
-                <div class="col-md-3 text-right">
-                    @can('create', \App\Models\ItemUnidad::class)
-                        <button wire:click="abrirModalAlta" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Nueva unidad
-                        </button>
-                    @endcan
-                </div>
             </div>
-        </div>
+        </x-slot:header>
 
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover">
-                <thead>
+        <div class="table-responsive">
+            <table class="table table-ops-hover mb-0">
+                <thead class="thead-ops">
                     <tr>
                         <th>Nº de serie</th>
                         <th>Ítem</th>
@@ -59,12 +60,13 @@
                             <td>{{ $unidad->numero_serie ?? '—' }}</td>
                             <td>{{ $unidad->item->nombre }}</td>
                             <td>
-                                <span class="badge
+                                <span
+                                    class="badge-ops
                                     @switch($unidad->estado)
-                                        @case('disponible') badge-success @break
-                                        @case('asignado') badge-info @break
-                                        @case('en_reparacion') badge-warning @break
-                                        @case('baja') badge-secondary @break
+                                        @case('disponible') badge-ops-success @break
+                                        @case('asignado') badge-ops-info @break
+                                        @case('en_reparacion') badge-ops-warning @break
+                                        @case('baja') badge-ops-secondary @break
                                     @endswitch
                                 ">
                                     {{ str_replace('_', ' ', ucfirst($unidad->estado)) }}
@@ -73,11 +75,13 @@
                             <td>
                                 @if ($unidad->vencimiento)
                                     @if ($unidad->estaVencida())
-                                        <span class="badge badge-danger" title="Venció el {{ $unidad->vencimiento->format('d/m/Y') }}">
+                                        <span class="badge-ops badge-ops-danger"
+                                            title="Venció el {{ $unidad->vencimiento->format('d/m/Y') }}">
                                             <i class="fas fa-exclamation-triangle"></i> Vencida
                                         </span>
                                     @else
-                                        <span class="text-muted small">{{ $unidad->vencimiento->format('d/m/Y') }}</span>
+                                        <span
+                                            class="text-muted small">{{ $unidad->vencimiento->format('d/m/Y') }}</span>
                                     @endif
                                 @else
                                     <span class="text-muted">—</span>
@@ -87,27 +91,61 @@
                             <td>{{ $unidad->responsable->name ?? '—' }}</td>
                             <td class="text-right">
                                 @if ($unidad->estado !== 'baja')
-                                    @can('asignar', $unidad)
-                                        <button wire:click="abrirModalAsignar({{ $unidad->id }})"
-                                                class="btn btn-sm btn-outline-primary" title="Asignar / transferir">
-                                            <i class="fas fa-exchange-alt"></i>
-                                        </button>
-                                    @endcan
-                                    @can('marcarEnReparacion', $unidad)
-                                        @if ($unidad->estado !== 'en_reparacion')
-                                            <button wire:click="marcarEnReparacion({{ $unidad->id }})"
-                                                    wire:confirm="¿Marcar esta unidad como en reparación?"
-                                                    class="btn btn-sm btn-outline-warning" title="Enviar a reparación">
-                                                <i class="fas fa-tools"></i>
-                                            </button>
-                                        @endif
-                                    @endcan
-                                    @can('darDeBaja', $unidad)
-                                        <button wire:click="abrirModalBaja({{ $unidad->id }})"
-                                                class="btn btn-sm btn-outline-danger" title="Dar de baja">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    @endcan
+                                    <x-ops-actions>
+                                        @can('asignar', $unidad)
+                                            <x-btn-ops variant="info" icon="exchange-alt" class="btn-ops-icon btn-ops-icon--sm"
+                                                wire:click="abrirModalAsignar({{ $unidad->id }})"
+                                                title="Asignar / transferir" />
+                                        @endcan
+
+                                        @can('marcarEnReparacion', $unidad)
+                                            @if ($unidad->estado !== 'en_reparacion')
+                                                @if ($unidad->ubicacionActual?->es_general)
+                                                    <x-btn-ops variant="warning" icon="tools" class="btn-ops-icon btn-ops-icon--sm"
+                                                        x-on:click="
+                                                            confirmarAccion({
+                                                                title: '¿Enviar a reparación?',
+                                                                text: '¿Marcar esta unidad como en reparación?',
+                                                                confirmButtonText: 'Sí, enviar',
+                                                                onConfirm: () => $wire.marcarEnReparacion({{ $unidad->id }}),
+                                                            })
+                                                        "
+                                                        title="Enviar a reparación" />
+                                                @else
+                                                    <x-btn-ops variant="warning" icon="tools" class="btn-ops-icon btn-ops-icon--sm"
+                                                        disabled
+                                                        title="Solo se puede enviar a reparación desde el Depósito General" />
+                                                @endif
+                                            @endif
+                                        @endcan
+
+                                        @can('volverDeReparacion', $unidad)
+                                            @if ($unidad->estado === 'en_reparacion')
+                                                <x-btn-ops variant="success" icon="check-circle" class="btn-ops-icon btn-ops-icon--sm"
+                                                    x-on:click="
+                                                        confirmarAccion({
+                                                            title: '¿Volver de reparación?',
+                                                            text: '¿Marcar esta unidad como disponible nuevamente?',
+                                                            confirmButtonText: 'Sí, marcar disponible',
+                                                            onConfirm: () => $wire.volverDeReparacion({{ $unidad->id }}),
+                                                        })
+                                                    "
+                                                    title="Volver de reparación (disponible)" />
+                                            @endif
+                                        @endcan
+
+                                        @can('darDeBaja', $unidad)
+                                            @if ($unidad->estado === 'en_reparacion' || $unidad->ubicacionActual?->es_general)
+                                                <x-btn-ops variant="danger" icon="trash" class="btn-ops-icon btn-ops-icon--sm"
+                                                    wire:click="abrirModalBaja({{ $unidad->id }})"
+                                                    title="Dar de baja" />
+                                            @else
+                                                <x-btn-ops variant="danger" icon="trash" class="btn-ops-icon btn-ops-icon--sm"
+                                                    disabled
+                                                    title="Solo se puede dar de baja desde el Depósito General" />
+                                            @endif
+                                        @endcan
+                                    </x-ops-actions>
                                 @else
                                     <span class="text-muted small">Sin acciones</span>
                                 @endif
@@ -124,185 +162,222 @@
             </table>
         </div>
 
-        <div class="card-footer">
+        <x-slot:footer>
             {{ $unidades->links() }}
-        </div>
-    </div>
+        </x-slot:footer>
+    </x-ops-card>
 
     {{-- Panel: alta de unidad (estilo ops) --}}
     <template x-teleport="body">
-    <div class="ops-panel-overlay" id="modalUnidadAlta" wire:ignore.self>
-        <div class="ops-panel">
-            <form wire:submit="darDeAlta" class="ops-panel__form">
-                <div class="ops-panel__header">
-                    <div class="ops-panel__title-wrap">
-                        <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
-                        <h5 class="ops-panel__title">Nueva unidad</h5>
+        <div class="ops-panel-overlay" id="modalUnidadAlta" wire:ignore.self>
+            <div class="ops-panel">
+                <form wire:submit="darDeAlta" class="ops-panel__form">
+                    <div class="ops-panel__header">
+                        <div class="ops-panel__title-wrap">
+                            <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
+                            <h5 class="ops-panel__title">Nueva unidad</h5>
+                        </div>
+                        <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalUnidadAlta')"
+                            title="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalUnidadAlta')" title="Cerrar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
 
-                <div class="ops-panel__body">
-                    <div class="ops-panel__content">
-                        <div class="form-group">
-                            <label>Ítem</label>
-                            <select wire:model.live="altaItemId" class="form-control @error('altaItemId') is-invalid @enderror">
-                                <option value="">Seleccionar...</option>
-                                @foreach ($items as $item)
-                                    <option value="{{ $item->id }}">{{ $item->codigo }} — {{ $item->nombre }}</option>
-                                @endforeach
-                            </select>
-                            @error('altaItemId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="form-group">
-                            <label>Número de serie (opcional)</label>
-                            <input type="text" wire:model="altaNumeroSerie" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Ubicación inicial</label>
-                            <select wire:model="altaUbicacionId" class="form-control @error('altaUbicacionId') is-invalid @enderror">
-                                <option value="">Seleccionar...</option>
-                                @foreach ($ubicaciones as $ubicacion)
-                                    <option value="{{ $ubicacion->id }}">{{ $ubicacion->nombre }}</option>
-                                @endforeach
-                            </select>
-                            @error('altaUbicacionId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-6">
-                                <label>Proveedor (opcional)</label>
-                                <select wire:model="altaProveedorId" class="form-control @error('altaProveedorId') is-invalid @enderror">
-                                    <option value="">Sin especificar</option>
-                                    @foreach ($proveedores as $proveedor)
-                                        <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+                    <div class="ops-panel__body">
+                        <div class="ops-panel__content">
+                            <div class="form-group">
+                                <label>Ítem</label>
+                                <select wire:model.live="altaItemId"
+                                    class="form-control @error('altaItemId') is-invalid @enderror">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach ($items as $item)
+                                        <option value="{{ $item->id }}">{{ $item->codigo }} — {{ $item->nombre }}
+                                        </option>
                                     @endforeach
                                 </select>
-                                @error('altaProveedorId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                                @error('altaItemId')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
                             </div>
-                            <div class="form-group col-md-6">
-                                <label>Fecha de recibido (opcional)</label>
-                                <input type="date" wire:model="altaFechaRecibido"
-                                       class="form-control @error('altaFechaRecibido') is-invalid @enderror">
-                                @error('altaFechaRecibido') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                                @if ($this->itemSeleccionadoTieneVidaUtil())
-                                    <small class="form-text text-muted">
-                                        Este ítem vence a los {{ $this->vidaUtilDelItemSeleccionado() }} meses de recibido.
-                                    </small>
-                                @endif
+                            <div class="form-group">
+                                <label>Número de serie (opcional)</label>
+                                <input type="text" wire:model="altaNumeroSerie" class="form-control">
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Motivo (opcional)</label>
-                            <input type="text" wire:model="altaMotivo" class="form-control" placeholder="ej: compra, donación...">
+                            <div class="form-group">
+                                <label>Ubicación inicial</label>
+                                <select wire:model="altaUbicacionId"
+                                    class="form-control @error('altaUbicacionId') is-invalid @enderror">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach ($ubicaciones as $ubicacion)
+                                        <option value="{{ $ubicacion->id }}">{{ $ubicacion->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('altaUbicacionId')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label>Proveedor (opcional)</label>
+                                    <select wire:model="altaProveedorId"
+                                        class="form-control @error('altaProveedorId') is-invalid @enderror">
+                                        <option value="">Sin especificar</option>
+                                        @foreach ($proveedores as $proveedor)
+                                            <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('altaProveedorId')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Fecha de recibido (opcional)</label>
+                                    <input type="date" wire:model="altaFechaRecibido"
+                                        class="form-control @error('altaFechaRecibido') is-invalid @enderror">
+                                    @error('altaFechaRecibido')
+                                        <span class="invalid-feedback d-block">{{ $message }}</span>
+                                    @enderror
+                                    @if ($this->itemSeleccionadoTieneVidaUtil())
+                                        <small class="form-text text-muted">
+                                            Este ítem vence a los {{ $this->vidaUtilDelItemSeleccionado() }} meses de
+                                            recibido.
+                                        </small>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Motivo (opcional)</label>
+                                <input type="text" wire:model="altaMotivo" class="form-control"
+                                    placeholder="ej: compra, donación...">
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="ops-panel__footer">
-                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalUnidadAlta')">Cancelar</button>
-                    <button type="submit" class="btn btn-ops-primary" wire:loading.attr="disabled" wire:target="darDeAlta">
-                        <span wire:loading.remove wire:target="darDeAlta"><i class="fas fa-save"></i> Dar de alta</span>
-                        <span wire:loading wire:target="darDeAlta"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
-                    </button>
-                </div>
-            </form>
+                    <div class="ops-panel__footer">
+                        <x-btn-ops variant="secondary" type="button" class="footer-btn"
+                            onclick="cerrarOpsPanel('modalUnidadAlta')">
+                            Cancelar
+                        </x-btn-ops>
+                        <x-btn-ops variant="primary" type="submit" wire:loading.attr="disabled"
+                            wire:target="darDeAlta">
+                            <span wire:loading.remove wire:target="darDeAlta"><i class="fas fa-save"></i> Dar de
+                                alta</span>
+                            <span wire:loading wire:target="darDeAlta"><i class="fas fa-spinner fa-spin"></i>
+                                Guardando...</span>
+                        </x-btn-ops>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
     </template>
 
     {{-- Panel: asignar / transferir (estilo ops) --}}
     <template x-teleport="body">
-    <div class="ops-panel-overlay" id="modalUnidadAsignar" wire:ignore.self>
-        <div class="ops-panel">
-            <form wire:submit="asignar" class="ops-panel__form">
-                <div class="ops-panel__header">
-                    <div class="ops-panel__title-wrap">
-                        <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
-                        <h5 class="ops-panel__title">Asignar / transferir unidad</h5>
+        <div class="ops-panel-overlay" id="modalUnidadAsignar" wire:ignore.self>
+            <div class="ops-panel">
+                <form wire:submit="asignar" class="ops-panel__form">
+                    <div class="ops-panel__header">
+                        <div class="ops-panel__title-wrap">
+                            <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
+                            <h5 class="ops-panel__title">Asignar / transferir unidad</h5>
+                        </div>
+                        <button type="button" class="ops-panel__close"
+                            onclick="cerrarOpsPanel('modalUnidadAsignar')" title="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalUnidadAsignar')" title="Cerrar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
 
-                <div class="ops-panel__body">
-                    <div class="ops-panel__content">
-                        <div class="form-group">
-                            <label>Nueva ubicación</label>
-                            <select wire:model="asignarUbicacionId" class="form-control @error('asignarUbicacionId') is-invalid @enderror">
-                                <option value="">Seleccionar...</option>
-                                @foreach ($ubicaciones as $ubicacion)
-                                    <option value="{{ $ubicacion->id }}">{{ $ubicacion->nombre }}</option>
-                                @endforeach
-                            </select>
-                            @error('asignarUbicacionId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="form-group">
-                            <label>Responsable (opcional)</label>
-                            <select wire:model="asignarResponsableId" class="form-control">
-                                <option value="">Sin responsable puntual</option>
-                                @foreach ($usuarios as $usuario)
-                                    <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Motivo (opcional)</label>
-                            <input type="text" wire:model="asignarMotivo" class="form-control">
+                    <div class="ops-panel__body">
+                        <div class="ops-panel__content">
+                            <div class="form-group">
+                                <label>Nueva ubicación</label>
+                                <select wire:model="asignarUbicacionId"
+                                    class="form-control @error('asignarUbicacionId') is-invalid @enderror">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach ($ubicaciones as $ubicacion)
+                                        <option value="{{ $ubicacion->id }}">{{ $ubicacion->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('asignarUbicacionId')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="form-group">
+                                <label>Responsable</label>
+                                <input type="text" class="form-control" value="{{ auth()->user()->name }} {{ auth()->user()->last_name }}"
+                                    disabled>
+                                <small class="form-text text-muted">Se asigna automáticamente a quien realiza la
+                                    operación.</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Motivo (opcional)</label>
+                                <input type="text" wire:model="asignarMotivo" class="form-control">
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="ops-panel__footer">
-                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalUnidadAsignar')">Cancelar</button>
-                    <button type="submit" class="btn btn-ops-primary" wire:loading.attr="disabled" wire:target="asignar">
-                        <span wire:loading.remove wire:target="asignar"><i class="fas fa-save"></i> Asignar</span>
-                        <span wire:loading wire:target="asignar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
-                    </button>
-                </div>
-            </form>
+                    <div class="ops-panel__footer">
+                        <x-btn-ops variant="secondary" type="button" class="footer-btn"
+                            onclick="cerrarOpsPanel('modalUnidadAsignar')">
+                            Cancelar
+                        </x-btn-ops>
+                        <x-btn-ops variant="primary" type="submit" wire:loading.attr="disabled"
+                            wire:target="asignar">
+                            <span wire:loading.remove wire:target="asignar"><i class="fas fa-save"></i> Asignar</span>
+                            <span wire:loading wire:target="asignar"><i class="fas fa-spinner fa-spin"></i>
+                                Guardando...</span>
+                        </x-btn-ops>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
     </template>
 
     {{-- Panel: dar de baja (estilo ops) --}}
     <template x-teleport="body">
-    <div class="ops-panel-overlay" id="modalUnidadBaja" wire:ignore.self>
-        <div class="ops-panel">
-            <form wire:submit="confirmarBaja" class="ops-panel__form">
-                <div class="ops-panel__header">
-                    <div class="ops-panel__title-wrap">
-                        <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
-                        <h5 class="ops-panel__title">Dar de baja unidad</h5>
+        <div class="ops-panel-overlay" id="modalUnidadBaja" wire:ignore.self>
+            <div class="ops-panel">
+                <form wire:submit="confirmarBaja" class="ops-panel__form">
+                    <div class="ops-panel__header">
+                        <div class="ops-panel__title-wrap">
+                            <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
+                            <h5 class="ops-panel__title">Dar de baja unidad</h5>
+                        </div>
+                        <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalUnidadBaja')"
+                            title="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalUnidadBaja')" title="Cerrar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
 
-                <div class="ops-panel__body">
-                    <div class="ops-panel__content">
-                        <p class="text-muted">Esta acción es definitiva: la unidad queda fuera de servicio.</p>
-                        <div class="form-group">
-                            <label>Motivo</label>
-                            <textarea wire:model="bajaMotivo" class="form-control @error('bajaMotivo') is-invalid @enderror" rows="3"></textarea>
-                            @error('bajaMotivo') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                    <div class="ops-panel__body">
+                        <div class="ops-panel__content">
+                            <p class="text-muted">Esta acción es definitiva: la unidad queda fuera de servicio.</p>
+                            <div class="form-group">
+                                <label>Motivo</label>
+                                <textarea wire:model="bajaMotivo" class="form-control @error('bajaMotivo') is-invalid @enderror" rows="3"></textarea>
+                                @error('bajaMotivo')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="ops-panel__footer">
-                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalUnidadBaja')">Cancelar</button>
-                    <button type="submit" class="btn btn-danger" wire:loading.attr="disabled" wire:target="confirmarBaja">
-                        <span wire:loading.remove wire:target="confirmarBaja"><i class="fas fa-trash"></i> Dar de baja</span>
-                        <span wire:loading wire:target="confirmarBaja"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
-                    </button>
-                </div>
-            </form>
+                    <div class="ops-panel__footer">
+                        <x-btn-ops variant="secondary" type="button" class="footer-btn"
+                            onclick="cerrarOpsPanel('modalUnidadBaja')">
+                            Cancelar
+                        </x-btn-ops>
+                        <x-btn-ops variant="danger" type="submit" wire:loading.attr="disabled"
+                            wire:target="confirmarBaja">
+                            <span wire:loading.remove wire:target="confirmarBaja"><i class="fas fa-trash"></i> Dar de
+                                baja</span>
+                            <span wire:loading wire:target="confirmarBaja"><i class="fas fa-spinner fa-spin"></i>
+                                Guardando...</span>
+                        </x-btn-ops>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
     </template>
 </div>
 
@@ -310,7 +385,7 @@
 @script
     <script>
         if (!window.cerrarOpsPanel) {
-            window.cerrarOpsPanel = function (id) {
+            window.cerrarOpsPanel = function(id) {
                 const overlay = document.getElementById(id);
                 if (overlay) overlay.classList.remove('is-open');
                 document.body.classList.remove('ops-panel-open');

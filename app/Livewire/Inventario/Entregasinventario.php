@@ -229,7 +229,7 @@ class EntregasInventario extends Component
         session()->flash('success', 'Entrega registrada correctamente.');
         $this->reset(['origenId', 'destinoId', 'motivo', 'lineas', 'lineaItemId', 'lineaCantidad', 'lineaItemUnidadId']);
     }
-    
+
 
     private function limpiarFormularioLinea(): void
     {
@@ -266,5 +266,9 @@ class EntregasInventario extends Component
             'items' => Item::orderBy('nombre')->get(),
             'unidadesCandidatas' => $this->unidadesCandidatas,
         ]);
+    }
+    public function cambiarTipo(string $tipo): void
+    {
+        $this->tipo = $tipo;
     }
 }

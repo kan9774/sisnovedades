@@ -15,9 +15,6 @@
                     <h3 class="profile-username text-center">
                         {{ $conductor->nombre_completo }}
                     </h3>
-                    <p class="text-muted text-center">
-                        {{ $conductor->grado }}
-                    </p>
                     <ul class="list-group list-group-unbordered mb-3">
                         <li class="list-group-item">
                             <b>Documento (Cédula)</b>
@@ -37,6 +34,14 @@
                                 class="float-right badge {{ $conductor->licencia_vigente ? 'badge-success' : 'badge-danger' }}">
                                 {{ $conductor->categoria_licencia }} -
                                 {{ $conductor->nro_licencia }}
+                            </span>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Carné Habilitante</b>
+                            <span
+                                class="float-right badge {{ $conductor->carne_habilitante_vigente ? 'badge-success' : 'badge-danger' }}">
+                               Nº: {{ $conductor->numero_carne_habilitante }} - 
+                                {{ $conductor->tipo_vehiculo_habilitado }}
                             </span>
                         </li>
                     </ul>
@@ -112,6 +117,7 @@
                                                     Lugar:
                                                     {{ $conductor->lugar_carne_salud ?? 'No especificado' }}
                                                 </small>
+    
                                                 <span class="text-sm font-weight-bold d-block mt-3">
                                                     Vence:
                                                     {{ $conductor->fecha_vencimiento_carne_salud->format('d/m/Y') }}
@@ -139,6 +145,10 @@
                                                 <small class="text-muted d-block">
                                                     Habilitado:
                                                     {{ $conductor->tipo_vehiculo_habilitado ?? 'General' }}
+                                                </small>
+                                                <small class="text-muted d-block">
+                                                    Nº:
+                                                    {{ $conductor->numero_carne_habilitante ?? 'N/A' }}
                                                 </small>
                                                 <span class="text-sm font-weight-bold d-block mt-2">
                                                     Vence:

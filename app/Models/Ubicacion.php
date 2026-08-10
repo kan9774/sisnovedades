@@ -9,13 +9,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Ubicacion extends Model
 {
     use HasFactory;
-     protected $table = 'ubicaciones';
+    protected $table = 'ubicaciones';
 
     protected $fillable = [
         'nombre',
         'tipo',
         'referencia_id',
+        'es_general',
     ];
+    protected $casts = [
+        'es_general' => 'boolean',
+    ];
+    public static function general(): self
+    {
+        return static::where('es_general', true)->firstOrFail();
+    }
 
     public function itemUnidades(): HasMany
     {

@@ -36,7 +36,6 @@ class UnidadesIndividuales extends Component
     public bool $mostrarModalAsignar = false;
     public ?int $unidadId = null;
     public ?int $asignarUbicacionId = null;
-    public ?int $asignarResponsableId = null;
     public ?string $asignarMotivo = null;
 
     // Modal: dar de baja
@@ -92,15 +91,20 @@ class UnidadesIndividuales extends Component
             return;
         }
 
-        app(InventarioService::class)->darDeAltaUnidad(
-            $item,
-            Ubicacion::findOrFail($datos['altaUbicacionId']),
-            Auth::user(),
-            $datos['altaNumeroSerie'],
-            $datos['altaMotivo'],
-            $datos['altaProveedorId'] ? Proveedor::findOrFail($datos['altaProveedorId']) : null,
-            $datos['altaFechaRecibido'],
-        );
+        try {
+            app(InventarioService::class)->darDeAltaUnidad(
+                $item,
+                Ubicacion::findOrFail($datos['altaUbicacionId']),
+                Auth::user(),
+                $datos['altaNumeroSerie'],
+                $datos['altaMotivo'],
+                $datos['altaProveedorId'] ? Proveedor::findOrFail($datos['altaProveedorId']) : null,
+                $datos['altaFechaRecibido'],
+            );
+        } catch (InvalidArgumentException $e) {
+            $this->addError('altaUbicacionId', $e->getMessage());
+            return;
+        }
 
         session()->flash('success', 'Unidad dada de alta correctamente.');
         $this->mostrarModalAlta = false;
@@ -119,7 +123,7 @@ class UnidadesIndividuales extends Component
         $this->authorize('asignar', $unidad);
 
         $this->unidadId = $unidad->id;
-        $this->reset(['asignarUbicacionId', 'asignarResponsableId', 'asignarMotivo']);
+        $this->reset(['asignarUbicacionId', 'asignarMotivo']);
         $this->resetErrorBag();
         $this->mostrarModalAsignar = true;
         $this->dispatch('abrir-modal-unidad-asignar');
@@ -132,7 +136,6 @@ class UnidadesIndividuales extends Component
 
         $datos = $this->validate([
             'asignarUbicacionId' => 'required|exists:ubicaciones,id',
-            'asignarResponsableId' => 'nullable|exists:users,id',
             'asignarMotivo' => 'nullable|string|max:255',
         ], [
             'asignarUbicacionId.required' => 'Seleccioná la ubicación de destino.',
@@ -150,11 +153,9 @@ class UnidadesIndividuales extends Component
             return;
         }
 
-        // El responsable directo es un dato propio de la unidad, no del
-        // movimiento — se guarda aparte si se indicó uno.
-        if ($datos['asignarResponsableId']) {
-            $unidad->update(['responsable_id' => $datos['asignarResponsableId']]);
-        }
+        // El responsable directo siempre es quien realiza la asignación,
+        // nunca un valor elegido por el usuario.
+        $unidad->update(['responsable_id' => Auth::id()]);
 
         session()->flash('success', 'Unidad asignada correctamente.');
         $this->mostrarModalAsignar = false;
@@ -172,7 +173,12 @@ class UnidadesIndividuales extends Component
         $unidad = ItemUnidad::findOrFail($unidadId);
         $this->authorize('marcarEnReparacion', $unidad);
 
-        app(InventarioService::class)->marcarEnReparacion($unidad, Auth::user());
+        try {
+            app(InventarioService::class)->marcarEnReparacion($unidad, Auth::user());
+        } catch (InvalidArgumentException $e) {
+            session()->flash('error', $e->getMessage());
+            return;
+        }
 
         session()->flash('success', 'Unidad marcada como en reparación.');
     }
@@ -248,9 +254,9 @@ class UnidadesIndividuales extends Component
     {
         $unidades = ItemUnidad::query()
             ->with(['item', 'ubicacionActual', 'responsable', 'proveedor'])
-            ->when($this->busqueda, fn ($q) => $q->where('numero_serie', 'like', "%{$this->busqueda}%"))
-            ->when($this->filtroItemId, fn ($q) => $q->where('item_id', $this->filtroItemId))
-            ->when($this->filtroEstado, fn ($q) => $q->where('estado', $this->filtroEstado))
+            ->when($this->busqueda, fn($q) => $q->where('numero_serie', 'like', "%{$this->busqueda}%"))
+            ->when($this->filtroItemId, fn($q) => $q->where('item_id', $this->filtroItemId))
+            ->when($this->filtroEstado, fn($q) => $q->where('estado', $this->filtroEstado))
             ->latest()
             ->paginate(15);
 
@@ -261,5 +267,19 @@ class UnidadesIndividuales extends Component
             'usuarios' => User::orderBy('name')->get(),
             'proveedores' => Proveedor::orderBy('nombre')->get(),
         ]);
+    }
+    public function volverDeReparacion(int $unidadId): void
+    {
+        $unidad = ItemUnidad::findOrFail($unidadId);
+        $this->authorize('volverDeReparacion', $unidad); // ⚠️ falta en la Policy, ver abajo
+
+        try {
+            app(InventarioService::class)->volverDeReparacion($unidad, Auth::user());
+        } catch (InvalidArgumentException $e) {
+            session()->flash('error', $e->getMessage());
+            return;
+        }
+
+        session()->flash('success', 'Unidad disponible nuevamente.');
     }
 }

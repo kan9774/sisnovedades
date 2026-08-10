@@ -18,7 +18,7 @@
             'historial-grados' => 'Grados',
             'csm' => 'C.S.M.',
             'cc' => 'C.C.',
-        ]" :active="$activeTab" />
+        ]" :active="$activeTab" :livewire="true" />
         <form id="userForm" wire:submit="save">
 
             {{-- TAB: GENERAL --}}
