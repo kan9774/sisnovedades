@@ -18,7 +18,6 @@ use App\Http\Controllers\NovedadPersonalController;
 use App\Http\Controllers\NovedadRanchoController;
 use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\UnidadController;
-use App\Http\Controllers\OficinaController;
 use App\Http\Controllers\PalomaController;
 use App\Http\Controllers\PalomarController;
 use App\Http\Controllers\PermisoController;
@@ -245,14 +244,9 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
         })->name('organismos.index');
 
         // Oficinas (catálogo, para notificaciones de novedades)
-        Route::prefix('oficinas')->name('oficinas.')->group(function () {
-            Route::get('/',              [OficinaController::class, 'index'])->name('index');
-            Route::get('/create',        [OficinaController::class, 'create'])->name('create');
-            Route::post('/',             [OficinaController::class, 'store'])->name('store');
-            Route::get('/{oficina}/edit', [OficinaController::class, 'edit'])->name('edit');
-            Route::put('/{oficina}',     [OficinaController::class, 'update'])->name('update');
-            Route::delete('/{oficina}',  [OficinaController::class, 'destroy'])->name('destroy');
-        });
+        Route::get('/oficinas', function () {
+            return view('livewire.oficinas.layout');
+        })->name('oficinas.index');
         // Tipos de vehículo (catálogo) - debe ir ANTES del grupo vehiculos/{vehiculo}
         Route::prefix('vehiculos/tipos')->name('vehiculos.tipos.')->group(function () {
             Route::get('/', [TipoVehiculoController::class, 'index'])->name('index');
