@@ -21,16 +21,16 @@
             'persona' => 'Persona',
         ];
         $tiposBadge = [
-            'deposito' => 'badge-secondary',
-            'oficina' => 'badge-info',
-            'vehiculo' => 'badge-warning',
-            'persona' => 'badge-success',
+            'deposito' => 'badge-ops-secondary',
+            'oficina' => 'badge-ops-info',
+            'vehiculo' => 'badge-ops-warning',
+            'persona' => 'badge-ops-success',
         ];
     @endphp
 
-    <div class="card">
-        <div class="card-header">
-            <div class="row align-items-center">
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="row align-items-center w-100 mx-0">
                 <div class="col-md-8">
                     <input type="text" wire:model.live.debounce.400ms="busqueda" class="form-control"
                         placeholder="Buscar por nombre...">
@@ -124,8 +124,8 @@
                         </div>
                         <div class="col-md-3">
                             <label class="font-weight-bold d-none d-md-block">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary btn-block" wire:loading.attr="disabled"
-                                wire:target="agregar">
+                            <button type="submit" class="btn-ops btn-ops-primary w-100 justify-content-center"
+                                wire:loading.attr="disabled" wire:target="agregar">
                                 <span wire:loading.remove wire:target="agregar"><i class="fas fa-plus"></i> Agregar</span>
                                 <span wire:loading wire:target="agregar"><i class="fas fa-spinner fa-spin"></i>
                                     Guardando...</span>
@@ -137,7 +137,7 @@
 
             {{-- TABLA --}}
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover table-ops-hover mb-0">
                     <thead class="thead-ops">
                         <tr>
                             <th>Nombre</th>
@@ -194,11 +194,12 @@
                                         @enderror
                                     </td>
                                     <td class="text-right">
-                                        <button wire:click="saveEdit" class="btn btn-success btn-sm" title="Guardar"
-                                            wire:loading.attr="disabled" wire:target="saveEdit">
+                                        <button wire:click="saveEdit" class="btn-ops btn-ops-success btn-ops-icon btn-ops-icon--sm"
+                                            title="Guardar" wire:loading.attr="disabled" wire:target="saveEdit">
                                             <i class="fas fa-check"></i>
                                         </button>
-                                        <button wire:click="cancelEdit" class="btn btn-outline-secondary btn-sm"
+                                        <button wire:click="cancelEdit"
+                                            class="footer-btn btn-ops-secondary btn-ops-icon btn-ops-icon--sm"
                                             title="Cancelar">
                                             <i class="fas fa-times"></i>
                                         </button>
@@ -207,11 +208,11 @@
                                     {{-- FILA NORMAL --}}
                                     <td>{{ $ubicacion->nombre }}</td>
                                     <td>
-                                        <span class="badge {{ $tiposBadge[$ubicacion->tipo] ?? 'badge-secondary' }}">
+                                        <span class="badge-ops {{ $tiposBadge[$ubicacion->tipo] ?? 'badge-ops-secondary' }}">
                                             {{ $tiposLabel[$ubicacion->tipo] ?? $ubicacion->tipo }}
                                         </span>
                                         @if ($ubicacion->es_general)
-                                            <span class="badge badge-dark" title="Ubicación central del sistema">
+                                            <span class="badge-ops badge-ops-dark" title="Ubicación central del sistema">
                                                 <i class="fas fa-star"></i> General
                                             </span>
                                         @endif
@@ -224,14 +225,14 @@
                                         @else
                                             @can('update', $ubicacion)
                                                 <button wire:click="startEdit({{ $ubicacion->id }})"
-                                                    class="btn btn-outline-secondary btn-sm" title="Editar">
+                                                    class="btn-ops btn-ops-warning btn-ops-icon btn-ops-icon--sm" title="Editar">
                                                     <i class="fas fa-pen"></i>
                                                 </button>
                                             @endcan
                                             @can('delete', $ubicacion)
                                                 <button wire:click="eliminar({{ $ubicacion->id }})"
                                                     wire:confirm="¿Eliminar esta ubicación?"
-                                                    class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                                    class="btn-ops btn-ops-danger btn-ops-icon btn-ops-icon--sm" title="Eliminar">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             @endcan

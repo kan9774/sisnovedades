@@ -13,9 +13,9 @@
         </div>
     @endif
 
-    <div class="card">
-        <div class="card-header">
-            <div class="row align-items-center">
+    <div class="card card-outline-ops">
+        <div class="card-header-ops">
+            <div class="row align-items-center w-100 mx-0">
                 <div class="col-md-8">
                     <input type="text" wire:model.live.debounce.400ms="busqueda"
                            class="form-control" placeholder="Buscar por nombre...">
@@ -47,7 +47,7 @@
                         </div>
                         <div class="col-md-2">
                             <label class="font-weight-bold d-none d-md-block">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary btn-block"
+                            <button type="submit" class="btn-ops btn-ops-primary w-100 justify-content-center"
                                     wire:loading.attr="disabled" wire:target="agregar">
                                 <span wire:loading.remove wire:target="agregar"><i class="fas fa-plus"></i> Agregar</span>
                                 <span wire:loading wire:target="agregar"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
@@ -59,7 +59,7 @@
 
             {{-- TABLA --}}
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover table-ops-hover mb-0">
                     <thead class="thead-ops">
                         <tr>
                             <th style="width: 25%">Nombre</th>
@@ -87,11 +87,11 @@
                                                class="form-control form-control-sm">
                                     </td>
                                     <td class="text-right">
-                                        <button wire:click="saveEdit" class="btn btn-success btn-sm" title="Guardar"
+                                        <button wire:click="saveEdit" class="btn-ops btn-ops-success btn-ops-icon btn-ops-icon--sm" title="Guardar"
                                                 wire:loading.attr="disabled" wire:target="saveEdit">
                                             <i class="fas fa-check"></i>
                                         </button>
-                                        <button wire:click="cancelEdit" class="btn btn-outline-secondary btn-sm" title="Cancelar">
+                                        <button wire:click="cancelEdit" class="footer-btn btn-ops-secondary btn-ops-icon btn-ops-icon--sm" title="Cancelar">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </td>
@@ -103,14 +103,14 @@
                                     <td class="text-right">
                                         @can('update', $proveedor)
                                             <button wire:click="startEdit({{ $proveedor->id }})"
-                                                    class="btn btn-outline-secondary btn-sm" title="Editar">
+                                                    class="btn-ops btn-ops-warning btn-ops-icon btn-ops-icon--sm" title="Editar">
                                                 <i class="fas fa-pen"></i>
                                             </button>
                                         @endcan
                                         @can('delete', $proveedor)
                                             <button wire:click="eliminar({{ $proveedor->id }})"
                                                     wire:confirm="¿Eliminar este proveedor?"
-                                                    class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                                    class="btn-ops btn-ops-danger btn-ops-icon btn-ops-icon--sm" title="Eliminar">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         @endcan

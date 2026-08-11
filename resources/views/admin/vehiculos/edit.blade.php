@@ -7,13 +7,15 @@
 @section('content_body')
     <div class="container-fluid">
         <div class="card card-outline-ops">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-truck text-primary"></i> Editar Vehículo: <strong>{{ $vehiculo->matricula }}</strong>
-                </h3>
+            <div class="card-header-ops">
+                <div class="card-header-ops__title-wrap">
+                    <h3 class="card-title-ops mb-0">
+                        <i class="fas fa-truck"></i> Editar Vehículo
+                        <span class="card-title-ops__suffix">{{ $vehiculo->matricula }}</span>
+                    </h3>
+                </div>
                 <div class="card-tools">
-                    <a href="{{ route('admin.vehiculos.index') }}" class="btn btn-outline-secondary btn-sm"
-                        style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);"
+                    <a href="{{ route('admin.vehiculos.index') }}" class="btn-ops btn-ops-secondary btn-sm"
                         aria-label="Volver al listado">
                         <i class="fas fa-arrow-left"></i> Volver
                     </a>
@@ -317,11 +319,11 @@
                             {{-- Si ya existe un acta guardada, la mostramos --}}
                             @if ($vehiculo->acta)
                                 <div class="mb-2 d-flex align-items-center">
-                                    <span class="badge badge-info mr-2 p-2">
+                                    <span class="badge-ops badge-ops-info mr-2 p-2">
                                         <i class="fas fa-file-alt"></i> Acta actual cargada
                                     </span>
                                     <a href="{{ asset('storage/' . $vehiculo->acta) }}" target="_blank"
-                                        class="btn btn-outline-info btn-xs mr-2">
+                                        class="btn-ops btn-ops-info btn-xs mr-2">
                                         <i class="fas fa-eye"></i> Ver / Descargar
                                     </a>
 
@@ -353,12 +355,10 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('admin.vehiculos.index') }}" class="btn btn-outline-secondary btn-sm"
-                            style="background-color: rgba(108, 117, 125, 0.08); border-color: rgba(108, 117, 125, 0.25);">
+                        <a href="{{ route('admin.vehiculos.index') }}" class="footer-btn btn-ops-secondary btn-sm">
                             <i class="fas fa-times"></i> Cancelar
                         </a>
-                        <button type="submit" class="btn btn-outline-primary btn-sm"
-                            style="background-color: rgba(0, 123, 255, 0.08); border-color: rgba(0, 123, 255, 0.25);">
+                        <button type="submit" class="btn-ops btn-ops-primary btn-sm">
                             <i class="fas fa-save"></i> Actualizar Vehículo
                         </button>
                     </div>
