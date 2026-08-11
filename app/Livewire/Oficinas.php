@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Oficina;
+use App\Traits\UsesBootstrapPagination;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
 use Livewire\WithPagination;
@@ -10,6 +11,7 @@ use Livewire\WithPagination;
 class Oficinas extends Component
 {
     use WithPagination;
+    use UsesBootstrapPagination;
 
     // ── Estado de búsqueda ──
     public $search = '';

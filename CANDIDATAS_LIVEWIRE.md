@@ -1,10 +1,23 @@
 # Candidatas a Migración de Blade → Livewire
 
 > Archivo generado con codebase-memory-mcp — Análisis del grafo de conocimiento del proyecto `novedades`.
+> Última actualización: 2025-08-10
 
 ## Contexto
 
 El proyecto usa Laravel 11 + Livewire 3 + Alpine.js. Ya existen **~30+ componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
+
+## Migraciones completadas
+
+| # | Componente | Nivel | Estado | Rutas web | Controlador eliminado |
+|---|------------|-------|--------|-----------|----------------------|
+| 1 | `Livewire\Oficinas` | 1 — Simple | ✅ MIGRADO | `Route::get('/oficinas', ...)` → `livewire.oficinas.layout` | `OficinaController.php` ✅ |
+| 2 | `Livewire\Permisos` | 2 — Intermedia | ✅ MIGRADO | `Route::get('/permisos', ...)` → `livewire.permisos.layout` | `PermisoController.php` ✅ |
+| 3 | `Livewire\Roles` | 2 — Intermedia | ✅ MIGRADO | `Route::get('/roles', ...)` → `livewire.roles.layout` | `RolController.php` ✅ |
+| 4 | `Livewire\Notificaciones` | 2 — Intermedia | ✅ MIGRADO | `Route::get('/notificaciones', ...)` → `livewire.notificaciones.layout` | `NotificationController::index/markAsRead/markAllAsRead` ✅ |
+
+**Patrón Nivel 1:** `#[Computed]` + `WithPagination` + `UsesBootstrapPagination` + `mount()` con `$this->authorize('viewAny')` + `updatedSearch()` con `$this->resetPage()` + formulario inline con `wire:confirm` para eliminar.
+**Patrón Nivel 2:** `#[Computed]` + sin paginación (->get()) + `mount()` con `$this->authorize('viewAny')` + `updatedSearch()` + modal de formulario con `x-ops-card` + `confirmDelete()` / `executeDelete()` + checkboxes de permisos agrupados por módulo (`agruparPermisosPorModulo` + `formatearNombreModulo`).
 
 ---
 
@@ -86,7 +99,7 @@ Estas son las más fáciles de migrar: una tabla con paginación, formulario de 
 
 | # | Vista Blade | Controlador | Modelo | Vistas | Complejidad | Notas |
 |---|-------------|-------------|--------|--------|-------------|-------|
-| 1 | `admin.oficinas.index` | `OficinaController` | `Oficina` | index, create, edit | ⭐ Simple | CRUD con `withCount('users')`, validación de usuarios asociados antes de eliminar |
+| ~~1~~ | ~~`admin.oficinas.index`~~ | ~~`OficinaController`~~ | ~~`Oficina`~~ | ~~index, create, edit~~ | ~~⭐ Simple~~ | ~~MIGRADO~~ |
 | 2 | `admin.organismos.index` | `OrganismoController` | `Organismo` | index, create, edit | ⭐ Simple | CRUD mínimo, solo campo `name`. Validación de novedades asociadas |
 | 3 | `admin.vehiculos.tipos.index` | `TipoVehiculoController` | `TipoVehiculo` | index, create, edit | ⭐ Simple | CRUD con campo `nombre`. Validación de vehículos asociados |
 | 4 | `admin.palomar.estados.index` | `EstadoPalomaController` | `EstadoPaloma` | index, create, edit | ⭐ Simple | CRUD mínimo para catálogo de estados |
@@ -101,9 +114,9 @@ Requieren selectores que cargan opciones de otros catálogos, o formularios con 
 
 | # | Vista Blade | Controlador | Modelo | Vistas | Complejidad | Notas |
 |---|-------------|-------------|--------|--------|-------------|-------|
-| 5 | `admin.permisos.index` | `PermisoController` | `Permission` | index, create, edit | ⭐⭐ Media | CRUD con `withCount('rols')`. Create/Edit necesita catálogo de `modulos` |
-| 6 | `admin.roles.index` | `RolController` | `Rol` | index, create, edit | ⭐⭐ Media | CRUD con `withCount('users')`. Create/Edit necesita checkboxes de permisos agrupados por módulo (`agruparPermisosPorModulo`) |
-| 7 | `admin.notificaciones.index` | `NotificationController` | `DatabaseNotification` | index | ⭐⭐ Media | Filtro (todas/no_leidas), paginación, acciones "marcar como leída" y "marcar todas" |
+| ~~5~~ | ~~`admin.permisos.index`~~ | ~~`PermisoController`~~ | ~~`Permission`~~ | ~~index, create, edit~~ | ~~⭐⭐ Media~~ | ~~MIGRADO~~ |
+| ~~6~~ | ~~`admin.roles.index`~~ | ~~`RolController`~~ | ~~`Rol`~~ | ~~index, create, edit~~ | ~~⭐⭐ Media~~ | ~~MIGRADO~~ |
+| ~~7~~ | ~~`admin.notificaciones.index`~~ | ~~`NotificationController`~~ | ~~`DatabaseNotification`~~ | ~~index~~ | ~~⭐⭐ Media~~ | ~~MIGRADO~~ |
 | 8 | `admin.logs.index` | `ActivityLogController` | `Activity` (spatie) | index | ⭐⭐ Media | Filtros múltiples (log_name, event, user_id, fecha). Paginación con query string |
 
 **Patrón a seguir:** `Documentos` (filtros reactivos + modal de formulario)
@@ -139,40 +152,43 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 | Categoría | Cantidad | Vistas Blade |
 |-----------|----------|--------------|
-| Nivel 1 — Simple | 4 | ~12 archivos |
-| Nivel 2 — Intermedia | 4 | ~10 archivos |
+| Nivel 1 — Simple | 3 (2 migrados) | ~9 archivos |
+| Nivel 2 — Intermedia | 3 (2 migrados) | ~7 archivos |
 | Nivel 3 — Alta | 5 | ~25 archivos |
 | Nivel 4 — Muy alta | 2 | ~15 archivos |
-| **Total** | **15** | **~62 archivos** |
+| **Total** | **13** | **~56 archivos** |
 
 ## Controladores que pueden eliminarse tras migración
 
-| Controlador | Rutas a migrar |
-|-------------|----------------|
-| `OficinaController` | 5 rutas (CRUD completo) |
-| `OrganismoController` | 5 rutas (CRUD completo) |
-| `TipoVehiculoController` | 5 rutas (CRUD completo) |
-| `EstadoPalomaController` | 3 rutas (index, create, edit) |
-| `PermisoController` | 5 rutas (CRUD completo) |
-| `RolController` | 5 rutas (CRUD + agrupación permisos) |
-| `NotificationController` | 4 rutas (index + acciones) |
-| `ActivityLogController` | 1 ruta (index con filtros) |
-| `ConductorController` | 5 rutas (CRUD completo) |
-| `VehiculoController` | 7 rutas (CRUD + export) |
-| `PalomarController` | 6 rutas (CRUD + reporte) |
-| `PalomaController` | 6 rutas (CRUD + historial) |
-| `VueloController` | 7 rutas (CRUD + resultados) |
-| `UserController` | 6 rutas (CRUD + incompletos) |
-| `GuardiaController` | 11 rutas (CRUD + estados) |
+| Controlador | Rutas a migrar | Estado |
+|-------------|----------------|--------|
+| ~~`OficinaController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
+| `OrganismoController` | 5 rutas (CRUD completo) | ⏳ Pendiente |
+| `TipoVehiculoController` | 5 rutas (CRUD completo) | ⏳ Pendiente |
+| `EstadoPalomaController` | 3 rutas (index, create, edit) | ⏳ Pendiente |
+| ~~`PermisoController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
+| `RolController` | 5 rutas (CRUD + agrupación permisos) | ⏳ Pendiente |
+| ~~`NotificationController`~~ | ~~index/markAsRead/markAllAsRead~~ | ~~✅ MIGRADO~~ |
+| `NotificationController` | `tomar()` (sigue en uso en web.php:260) | ⚠️ Parcial — solo index/markAsRead/markAllAsRead migrados |
+| `ActivityLogController` | 1 ruta (index con filtros) | ⏳ Pendiente |
+| `ConductorController` | 5 rutas (CRUD completo) | ⏳ Pendiente |
+| `VehiculoController` | 7 rutas (CRUD + export) | ⏳ Pendiente |
+| `PalomarController` | 6 rutas (CRUD + reporte) | ⏳ Pendiente |
+| `PalomaController` | 6 rutas (CRUD + historial) | ⏳ Pendiente |
+| `VueloController` | 7 rutas (CRUD + resultados) | ⏳ Pendiente |
+| `UserController` | 6 rutas (CRUD + incompletos) | ⏳ Pendiente |
+| `GuardiaController` | 11 rutas (CRUD + estados) | ⏳ Pendiente |
 
 ---
 
 ## Recomendación de orden de migración
 
-1. **Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza
-2. **Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros
-3. **Sprint 3:** Nivel 3 (Conductores, Vehiculos, Palomar, Palomas, Vuelos) — formularios complejos
-4. **Sprint 4:** Nivel 4 (Users, Guardias) — lógica de negocio crítica
+1. ~~**Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza~~ ✅ **Oficinas MIGRADO**
+2. ~~**Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros~~ ✅ **Permisos, Roles, Notificaciones MIGRADOS**
+3. **Sprint 3:** Nivel 1 restante (Organismos, TipoVehiculo, EstadoPaloma) — completar simple
+4. **Sprint 4:** Nivel 2 restante (Logs) — patrones de filtros
+5. **Sprint 5:** Nivel 3 (Conductores, Vehiculos, Palomar, Palomas, Vuelos) — formularios complejos
+6. **Sprint 6:** Nivel 4 (Users, Guardias) — lógica de negocio crítica
 
 ---
 

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\EntregaController;
 use App\Http\Controllers\AdjuntoController;
@@ -20,8 +19,6 @@ use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\PalomaController;
 use App\Http\Controllers\PalomarController;
-use App\Http\Controllers\PermisoController;
-use App\Http\Controllers\RolController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VueloController;
 use App\Models\Documento;
@@ -149,7 +146,9 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
         })->name('index');
 
         // Auditoría de acciones del sistema
-        Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
+        Route::get('/logs', function () {
+            return view('livewire.logs.layout');
+        })->name('logs.index');
 
         // Gestión de backups
         Route::get('/backup',      [BackupController::class, 'index'])->name('backup.index');
@@ -158,11 +157,25 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
         Route::post('/backup/{filename}/delete', [BackupController::class, 'delete'])->name('backup.delete');
 
         // Notificaciones
-        Route::prefix('notificaciones')->name('notificaciones.')->group(function () {
-            Route::get('/',                [NotificationController::class, 'index'])->name('index');
-            Route::post('/{id}/leer',      [NotificationController::class, 'markAsRead'])->name('leer');
-            Route::post('/marcar-todas',   [NotificationController::class, 'markAllAsRead'])->name('marcar-todas');
-        });
+        Route::get('/notificaciones', function () {
+            return view('livewire.notificaciones.layout');
+        })->name('notificaciones.index');
+
+        Route::post('/notificaciones/{id}/leer', function (string $id) {
+            $notificacion = auth()->user()->notifications()->findOrFail($id);
+            [$novedadId, $guardiaId] = \App\Services\NovedadService::marcarLeida($notificacion);
+
+            if ($novedadId && $guardiaId) {
+                return redirect()->route('admin.guardias.novedades.show', [$guardiaId, $novedadId]);
+            }
+
+            return back();
+        })->name('notificaciones.leer');
+
+        Route::post('/notificaciones/marcar-todas', function () {
+            auth()->user()->unreadNotifications->markAsRead();
+            return back()->with('success', 'Todas las notificaciones fueron marcadas como leídas.');
+        })->name('notificaciones.marcar-todas');
 
         // Novedades (vista general)
         Route::get('/novedades', [NovedadesController::class, 'index'])->name('novedades.index');
@@ -188,23 +201,13 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             Route::get('/userdelete',           [UserController::class, 'UserDelete'])->name('userdelete');
         });
         // Roles — solo admin
-        Route::prefix('roles')->name('roles.')->group(function () {
-            Route::get('/',              [RolController::class, 'index'])->name('index');
-            Route::get('/create',        [RolController::class, 'create'])->name('create');
-            Route::post('/',             [RolController::class, 'store'])->name('store');
-            Route::get('/{rol}/edit',    [RolController::class, 'edit'])->name('edit');
-            Route::put('/{rol}',         [RolController::class, 'update'])->name('update');
-            Route::delete('/{rol}',      [RolController::class, 'destroy'])->name('destroy');
-        });
+        Route::get('/roles', function () {
+            return view('livewire.roles.layout');
+        })->name('roles.index');
         // Permisos — solo admin
-        Route::prefix('permisos')->name('permisos.')->group(function () {
-            Route::get('/',                  [PermisoController::class, 'index'])->name('index');
-            Route::get('/create',            [PermisoController::class, 'create'])->name('create');
-            Route::post('/',                 [PermisoController::class, 'store'])->name('store');
-            Route::get('/{permiso}/edit',    [PermisoController::class, 'edit'])->name('edit');
-            Route::put('/{permiso}',         [PermisoController::class, 'update'])->name('update');
-            Route::delete('/{permiso}',      [PermisoController::class, 'destroy'])->name('destroy');
-        });
+        Route::get('/permisos', function () {
+            return view('livewire.permisos.layout');
+        })->name('permisos.index');
 
         // Destinatarios de PDF
         Route::get('/pdf-destinatarios', function () {
