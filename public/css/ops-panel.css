@@ -858,3 +858,332 @@ body.ops-panel-open {
     border-radius: 8px;
     border-top: 4px solid #FF5A1F;
 }
+
+/* ============================================
+   Conductor Detail Modal — Estilos mejorados
+   ============================================ */
+
+.ops-panel--conductor .ops-panel__content {
+    max-width: 720px;
+}
+
+.ops-panel--conductor .ops-panel__body {
+    padding-top: 1.25rem;
+    padding-bottom: 0.5rem;
+}
+
+/* Header con avatar */
+.ops-panel--conductor .ops-panel__header {
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.conductor-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FFD200 0%, #FBCB5B 100%);
+    color: #0B2545;
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 6px rgba(255, 210, 0, 0.3);
+}
+
+.ops-panel--conductor .ops-panel__eyebrow {
+    margin-bottom: 0;
+}
+
+.ops-panel--conductor .ops-panel__title {
+    font-size: 1.05rem;
+    line-height: 1.35;
+}
+
+/* Secciones dentro de tabs */
+.conductor-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem 1.15rem;
+    margin-bottom: 0.75rem;
+}
+
+.conductor-section:last-child {
+    margin-bottom: 0;
+}
+
+.conductor-section__title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #0B2545;
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid #FFD200;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.conductor-field {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+}
+
+.conductor-field + .conductor-field {
+    border-top: 1px solid #e9ecef;
+}
+
+.conductor-field__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6c757d;
+    min-width: 130px;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.conductor-field__label i {
+    width: 14px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: #0F3460;
+}
+
+.conductor-field__value {
+    font-size: 0.88rem;
+    color: #212529;
+    font-weight: 500;
+    flex: 1;
+}
+
+/* Badge de vigencia mejorado */
+.conductor-badge-vigencia {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.conductor-badge-vigencia--vigente {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.conductor-badge-vigencia--vencido {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.conductor-badge-vigencia--vigente i {
+    color: #28a745;
+}
+
+.conductor-badge-vigencia--vencido i {
+    color: #dc3545;
+}
+
+/* Observaciones con borde lateral */
+.conductor-observaciones {
+    border-left: 4px solid #FFD200;
+    background: #fffef5;
+    border-radius: 0 6px 6px 0;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.85rem;
+    color: #495057;
+    line-height: 1.55;
+    margin-top: 0.25rem;
+}
+
+/* Tabs — Documentación cards */
+.doc-card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+    transition: box-shadow 0.2s;
+    height: 100%;
+}
+
+.doc-card:hover {
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+}
+
+.doc-card__header {
+    background: linear-gradient(135deg, #0B2545 0%, #0F3460 100%);
+    border-bottom: 3px solid #FFD200;
+    padding: 0.65rem 0.85rem;
+}
+
+.doc-card__header h6 {
+    color: #fff;
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.doc-card__body {
+    padding: 0.85rem;
+}
+
+.doc-card__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 16px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.doc-card__status--vigente {
+    background: #d4edda;
+    color: #155724;
+}
+
+.doc-card__status--vencido {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.doc-card__row {
+    font-size: 0.8rem;
+    color: #6c757d;
+    padding: 0.15rem 0;
+}
+
+.doc-card__row strong {
+    color: #212529;
+    font-weight: 600;
+}
+
+.doc-card__empty {
+    text-align: center;
+    padding: 1.25rem 0.5rem;
+    color: #adb5bd;
+    font-size: 0.82rem;
+}
+
+/* Historial de salidas — cards en vez de tabla plana */
+.salida-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: #fff;
+}
+
+.salida-card:hover {
+    border-color: #FFD200;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.salida-card__icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+}
+
+.salida-card__icon--cerrada {
+    background: #d4edda;
+    color: #28a745;
+}
+
+.salida-card__icon--pendiente {
+    background: #f8d7da;
+    color: #dc3545;
+}
+
+.salida-card__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.salida-card__info h6 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin: 0 0 0.15rem;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.salida-card__info small {
+    font-size: 0.72rem;
+    color: #6c757d;
+}
+
+.salida-card__meta {
+    text-align: right;
+    min-width: 60px;
+}
+
+.salida-card__meta small {
+    display: block;
+    font-size: 0.72rem;
+    color: #6c757d;
+}
+
+.salida-card__meta strong {
+    display: block;
+    font-size: 0.82rem;
+    color: #212529;
+}
+
+.salida-card__badge {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Salidas preview en footer */
+.ops-panel--conductor .ops-panel__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.salidas-preview {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-align: center;
+    padding: 0.25rem 0;
+}
+
+.salidas-preview strong {
+    color: #0B2545;
+}
+
+/* Footer buttons */
+.ops-panel--conductor .ops-panel__footer .btn {
+    min-width: 100px;
+}

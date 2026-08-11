@@ -16,6 +16,7 @@ use App\Models\MantenimientoVehiculo;
 use App\Models\Movimiento;
 use App\Models\News;
 use App\Models\Oficina;
+use App\Models\Organismo;
 use App\Models\Paloma;
 use App\Models\Palomar;
 use App\Models\Proveedor;
@@ -45,6 +46,7 @@ use App\Policies\MantenimientoVehiculoPolicy;
 use App\Policies\MovimientoPolicy;
 use App\Policies\NovedadPolicy;
 use App\Policies\OficinaPolicy;
+use App\Policies\OrganismoPolicy;
 use App\Policies\PalomaPolicy;
 use App\Policies\PalomarPolicy;
 use App\Policies\ProveedorPolicy;
@@ -177,6 +179,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Talla::class, TallaPolicy::class);
         Gate::policy(Grado::class, GradoPolicy::class);
         Gate::policy(Oficina::class, OficinaPolicy::class);
+        Gate::policy(Organismo::class, OrganismoPolicy::class);
 
 
         // Observers
