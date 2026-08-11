@@ -314,10 +314,15 @@ class GuardiaController extends Controller
                 : 'Guardia cerrada correctamente.');
     }
 
-    public function pdf(Guard $guardia)
+    public function pdf(Guard $guardia, Request $request)
     {
-        $pdf = GuardiaPdfGenerator::generar($guardia);
+        $firmaSeleccionada = collect($request->input('firma', []))
+            ->intersect(['capitan', 'oficial'])
+            ->values()
+            ->all();
 
-        return $pdf->stream(GuardiaPdfGenerator::nombreArchivo($guardia));
+        $pdf = app(GuardiaPdfGenerator::class)->generar($guardia, firmaSeleccionada: $firmaSeleccionada);
+
+        return $pdf->stream("guardia-{$guardia->id}.pdf");
     }
 }

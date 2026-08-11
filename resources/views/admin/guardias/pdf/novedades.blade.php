@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <style>
-
         @page {
             margin-top: 30px;
             margin-right: 10px;
@@ -173,8 +172,7 @@
                         @php
                             $fechaNovedad = $novedad->time ? \Carbon\Carbon::parse($novedad->time) : null;
                             $esPrimeraDelDia =
-                                $fechaNovedad &&
-                                (!$fechaAnteriorFila || !$fechaNovedad->isSameDay($fechaAnteriorFila));
+                                $fechaNovedad && (!$fechaAnteriorFila || !$fechaNovedad->isSameDay($fechaAnteriorFila));
                             if ($esPrimeraDelDia) {
                                 $fechaAnteriorFila = $fechaNovedad->copy();
                             }
@@ -225,8 +223,7 @@
                         @php
                             $fechaNovedad = $novedad->time ? \Carbon\Carbon::parse($novedad->time) : null;
                             $esPrimeraDelDia =
-                                $fechaNovedad &&
-                                (!$fechaAnteriorFila || !$fechaNovedad->isSameDay($fechaAnteriorFila));
+                                $fechaNovedad && (!$fechaAnteriorFila || !$fechaNovedad->isSameDay($fechaAnteriorFila));
                             if ($esPrimeraDelDia) {
                                 $fechaAnteriorFila = $fechaNovedad->copy();
                             }
@@ -333,15 +330,16 @@
     {{-- Salidas de Vehículos --}}
     @php
         // Salidas que se originaron en esta guardia
-        $misSalidas = $guardia->salidasVehiculos()
+        $misSalidas = $guardia
+            ->salidasVehiculos()
             ->with(['vehiculo', 'conductor', 'boletaCierre'])
             ->get();
 
         // Salidas originadas en OTRA guardia pero cuya boleta de cierre
         // (regreso del vehículo) se registró en esta guardia
         $retornosDeOtrasGuardias = \App\Models\SalidaVehiculo::whereHas('boletaCierre', function ($q) use ($guardia) {
-                $q->where('guardia_id', $guardia->id);
-            })
+            $q->where('guardia_id', $guardia->id);
+        })
             ->where('guardia_id', '!=', $guardia->id)
             ->with(['vehiculo', 'conductor', 'guardia', 'boletaCierre'])
             ->get();
@@ -484,65 +482,101 @@
     @endif
 
     {{-- Firma --}}
-    <div style="margin-top: 40px; font-size: 11px;">
+    @php
+        $firmaSeleccionada = $firmaSeleccionada ?? [];
+        $mostrarCapitan = in_array('capitan', $firmaSeleccionada);
+        $mostrarOficial = in_array('oficial', $firmaSeleccionada);
+    @endphp
 
-        <table class="firma-tabla" style="width: 100%; border-collapse: collapse; page-break-inside: avoid;"
-            border="0">
-            <tr>
-                <td colspan="3" style="text-align: right; padding-right: 60px; border: none; font-size: 11px;">
-                    Cuartel en Peñarol,
-                    {{ $guardia->date->copy()->addDay()->format('d') }}0830{{ strtoupper($guardia->date->copy()->addDay()->format('My')) }}.
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3" style="text-align: right; padding-right: 60px; border: none; font-size: 11px;">
-                    El Ofl. de Día de la {{ config('organizacion.nombre') }}
-                </td>
-            </tr>
-            
-            <tr>
-                <td style="width: 25%; font-style: italic; vertical-align: bottom; text-align: right; border: none;">
-                    @if ($guardia->escribiente->first())
-                        {{ strtoupper(substr($guardia->escribiente->first()->name, 0, 1)) }}{{ strtoupper(substr($guardia->escribiente->first()->last_name, 0, 1)) }}.
-                    @endif
-                </td>
-                <td style="width: 50%; border: none;"></td>
-                <td colspan="3" style="text-align: left; padding-left: 35px; border: none; font-size: 11px;">
-                    {{ strtoupper($guardia->oficial->grade) }}<br>
-                    <div style="border-top: 1px solid #000; width: 150px;  margin-bottom: 3px;"></div>
-                    <p style="text-align: center; font-size: 11px;">
-                        {{ strtoupper($guardia->oficial->name) }} {{ strtoupper($guardia->oficial->last_name) }}.
-                    </p>
-                </td>
-            </tr>
-        </table>
+    @if ($mostrarCapitan || $mostrarOficial)
+        <div style="margin-top: 40px; font-size: 11px;">
+            <table class="firma-tabla" border="0">
+                <tr>
+                    <td colspan="3" style="text-align: right; padding-right: 60px; border: none; font-size: 11px;">
+                        Cuartel en Peñarol,
+                        {{ $guardia->date->copy()->addDay()->format('d') }}0830{{ strtoupper($guardia->date->copy()->addDay()->format('My')) }}.
+                    </td>
+                </tr>
 
-        {{-- Pie con jerarquías de la guardia --}}
-        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; page-break-inside: avoid;" border="0">
-            <tr>
-                <td style="border: none; font-size: 11px; padding: 2px 20px;">
-                    <strong>Capitán de Servicio:</strong>
-                    {{ strtoupper($guardia->capitan->grade) }} {{ strtoupper($guardia->capitan->name) }} {{ strtoupper($guardia->capitan->last_name) }}
-                </td>
-            </tr>
-            <tr>
-                <td style="border: none; font-size: 11px; padding: 2px 20px;">
-                    <strong>Oficial de Día:</strong>
-                    {{ strtoupper($guardia->oficial->grade) }} {{ strtoupper($guardia->oficial->name) }} {{ strtoupper($guardia->oficial->last_name) }}
-                </td>
-            </tr>
-            <tr>
-                <td style="border: none; font-size: 11px; padding: 2px 20px;">
-                    <strong>Escribiente de Servicio:</strong>
-                    @if ($guardia->escribiente->first())
-                        {{ strtoupper($guardia->escribiente->first()->grade) }} {{ strtoupper($guardia->escribiente->first()->name) }} {{ strtoupper($guardia->escribiente->first()->last_name) }}
-                    @else
-                        S/D
-                    @endif
-                </td>
-            </tr>
-        </table>
-    </div>
+                @if ($mostrarOficial)
+                    <tr>
+                        <td colspan="3"
+                            style="text-align: right; padding-right: 60px; border: none; font-size: 11px;">
+                            El Ofl. de Día de la {{ config('organizacion.nombre') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="width: 25%; font-style: italic; vertical-align: bottom; text-align: right; border: none;">
+                            @if ($guardia->escribiente->first())
+                                {{ strtoupper(substr($guardia->escribiente->first()->name, 0, 1)) }}{{ strtoupper(substr($guardia->escribiente->first()->last_name, 0, 1)) }}.
+                            @endif
+                        </td>
+                        <td style="width: 50%; border: none;"></td>
+                        <td colspan="3"
+                            style="text-align: left; padding-left: 35px; border: none; font-size: 11px;">
+                            {{ strtoupper($guardia->oficial->grade) }}<br>
+                            <div class="firma-linea" style="width: 150px;"></div>
+                            <p style="text-align: center; font-size: 11px;">
+                                {{ strtoupper($guardia->oficial->name) }}
+                                {{ strtoupper($guardia->oficial->last_name) }}.
+                            </p>
+                        </td>
+                    </tr>
+                @endif
+
+                @if ($mostrarCapitan)
+                    <tr>
+                        <td colspan="3"
+                            style="text-align: right; padding-right: 60px; border: none; font-size: 11px; {{ $mostrarOficial ? 'padding-top: 20px;' : '' }}">
+                            El Capitán de Servicio de la {{ config('organizacion.nombre') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: center; border: none; font-size: 11px;">
+                            {{ strtoupper($guardia->capitan->grade) }}<br>
+                            <div class="firma-linea" style="width: 150px; margin: 0 auto;"></div>
+                            <p style="text-align: center; font-size: 11px;">
+                                {{ strtoupper($guardia->capitan->name) }}
+                                {{ strtoupper($guardia->capitan->last_name) }}.
+                            </p>
+                        </td>
+                    </tr>
+                @endif
+            </table>
+
+            {{-- Pie informativo con jerarquías: se mantiene siempre, no es la firma en sí --}}
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; page-break-inside: avoid;"
+                border="0">
+                <tr>
+                    <td style="border: none; font-size: 11px; padding: 2px 20px;">
+                        <strong>Capitán de Servicio:</strong>
+                        {{ strtoupper($guardia->capitan->grade) }} {{ strtoupper($guardia->capitan->name) }}
+                        {{ strtoupper($guardia->capitan->last_name) }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: none; font-size: 11px; padding: 2px 20px;">
+                        <strong>Oficial de Día:</strong>
+                        {{ strtoupper($guardia->oficial->grade) }} {{ strtoupper($guardia->oficial->name) }}
+                        {{ strtoupper($guardia->oficial->last_name) }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: none; font-size: 11px; padding: 2px 20px;">
+                        <strong>Escribiente de Servicio:</strong>
+                        @if ($guardia->escribiente->first())
+                            {{ strtoupper($guardia->escribiente->first()->grade) }}
+                            {{ strtoupper($guardia->escribiente->first()->name) }}
+                            {{ strtoupper($guardia->escribiente->first()->last_name) }}
+                        @else
+                            S/D
+                        @endif
+                    </td>
+                </tr>
+            </table>
+        </div>
+    @endif
     @if ($incluirAdjuntos ?? false)
         @include('admin.guardias.pdf.anexos-recibidos', ['guardia' => $guardia])
     @endif

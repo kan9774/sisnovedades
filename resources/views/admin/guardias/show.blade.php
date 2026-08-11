@@ -59,14 +59,14 @@
 
             <x-slot:actions>
                 @can('update', $guardia)
-                    <a href="{{ route('admin.guardias.edit', $guardia) }}"
-                        class="btn-ops btn-ops-secondary btn-ops-icon" data-toggle="tooltip" title="Editar guardia">
+                    <a href="{{ route('admin.guardias.edit', $guardia) }}" class="btn-ops btn-ops-secondary btn-ops-icon"
+                        data-toggle="tooltip" title="Editar guardia">
                         <i class="fas fa-edit text-warning"></i>
                     </a>
                 @endcan
                 @can('cerrar', $guardia)
-                    <form id="form-cerrar-guardia" action="{{ route('admin.guardias.cerrar', $guardia) }}"
-                        method="POST" class="d-inline">
+                    <form id="form-cerrar-guardia" action="{{ route('admin.guardias.cerrar', $guardia) }}" method="POST"
+                        class="d-inline">
                         @csrf
                         <button type="button" class="btn-ops btn-ops-secondary btn-ops-icon" data-toggle="tooltip"
                             title="Cerrar guardia" onclick="confirmarCierre()">
@@ -75,8 +75,8 @@
                     </form>
                 @endcan
                 @can('reactivar', $guardia)
-                    <form id="form-reactivar-guardia" action="{{ route('admin.guardias.reactivar', $guardia) }}"
-                        method="POST" class="d-inline">
+                    <form id="form-reactivar-guardia" action="{{ route('admin.guardias.reactivar', $guardia) }}" method="POST"
+                        class="d-inline">
                         @csrf
                         <button type="button" class="btn-ops btn-ops-secondary btn-ops-icon" data-toggle="tooltip"
                             title="Reactivar guardia" onclick="confirmarReactivacion()">
@@ -85,8 +85,8 @@
                     </form>
                 @endcan
                 @can('delete', $guardia)
-                    <form id="form-eliminar-guardia" action="{{ route('admin.guardias.destroy', $guardia) }}"
-                        method="POST" class="d-inline">
+                    <form id="form-eliminar-guardia" action="{{ route('admin.guardias.destroy', $guardia) }}" method="POST"
+                        class="d-inline">
                         @csrf
                         @method('DELETE')
                         <button type="button" class="btn-ops btn-ops-secondary btn-ops-icon" data-toggle="tooltip"
@@ -113,7 +113,7 @@
                     <strong>Oficial de Día:</strong><br>
                     <span class="d-inline-flex align-items-center px-3 py-1 rounded border"
                         style="background-color: rgba(0, 255, 157, 0.178); border-color: rgba(0, 255, 21, 0.212); color: #007bff; font-size: 0.875rem;">
-                    {{ $guardia->oficial->grade }} {{ $guardia->oficial->name }} {{ $guardia->oficial->last_name }}
+                        {{ $guardia->oficial->grade }} {{ $guardia->oficial->name }} {{ $guardia->oficial->last_name }}
                     </span>
                 </div>
                 <div class="col-md-3">
@@ -131,11 +131,15 @@
                 </div>
                 <div class="col-md-3">
                     <strong>Imprimir Guardia:</strong><br>
-                    <a href="{{ route('admin.guardias.pdf', $guardia) }}"
+                    <a href="{{ route('admin.guardias.pdf', $guardia) }}" id="btnPdfDirecto"
                         class="btn btn-outline-danger btn-ml ml-1 align-items-center" data-toggle="tooltip"
-                        title="Imprimir Guardia" target="_blank">
+                        title="Imprimir Guardia (sin firma)" target="_blank">
                         <i class="fa-regular fa-file-pdf"></i>
                     </a>
+                    <button type="button" class="btn btn-outline-secondary btn-ml ml-1" data-toggle="modal"
+                        data-target="#modalFirmaPdf" data-toggle2="tooltip" title="Configurar firma del PDF">
+                        <i class="fas fa-signature"></i>
+                    </button>
                     @if ($puedeOperarGuardia)
                         <livewire:enviar-guardia-email :guardia="$guardia" :puede-operar-guardia="$puedeOperarGuardia" :key="'enviar-guardia-email-' . $guardia->id" />
                     @endif
@@ -147,6 +151,37 @@
                 </div>
             @endif
         </x-ops-card>
+        {{-- Modal: selección de firma para el PDF --}}
+        <div class="modal fade" id="modalFirmaPdf" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-signature"></i> Firma a incluir en el PDF</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">
+                            Seleccioná qué firma va al pie del documento. Si no marcás ninguna, el PDF se genera sin firma.
+                        </p>
+                        <div class="custom-control custom-checkbox mb-2">
+                            <input type="checkbox" class="custom-control-input" id="firmaCapitan" value="capitan">
+                            <label class="custom-control-label" for="firmaCapitan">Capitán de Servicio</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="firmaOficial" value="oficial">
+                            <label class="custom-control-label" for="firmaOficial">Oficial de Día</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-outline-danger" id="btnGenerarPdfFirma">
+                            <i class="fa-regular fa-file-pdf"></i> Generar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         {{-- Tabs --}}
         <div class="card-outline-ops mt-4">
@@ -268,5 +303,16 @@
                 onConfirm: () => document.getElementById('form-eliminar-guardia').submit(),
             });
         }
+        document.getElementById('btnGenerarPdfFirma').addEventListener('click', function() {
+            const firmas = [];
+            if (document.getElementById('firmaCapitan').checked) firmas.push('capitan');
+            if (document.getElementById('firmaOficial').checked) firmas.push('oficial');
+
+            const qs = firmas.map(f => `firma[]=${f}`).join('&');
+            const url = "{{ route('admin.guardias.pdf', $guardia) }}" + (qs ? `?${qs}` : '');
+
+            window.open(url, '_blank');
+            $('#modalFirmaPdf').modal('hide');
+        });
     </script>
 @endpush

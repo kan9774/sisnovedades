@@ -17,12 +17,13 @@ class GuardiaPdfGenerator
      * Se usa para el preview/render en la landing y para el envío
      * estándar por correo (sin adjuntos incrustados).
      */
-    public static function generar(Guard $guardia): PdfContract
+    public static function generar(Guard $guardia, array $firmaSeleccionada = []): PdfContract
     {
         self::cargarRelaciones($guardia);
 
         return Pdf::loadView('admin.guardias.pdf.novedades', [
             'guardia' => $guardia,
+            'firmaSeleccionada' => $firmaSeleccionada,
             'incluirAdjuntos' => false,
         ])->setPaper('a4', 'portrait');
     }
