@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\EntregaController;
 use App\Http\Controllers\AdjuntoController;
-use App\Http\Controllers\Admin\EstadoPalomaController;
 use App\Http\Controllers\ForzarCambioPasswordController;
 use App\Http\Controllers\NovedadesController;
 use App\Http\Controllers\GuardiaController;
@@ -15,7 +14,6 @@ use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NovedadPersonalController;
 use App\Http\Controllers\NovedadRanchoController;
-use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\PalomaController;
 use App\Http\Controllers\PalomarController;
@@ -251,14 +249,9 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             return view('livewire.oficinas.layout');
         })->name('oficinas.index');
         // Tipos de vehículo (catálogo) - debe ir ANTES del grupo vehiculos/{vehiculo}
-        Route::prefix('vehiculos/tipos')->name('vehiculos.tipos.')->group(function () {
-            Route::get('/', [TipoVehiculoController::class, 'index'])->name('index');
-            Route::get('/create', [TipoVehiculoController::class, 'create'])->name('create');
-            Route::post('/', [TipoVehiculoController::class, 'store'])->name('store');
-            Route::get('/{tipo}/edit', [TipoVehiculoController::class, 'edit'])->name('edit');
-            Route::put('/{tipo}', [TipoVehiculoController::class, 'update'])->name('update');
-            Route::delete('/{tipo}', [TipoVehiculoController::class, 'destroy'])->name('destroy');
-        });
+        Route::get('/vehiculos/tipos', function () {
+            return view('livewire.vehiculos.tipos.layout');
+        })->name('vehiculos.tipos.index');
 
         // Unidades - listado/alta/edición/borrado en Livewire (formulario inline, sin modales)
         Route::get('/unidades', function () {
@@ -319,10 +312,10 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             Route::resource('vuelos', VueloController::class)
                 ->parameters(['vuelos' => 'vuelo']);
 
-            Route::resource('estados-paloma', EstadoPalomaController::class)
-                ->parameters([
-                    'estados-paloma' => 'estado'
-                ]);
+            // Estados de paloma (Livewire, formulario inline sin modales)
+            Route::get('estados-paloma', function () {
+                return view('livewire.palomar.estados.layout');
+            })->name('palomar.estados-paloma.index');
         });
 
         // Rutas para administrar los documentos (Livewire)

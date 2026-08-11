@@ -19,6 +19,25 @@
 | 3 | `Livewire\Roles` | 2 — Intermedia | GET `/roles` → `livewire.roles.layout` | RolController eliminado |
 | 4 | `Livewire\Notificaciones` | 2 — Intermedia | GET `/notificaciones` → `livewire.notificaciones.layout` | NotificationController::index/markAsRead/markAllAsRead eliminados |
 | 5 | `Livewire\Logs` | 2 — Intermedia | GET `/logs` → `livewire.logs.layout` | ActivityLogController eliminado |
+| 6 | `Livewire\Organismos` | 1 — Simple | GET `/organismos` → `livewire.organismos.layout` | OrganismoController eliminado |
+| 7 | `Livewire\TiposVehiculo` | 1 — Simple | GET `/vehiculos/tipos` → `livewire.vehiculos.tipos.layout` | TipoVehiculoController eliminado |
+| 8 | `Livewire\EstadosPaloma` | 1 — Simple | GET `/palomar/estados-paloma` → `livewire.palomar.estados.layout` | EstadoPalomaController eliminado |
+
+## Patrón CRUD inline (Nivel 1 — campos simples)
+- `#[Computed]` + `WithPagination` + `UsesBootstrapPagination`
+- `mount()` con `$this->authorize('viewAny', Modelo::class)`
+- `updatedSearch()` con `resetPage()`
+- Formulario inline (sin modal x-teleport), campos directos en la tabla
+- `withCount('relacion')` para mostrar contadores en tabla
+- `eliminar($id)` con bloqueo por `relacion_count > 0`
+- Validación unique con tabla explícita: `unique:tabla,campo`
+- Policy registrada en AppServiceProvider con `Gate::policy(Modelo::class, ModeloPolicy::class)`
+
+## Patrón CRUD inline con checkbox 'activo' (Nivel 1 — campos simples)
+- Mismo patrón base + campo `activo` (boolean) con `wire:model` directo
+- Validación: `max:50` (TipoVehiculo), `max:100` (EstadoPaloma), `max:255` (Organismo)
+- `formActivo` como booleano, `formColor` nullable max:50 (texto libre)
+- Tabla muestra badge activo/inactivo según estado
 
 ## Patrón Livewire adoptado
 ```php
@@ -95,9 +114,6 @@ class Componente extends Component
 ## Pendientes
 | # | Componente | Nivel | Notas |
 |---|-----------|-------|-------|
-| 6 | Organismos | 1 — Simple | CRUD mínimo, solo campo name |
-| 7 | TipoVehiculo | 1 — Simple | CRUD con nombre |
-| 8 | EstadoPaloma | 1 — Simple | CRUD catálogo |
 | 9 | Conductores | 3 — Alta | 15+ campos, vencimientos |
 | 10 | Vehiculos | 3 — Alta | 15+ campos, 4 catálogos, upload acta, export Excel |
 | 11 | Palomar | 3 — Alta | CRUD + withCount + PDF |
@@ -106,7 +122,25 @@ class Componente extends Component
 | 14 | Users | 4 — Muy alta | Búsqueda multi-campo, leftJoin, soft delete |
 | 15 | Guardias | 4 — Muy alta | 242 líneas, múltiples estados, dependencias |
 
+## Políticas (Policies)
+| Modelo | Policy | Patrón |
+|--------|--------|--------|
+| `Oficina` | `OficinaPolicy` | `isAdmin()` |
+| `Organismo` | `OrganismoPolicy` | `isAdmin()` (4 métodos) |
+| `TipoVehiculo` | `TipoVehiculoPolicy` | `isSuperAdmin()` (más restrictivo) |
+| `EstadoPaloma` | `EstadoPalomaPolicy` | `isAdmin()` + `HasPermisos()` fallback |
+| `Rol` | `RolPolicy` | `isAdmin()` |
+
+## Modelos migrados recientemente
+| Modelo | Tabla | fillable | Relación bloqueo |
+|--------|-------|----------|-----------------|
+| `Organismo` | `organismos` | `['name']` | `novedades()` → hasMany(News) |
+| `TipoVehiculo` | `tipos_vehiculo` | `['nombre', 'activo']` | `vehiculos()` → hasMany(Vehiculo) |
+| `EstadoPaloma` | `estados_paloma` | `['nombre', 'color', 'activo']` | `palomas()` → hasMany(Paloma) |
+
 ## Notas de rutas web.php
 - Rutas migradas: `Route::get('/ruta', function () { return view('livewire.componente.layout'); })->name('componente.index');`
 - `use` del controlador eliminado de web.php
 - Controlador eliminado del filesystem tras verificar 0 referencias en proyecto
+- ⚠️ Bug preexistente: `EstadoPalomaController` usaba `redirect()->route('admin.estados-paloma.index')` pero la ruta real es `admin.palomar.estados-paloma.index`
+- Consumidores externos (VehiculoController, GuardiaController, EditarNovedadModal) usan Eloquent directo (`::where()->get()`), NO rutas de controller
