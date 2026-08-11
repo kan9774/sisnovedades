@@ -1,7 +1,7 @@
 # Contexto del Proyecto — novedades (Laravel 13 + Livewire 3)
 
 ## Stack
-- Laravel 11 + Livewire 3 + Alpine.js + Bootstrap 4.6.1
+- Laravel 13 + Livewire 3 + Alpine.js + Bootstrap 4.6.1
 - ~30+ componentes Livewire ya implementados
 - Patrón CRUD: tabla + modal ops-panel (x-teleport="body")
 - CSS compartido: `public/css/ops-panel.css`
@@ -114,7 +114,7 @@ class Componente extends Component
 ## Pendientes
 | # | Componente | Nivel | Notas |
 |---|-----------|-------|-------|
-| 9 | Conductores | 3 — Alta | 15+ campos, vencimientos |
+| ~~9~~ | ~~Conductores~~ | ~~3 — Alta~~ | ~~15+ campos, vencimientos~~ ✅ **MIGRADO** |
 | 10 | Vehiculos | 3 — Alta | 15+ campos, 4 catálogos, upload acta, export Excel |
 | 11 | Palomar | 3 — Alta | CRUD + withCount + PDF |
 | 12 | Palomas | 3 — Alta | Padre/madre, historial estados |

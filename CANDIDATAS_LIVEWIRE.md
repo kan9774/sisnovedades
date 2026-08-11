@@ -5,7 +5,7 @@
 
 ## Contexto
 
-El proyecto usa Laravel 11 + Livewire 3 + Alpine.js. Ya existen **~30+ componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
+El proyecto usa Laravel 13 + Livewire 3 + Alpine.js. Ya existen **~30+ componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
 
 ## Migraciones completadas
 
@@ -15,6 +15,11 @@ El proyecto usa Laravel 11 + Livewire 3 + Alpine.js. Ya existen **~30+ component
 | 2 | `Livewire\Permisos` | 2 — Intermedia | ✅ MIGRADO | `Route::get('/permisos', ...)` → `livewire.permisos.layout` | `PermisoController.php` ✅ |
 | 3 | `Livewire\Roles` | 2 — Intermedia | ✅ MIGRADO | `Route::get('/roles', ...)` → `livewire.roles.layout` | `RolController.php` ✅ |
 | 4 | `Livewire\Notificaciones` | 2 — Intermedia | ✅ MIGRADO | `Route::get('/notificaciones', ...)` → `livewire.notificaciones.layout` | `NotificationController::index/markAsRead/markAllAsRead` ✅ |
+| 5 | `Livewire\Logs` | 2 — Intermedia | ✅ MIGRADO | `Route::get('/logs', ...)` → `livewire.logs.layout` | `ActivityLogController` ✅ |
+| 6 | `Livewire\Organismos` | 1 — Simple | ✅ MIGRADO | `Route::get('/organismos', ...)` → `livewire.organismos.layout` | `OrganismoController` ✅ |
+| 7 | `Livewire\TiposVehiculo` | 1 — Simple | ✅ MIGRADO | `Route::get('/vehiculos/tipos', ...)` → `livewire.vehiculos.tipos.layout` | `TipoVehiculoController` ✅ |
+| 8 | `Livewire\EstadosPaloma` | 1 — Simple | ✅ MIGRADO | `Route::get('/palomar/estados-paloma', ...)` → `livewire.palomar.estados.layout` | `EstadoPalomaController` ✅ |
+| 9 | `Livewire\Conductores` | 3 — Alta | ✅ MIGRADO | `Route::get('/conductores', ...)` → `livewire.conductores.layout` | `ConductorController` ✅ |
 
 **Patrón Nivel 1:** `#[Computed]` + `WithPagination` + `UsesBootstrapPagination` + `mount()` con `$this->authorize('viewAny')` + `updatedSearch()` con `$this->resetPage()` + formulario inline con `wire:confirm` para eliminar.
 **Patrón Nivel 2:** `#[Computed]` + sin paginación (->get()) + `mount()` con `$this->authorize('viewAny')` + `updatedSearch()` + modal de formulario con `x-ops-card` + `confirmDelete()` / `executeDelete()` + checkboxes de permisos agrupados por módulo (`agruparPermisosPorModulo` + `formatearNombreModulo`).
@@ -100,9 +105,9 @@ Estas son las más fáciles de migrar: una tabla con paginación, formulario de 
 | # | Vista Blade | Controlador | Modelo | Vistas | Complejidad | Notas |
 |---|-------------|-------------|--------|--------|-------------|-------|
 | ~~1~~ | ~~`admin.oficinas.index`~~ | ~~`OficinaController`~~ | ~~`Oficina`~~ | ~~index, create, edit~~ | ~~⭐ Simple~~ | ~~MIGRADO~~ |
-| 2 | `admin.organismos.index` | `OrganismoController` | `Organismo` | index, create, edit | ⭐ Simple | CRUD mínimo, solo campo `name`. Validación de novedades asociadas |
-| 3 | `admin.vehiculos.tipos.index` | `TipoVehiculoController` | `TipoVehiculo` | index, create, edit | ⭐ Simple | CRUD con campo `nombre`. Validación de vehículos asociados |
-| 4 | `admin.palomar.estados.index` | `EstadoPalomaController` | `EstadoPaloma` | index, create, edit | ⭐ Simple | CRUD mínimo para catálogo de estados |
+| 2 | `admin.organismos.index` | `OrganismoController` | `Organismo` | index, create, edit | ⭐ Simple | ✅ MIGRADO |
+| 3 | `admin.vehiculos.tipos.index` | `TipoVehiculoController` | `TipoVehiculo` | index, create, edit | ⭐ Simple | ✅ MIGRADO |
+| 4 | `admin.palomar.estados.index` | `EstadoPalomaController` | `EstadoPaloma` | index, create, edit | ⭐ Simple | ✅ MIGRADO |
 
 **Patrón a seguir:** `CategoriasDocumentos` (CRUD inline con edición fila por fila)
 
@@ -117,7 +122,7 @@ Requieren selectores que cargan opciones de otros catálogos, o formularios con 
 | ~~5~~ | ~~`admin.permisos.index`~~ | ~~`PermisoController`~~ | ~~`Permission`~~ | ~~index, create, edit~~ | ~~⭐⭐ Media~~ | ~~MIGRADO~~ |
 | ~~6~~ | ~~`admin.roles.index`~~ | ~~`RolController`~~ | ~~`Rol`~~ | ~~index, create, edit~~ | ~~⭐⭐ Media~~ | ~~MIGRADO~~ |
 | ~~7~~ | ~~`admin.notificaciones.index`~~ | ~~`NotificationController`~~ | ~~`DatabaseNotification`~~ | ~~index~~ | ~~⭐⭐ Media~~ | ~~MIGRADO~~ |
-| 8 | `admin.logs.index` | `ActivityLogController` | `Activity` (spatie) | index | ⭐⭐ Media | Filtros múltiples (log_name, event, user_id, fecha). Paginación con query string |
+| 8 | `admin.logs.index` | `ActivityLogController` | `Activity` (spatie) | index | ⭐⭐ Media | ✅ MIGRADO |
 
 **Patrón a seguir:** `Documentos` (filtros reactivos + modal de formulario)
 
@@ -129,7 +134,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 | # | Vista Blade | Controlador | Modelo | Vistas | Complejidad | Notas |
 |---|-------------|-------------|--------|--------|-------------|-------|
-| 9 | `admin.conductores.*` | `ConductorController` | `Conductor` | index, create, show, edit | ⭐⭐⭐ Alta | 15+ campos, fechas de vencimiento, validaciones de licencia. Controller tiene `show` con historial de salidas |
+| 9 | `admin.conductores.*` | `ConductorController` | `Conductor` | index, create, show, edit | ⭐⭐⭐ Alta | ✅ MIGRADO |
 | 10 | `admin.vehiculos.*` | `VehiculoController` | `Vehiculo` | index, create, show, edit | ⭐⭐⭐ Alta | 15+ campos, 4 catálogos dependientes (tipo_vehiculo, combustible, lubricante, rodado), upload de acta, export Excel |
 | 11 | `admin.palomar.palomares.*` | `PalomarController` | `Palomar` | index, create, show, edit | ⭐⭐⭐ Alta | CRUD con `withCount('palomas')`, validación de palomas asociadas, reporte PDF |
 | 12 | `admin.palomar.palomas.*` | `PalomaController` | `Paloma` | index, create, show, edit | ⭐⭐⭐ Alta | Formulario complejo: padre/madre con validación de sexo, historial de estados, relaciones múltiples |
@@ -152,26 +157,26 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 | Categoría | Cantidad | Vistas Blade |
 |-----------|----------|--------------|
-| Nivel 1 — Simple | 3 (2 migrados) | ~9 archivos |
-| Nivel 2 — Intermedia | 3 (2 migrados) | ~7 archivos |
-| Nivel 3 — Alta | 5 | ~25 archivos |
+| Nivel 1 — Simple | 4 (4 migrados) | ~12 archivos |
+| Nivel 2 — Intermedia | 3 (3 migrados) | ~7 archivos |
+| Nivel 3 — Alta | 5 (1 migrado) | ~25 archivos |
 | Nivel 4 — Muy alta | 2 | ~15 archivos |
-| **Total** | **13** | **~56 archivos** |
+| **Total** | **14** (9 migrados) | **~57 archivos** |
 
 ## Controladores que pueden eliminarse tras migración
 
 | Controlador | Rutas a migrar | Estado |
 |-------------|----------------|--------|
 | ~~`OficinaController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
-| `OrganismoController` | 5 rutas (CRUD completo) | ⏳ Pendiente |
-| `TipoVehiculoController` | 5 rutas (CRUD completo) | ⏳ Pendiente |
-| `EstadoPalomaController` | 3 rutas (index, create, edit) | ⏳ Pendiente |
+| ~~`OrganismoController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
+| ~~`TipoVehiculoController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
+| ~~`EstadoPalomaController`~~ | ~~3 rutas (index, create, edit)~~ | ~~✅ ELIMINADO~~ |
 | ~~`PermisoController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
-| `RolController` | 5 rutas (CRUD + agrupación permisos) | ⏳ Pendiente |
+| ~~`RolController`~~ | ~~5 rutas (CRUD + agrupación permisos)~~ | ~~✅ ELIMINADO~~ |
 | ~~`NotificationController`~~ | ~~index/markAsRead/markAllAsRead~~ | ~~✅ MIGRADO~~ |
 | `NotificationController` | `tomar()` (sigue en uso en web.php:260) | ⚠️ Parcial — solo index/markAsRead/markAllAsRead migrados |
-| `ActivityLogController` | 1 ruta (index con filtros) | ⏳ Pendiente |
-| `ConductorController` | 5 rutas (CRUD completo) | ⏳ Pendiente |
+| `ActivityLogController` | 1 ruta (index con filtros) | ✅ ELIMINADO |
+| ~~`ConductorController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
 | `VehiculoController` | 7 rutas (CRUD + export) | ⏳ Pendiente |
 | `PalomarController` | 6 rutas (CRUD + reporte) | ⏳ Pendiente |
 | `PalomaController` | 6 rutas (CRUD + historial) | ⏳ Pendiente |
@@ -183,12 +188,10 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 ## Recomendación de orden de migración
 
-1. ~~**Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza~~ ✅ **Oficinas MIGRADO**
-2. ~~**Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros~~ ✅ **Permisos, Roles, Notificaciones MIGRADOS**
-3. **Sprint 3:** Nivel 1 restante (Organismos, TipoVehiculo, EstadoPaloma) — completar simple
-4. **Sprint 4:** Nivel 2 restante (Logs) — patrones de filtros
-5. **Sprint 5:** Nivel 3 (Conductores, Vehiculos, Palomar, Palomas, Vuelos) — formularios complejos
-6. **Sprint 6:** Nivel 4 (Users, Guardias) — lógica de negocio crítica
+1. **Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza ✅ **COMPLETADO**
+2. **Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros ✅ **COMPLETADO**
+3. **Sprint 3:** Nivel 3 restante (Vehiculos, Palomar, Palomas, Vuelos) — formularios complejos
+4. **Sprint 4:** Nivel 4 (Users, Guardias) — lógica de negocio crítica
 
 ---
 

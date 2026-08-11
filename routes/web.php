@@ -7,8 +7,8 @@ use App\Http\Controllers\ForzarCambioPasswordController;
 use App\Http\Controllers\NovedadesController;
 use App\Http\Controllers\GuardiaController;
 use App\Http\Controllers\UserController;
+
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\ConductorController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\NotificationController;
@@ -281,9 +281,10 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             });
         });
 
-        // Conductores - CRUD completo
-        Route::resource('conductores', ConductorController::class)
-            ->parameters(['conductores' => 'conductor']); // Opcional: si no necesitas vista show
+        // Conductores - Livewire
+        Route::get('/conductores', function () {
+            return view('livewire.conductores.layout');
+        })->name('conductores.index');
 
         // Novedades de personal y rancho (anidadas a guardia)
         Route::prefix('guardias/{guardia}')->name('guardias.')->group(function () {
