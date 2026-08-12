@@ -1,7 +1,7 @@
 # Candidatas a Migración de Blade → Livewire
 
 > Archivo generado con codebase-memory-mcp — Análisis del grafo de conocimiento del proyecto `novedades`.
-> Última actualización: 2026-08-11
+> Última actualización: 2026-08-12
 
 ## Contexto
 
@@ -150,7 +150,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | # | Vista Blade | Controlador | Modelo | Vistas | Complejidad | Notas |
 |---|-------------|-------------|--------|--------|-------------|-------|
 | 14 | `admin.users.index` | `UserController` | `User` | index, userdelete | ⭐⭐⭐⭐ Muy alta | Búsqueda multi-campo, paginación con `leftJoin` para orden jerárquico, usuarios incompletos, soft delete, force delete, destroyIncompleto con transacción |
-| 15 | `admin.guardias.*` | `GuardiaController` | `Guard` | index, create, show, edit, trashed | ⭐⭐⭐⭐ Muy alta | 242 líneas. Estados: crear, cerrar, reactivar, restaurar, force-delete. Dependencias: capitanes, oficiales, escribientes, tipos_vehiculo. Show con carga masiva de relaciones |
+| ~~15~~ | ~~`admin.guardias.*`~~ | ~~`GuardiaController`~~ | ~~`Guard`~~ | ~~index, create, show, edit, trashed~~ | ~~⭐⭐⭐⭐ Muy alta~~ | ~~✅ MIGRADO (Fase 4: cerrar/reactivar desde show.blade.php → `GuardiaAcciones` component. CRUD, papelera, cerrar/reactivar/pdf desde tabla migrados en `Guardias` component. Controller reducido a show()/Hoy()/pdf()~~ |
 
 ---
 
@@ -161,8 +161,8 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | Nivel 1 — Simple | 4 (4 migrados) | ~12 archivos |
 | Nivel 2 — Intermedia | 3 (3 migrados) | ~7 archivos |
 | Nivel 3 — Alta | 5 (2 migrados) | ~25 archivos |
-| Nivel 4 — Muy alta | 2 | ~15 archivos |
-| **Total** | **14** (10 migrados) | **~57 archivos** |
+| Nivel 4 — Muy alta | 1 (1 migrado) | ~5 archivos |
+| **Total** | **14** (11 migrados) | **~47 archivos** |
 
 ## Controladores que pueden eliminarse tras migración
 
@@ -183,7 +183,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | `PalomaController` | 6 rutas (CRUD + historial) | ⏳ Pendiente |
 | `VueloController` | 7 rutas (CRUD + resultados) | ⏳ Pendiente |
 | `UserController` | 6 rutas (CRUD + incompletos) | ⏳ Pendiente |
-| `GuardiaController` | 11 rutas (CRUD + estados) | ⏳ Pendiente |
+| ~~`GuardiaController`~~ | ~~8 rutas (CRUD + cerrar + reactivar)~~ | ~~✅ MIGRADO (reducido a show()/Hoy()/pdf())~~ |
 
 ---
 
@@ -192,7 +192,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 1. **Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza ✅ **COMPLETADO**
 2. **Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros ✅ **COMPLETADO**
 3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar, Palomas, Vuelos) — formularios complejos
-4. **Sprint 4:** Nivel 4 (Users, Guardias) — lógica de negocio crítica
+4. **Sprint 4:** Nivel 4 (Users) — lógica de negocio crítica ✅ Guardias **COMPLETADO**
 
 ---
 
@@ -207,3 +207,5 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 ---
 
 > **Nota (2026-08-11):** `VehiculoController.php` y las vistas `admin/vehiculos/*.blade.php` (excepto `mantenimientos/`) se conservan en el filesystem sin uso tras la migración a Livewire. Quedan pendientes de borrado manual una vez confirmado en navegador que el módulo `livewire.vehiculos.*` funciona correctamente.
+
+> **Nota (2026-08-12):** Guardias migrado en 4 fases. Fase 4 (esta): `GuardiaAcciones` component reemplaza forms POST a cerrar/reactivar en show.blade.php. `GuardiaController` reducido a 3 métodos (show/Hoy/pdf). Vistas admin/guardias/{create,edit,index}.blade.php eliminadas. Rutas admin.guardias.cerrar/reactivar eliminadas.

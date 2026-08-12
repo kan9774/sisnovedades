@@ -25,14 +25,10 @@
             <div class="alert alert-warning alert-dismissible">
                 {{ session('warning') }}
                 @if ($guardia->status === 'open')
-                    <form id="form-cerrar-forzado" action="{{ route('admin.guardias.cerrar', $guardia) }}" method="POST"
-                        class="d-inline ml-2">
-                        @csrf
-                        <input type="hidden" name="forzar" value="1">
-                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="confirmarCierreForzado()">
-                            Cerrar con novedades sin resolver
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-dark"
+                        wire:click="$dispatchTo('guardia-acciones-{{ $guardia->id }}', 'cerrarForzadoDesdeAlerta')">
+                        Cerrar con novedades sin resolver
+                    </button>
                 @endif
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
             </div>
@@ -58,32 +54,7 @@
             </x-slot:titleSuffix>
 
             <x-slot:actions>
-                @can('update', $guardia)
-                    <a href="{{ route('admin.guardias.edit', $guardia) }}" class="btn-ops btn-ops-secondary btn-ops-icon"
-                        data-toggle="tooltip" title="Editar guardia">
-                        <i class="fas fa-edit text-warning"></i>
-                    </a>
-                @endcan
-                @can('cerrar', $guardia)
-                    <form id="form-cerrar-guardia" action="{{ route('admin.guardias.cerrar', $guardia) }}" method="POST"
-                        class="d-inline">
-                        @csrf
-                        <button type="button" class="btn-ops btn-ops-secondary btn-ops-icon" data-toggle="tooltip"
-                            title="Cerrar guardia" onclick="confirmarCierre()">
-                            <i class="fas fa-lock text-danger"></i>
-                        </button>
-                    </form>
-                @endcan
-                @can('reactivar', $guardia)
-                    <form id="form-reactivar-guardia" action="{{ route('admin.guardias.reactivar', $guardia) }}" method="POST"
-                        class="d-inline">
-                        @csrf
-                        <button type="button" class="btn-ops btn-ops-secondary btn-ops-icon" data-toggle="tooltip"
-                            title="Reactivar guardia" onclick="confirmarReactivacion()">
-                            <i class="fas fa-lock-open text-warning"></i>
-                        </button>
-                    </form>
-                @endcan
+                @livewire('guardia-acciones', ['guardia' => $guardia], key('guardia-acciones-' . $guardia->id))
                 @can('delete', $guardia)
                     <form id="form-eliminar-guardia" action="{{ route('admin.guardias.destroy', $guardia) }}" method="POST"
                         class="d-inline">
@@ -266,34 +237,6 @@
                 history.replaceState(null, null, e.target.hash);
             });
         });
-
-        function confirmarCierre() {
-            confirmarAccion({
-                title: '¿Cerrar la guardia?',
-                icon: 'question',
-                confirmButtonText: 'Sí, cerrar',
-                onConfirm: () => document.getElementById('form-cerrar-guardia').submit(),
-            });
-        }
-
-        function confirmarCierreForzado() {
-            confirmarAccion({
-                title: '¿Cerrar guardia con novedades sin resolver?',
-                text: 'Esta acción queda registrada en el historial de auditoría.',
-                confirmButtonText: 'Sí, cerrar de todas formas',
-                onConfirm: () => document.getElementById('form-cerrar-forzado').submit(),
-            });
-        }
-
-        function confirmarReactivacion() {
-            confirmarAccion({
-                title: '¿Reactivar la guardia?',
-                icon: 'question',
-                confirmButtonText: 'Sí, reactivar',
-                confirmButtonColor: '#ffc107',
-                onConfirm: () => document.getElementById('form-reactivar-guardia').submit(),
-            });
-        }
 
         function confirmarEliminacionGuardia() {
             confirmarAccion({

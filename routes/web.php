@@ -19,6 +19,7 @@ use App\Http\Controllers\PalomaController;
 use App\Http\Controllers\PalomarController;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VueloController;
+use App\Livewire\Guardias;
 use App\Models\Documento;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -226,19 +227,17 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             Route::get('/{adjunto}/download', [AdjuntoController::class, 'download'])->name('download');
         });
 
-        // Verificar que todas usen GuardiaController (con doble 'l')
-        Route::put('guardias/{guardia}', [GuardiaController::class, 'update'])->name('guardias.update');
-        Route::get('guardias/{guardia}/edit', [GuardiaController::class, 'edit'])->name('guardias.edit');
-        Route::get('/guardias/hoy', [GuardiaController::class, 'hoy'])->name('guardias.hoy');
-        Route::get('/guardias/trashed', [GuardiaController::class, 'trashed'])->name('guardias.trashed');
-        Route::resource('guardias', GuardiaController::class)->only(['index', 'create', 'store', 'show']);
-        Route::post('/guardias/{guardia}/cerrar', [GuardiaController::class, 'cerrar'])->name('guardias.cerrar');
-        Route::post('/guardias/{guardia}/reactivar', [GuardiaController::class, 'reactivar'])->name('guardias.reactivar');
-        Route::get('/guardias/{guardia}/pdf', [GuardiaController::class, 'pdf'])->name('guardias.pdf');
+        // Guardias — Livewire (CRUD + papelera + cerrar/reactivar/pdf) + Controller (show/destroy/hoy/pdf)
+        Route::get('/guardias', function () {
+            return view('livewire.guardias.layout');
+        })->name('guardias.index');
 
-        Route::post('/guardias/{id}/restore', [GuardiaController::class, 'restore'])->name('guardias.restore');
-        Route::delete('/guardias/{id}/force-delete', [GuardiaController::class, 'forceDelete'])->name('guardias.force-delete');
-        Route::delete('/guardias/{guardia}', [GuardiaController::class, 'destroy'])->name('guardias.destroy');
+        Route::get('/guardias/hoy', [GuardiaController::class, 'hoy'])->name('guardias.hoy');
+
+        Route::get('guardias/{guardia}', [GuardiaController::class, 'show'])->name('guardias.show');
+        Route::delete('guardias/{guardia}', [GuardiaController::class, 'destroy'])->name('guardias.destroy');
+
+        Route::get('/guardias/{guardia}/pdf', [GuardiaController::class, 'pdf'])->name('guardias.pdf');
 
 
         // Novedades anidadas bajo guardia

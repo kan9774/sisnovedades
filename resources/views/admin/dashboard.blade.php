@@ -10,6 +10,4 @@
     <livewire:admin-dashboard />
 @stop
 
-@push('js')
-    <script src="{{ asset('vendor/livewire/livewire/dist/livewire.min.js') }}" data-turbo-eval="false" data-turbolinks-eval="false"></script>
-@endpush
+

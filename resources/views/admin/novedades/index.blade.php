@@ -22,7 +22,7 @@
             <div>
                 No hay guardia abierta hoy.
                 @can('create', App\Models\Guard::class)
-                    <a href="{{ route('admin.guardias.create') }}" class="alert-link font-weight-bold ml-1">Abrir guardia del día</a>
+                    <a href="{{ route('admin.guardias.index') }}" class="alert-link font-weight-bold ml-1">Ir a Guardias</a>
                 @endcan
             </div>
         </div>
