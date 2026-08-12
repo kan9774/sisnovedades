@@ -9,7 +9,7 @@ class MantenimientoVehiculoPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_mantenimientos_vehiculos');
+        return $user->isAdmin() || $user->HasPermisos('ver_mantenimiento');
 
     }
 

@@ -117,6 +117,15 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             Route::get('/entregas/historial', function () {
                 return view('livewire.inventario.entregas-historial-layout');
             })->name('entregas.historial');
+            Route::get('/items/plantilla', function () {
+                $ruta = (new \App\Exports\ItemsPlantillaExport())->generar();
+                return response()->download($ruta, 'plantilla_items.xlsx')->deleteFileAfterSend(true);
+            })->name('items.plantilla');
+
+            Route::get('/unidades-individuales/plantilla', function () {
+                $ruta = (new \App\Exports\ItemUnidadesPlantillaExport())->generar();
+                return response()->download($ruta, 'plantilla_item_unidades.xlsx')->deleteFileAfterSend(true);
+            })->name('unidades-individuales.plantilla');
         });
         Route::prefix('grados')->name('grados.')->group(function () {
             Route::get('/', function () {

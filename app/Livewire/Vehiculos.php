@@ -581,9 +581,6 @@ class Vehiculos extends Component
             'salidas' => function ($query) {
                 $query->with(['guardia', 'conductor'])->latest('id')->limit(10);
             },
-            'mantenimientos' => function ($query) {
-                $query->latest('fecha')->limit(10);
-            },
             'actas',
         ])->findOrFail($vehiculoId);
         $this->showDetalle = true;

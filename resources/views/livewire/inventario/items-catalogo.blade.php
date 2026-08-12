@@ -16,12 +16,14 @@
     <x-ops-card eyebrow="BCOM1 · Inventario" icon="boxes" title="Catálogo de ítems">
         <x-slot:actions>
             @can('create', \App\Models\Item::class)
+                <x-btn-ops variant="secondary" icon="file-excel" wire:click="abrirModalImportar">
+                    Importar Excel
+                </x-btn-ops>
                 <x-btn-ops variant="primary" icon="plus" wire:click="abrirModalCrear">
                     Nuevo ítem
                 </x-btn-ops>
             @endcan
         </x-slot:actions>
-
         <x-slot:header>
             <div class="row align-items-center">
                 <div class="col-md-6">
@@ -72,20 +74,15 @@
                             <td>{{ $item->stock_minimo ?? '—' }}</td>
                             <td>
                                 @if ($item->vida_util_meses)
-                                    {{ $item->vida_util_meses }} {{ Str::plural('mes', $item->vida_util_meses) }}
+                                    {{ $item->vida_util_meses }} {{ $item->vida_util_meses == 1 ? 'mes' : 'meses' }}
                                 @else
                                     <span class="text-muted">No vence</span>
                                 @endif
                             </td>
                             <td class="text-right">
-                                <x-ops-actions
-                                    :model="$item"
-                                    :edit="'abrirModalEditar(' . $item->id . ')'"
-                                    :delete="'eliminar(' . $item->id . ')'"
-                                    size="sm"
+                                <x-ops-actions :model="$item" :edit="'abrirModalEditar(' . $item->id . ')'" :delete="'eliminar(' . $item->id . ')'" size="sm"
                                     deleteTitle="¿Eliminar este ítem del catálogo?"
-                                    deleteText="Esta acción no se puede deshacer."
-                                />
+                                    deleteText="Esta acción no se puede deshacer." />
                             </td>
                         </tr>
                     @empty
@@ -203,8 +200,8 @@
                                 @if ($tipo_seguimiento === 'cantidad')
                                     <div class="form-group col-md-4">
                                         <label>Unidad de medida</label>
-                                        <input type="text" wire:model="unidad_medida" style="text-transform: uppercase"
-                                            placeholder="unidad, caja, litro..."
+                                        <input type="text" wire:model="unidad_medida"
+                                            style="text-transform: uppercase" placeholder="unidad, caja, litro..."
                                             class="form-control @error('unidad_medida') is-invalid @enderror">
                                         @error('unidad_medida')
                                             <span class="invalid-feedback">{{ $message }}</span>
@@ -239,7 +236,8 @@
                     <div class="ops-panel__footer">
                         <button type="button" class="footer-btn btn-ops-secondary"
                             onclick="cerrarOpsPanel('modalItem')">Cancelar</button>
-                        <x-btn-ops type="submit" variant="primary" wire:loading.attr="disabled" wire:target="guardar">
+                        <x-btn-ops type="submit" variant="primary" wire:loading.attr="disabled"
+                            wire:target="guardar">
                             <span wire:loading.remove wire:target="guardar"><i class="fas fa-save"></i> Guardar</span>
                             <span wire:loading wire:target="guardar"><i class="fas fa-spinner fa-spin"></i>
                                 Guardando...</span>
@@ -249,8 +247,73 @@
             </div>
         </div>
     </template>
-</div>
 
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalImportarItems" wire:ignore.self>
+        <div class="ops-panel">
+            <form wire:submit="importar" class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">BCOM1 · Inventario</span>
+                        <h5 class="ops-panel__title">Importar ítems desde Excel</h5>
+                    </div>
+                    <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalImportarItems')"
+                        title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
+
+                        <a href="{{ route('admin.inventario.items.plantilla') }}"
+                            class="d-inline-flex align-items-center mb-3" download>
+                            <i class="fas fa-download mr-1"></i> Descargar plantilla Excel
+                        </a>
+
+                        <div class="form-group">
+                            <label>Archivo Excel</label>
+                            <input type="file" wire:model="archivoExcel" accept=".xlsx,.xls"
+                                class="form-control @error('archivoExcel') is-invalid @enderror">
+                            @error('archivoExcel')
+                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                            @enderror
+                            <div wire:loading wire:target="archivoExcel" class="text-muted small mt-1">
+                                Cargando archivo...
+                            </div>
+                        </div>
+
+                        @if (!empty($erroresImportacion))
+                            <div class="alert alert-warning">
+                                <strong>Se encontraron errores:</strong>
+                                <ul class="mb-0">
+                                    @foreach ($erroresImportacion as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="footer-btn btn-ops-secondary"
+                        onclick="cerrarOpsPanel('modalImportarItems')">Cancelar</button>
+                    <x-btn-ops type="submit" variant="primary" wire:loading.attr="disabled" wire:target="importar">
+                        <span wire:loading.remove wire:target="importar">
+                            <i class="fas fa-file-import"></i> Importar
+                        </span>
+                        <span wire:loading wire:target="importar">
+                            <i class="fas fa-spinner fa-spin"></i> Importando...
+                        </span>
+                    </x-btn-ops>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>
+</div>
 
 @script
     <script>
@@ -269,6 +332,16 @@
 
         $wire.on('cerrar-modal-item', () => {
             cerrarOpsPanel('modalItem');
+        });
+
+        // Nuevo: modal de importación
+        $wire.on('abrir-modal-importar', () => {
+            document.getElementById('modalImportarItems').classList.add('is-open');
+            document.body.classList.add('ops-panel-open');
+        });
+
+        $wire.on('cerrar-modal-importar', () => {
+            cerrarOpsPanel('modalImportarItems');
         });
     </script>
 @endscript

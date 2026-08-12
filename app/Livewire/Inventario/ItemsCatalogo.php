@@ -8,11 +8,13 @@ use App\Models\Talla;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class ItemsCatalogo extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
+
 
     // Filtros del listado
     public string $busqueda = '';
@@ -32,6 +34,9 @@ class ItemsCatalogo extends Component
     public ?string $unidad_medida = null;
     public ?int $stock_minimo = null;
     public ?int $vida_util_meses = null;
+
+    public $archivoExcel;
+    public array $erroresImportacion = [];
 
     /**
      * true mientras el código en pantalla sigue siendo el sugerido
@@ -135,7 +140,7 @@ class ItemsCatalogo extends Component
         $ultimoNumero = Item::where('categoria_id', $categoriaId)
             ->where('codigo', 'like', $prefijo . '-%')
             ->get()
-            ->map(fn (Item $item) => (int) substr($item->codigo, strlen($prefijo) + 1))
+            ->map(fn(Item $item) => (int) substr($item->codigo, strlen($prefijo) + 1))
             ->max() ?? 0;
 
         return $prefijo . '-' . str_pad($ultimoNumero + 1, 4, '0', STR_PAD_LEFT);
@@ -221,8 +226,15 @@ class ItemsCatalogo extends Component
     private function resetFormulario(): void
     {
         $this->reset([
-            'itemId', 'codigo', 'nombre', 'descripcion',
-            'categoria_id', 'talla_id', 'unidad_medida', 'stock_minimo', 'vida_util_meses',
+            'itemId',
+            'codigo',
+            'nombre',
+            'descripcion',
+            'categoria_id',
+            'talla_id',
+            'unidad_medida',
+            'stock_minimo',
+            'vida_util_meses',
         ]);
         $this->tipo_seguimiento = 'cantidad';
         $this->codigoAuto = true;
@@ -239,11 +251,11 @@ class ItemsCatalogo extends Component
     {
         $items = Item::query()
             ->with(['categoria', 'talla'])
-            ->when($this->busqueda, fn ($q) => $q->where(function ($q) {
+            ->when($this->busqueda, fn($q) => $q->where(function ($q) {
                 $q->where('nombre', 'like', "%{$this->busqueda}%")
                     ->orWhere('codigo', 'like', "%{$this->busqueda}%");
             }))
-            ->when($this->filtroCategoriaId, fn ($q) => $q->where('categoria_id', $this->filtroCategoriaId))
+            ->when($this->filtroCategoriaId, fn($q) => $q->where('categoria_id', $this->filtroCategoriaId))
             ->orderBy('nombre')
             ->paginate(15);
 
@@ -252,5 +264,32 @@ class ItemsCatalogo extends Component
             'categorias' => Categoria::orderBy('nombre')->get(),
             'tallas' => Talla::orderBy('orden')->get(),
         ]);
+    }
+    public function abrirModalImportar()
+    {
+        $this->reset('archivoExcel', 'erroresImportacion');
+        $this->dispatch('abrir-modal-importar');
+    }
+
+    public function importar()
+    {
+        $this->validate([
+            'archivoExcel' => 'required|file|mimes:xlsx,xls|max:5120',
+        ]);
+
+        $import = new \App\Imports\ItemsImport();
+        $import->importar($this->archivoExcel->getRealPath());
+
+        $this->erroresImportacion = $import->errores;
+
+        if ($import->filasImportadas > 0) {
+            session()->flash('success', "{$import->filasImportadas} ítems importados correctamente.");
+        }
+
+        if (empty($this->erroresImportacion)) {
+            $this->dispatch('cerrar-modal-importar');
+        }
+
+        $this->reset('archivoExcel');
     }
 }
