@@ -533,9 +533,17 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="text-align: center; border: none; font-size: 11px;">
+                        <td
+                            style="width: 25%; font-style: italic; vertical-align: bottom; text-align: left; border: none;">
+                            @if ($guardia->escribiente->first())
+                                {{ strtoupper(substr($guardia->escribiente->first()->name, 0, 1)) }}{{ strtoupper(substr($guardia->escribiente->first()->last_name, 0, 1)) }}.
+                            @endif
+                        </td>
+                        <td style="width: 50%; border: none;"></td>
+                        <td colspan="3"
+                            style="text-align: left; padding-left: 35px; border: none; font-size: 11px;">
                             {{ strtoupper($guardia->capitan->grade) }}<br>
-                            <div class="firma-linea" style="width: 150px; margin: 0 auto;"></div>
+                            <div class="firma-linea" style="width: 150px;"></div>
                             <p style="text-align: center; font-size: 11px;">
                                 {{ strtoupper($guardia->capitan->name) }}
                                 {{ strtoupper($guardia->capitan->last_name) }}.

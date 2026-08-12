@@ -263,16 +263,11 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             ->only(['show'])
             ->parameters(['unidades' => 'unidad']);
 
-        // Vehículos - CRUD completo
+        // Vehículos - Livewire
         Route::prefix('vehiculos')->name('vehiculos.')->group(function () {
-            Route::get('/', [VehiculoController::class, 'index'])->name('index');
-            Route::get('/create', [VehiculoController::class, 'create'])->name('create');
-            Route::post('/', [VehiculoController::class, 'store'])->name('store');
-            Route::get('/export', [VehiculoController::class, 'export'])->name('export');
-            Route::get('/{vehiculo}', [VehiculoController::class, 'show'])->name('show');
-            Route::get('/{vehiculo}/edit', [VehiculoController::class, 'edit'])->name('edit');
-            Route::put('/{vehiculo}', [VehiculoController::class, 'update'])->name('update');
-            Route::delete('/{vehiculo}', [VehiculoController::class, 'destroy'])->name('destroy');
+            Route::get('/', function () {
+                return view('livewire.vehiculos.layout');
+            })->name('index');
 
             // Mantenimientos (anidados bajo vehiculo)
             Route::prefix('{vehiculo}/mantenimientos')->name('mantenimientos.')->group(function () {

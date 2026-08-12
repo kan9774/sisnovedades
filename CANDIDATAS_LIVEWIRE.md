@@ -1,7 +1,7 @@
 # Candidatas a Migración de Blade → Livewire
 
 > Archivo generado con codebase-memory-mcp — Análisis del grafo de conocimiento del proyecto `novedades`.
-> Última actualización: 2025-08-10
+> Última actualización: 2026-08-11
 
 ## Contexto
 
@@ -20,6 +20,7 @@ El proyecto usa Laravel 13 + Livewire 3 + Alpine.js. Ya existen **~30+ component
 | 7 | `Livewire\TiposVehiculo` | 1 — Simple | ✅ MIGRADO | `Route::get('/vehiculos/tipos', ...)` → `livewire.vehiculos.tipos.layout` | `TipoVehiculoController` ✅ |
 | 8 | `Livewire\EstadosPaloma` | 1 — Simple | ✅ MIGRADO | `Route::get('/palomar/estados-paloma', ...)` → `livewire.palomar.estados.layout` | `EstadoPalomaController` ✅ |
 | 9 | `Livewire\Conductores` | 3 — Alta | ✅ MIGRADO | `Route::get('/conductores', ...)` → `livewire.conductores.layout` | `ConductorController` ✅ |
+| 10 | `Livewire\Vehiculos` | 3 — Alta | ✅ MIGRADO | `Route::get('/vehiculos', ...)` → `livewire.vehiculos.layout` | `VehiculoController` (desactivado, no eliminado) |
 
 **Patrón Nivel 1:** `#[Computed]` + `WithPagination` + `UsesBootstrapPagination` + `mount()` con `$this->authorize('viewAny')` + `updatedSearch()` con `$this->resetPage()` + formulario inline con `wire:confirm` para eliminar.
 **Patrón Nivel 2:** `#[Computed]` + sin paginación (->get()) + `mount()` con `$this->authorize('viewAny')` + `updatedSearch()` + modal de formulario con `x-ops-card` + `confirmDelete()` / `executeDelete()` + checkboxes de permisos agrupados por módulo (`agruparPermisosPorModulo` + `formatearNombreModulo`).
@@ -135,7 +136,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | # | Vista Blade | Controlador | Modelo | Vistas | Complejidad | Notas |
 |---|-------------|-------------|--------|--------|-------------|-------|
 | 9 | `admin.conductores.*` | `ConductorController` | `Conductor` | index, create, show, edit | ⭐⭐⭐ Alta | ✅ MIGRADO |
-| 10 | `admin.vehiculos.*` | `VehiculoController` | `Vehiculo` | index, create, show, edit | ⭐⭐⭐ Alta | 15+ campos, 4 catálogos dependientes (tipo_vehiculo, combustible, lubricante, rodado), upload de acta, export Excel |
+| ~~10~~ | ~~`admin.vehiculos.*`~~ | ~~`VehiculoController`~~ | ~~`Vehiculo`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ~~MIGRADO~~ |
 | 11 | `admin.palomar.palomares.*` | `PalomarController` | `Palomar` | index, create, show, edit | ⭐⭐⭐ Alta | CRUD con `withCount('palomas')`, validación de palomas asociadas, reporte PDF |
 | 12 | `admin.palomar.palomas.*` | `PalomaController` | `Paloma` | index, create, show, edit | ⭐⭐⭐ Alta | Formulario complejo: padre/madre con validación de sexo, historial de estados, relaciones múltiples |
 | 13 | `admin.palomar.vuelos.*` | `VueloController` | `Vuelo` | index, create, edit, resultados | ⭐⭐⭐ Alta | CRUD + resultados. Lógica de estados de palomas, cálculo tiempo/velocidad, pivot con historial |
@@ -159,9 +160,9 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 |-----------|----------|--------------|
 | Nivel 1 — Simple | 4 (4 migrados) | ~12 archivos |
 | Nivel 2 — Intermedia | 3 (3 migrados) | ~7 archivos |
-| Nivel 3 — Alta | 5 (1 migrado) | ~25 archivos |
+| Nivel 3 — Alta | 5 (2 migrados) | ~25 archivos |
 | Nivel 4 — Muy alta | 2 | ~15 archivos |
-| **Total** | **14** (9 migrados) | **~57 archivos** |
+| **Total** | **14** (10 migrados) | **~57 archivos** |
 
 ## Controladores que pueden eliminarse tras migración
 
@@ -177,7 +178,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | `NotificationController` | `tomar()` (sigue en uso en web.php:260) | ⚠️ Parcial — solo index/markAsRead/markAllAsRead migrados |
 | `ActivityLogController` | 1 ruta (index con filtros) | ✅ ELIMINADO |
 | ~~`ConductorController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
-| `VehiculoController` | 7 rutas (CRUD + export) | ⏳ Pendiente |
+| `VehiculoController` | 7 rutas (CRUD + export) | ⏳ Desactivado (rutas reemplazadas por Livewire, archivo conservado) |
 | `PalomarController` | 6 rutas (CRUD + reporte) | ⏳ Pendiente |
 | `PalomaController` | 6 rutas (CRUD + historial) | ⏳ Pendiente |
 | `VueloController` | 7 rutas (CRUD + resultados) | ⏳ Pendiente |
@@ -190,7 +191,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 1. **Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza ✅ **COMPLETADO**
 2. **Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros ✅ **COMPLETADO**
-3. **Sprint 3:** Nivel 3 restante (Vehiculos, Palomar, Palomas, Vuelos) — formularios complejos
+3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar, Palomas, Vuelos) — formularios complejos
 4. **Sprint 4:** Nivel 4 (Users, Guardias) — lógica de negocio crítica
 
 ---
@@ -202,3 +203,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 - `admin.guardias.pdf.*` — Generación de PDF (renderizado servidor-side)
 - `layouts/*`, `partials/*`, `emails/*` — Templates compartidos
 - `admin.guardias.pdf-preview` — Ruta pública de preview HTML
+
+---
+
+> **Nota (2026-08-11):** `VehiculoController.php` y las vistas `admin/vehiculos/*.blade.php` (excepto `mantenimientos/`) se conservan en el filesystem sin uso tras la migración a Livewire. Quedan pendientes de borrado manual una vez confirmado en navegador que el módulo `livewire.vehiculos.*` funciona correctamente.

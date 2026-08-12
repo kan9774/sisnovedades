@@ -89,6 +89,11 @@ class Vehiculo extends Model
     {
         return $this->belongsTo(TipoRodado::class);
     }
+
+    public function actas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(VehiculoActa::class);
+    }
     // Helper para obtener nombre completo
     public function getNombreCompletoAttribute(): string
     {

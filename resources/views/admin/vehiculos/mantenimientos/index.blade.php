@@ -29,7 +29,7 @@
                         <i class="fas fa-plus-circle"></i> Registrar Mantenimiento
                     </a>
                 @endcan
-                <a href="{{ route('admin.vehiculos.show', $vehiculo) }}"
+                <a href="{{ route('admin.vehiculos.index') }}"
                    class="btn-ops btn-ops-secondary btn-sm">
                     <i class="fas fa-arrow-left"></i> Volver al vehículo
                 </a>
