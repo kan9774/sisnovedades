@@ -90,6 +90,10 @@ class Vehiculos extends Component
     public $errorMsg = '';
     public $loading = false;
     public $confirmDeleteId = null;
+    public $confirmForceDeleteId = null;
+
+    // ── Papelera ──
+    public $vistaPapelera = false;
 
     // ── Estado del modal de detalle (show) ──
     public $showDetalle = false;
@@ -108,6 +112,11 @@ class Vehiculos extends Component
     {
         $query = Vehiculo::with(['tipoVehiculo', 'tipoCombustible', 'tipoLubricante', 'tipoRodado', 'unidad'])
             ->orderBy('matricula');
+
+        if ($this->vistaPapelera) {
+            $query = Vehiculo::onlyTrashed()->with(['tipoVehiculo', 'tipoCombustible', 'tipoLubricante', 'tipoRodado', 'unidad'])
+                ->orderBy('matricula');
+        }
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -367,7 +376,7 @@ class Vehiculos extends Component
 
                 // Si la matrícula cambió después de subir archivos, mover los
                 // archivos a la carpeta de la matrícula final (la que quedó en BD)
-                $carpetaFinal = 'actas/' . $this->sanitizarMatriculaParaCarpeta($vehiculo->matricula);
+                $carpetaFinal = $vehiculo->carpetaActas();
                 foreach ($this->queuedActaPaths as &$acta) {
                     $carpetaArchivo = dirname($acta['path']);
                     if ($carpetaArchivo !== $carpetaFinal) {
@@ -395,7 +404,7 @@ class Vehiculos extends Component
                 $matriculaNueva = $this->formMatricula;
 
                 if ($matriculaVieja !== $matriculaNueva) {
-                    $carpetaVieja = 'actas/' . $this->sanitizarMatriculaParaCarpeta($matriculaVieja);
+                    $carpetaVieja = $vehiculo->carpetaActas();
                     $carpetaNueva = 'actas/' . $this->sanitizarMatriculaParaCarpeta($matriculaNueva);
 
                     if ($carpetaVieja !== $carpetaNueva) {
@@ -540,18 +549,7 @@ class Vehiculos extends Component
         $this->loading = true;
         try {
             $vehiculo = Vehiculo::findOrFail($this->confirmDeleteId);
-
             $vehiculo->delete();
-
-            // Borrar carpeta completa de actas en vez de archivo por archivo
-            // para evitar dejar directorios huérfanos vacíos en
-            // storage/app/public/actas/{matricula}/ que Storage::delete()
-            // individual no elimina.
-            $carpeta = 'actas/' . $this->sanitizarMatriculaParaCarpeta($vehiculo->matricula);
-            if (Storage::disk('public')->exists($carpeta)) {
-                Storage::disk('public')->deleteDirectory($carpeta);
-            }
-
             $this->successMsg = 'Vehículo eliminado correctamente.';
         } catch (\Exception $e) {
             $this->errorMsg = 'Error al eliminar: ' . $e->getMessage();
@@ -702,6 +700,66 @@ class Vehiculos extends Component
     {
         $this->search = '';
         $this->resetPage();
+    }
+
+    // ── PAPELERA: alternar entre activos y papelera ──
+    public function verPapelera()
+    {
+        $this->vistaPapelera = true;
+        $this->search = '';
+        $this->resetPage();
+    }
+
+    public function verActivos()
+    {
+        $this->vistaPapelera = false;
+        $this->search = '';
+        $this->resetPage();
+    }
+
+    // ── PAPELERA: restaurar vehículo ──
+    public function restaurar(int $vehiculoId)
+    {
+        try {
+            $vehiculo = Vehiculo::onlyTrashed()->findOrFail($vehiculoId);
+            $this->authorize('restore', $vehiculo);
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
+            return;
+        }
+
+        $vehiculo->restore();
+        $this->successMsg = 'Vehículo restaurado correctamente.';
+    }
+
+    // ── PAPELERA: confirmar eliminación permanente ──
+    public function confirmarEliminacionPermanente(int $vehiculoId)
+    {
+        try {
+            $vehiculo = Vehiculo::onlyTrashed()->findOrFail($vehiculoId);
+            $this->authorize('forceDelete', $vehiculo);
+        } catch (AuthorizationException $e) {
+            $this->errorMsg = $e->getMessage();
+            return;
+        }
+
+        $this->confirmForceDeleteId = $vehiculoId;
+    }
+
+    // ── PAPELERA: ejecutar eliminación permanente (forceDelete) ──
+    public function ejecutarEliminacionPermanente()
+    {
+        $this->loading = true;
+        try {
+            $vehiculo = Vehiculo::onlyTrashed()->findOrFail($this->confirmForceDeleteId);
+            $vehiculo->forceDelete();
+            $this->successMsg = 'Vehículo eliminado permanentemente.';
+        } catch (\Exception $e) {
+            $this->errorMsg = 'Error al eliminar permanentemente: ' . $e->getMessage();
+        } finally {
+            $this->loading = false;
+            $this->confirmForceDeleteId = null;
+        }
     }
 
     // ── EXPORTAR EXCEL ──

@@ -4,12 +4,42 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Vehiculo extends Model
 {
     use SoftDeletes, LogsActivity;
+
+    protected static function booted(): void
+    {
+        // Borrar la carpeta de actas SOLO cuando se hace forceDelete().
+        // NO en el soft delete normal (delete()), porque sin papelera en la UI
+        // un vehículo eliminado queda invisible pero restaurable; si borramos
+        // las actas en el soft delete, al restaurar el registro quedaría
+        // huérfano sin sus archivos adjuntos.
+        static::forceDeleting(function (Vehiculo $vehiculo) {
+            $carpeta = $vehiculo->carpetaActas();
+            if (Storage::disk('public')->exists($carpeta)) {
+                Storage::disk('public')->deleteDirectory($carpeta);
+            }
+        });
+    }
+
+    /**
+     * Ruta relativa de la carpeta de actas de este vehículo en storage.
+     * Ejemplo: 'actas/AA_123'
+     */
+    public function carpetaActas(): string
+    {
+        $matriculaSanitizada = trim(
+            preg_replace('/_+/', '_', strtoupper(preg_replace('/[^A-Z0-9]/', '_', $this->matricula))),
+            '_'
+        );
+
+        return 'actas/' . $matriculaSanitizada;
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

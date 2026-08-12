@@ -31,4 +31,14 @@ class VehiculoPolicy
     {
        return $user->HasPermisos('eliminar_vehiculo') || $user->isSuperAdmin();
     }
+
+    public function restore(User $user, Vehiculo $vehiculo): bool
+    {
+        return $user->HasPermisos('eliminar_vehiculo') || $user->isSuperAdmin();
+    }
+
+    public function forceDelete(User $user, Vehiculo $vehiculo): bool
+    {
+        return $user->HasPermisos('eliminar_vehiculo') || $user->isSuperAdmin();
+    }
 }

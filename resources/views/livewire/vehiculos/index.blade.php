@@ -16,12 +16,22 @@
 
     <x-ops-card title="Vehículos" icon="truck" eyebrow="{{ $vehiculos->total() ?? 0 }} registros">
         <x-slot name="actions">
-            @can('create', \App\Models\Vehiculo::class)
-                <x-btn-ops variant="primary" icon="plus" wire:click="crear">
-                    Nuevo Vehículo
-                </x-btn-ops>
-            @endcan
+            @if (! $vistaPapelera)
+                @can('create', \App\Models\Vehiculo::class)
+                    <x-btn-ops variant="primary" icon="plus" wire:click="crear">
+                        Nuevo Vehículo
+                    </x-btn-ops>
+                @endcan
+            @endif
         </x-slot>
+
+        {{-- PESTAÑAS: Activos / Papelera --}}
+        <x-nav-tabs-ops
+            :tabs="['activos' => 'Vehículos activos', 'papelera' => 'Papelera']"
+            :active="$vistaPapelera ? 'papelera' : 'activos'"
+            wireMethod="{{ $vistaPapelera ? 'verActivos' : 'verPapelera' }}"
+            :livewire="true"
+        />
 
         {{-- BARRA DE BÚSQUEDA --}}
         <div class="row mb-3">
@@ -54,7 +64,9 @@
                         <th>Unidad</th>
                         <th>Tipo Vehículo</th>
                         <th>Estado</th>
-                        <th class="text-center">Activo</th>
+                        @if ($vistaPapelera)
+                            <th>Fecha eliminación</th>
+                        @endif
                         <th class="text-center" style="width: 120px">Acciones</th>
                     </tr>
                 </thead>
@@ -68,32 +80,52 @@
                             <td>
                                 <span class="{{ $vehiculo->estado_badge_class }}">{{ $vehiculo->estado_label }}</span>
                             </td>
-                            <td class="text-center align-middle">
-                                @if ($vehiculo->activo)
-                                    <span class="badge-ops badge-ops-success">Sí</span>
-                                @else
-                                    <span class="badge-ops badge-ops-secondary">No</span>
-                                @endif
-                            </td>
-                            <td class="text-center align-middle">
-                                <div class="ops-actions justify-content-center">
-                                    @can('view', $vehiculo)
-                                        <x-btn-ops variant="info" icon="eye" wire:click="verDetalle({{ $vehiculo->id }})" size="xs" title="Ver detalle"></x-btn-ops>
-                                    @endcan
-                                    @can('update', $vehiculo)
-                                        <x-btn-ops variant="warning" icon="pen" wire:click="abrirEditar({{ $vehiculo->id }})" size="xs" title="Editar"></x-btn-ops>
-                                    @endcan
-                                    @can('delete', $vehiculo)
-                                        <x-btn-ops variant="danger" icon="trash" wire:click="confirmarEliminacion({{ $vehiculo->id }})" size="xs" title="Eliminar"></x-btn-ops>
-                                    @endcan
-                                </div>
-                            </td>
+                            @if (! $vistaPapelera)
+                                <td class="text-center align-middle">
+                                    @if ($vehiculo->activo)
+                                        <span class="badge-ops badge-ops-success">Sí</span>
+                                    @else
+                                        <span class="badge-ops badge-ops-secondary">No</span>
+                                    @endif
+                                </td>
+                                <td class="text-center align-middle">
+                                    <div class="ops-actions justify-content-center">
+                                        @can('view', $vehiculo)
+                                            <x-btn-ops variant="info" icon="eye" wire:click="verDetalle({{ $vehiculo->id }})" size="xs" title="Ver detalle"></x-btn-ops>
+                                        @endcan
+                                        @can('update', $vehiculo)
+                                            <x-btn-ops variant="warning" icon="pen" wire:click="abrirEditar({{ $vehiculo->id }})" size="xs" title="Editar"></x-btn-ops>
+                                        @endcan
+                                        @can('delete', $vehiculo)
+                                            <x-btn-ops variant="danger" icon="trash" wire:click="confirmarEliminacion({{ $vehiculo->id }})" size="xs" title="Eliminar"></x-btn-ops>
+                                        @endcan
+                                    </div>
+                                </td>
+                            @else
+                                <td class="text-center align-middle">
+                                    <small class="text-muted">{{ $vehiculo->deleted_at ? $vehiculo->deleted_at->format('d/m/Y H:i') : '—' }}</small>
+                                </td>
+                                <td class="text-center align-middle">
+                                    <div class="ops-actions justify-content-center">
+                                        @can('restore', $vehiculo)
+                                            <x-btn-ops variant="success" icon="undo" wire:click="restaurar({{ $vehiculo->id }})" size="xs" title="Restaurar"></x-btn-ops>
+                                        @endcan
+                                        @can('forceDelete', $vehiculo)
+                                            <x-btn-ops variant="danger" icon="trash" wire:click="confirmarEliminacionPermanente({{ $vehiculo->id }})" size="xs" title="Eliminar permanentemente"></x-btn-ops>
+                                        @endcan
+                                    </div>
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
+                            <td colspan="{{ $vistaPapelera ? 7 : 7 }}" class="text-center text-muted py-4">
                                 <i class="fas fa-truck fa-2x d-block mb-2"></i>
-                                No hay vehículos registrados.
+                                @if ($vistaPapelera)
+                                    No hay vehículos en la papelera.
+                                @else
+                                    No hay vehículos registrados.
+                                @endif
                             </td>
                         </tr>
                     @endforelse
@@ -792,6 +824,38 @@
                                 <span class="spinner-border spinner-border-sm mr-1"></span> Eliminando...
                             @else
                                 <i class="fas fa-trash"></i> Eliminar
+                            @endif
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- MODAL: CONFIRMAR ELIMINACIÓN PERMANENTE (papelera) --}}
+    @if ($confirmForceDeleteId)
+        <div class="modal fade show d-block" tabindex="-1"
+            style="background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(12px) saturate(180%) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; border-radius: 16px !important; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;"
+            wire:click.self="$set('confirmForceDeleteId', null)" wire:keydown.escape="$set('confirmForceDeleteId', null)">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Eliminación permanente</h5>
+                        <button type="button" class="close text-white" wire:click="$set('confirmForceDeleteId', null)">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Esta acción es irreversible y eliminará también todos los archivos adjuntos (actas) de este vehículo.</strong></p>
+                        <p class="text-muted mb-0"><small>¿Confirmás que querés continuar?</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" wire:click="$set('confirmForceDeleteId', null)">
+                            Cancelar
+                        </button>
+                        <button type="button" class="btn btn-danger" wire:click="ejecutarEliminacionPermanente" @disabled($loading)>
+                            @if ($loading)
+                                <span class="spinner-border spinner-border-sm mr-1"></span> Eliminando...
+                            @else
+                                <i class="fas fa-trash"></i> Eliminar permanentemente
                             @endif
                         </button>
                     </div>
