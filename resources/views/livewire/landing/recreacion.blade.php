@@ -28,11 +28,11 @@
                 <div class="recreacion-card__estado">Disponible</div>
             </div>
 
-            <div class="recreacion-card recreacion-card--disabled">
+            <div class="recreacion-card" wire:click="elegir('tetris')">
                 <div class="recreacion-card__ch">04</div>
                 <i class="fa-solid fa-border-none recreacion-card__icono"></i>
                 <div class="recreacion-card__nombre">Tetris</div>
-                <div class="recreacion-card__estado">Próximamente</div>
+                <div class="recreacion-card__estado">Disponible</div>
             </div>
 
         </div>
@@ -47,6 +47,8 @@
             <livewire:landing.sopa-letras wire:key="sopa-activo" />
         @elseif ($juego === 'crucigrama')
             <livewire:landing.crucigrama wire:key="crucigrama-activo" />
+        @elseif ($juego === 'tetris')
+            <livewire:landing.tetris-game wire:key="tetris-activo" />
         @endif
     @endif
 
