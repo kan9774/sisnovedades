@@ -1,15 +1,18 @@
-# Contexto del Proyecto — novedades (Laravel 13 + Livewire 3)
+# Contexto del Proyecto — novedades (Laravel 13 + Livewire 4)
 
 ## Stack
-- Laravel 13 + Livewire 3 + Alpine.js + Bootstrap 4.6.1
-- ~30+ componentes Livewire ya implementados
+- Laravel 13 + Livewire 4 + Alpine.js + Bootstrap 4.6.1 + Tailwind CSS 4 + AdminLTE 3
+- ~63 componentes Livewire implementados
+- Blaze 1.0 + Flux 2.13.1
+- Vite 8 + DomPDF 3 + PHPSpreadsheet 5 + Spatie ActivityLog 4
 - Patrón CRUD: tabla + modal ops-panel (x-teleport="body")
 - CSS compartido: `public/css/ops-panel.css`
 - Traits: `App\Traits\UsesBootstrapPagination` (paginationTheme='bootstrap')
 - Gate custom: `Gate::define('viewAny-log', ...)` en AppServiceProvider
+- Autenticación: Laravel Fortify + Passkeys + social auth + RBAC
 
 ## Estructura de migraciones
-`CANDIDATAS_LIVEWIRE.md` — tracker con 4 niveles de complejidad
+`CANDIDATAS_LIVEWIRE.md` — tracker con 4 niveles de complejidad + landing components
 
 ## Migraciones completadas ✅
 | # | Componente | Nivel | Rutas | Controlador |
@@ -22,6 +25,9 @@
 | 6 | `Livewire\Organismos` | 1 — Simple | GET `/organismos` → `livewire.organismos.layout` | OrganismoController eliminado |
 | 7 | `Livewire\TiposVehiculo` | 1 — Simple | GET `/vehiculos/tipos` → `livewire.vehiculos.tipos.layout` | TipoVehiculoController eliminado |
 | 8 | `Livewire\EstadosPaloma` | 1 — Simple | GET `/palomar/estados-paloma` → `livewire.palomar.estados.layout` | EstadoPalomaController eliminado |
+| 9 | `Livewire\Conductores` | 3 — Alta | CRUD completo | ConductorController eliminado |
+| 10 | `Livewire\Vehiculos` | 3 — Alta | CRUD completo | VehiculoController desactivado (conservado) |
+| 11 | `Livewire\Guardias` | 4 — Muy alta | CRUD + cerrar/reactivar/pdf | GuardiaController reducido a show()/Hoy()/pdf() |
 
 ## Patrón CRUD inline (Nivel 1 — campos simples)
 - `#[Computed]` + `WithPagination` + `UsesBootstrapPagination`

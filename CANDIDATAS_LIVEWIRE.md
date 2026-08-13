@@ -5,7 +5,28 @@
 
 ## Contexto
 
-El proyecto usa Laravel 13 + Livewire 3 + Alpine.js. Ya existen **~30+ componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
+El proyecto usa Laravel 13 + Livewire 4 + Alpine.js. Existen **63+ componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
+
+## Componentes Landing
+
+| # | Componente | Nivel | Estado |
+|---|------------|-------|--------|
+| 1 | `Landing\Contacto` | 1 — Simple | ✅ Activo |
+| 2 | `Landing\ContactoSeccion` | 1 — Simple | ✅ Activo |
+| 3 | `Landing\Hero` | 1 — Simple | ✅ Activo |
+| 4 | `Landing\Navbar` | 1 — Simple | ✅ Activo |
+| 5 | `Landing\Footer` | 1 — Simple | ✅ Activo |
+| 6 | `Landing\Nosotros` | 1 — Simple | ✅ Activo |
+| 7 | `Landing\Servicios` | 1 — Simple | ✅ Activo |
+| 8 | `Landing\Documentos` | 2 — Intermedia | ✅ Activo |
+| 9 | `Landing\NovedadesCerradas` | 2 — Intermedia | ✅ Activo |
+| 10 | `Landing\Crucigrama` | 1 — Simple | ✅ Activo |
+| 11 | `Landing\SudokuGame` | 2 — Intermedia | ✅ Activo |
+| 12 | `Landing\SopaLetras` | 2 — Intermedia | ✅ Activo |
+| 13 | `Landing\TetrisGame` | 2 — Intermedia | ✅ Activo (2026-08-12) |
+| 14 | `Landing\Recreacion` | 1 — Simple | ✅ Activo |
+
+---
 
 ## Migraciones completadas
 
@@ -158,11 +179,13 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 | Categoría | Cantidad | Vistas Blade |
 |-----------|----------|--------------|
+| Landing (nuevos) | 14 | ~14 archivos |
 | Nivel 1 — Simple | 4 (4 migrados) | ~12 archivos |
 | Nivel 2 — Intermedia | 3 (3 migrados) | ~7 archivos |
 | Nivel 3 — Alta | 5 (2 migrados) | ~25 archivos |
 | Nivel 4 — Muy alta | 1 (1 migrado) | ~5 archivos |
-| **Total** | **14** (11 migrados) | **~47 archivos** |
+| **Total Livewire** | **63+** | |
+| **Total migraciones** | **14** (11 migrados) | **~47 archivos** |
 
 ## Controladores que pueden eliminarse tras migración
 
@@ -193,6 +216,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 2. **Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros ✅ **COMPLETADO**
 3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar, Palomas, Vuelos) — formularios complejos
 4. **Sprint 4:** Nivel 4 (Users) — lógica de negocio crítica ✅ Guardias **COMPLETADO**
+5. **Landing:** Componentes interactivos (Tetris ✅, Crucigrama, Sudoku, SopaLetras) ✅ **COMPLETADO**
 
 ---
 
@@ -203,6 +227,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 - `admin.guardias.pdf.*` — Generación de PDF (renderizado servidor-side)
 - `layouts/*`, `partials/*`, `emails/*` — Templates compartidos
 - `admin.guardias.pdf-preview` — Ruta pública de preview HTML
+- `livewire/landing/*` — Ya son componentes Livewire (Tetris, Crucigrama, Sudoku, SopaLetras, etc.)
 
 ---
 
