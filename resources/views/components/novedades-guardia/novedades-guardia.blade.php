@@ -265,7 +265,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Asunto <small class="text-muted">(opcional)</small></label>
+                                        <label>Asunto <small class="text-muted"><span
+                                                    class="text-danger">(Obligatorio)</span></small></label>
                                         <input type="text" wire:model="affair"
                                             class="form-control @error('affair') is-invalid @enderror">
                                         @error('affair')
@@ -386,6 +387,5 @@
         $wire.on('cerrar-modal-novedad', () => {
             cerrarOpsPanel('modalNovedad');
         });
-        
     </script>
 @endscript

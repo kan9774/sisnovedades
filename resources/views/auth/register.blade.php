@@ -80,7 +80,7 @@
             <div class="input-group mb-3">
                 <select name="unidad_id" class="form-control guest-form-control @error('unidad_id') is-invalid @enderror">
                     <option value="">-- Seleccionar Unidad --</option>
-                    @foreach ($unidades->where('nombre', '!=', 'CASUBO') as $unidad)
+                    @foreach ($unidades->where('nombre', '!=', 'C.A.C.O.') as $unidad)
                         <option value="{{ $unidad->id }}" {{ old('unidad_id') == $unidad->id ? 'selected' : '' }}>
                             {{ $unidad->nombre }}
                         </option>

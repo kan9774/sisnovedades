@@ -14,6 +14,21 @@ class ProcesarRebotesCommand extends Command
 
     protected $description = 'Lee la bandeja por IMAP, detecta rebotes (DSN) y los correlaciona con guardia_correos_enviados para registrarlos en guardia_correos_fallidos';
 
+    /**
+     * Carpeta IMAP que se revisa. Se usa como parte de la clave de
+     * deduplicación en imap_mensajes_procesados (el UID de IMAP es único
+     * por carpeta, no globalmente).
+     */
+    private const FOLDER = 'INBOX';
+
+    /**
+     * Ventana de días hacia atrás que se vuelve a escanear en cada corrida.
+     * No hace falta traer todo el historial del buzón: alcanza con cubrir
+     * unos días por si el comando estuvo caído, y la tabla
+     * imap_mensajes_procesados se encarga de no reprocesar lo ya visto.
+     */
+    private const DIAS_VENTANA = 7;
+
     public function handle(): int
     {
         $this->info('Conectando a IMAP...');
@@ -38,30 +53,54 @@ class ProcesarRebotesCommand extends Command
             return self::FAILURE;
         }
 
-        $folder = $client->getFolder('INBOX');
-        $mensajes = $folder->messages()->unseen()->leaveUnread()->get();
+        $folder = $client->getFolder(self::FOLDER);
 
-        $this->info("Mensajes no leídos encontrados: {$mensajes->count()}");
+        // Ya NO filtramos por unseen(): el flag Seen/Unseen de IMAP puede
+        // ser modificado por cualquiera que abra el buzón en Zimbra
+        // (webmail), lo que hacía que el comando saltara rebotes reales
+        // sin registrar nada. La deduplicación ahora es propia, contra
+        // imap_mensajes_procesados (folder + uid), inmune a que alguien
+        // abra el correo manualmente.
+        $mensajes = $folder->messages()
+            ->since(now()->subDays(self::DIAS_VENTANA))
+            ->get();
+
+        $uidsYaProcesados = DB::table('imap_mensajes_procesados')
+            ->where('folder', self::FOLDER)
+            ->pluck('uid')
+            ->flip();
+
+        $this->info("Mensajes en ventana de {$this->getDiasVentanaLabel()}: {$mensajes->count()}");
 
         $rebotesProcesados = 0;
         $rebotesSinCorrelacion = 0;
         $rebotesSinEnvioCorrelacionado = 0;
 
         foreach ($mensajes as $mensaje) {
+            $uid = $mensaje->getUid();
+
+            if ($uidsYaProcesados->has($uid)) {
+                continue;
+            }
+
             if (!$this->pareceRebote($mensaje)) {
+                // No es un rebote (correo normal de la casilla). No lo
+                // registramos en imap_mensajes_procesados: es barato
+                // volver a evaluarle el asunto/remitente en la próxima
+                // corrida y así la tabla no crece con mail que nunca
+                // nos interesó.
                 continue;
             }
 
             $datos = $this->parsearDsn($mensaje);
 
             if (!$datos || !$datos['message_id_original']) {
-                // Es un rebote, pero no pudimos extraer lo necesario para
-                // correlacionarlo. Lo dejamos SIN marcar como leído a
-                // propósito, para poder revisarlo a mano.
                 $rebotesSinCorrelacion++;
                 Log::warning('ProcesarRebotesCommand: rebote sin datos suficientes para correlacionar', [
                     'subject' => $mensaje->getSubject(),
+                    'uid'     => $uid,
                 ]);
+                $this->marcarProcesado($uid, 'sin_correlacion');
                 continue;
             }
 
@@ -70,17 +109,13 @@ class ProcesarRebotesCommand extends Command
                 ->first();
 
             if (!$envioOriginal) {
-                // Rebote real, pero no corresponde a un envío que hicimos
-                // desde este sistema (o ya fue procesado / es muy viejo).
-                // Se loguea para poder distinguir esto de un bug de
-                // correlación (message_id guardado en un formato distinto
-                // al parseado acá) sin tener que revisar el buzón a mano.
                 $rebotesSinEnvioCorrelacionado++;
                 Log::info('ProcesarRebotesCommand: rebote sin envío correlacionado en guardia_correos_enviados', [
                     'destinatario'        => $datos['destinatario'] ?? null,
                     'message_id_parseado' => $datos['message_id_original'],
+                    'uid'                 => $uid,
                 ]);
-                $mensaje->setFlag('Seen');
+                $this->marcarProcesado($uid, 'sin_envio_relacionado');
                 continue;
             }
 
@@ -97,7 +132,7 @@ class ProcesarRebotesCommand extends Command
                 ->where('id', $envioOriginal->id)
                 ->update(['rebotado_en' => now()]);
 
-            $mensaje->setFlag('Seen');
+            $this->marcarProcesado($uid, 'procesado');
             $rebotesProcesados++;
 
             $this->info("Rebote registrado: {$datos['destinatario']} (guardia #{$envioOriginal->guardia_id})");
@@ -106,6 +141,30 @@ class ProcesarRebotesCommand extends Command
         $this->info("Listo. Rebotes procesados: {$rebotesProcesados}. Sin correlación (revisar a mano): {$rebotesSinCorrelacion}. Sin envío correlacionado (ver logs): {$rebotesSinEnvioCorrelacionado}.");
 
         return self::SUCCESS;
+    }
+
+    private function getDiasVentanaLabel(): string
+    {
+        return self::DIAS_VENTANA . ' día' . (self::DIAS_VENTANA === 1 ? '' : 's');
+    }
+
+    /**
+     * Registra el UID como procesado en imap_mensajes_procesados. Usa
+     * upsert para que sea idempotente: si dos corridas se solaparan (no
+     * debería, pero por las dudas) no rompe por violar el índice único.
+     */
+    private function marcarProcesado(int $uid, string $resultado): void
+    {
+        DB::table('imap_mensajes_procesados')->upsert(
+            [[
+                'folder'       => self::FOLDER,
+                'uid'          => $uid,
+                'resultado'    => $resultado,
+                'procesado_en' => now(),
+            ]],
+            ['folder', 'uid'],
+            ['resultado', 'procesado_en'],
+        );
     }
 
     /**

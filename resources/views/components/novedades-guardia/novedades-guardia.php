@@ -147,9 +147,9 @@ new class extends Component
             'fecha'           => 'required|date_format:Y-m-d',
             'time'            => 'required|date_format:H:i',
             'office_id'       => 'required|exists:oficinas,id',
-            'affair'          => 'nullable|string|max:255',
+            'affair'          => 'required|string|max:255',
             'text'            => 'required|string',
-            'destino'         => 'nullable|string|max:255',
+            'destino'         => 'required|string|max:255',
             'clasification'   => 'required|in:Rutinario,Prioritario,Urgente,Destello',
             'organismo_id'    => 'nullable|exists:organismos,id',
             'organismo_nuevo' => 'nullable|string|max:255',
@@ -160,7 +160,13 @@ new class extends Component
             $rules['archivos.*'] = ['file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
         }
 
-        $data = $this->validate($rules);
+        $data = $this->validate($rules, [], [
+            'affair'        => 'asunto',
+            'type'          => 'tipo',
+            'direction'     => 'dirección',
+            'office_id'     => 'oficina',
+            'clasification' => 'clasificación'
+        ]);
 
         $organismoId = $data['organismo_id'] ?: null;
         if (filled($this->organismo_nuevo)) {
@@ -178,7 +184,7 @@ new class extends Component
             'office_id'       => $data['office_id'],
             'number'          => $data['number'],
             'time' => $this->calcularFechaHora($data['fecha'], $data['time']),
-            'affair'          => $data['affair'] ?: null,
+            'affair'          => $data['affair'],
             'text'            => $data['text'],
             'clasification'   => $data['clasification'],
             'organismo_id'    => $organismoId,
@@ -280,12 +286,12 @@ new class extends Component
     {
         [$horas, $minutos] = explode(':', $hora);
 
-        
+
         return \Carbon\Carbon::createFromFormat('Y-m-d', $fecha)
             ->setTime((int) $horas, (int) $minutos);
     }
-  
-  
+
+
     public function eliminar(int $id): void
     {
         $novedad = $this->guardia->novedades()->find($id);
@@ -309,7 +315,7 @@ new class extends Component
 
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
     }
-    
+
 
     public function render()
     {

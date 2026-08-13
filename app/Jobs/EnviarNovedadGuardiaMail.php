@@ -47,29 +47,36 @@ class EnviarNovedadGuardiaMail
     public function handle(): bool
     {
         try {
-            $sentMessage = Mail::to($this->usuario->email)->send(
-                new GuardiaNovedadesMail(
-                    $this->guardia,
-                    $this->nombreRemitente,
-                    $this->incluirAdjuntos,
-                    $this->pdfContent,
-                    $this->enviarZip,
-                    $this->zipContent,
-                )
+            $mailable = new GuardiaNovedadesMail(
+                $this->guardia,
+                $this->nombreRemitente,
+                $this->incluirAdjuntos,
+                $this->pdfContent,
+                $this->enviarZip,
+                $this->zipContent,
             );
 
-            // Laravel 13 (Symfony Mailer) devuelve el SentMessage con el
-            // Message-ID real, que se usa para correlacionar rebotes
-            // diferidos (DSN) leídos después por mail:procesar-rebotes.
+            Mail::to($this->usuario->email)->send($mailable);
+
+            // IMPORTANTE: usamos $mailable->messageId (el que nosotros
+            // generamos y fijamos vía GuardiaNovedadesMail::headers()),
+            // NO $sentMessage->getMessageId().
             //
-            // IMPORTANTE: Symfony devuelve el Message-ID CON los signos
-            // <...>, pero el regex que parsea el DSN en
-            // ProcesarRebotesCommand extrae el valor SIN esos signos
-            // (Message-ID:\s*<([^>]+)>). Si acá se guarda con < > nunca
-            // va a matchear contra lo que llega parseado del rebote, y la
-            // correlación falla siempre en silencio. Se normaliza sin
-            // brackets para que ambos lados queden consistentes.
-            $messageId = trim($sentMessage?->getMessageId() ?? '', '<> ');
+            // Symfony Mailer / SmtpTransport busca en la respuesta SMTP
+            // el patrón "250 Ok: queued as <ID>" y, si lo encuentra, lo
+            // usa como el "messageId definitivo" del SentMessage. Postfix
+            // responde justo así, así que getMessageId() terminaba
+            // devolviendo el Queue ID interno de Postfix (ej.
+            // "B6BE28029B") en vez del Message-ID real del header del
+            // correo — y ese Queue ID nunca aparece en el DSN de rebote,
+            // rompiendo la correlación en silencio (guardaba algo, pero
+            // no lo que el rebote iba a traer).
+            //
+            // $mailable->messageId es el mismo valor que quedó en el
+            // header "Message-ID:" del correo realmente enviado, así que
+            // es el mismo que ProcesarRebotesCommand va a extraer del
+            // DSN cuando rebote.
+            $messageId = $mailable->messageId;
 
             if ($messageId) {
                 DB::table('guardia_correos_enviados')->insert([

@@ -61,14 +61,14 @@
             color: #fff;
             text-align: center;
             padding: 3px 4px;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
         }
 
         table td {
             border: 1px solid #000;
             padding: 3px 4px;
-            font-size: 10px;
+            font-size: 12px;
             vertical-align: top;
         }
 

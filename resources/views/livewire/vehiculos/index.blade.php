@@ -72,6 +72,7 @@
                         @if ($vistaPapelera)
                             <th>Fecha eliminación</th>
                         @endif
+                        <th>Activo</th>
                         <th class="text-center" style="width: 120px">Acciones</th>
                     </tr>
                 </thead>
@@ -310,8 +311,8 @@
                                                 <select wire:model="formUnidadId"
                                                     class="form-control form-control-sm @error('formUnidadId') is-invalid @enderror">
                                                     <option value="">-- Seleccionar --</option>
-                                                    @foreach ($catalogos['unidades'] as $unidad)
-                                                        <option value="{{ $unidad->id }}">{{ $unidad->nombre }}
+                                                    @foreach ($catalogos['unidades']->where('nombre', '!=', 'C.A.C.O.') as $unidad)
+                                                        <option value="{{ $unidad->id }}">{{ $unidad->nombre}}
                                                         </option>
                                                     @endforeach
                                                 </select>

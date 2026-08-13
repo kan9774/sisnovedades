@@ -87,10 +87,11 @@
                         <th>Capitán</th>
                         <th>Oficial de Día</th>
                         <th>Estado</th>
+                        <th>Escribiente</th>
+                        <th class="text-center">Novedades</th>
                         @if ($viewMode === 'papelera')
                             <th class="text-center">Eliminado</th>
                         @endif
-                        <th class="text-center">Novedades</th>
                         <th class="text-center" style="width: 180px">Acciones</th>
                     </tr>
                 </thead>
@@ -103,6 +104,10 @@
                             </td>
                             <td>{{ $guardia->capitan->name }} {{ $guardia->capitan->last_name }}</td>
                             <td>{{ $guardia->oficial->name }} {{ $guardia->oficial->last_name }}</td>
+                            <td>
+                                @php $escribiente = $guardia->escribiente->first(); @endphp
+                                {{ $escribiente?->name }} {{ $escribiente?->last_name }}
+                            </td>
                             <td>
                                 @if ($guardia->status === 'open')
                                     <span class="badge-ops badge-ops-success">Abierta</span>
