@@ -205,72 +205,72 @@
             </div>
 
             <div class="ops-panel__body">
+                @if($showRestoreModal)
                 <div class="ops-panel__content">
-                    @if ($selectedBackup)
-                        <div class="form-group mb-3">
-                            <label>Archivo de backup</label>
-                            <code class="d-block p-2 bg-light">{{ $selectedBackup }}</code>
+                    <div class="form-group mb-3">
+                        <label>Archivo de backup</label>
+                        <code class="d-block p-2 bg-light">{{ $selectedBackup }}</code>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Nombre del backup</label>
+                        <strong>{{ pathinfo($selectedBackup, PATHINFO_FILENAME) }}</strong>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Motor detectado en el backup</label>
+                            <span class="badge badge-{{ $detectedBackupDriver === 'pgsql' ? 'danger' : 'primary' }}">
+                                {{ ucfirst($detectedBackupDriver) }}
+                            </span>
                         </div>
-
-                        <div class="form-group mb-3">
-                            <label>Nombre del backup</label>
-                            <strong>{{ $selectedBackup ? pathinfo($selectedBackup, PATHINFO_FILENAME) : '—' }}</strong>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Motor activo actualmente</label>
+                            <span class="badge badge-{{ $currentDriver === 'pgsql' ? 'danger' : 'success' }}">
+                                {{ ucfirst($currentDriver) }}
+                            </span>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6 form-group mb-3">
-                                <label>Motor detectado en el backup</label>
-                                <span class="badge badge-{{ $detectedBackupDriver === 'pgsql' ? 'danger' : 'primary' }}">
-                                    {{ ucfirst($detectedBackupDriver) }}
-                                </span>
-                            </div>
-                            <div class="col-md-6 form-group mb-3">
-                                <label>Motor activo actualmente</label>
-                                <span class="badge badge-{{ $currentDriver === 'pgsql' ? 'danger' : 'success' }}">
-                                    {{ ucfirst($currentDriver) }}
-                                </span>
-                            </div>
-                        </div>
-
-                        @if ($detectedBackupDriver !== $currentDriver)
-                            <div class="alert alert-danger mb-3">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                <strong>Motor incompatible:</strong> Este backup fue creado con
-                                <strong>{{ ucfirst($detectedBackupDriver) }}</strong> pero la base de datos activa es
-                                <strong>{{ ucfirst($currentDriver) }}</strong>. No se puede restaurar.
-                            </div>
-                        @endif
-
-                        <div class="form-group mb-3">
-                            <label>Tamaño del backup</label>
-                            <span>{{ $selectedBackup ? (function() use ($backups) {
-                                $b = collect($backups)->firstWhere('filename', $selectedBackup);
-                                return $b ? $b['size'] : '—';
-                            })() : '—' }}</span>
-                        </div>
-
-                        <div class="alert alert-warning mb-3">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Se creará automáticamente un backup de seguridad del estado actual antes de proceder.
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label>
-                                Confirmá escribiendo el nombre del archivo de backup:
-                                <strong>{{ $selectedBackup ? pathinfo($selectedBackup, PATHINFO_FILENAME) : '' }}</strong>
-                                <small class="text-muted"> (sin extensión .zip)</small>
-                            </label>
-                            <input type="text"
-                                   wire:model.live="restoreConfirmationText"
-                                   class="form-control @error('restoreConfirmationText') is-invalid @enderror"
-                                   placeholder="Escribí el nombre exacto aquí"
-                                   autocomplete="off">
-                            @error('restoreConfirmationText')
-                                <span class="invalid-feedback d-block">{{ $message }}</span>
-                            @enderror
+                    @if ($detectedBackupDriver !== $currentDriver)
+                        <div class="alert alert-danger mb-3">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            <strong>Motor incompatible:</strong> Este backup fue creado con
+                            <strong>{{ ucfirst($detectedBackupDriver) }}</strong> pero la base de datos activa es
+                            <strong>{{ ucfirst($currentDriver) }}</strong>. No se puede restaurar.
                         </div>
                     @endif
+
+                    <div class="form-group mb-3">
+                        <label>Tamaño del backup</label>
+                        <span>{{ (function() use ($backups, $selectedBackup) {
+                            $b = collect($backups)->firstWhere('filename', $selectedBackup);
+                            return $b ? $b['size'] : '—';
+                        })() }}</span>
+                    </div>
+
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Se creará automáticamente un backup de seguridad del estado actual antes de proceder.
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>
+                            Confirmá escribiendo el nombre del archivo de backup:
+                            <strong>{{ pathinfo($selectedBackup, PATHINFO_FILENAME) }}</strong>
+                            <small class="text-muted"> (sin extensión .zip)</small>
+                        </label>
+                        <input type="text"
+                               wire:model.live="restoreConfirmationText"
+                               class="form-control @error('restoreConfirmationText') is-invalid @enderror"
+                               placeholder="Escribí el nombre exacto aquí"
+                               autocomplete="off">
+                        @error('restoreConfirmationText')
+                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                        @enderror
+                    </div>
                 </div>
+                @endif
             </div>
 
             <div class="ops-panel__footer">
@@ -280,8 +280,7 @@
                 <button type="button"
                         class="btn btn-danger"
                         wire:click="startRestore"
-                        disabled
-                        @if ($detectedBackupDriver !== $currentDriver || !$selectedBackup || $restoreConfirmationText !== ($selectedBackup ? pathinfo($selectedBackup, PATHINFO_FILENAME) : ''))
+                        @if(!$showRestoreModal || $detectedBackupDriver !== $currentDriver || !$selectedBackup || $restoreConfirmationText !== (pathinfo($selectedBackup ?? '', PATHINFO_FILENAME)))
                             disabled
                         @endif
                         wire:loading.attr="disabled">
