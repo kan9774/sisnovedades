@@ -137,7 +137,7 @@
             <ul class="mb-0">
                 <li><strong>Rotación automática:</strong> Se mantienen backups de los últimos <strong>7 días</strong>.
                 </li>
-                <li><strong>Contenido:</strong> Solo base de datos (MySQL).</li>
+                <li><strong>Contenido:</strong> Solo base de datos ({{ ucfirst(config('database.default')) }}).</li>
                 <li><strong>Almacenamiento:</strong> Máximo 5 GB total.</li>
                 <li><strong>Automático:</strong> Para programar backups diarios, configurar tarea programada en Windows.
                 </li>

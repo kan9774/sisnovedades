@@ -14,7 +14,7 @@ use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
 return [
 
     'backup' => [
-        'name' => env('APP_NAME', 'novedades'),
+        'name' => env('APP_NAME', 'novedades') . '-' . env('DB_CONNECTION', 'mysql'),
 
         'source' => [
             'files' => [
@@ -62,7 +62,16 @@ return [
         /*
          * The path where the mysqldump/pg_dump binary is located.
          */
-        'database_dump_binary_path' => 'C:\tools\mysql\bin\\',
+        // NOTA: Esta clave NO es leída por spatie/laravel-backup en la versión actual
+        // del paquete. El path real del binario de dump se resuelve desde
+        // config/database.php -> connections.{driver}.dump.dump_binary_path
+        // (ver DbDumperFactory::createForConnection). Se deja esta clave documentada
+        // por si una versión futura del paquete vuelve a leerla, pero NO modificar
+        // el comportamiento de backups editando este valor: editar config/database.php.
+        'database_dump_binary_path' => match (env('DB_CONNECTION', 'mysql')) {
+            'pgsql' => env('PG_DUMP_BINARY_PATH', 'C:/Program Files/PostgreSQL/17/bin/'),
+            default => env('MYSQL_DUMP_BINARY_PATH', 'C:/tools/mysql/bin/'),
+        },
 
         /*
          * The database dump can be compressed to decrease disk space usage.
