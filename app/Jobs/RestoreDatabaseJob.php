@@ -213,10 +213,12 @@ class RestoreDatabaseJob implements ShouldQueue
         $username = $config['username'];
         $password = $config['password'];
 
+        $mysqlBinary = env('MYSQL_CLIENT_BINARY_PATH', 'mysql');
+
         $this->log('Ejecutando: mysql import (password via MYSQL_PWD env, no en logs)');
 
         $process = new Process([
-            'mysql',
+            $mysqlBinary,
             '-u', $username,
             '-h', $host,
             '-P', (string) $port,
@@ -258,19 +260,19 @@ class RestoreDatabaseJob implements ShouldQueue
         $username = $config['username'];
         $password = $config['password'];
 
-        $env = ['PGPASSWORD' => $password];
+        $psqlBinary = env('PSQL_CLIENT_BINARY_PATH', 'psql');
 
-        $command = sprintf(
-            'psql -U %s -h %s -d %s -f "%s"',
-            escapeshellarg($username),
-            escapeshellarg($host),
-            escapeshellarg($database),
-            $sqlFile
-        );
+        $env = ['PGPASSWORD' => $password];
 
         $this->log('Ejecutando: psql import (PGPASSWORD via env, no en logs)');
 
-        $process = new Process(explode(' ', $command), null, $env, null, 0);
+        $process = new Process([
+            $psqlBinary,
+            '-U', $username,
+            '-h', $host,
+            '-d', $database,
+            '-f', $sqlFile,
+        ], null, $env, null, 600);
         $output = '';
         $exitCode = 1;
 
