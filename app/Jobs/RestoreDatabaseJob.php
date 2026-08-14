@@ -213,19 +213,20 @@ class RestoreDatabaseJob implements ShouldQueue
         $username = $config['username'];
         $password = $config['password'];
 
-        $command = sprintf(
-            'mysql --host=%s --port=%d --user=%s --password=%s %s < "%s"',
-            $host,
-            (int) $port,
-            escapeshellarg($username),
-            escapeshellarg($password),
-            escapeshellarg($database),
-            $sqlFile
-        );
+        $this->log('Ejecutando: mysql import (password via MYSQL_PWD env, no en logs)');
 
-        $this->log('Ejecutando: mysql import (password omitido en logs)');
+        $process = new Process([
+            'mysql',
+            '-u', $username,
+            '-h', $host,
+            '-P', (string) $port,
+            $database,
+        ], null, [
+            'MYSQL_PWD' => $password,
+        ], null, 600);
 
-        $process = Process::fromShellCommandline($command, null, null, null, 0);
+        $process->setInput(fopen($sqlFile, 'r'));
+
         $output = '';
         $exitCode = 1;
 
