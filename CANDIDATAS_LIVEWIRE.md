@@ -1,11 +1,11 @@
 # Candidatas a Migración de Blade → Livewire
 
 > Archivo generado con codebase-memory-mcp — Análisis del grafo de conocimiento del proyecto `novedades`.
-> Última actualización: 2026-08-12
+> Última actualización: 2026-08-13
 
 ## Contexto
 
-El proyecto usa Laravel 13 + Livewire 4 + Alpine.js. Existen **63+ componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
+El proyecto usa Laravel 13 + Livewire 4 + Alpine.js. Existen **67 componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
 
 ## Componentes Landing
 
@@ -158,7 +158,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 |---|-------------|-------------|--------|--------|-------------|-------|
 | 9 | `admin.conductores.*` | `ConductorController` | `Conductor` | index, create, show, edit | ⭐⭐⭐ Alta | ✅ MIGRADO |
 | ~~10~~ | ~~`admin.vehiculos.*`~~ | ~~`VehiculoController`~~ | ~~`Vehiculo`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ~~MIGRADO~~ |
-| 11 | `admin.palomar.palomares.*` | `PalomarController` | `Palomar` | index, create, show, edit | ⭐⭐⭐ Alta | CRUD con `withCount('palomas')`, validación de palomas asociadas, reporte PDF |
+| ~~11~~ | ~~`admin.palomar.palomares.*`~~ | ~~`PalomarController`~~ | ~~`Palomar`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ✅ MIGRADO — PalomarController (120 líneas) → Livewire\Palomares |
 | 12 | `admin.palomar.palomas.*` | `PalomaController` | `Paloma` | index, create, show, edit | ⭐⭐⭐ Alta | Formulario complejo: padre/madre con validación de sexo, historial de estados, relaciones múltiples |
 | 13 | `admin.palomar.vuelos.*` | `VueloController` | `Vuelo` | index, create, edit, resultados | ⭐⭐⭐ Alta | CRUD + resultados. Lógica de estados de palomas, cálculo tiempo/velocidad, pivot con historial |
 
@@ -184,8 +184,8 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | Nivel 2 — Intermedia | 3 (3 migrados) | ~7 archivos |
 | Nivel 3 — Alta | 5 (2 migrados) | ~25 archivos |
 | Nivel 4 — Muy alta | 1 (1 migrado) | ~5 archivos |
-| **Total Livewire** | **63+** | |
-| **Total migraciones** | **14** (11 migrados) | **~47 archivos** |
+| **Total Livewire** | **67** | |
+| **Total migraciones** | **15** (12 migrados) | **~48 archivos** |
 
 ## Controladores que pueden eliminarse tras migración
 
@@ -202,7 +202,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | `ActivityLogController` | 1 ruta (index con filtros) | ✅ ELIMINADO |
 | ~~`ConductorController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
 | `VehiculoController` | 7 rutas (CRUD + export) | ⏳ Desactivado (rutas reemplazadas por Livewire, archivo conservado) |
-| `PalomarController` | 6 rutas (CRUD + reporte) | ⏳ Pendiente |
+| ~~`PalomarController`~~ | ~~6 rutas (CRUD + reporte)~~ | ~~✅ ELIMINADO~~ |
 | `PalomaController` | 6 rutas (CRUD + historial) | ⏳ Pendiente |
 | `VueloController` | 7 rutas (CRUD + resultados) | ⏳ Pendiente |
 | `UserController` | 6 rutas (CRUD + incompletos) | ⏳ Pendiente |
@@ -214,7 +214,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 1. **Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza ✅ **COMPLETADO**
 2. **Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros ✅ **COMPLETADO**
-3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar, Palomas, Vuelos) — formularios complejos
+3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar ✅ migrado, Palomas, Vuelos) — formularios complejos
 4. **Sprint 4:** Nivel 4 (Users) — lógica de negocio crítica ✅ Guardias **COMPLETADO**
 5. **Landing:** Componentes interactivos (Tetris ✅, Crucigrama, Sudoku, SopaLetras) ✅ **COMPLETADO**
 
@@ -234,3 +234,5 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 > **Nota (2026-08-11):** `VehiculoController.php` y las vistas `admin/vehiculos/*.blade.php` (excepto `mantenimientos/`) se conservan en el filesystem sin uso tras la migración a Livewire. Quedan pendientes de borrado manual una vez confirmado en navegador que el módulo `livewire.vehiculos.*` funciona correctamente.
 
 > **Nota (2026-08-12):** Guardias migrado en 4 fases. Fase 4 (esta): `GuardiaAcciones` component reemplaza forms POST a cerrar/reactivar en show.blade.php. `GuardiaController` reducido a 3 métodos (show/Hoy/pdf). Vistas admin/guardias/{create,edit,index}.blade.php eliminadas. Rutas admin.guardias.cerrar/reactivar eliminadas.
+
+> **Nota (2026-08-13):** Palomar migrado. `PalomarController` (120 líneas) reemplazado por `Livewire\Palomares`. Se agregó `PalomarPdfGenerator` como support class con métodos estáticos `generar()` y `nombreArchivo()`, invocado desde ruta clásica `<a href>` (no `wire:click`). Vistas admin/palomar/*.blade.php eliminadas.

@@ -2,7 +2,7 @@
 
 ## Stack
 - Laravel 13 + Livewire 4 + Alpine.js + Bootstrap 4.6.1 + Tailwind CSS 4 + AdminLTE 3
-- ~63 componentes Livewire implementados
+- 67 archivos Livewire (contado con `find app/Livewire -name "*.php" | wc -l`)
 - Blaze 1.0 + Flux 2.13.1
 - Vite 8 + DomPDF 3 + PHPSpreadsheet 5 + Spatie ActivityLog 4
 - Patrón CRUD: tabla + modal ops-panel (x-teleport="body")
@@ -26,8 +26,46 @@
 | 7 | `Livewire\TiposVehiculo` | 1 — Simple | GET `/vehiculos/tipos` → `livewire.vehiculos.tipos.layout` | TipoVehiculoController eliminado |
 | 8 | `Livewire\EstadosPaloma` | 1 — Simple | GET `/palomar/estados-paloma` → `livewire.palomar.estados.layout` | EstadoPalomaController eliminado |
 | 9 | `Livewire\Conductores` | 3 — Alta | CRUD completo | ConductorController eliminado |
+| 12 | `Livewire\Palomas` | 3 — Alta | CRUD completo + modal ops-panel | PalomaController pendiente (181 líneas) |
 | 10 | `Livewire\Vehiculos` | 3 — Alta | CRUD completo | VehiculoController desactivado (conservado) |
 | 11 | `Livewire\Guardias` | 4 — Muy alta | CRUD + cerrar/reactivar/pdf | GuardiaController reducido a show()/Hoy()/pdf() |
+
+## Componentes Livewire por módulo (66 archivos)
+
+| Subdirectorio | Archivos | Componentes |
+|---------------|----------|-------------|
+| `Admin/` | 9 | `ComisionPanel`, `CredencialCivicaPanel`, `CsmPanel`, `HistorialEstadoPanel`, `HistorialGradosPanel`, `JefesUnidadPanel`, `PasePanel`, `UserForm`, `UserWizard` |
+| `Inventario/` | 11 | `ItemsCatalogo`, `MovimientosInventario`, `UnidadesIndividuales`, `UbicacionesCatalogo`, `CategoriasCatalogo`, `TallasCatalogo`, `ProveedoresCatalogo`, `Entregasinventario`, `LotesStock`, `VencidosEnTerceros`, `EntregasHistorial` |
+| `Landing/` | 14 | `Hero`, `Nosotros`, `Servicios`, `Contacto`, `ContactoSeccion`, `Crucigrama`, `SopaLetras`, `SudokuGame`, `TetrisGame`, `Footer`, `Navbar`, `NovedadesCerradas`, `Documentos`, `Recreacion` |
+| `Catalogos/` | 4 | `CatalogoSimpleModal`, `TiposCombustibleModal`, `TiposLubricanteModal`, `TiposRodadoModal` |
+| Raíz | 26 | `AdminDashboard`, `BackupManager`, `CategoriasDocumentos`, `Conductores`, `DashboardCharts`, `DashboardSalidas`, `Documentos`, `EditarNovedadModal`, `EstadoNovedad`, `EstadosPaloma`, `GestionAdjuntos`, `GuardiaAcciones`, `Guardias`, `Logs`, `Notificaciones`, `NotificacionesWatcher`, `Oficinas`, `Organismos`, `Palomas`, `PdfDestinatarios`, `Permisos`, `RealTimeNews`, `Roles`, `SalidasPendientes`, `TiposVehiculo`, `Vehiculos` |
+| `Actions/` | 1 | `Logout` |
+| `Vehiculos/` | 1 | `MantenimientoModal` (namespace `App\Livewire\Vehiculos\MantenimientoModal`, distinto de `App\Livewire\Vehiculos` raíz) |
+| `Grado/` | 1 | `GradosCatalogo` |
+| **Total** | **67** | |
+
+## Controladores clásicos activos
+
+| Controlador | Rutas activas | Estado | Notas |
+|-------------|--------------|--------|-------|
+| `UserController` | 8 (index, create, edit, destroy, restore, forceDelete, destroyIncompleto, UserDelete) | Activo | Pendiente #14 |
+| `GuardiaController` | 4 (show, hoy, pdf, destroy) | Activo | Reducido — Livewire\Guardias hace CRUD |
+| `NovedadesController` | 3 (index, show, destroy) | Activo | Vista general + detalle guardia |
+| `NovedadPersonalController` | 2 (store, destroy) | Activo | Novedades personal anidadas a guardia |
+| `NovedadRanchoController` | 1 (update) | Activo | Novedad rancho anidada a guardia |
+| `NotificationController` | 1 (tomar) | Activo | Solo método `tomar()` — index/markAsRead/markAllAsRead eliminados |
+| `VehiculoController` | 0 | Desactivado | Conservado — Livewire\Vehiculos hace todo |
+| `PalomarController` | resource + reporte | Activo | Pendiente #11 |
+| `PalomaController` | resource | Activo | Pendiente #12 |
+| `VueloController` | resource + resultados | Activo | Pendiente #13 |
+| `UnidadController` | 1 (show) | Activo | Resource desactivado, solo show |
+| `MantenimientoVehiculoController` | 2 (index, destroy) | Activo | Anidado bajo vehiculo/mantenimientos |
+| `BackupController` | 4 (index, create, cleanup, delete) | Activo | Gestión de backups |
+| `AdjuntoController` | 2 (download, view) | Activo | Adjuntos de novedades |
+| `EntregaController` | 1 (comprobante) | Activo | Comprobante de entrega inventario |
+| `HomeController` | 1 (index) | Activo | Landing page |
+| `ForzarCambioPasswordController` | 2 (edit, update) | Activo | Cambio obligatorio de password |
+| `AdminController` | 0 | **DEAD CODE** | Importado en web.php:11 pero 0 referencias en routes/app/Providers/Middleware — candidato a eliminar |
 
 ## Patrón CRUD inline (Nivel 1 — campos simples)
 - `#[Computed]` + `WithPagination` + `UsesBootstrapPagination`
@@ -121,12 +159,12 @@ class Componente extends Component
 | # | Componente | Nivel | Notas |
 |---|-----------|-------|-------|
 | ~~9~~ | ~~Conductores~~ | ~~3 — Alta~~ | ~~15+ campos, vencimientos~~ ✅ **MIGRADO** |
-| 10 | Vehiculos | 3 — Alta | 15+ campos, 4 catálogos, upload acta, export Excel |
-| 11 | Palomar | 3 — Alta | CRUD + withCount + PDF |
-| 12 | Palomas | 3 — Alta | Padre/madre, historial estados |
-| 13 | Vuelos | 3 — Alta | CRUD + resultados + cálculo velocidad |
-| 14 | Users | 4 — Muy alta | Búsqueda multi-campo, leftJoin, soft delete |
-| 15 | Guardias | 4 — Muy alta | 242 líneas, múltiples estados, dependencias |
+| ~~10~~ | ~~Vehiculos~~ | ~~3 — Alta~~ | ~~15+ campos, 4 catálogos, upload acta, export Excel~~ ✅ **MIGRADO** (Livewire\Vehiculos) |
+| ~~15~~ | ~~Guardias~~ | ~~4 — Muy alta~~ | ~~242 líneas, múltiples estados, dependencias~~ ✅ **MIGRADO** (Livewire\Guardias) |
+| 11 | Palomar | 3 — Alta | CRUD + withCount + PDF — PalomarController (101 líneas) |
+| 12 | Palomas | 3 — Alta | Padre/madre, historial estados — PalomaController (181 líneas) ✅ **MIGRADO** (Livewire\Palomas) |
+| 13 | Vuelos | 3 — Alta | CRUD + resultados + cálculo velocidad — VueloController (312 líneas) |
+| 14 | Users | 4 — Muy alta | Búsqueda multi-campo, leftJoin, soft delete — UserController (152 líneas) |
 
 ## Políticas (Policies)
 | Modelo | Policy | Patrón |

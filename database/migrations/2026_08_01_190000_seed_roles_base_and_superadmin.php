@@ -38,15 +38,21 @@ return new class extends Migration
         $gradoId = \App\Models\Grado::firstOrCreate(['nombre' => 'Sgto.(EC)'])->id;
         $existeSuperAdmin = DB::table('users')->where('is_super_admin', true)->exists();
         if (!$existeSuperAdmin) {
-            DB::table('users')->insert([
+            $userId = DB::table('users')->insertGetId([
                 'name' => 'Super',
                 'last_name' => 'Admin',
                 'grado_id' => $gradoId,
                 'email' => 's1bcom1@ejercito.mil.uy',
                 'password' => Hash::make('password'),
-                'rol_id' => $adminId,
                 'status' => 'active',
                 'is_super_admin' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('role_user')->insert([
+                'user_id' => $userId,
+                'rol_id' => $adminId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

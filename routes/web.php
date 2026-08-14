@@ -14,9 +14,9 @@ use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NovedadPersonalController;
 use App\Http\Controllers\NovedadRanchoController;
-use App\Http\Controllers\UnidadController;
-use App\Http\Controllers\PalomaController;
-use App\Http\Controllers\PalomarController;
+use App\Livewire\Palomas\PalomaShow;
+use App\Models\Palomar;
+use App\Support\PalomarPdfGenerator;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\VueloController;
 use App\Livewire\Guardias;
@@ -297,15 +297,23 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
         });
         // Palomar
         Route::prefix('palomar')->group(function () {
-            // Primero la ruta personalizada del reporte (debe ir ANTES que el resource)
-            Route::get('palomares/{palomar}/reporte', [PalomarController::class, 'reporte'])
-                ->name('palomares.reporte');
+            // Listado Livewire
+            Route::get('palomares', function () {
+                return view('livewire.palomares-layout');
+            })->name('palomares.index');
 
-            Route::resource('palomares', PalomarController::class)
-                ->parameters(['palomares' => 'palomar']);
+            // Reporte PDF (fuera de Livewire)
+            Route::get('palomares/{palomar}/reporte', function (Palomar $palomar) {
+                return PalomarPdfGenerator::generar($palomar)
+                    ->stream(PalomarPdfGenerator::nombreArchivo($palomar));
+            })->name('palomares.reporte');
 
-            Route::resource('palomas', PalomaController::class)
-                ->parameters(['palomas' => 'paloma']);
+            // Livewire: listado + CRUD inline
+            Route::get('palomas', function () {
+                return view('livewire.palomas-layout');
+            })->name('palomas.index');
+            // Livewire: detalle de paloma (datos + historial + vuelos)
+            Route::get('palomas/{paloma}', PalomaShow::class)->name('palomas.show');
 
             // Rutas personalizadas de vuelos (ANTES del resource, mismo criterio que palomares.reporte)
             Route::get('vuelos/{vuelo}/resultados', [VueloController::class, 'resultados'])
