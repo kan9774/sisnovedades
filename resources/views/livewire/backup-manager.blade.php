@@ -110,44 +110,7 @@
                         <i class="fas fa-sync-alt mr-1"></i> Refrescar Lista
                     </button>
                 </div>
-                <div class="col-md-3">
-                    @can('restore-backup')
-                        <button type="button" class="btn btn-danger btn-block" data-bs-toggle="modal"
-                            data-bs-target="#modalRestoreWarning" wire:loading.attr="disabled">
-                            <i class="fas fa-exclamation-triangle mr-1"></i> Restaurar Backup
-                        </button>
-                    @endcan
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Modal: Advertencia antes de restaurar --}}
-    <div class="modal fade" id="modalRestoreWarning" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-exclamation-triangle"></i> Advertencia Crítica
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-danger"><strong>La restauración de un backup reemplazará TODA la base de datos actual.</strong></p>
-                    <ul>
-                        <li>La aplicación entrará en modo mantenimiento durante la restauración.</li>
-                        <li>Se creará un backup de seguridad automático antes de restaurar.</li>
-                        <li>Si la restauración falla, el backup de seguridad estará disponible para recuperación manual.</li>
-                        <li><strong>Esta acción no se puede deshacer.</strong></li>
-                    </ul>
-                    <p>¿Deseás continuar?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalRestoreConfirm">
-                        Sí, ver backups disponibles
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -224,8 +187,12 @@
 
     {{-- Modal de confirmación de restauración (ops-panel) --}}
     <template x-teleport="body">
-    <div class="ops-panel-overlay" id="modalRestoreConfirm" wire:ignore.self
-         :class="{'is-open': $wire.showRestoreModal}">
+    <div class="ops-panel-overlay" id="modalRestoreConfirm" x-data x-init="$watch('$wire.showRestoreModal', value => {
+            if (value) document.body.classList.add('ops-panel-open');
+            else document.body.classList.remove('ops-panel-open');
+        })"
+         :class="{ 'is-open': $wire.showRestoreModal }"
+         wire:click.self="$wire.closeRestoreModal()">
         <div class="ops-panel">
             <div class="ops-panel__header">
                 <div class="ops-panel__title-wrap">
@@ -374,7 +341,7 @@
             $wire.getRestoreStatus();
         });
 
-        $watch('showRestoreModal', (value) => {
+        $wire.$watch('showRestoreModal', (value) => {
             if (value) {
                 document.getElementById('modalRestoreConfirm')?.classList.add('is-open');
                 document.body.classList.add('ops-panel-open');
