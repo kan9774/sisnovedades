@@ -11,6 +11,68 @@
         </div>
     @endif
 
+    {{-- Estado de restauración en curso --}}
+    @if ($restoreStatus !== 'idle' && $restoreStatus !== 'completed' && $restoreStatus !== 'failed')
+        <div class="alert alert-info mb-3">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-cog fa-spin fa-2x mr-3"></i>
+                <div>
+                    <strong>
+                        @if ($restoreStatus === 'backing_up_safety')
+                            Creando backup de seguridad...
+                        @elseif ($restoreStatus === 'restoring')
+                            Restaurando base de datos...
+                        @else
+                            Procesando restauración...
+                        @endif
+                    </strong>
+                    <p class="mb-0 small">
+                        @if ($restoreStatus === 'backing_up_safety')
+                            Se está generando un backup de seguridad del estado actual. Esto puede tardar.
+                        @elseif ($restoreStatus === 'restoring')
+                            La base de datos está en modo mantenimiento. No cierres esta página.
+                        @else
+                            Por favor esperá...
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Restauración completada con éxito --}}
+    @if ($restoreStatus === 'completed')
+        <div class="alert alert-success mb-3">
+            <i class="fas fa-check-circle mr-1"></i>
+            <strong>Restauración completada exitosamente.</strong> La base de datos fue restaurada desde el backup seleccionado.
+        </div>
+    @endif
+
+    {{-- Restauración fallida --}}
+    @if ($restoreStatus === 'failed')
+        <div class="alert alert-danger mb-3">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            <strong>Restauración fallida.</strong>
+            <p class="mb-1 mt-2">{{ $restoreError ?? 'Error desconocido.' }}</p>
+            @if ($restoreSafetyPath)
+                <p class="mb-0">
+                    <strong>Backup de seguridad disponible:</strong>
+                    <code>{{ $restoreSafetyPath }}</code>
+                    <br>
+                    <small>Para restaurar manualmente, usá este archivo con el comando artisan correspondiente.</small>
+                </p>
+            @endif
+            @if ($restoreLogPath)
+                <p class="mb-0">
+                    <strong>Logs detallados:</strong> storage/logs/{{ $restoreLogPath }}
+                </p>
+            @endif
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" wire:click="$set('restoreStatus', 'idle')">
+                <i class="fas fa-times"></i> Cerrar
+            </button>
+        </div>
+    @endif
+
     {{-- Tarjeta: Acciones rápidas --}}
     <div class="card card-primary card-outline mb-3">
         <div class="card-header">
@@ -20,7 +82,7 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <button wire:click="quickCreate" class="btn btn-success btn-block" wire:loading.attr="disabled"
                         wire:target="quickCreate">
                         <span wire:loading.remove wire:target="quickCreate">
@@ -29,8 +91,9 @@
                         <span wire:loading wire:target="quickCreate">
                             <i class="fas fa-spinner fa-spin mr-1"></i> Generando backup...
                         </span>
+                    </button>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <button wire:click="runCleanup" class="btn btn-warning btn-block" wire:loading.attr="disabled"
                         wire:target="runCleanup">
                         <span wire:loading.remove wire:target="runCleanup">
@@ -39,29 +102,55 @@
                         <span wire:loading wire:target="runCleanup">
                             <i class="fas fa-spinner fa-spin mr-1"></i> Limpiando...
                         </span>
+                    </button>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <button wire:click="$refresh" class="btn btn-info btn-block" wire:loading.attr="disabled"
                         wire:target="$refresh">
                         <i class="fas fa-sync-alt mr-1"></i> Refrescar Lista
                     </button>
                 </div>
+                <div class="col-md-3">
+                    @can('restore-backup')
+                        <button type="button" class="btn btn-danger btn-block" data-bs-toggle="modal"
+                            data-bs-target="#modalRestoreWarning" wire:loading.attr="disabled">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Restaurar Backup
+                        </button>
+                    @endcan
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- Tarjeta: Estado --}}
-    @if ($isRunning)
-        <div class="alert alert-info mb-3">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-cog fa-spin fa-2x mr-3"></i>
-                <div>
-                    <strong>Backup en progreso...</strong>
-                    <p class="mb-0 small">Esto puede tomar unos minutos dependiendo del tamaño de la base de datos.</p>
+    {{-- Modal: Advertencia antes de restaurar --}}
+    <div class="modal fade" id="modalRestoreWarning" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle"></i> Advertencia Crítica
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger"><strong>La restauración de un backup reemplazará TODA la base de datos actual.</strong></p>
+                    <ul>
+                        <li>La aplicación entrará en modo mantenimiento durante la restauración.</li>
+                        <li>Se creará un backup de seguridad automático antes de restaurar.</li>
+                        <li>Si la restauración falla, el backup de seguridad estará disponible para recuperación manual.</li>
+                        <li><strong>Esta acción no se puede deshacer.</strong></li>
+                    </ul>
+                    <p>¿Deseás continuar?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalRestoreConfirm">
+                        Sí, ver backups disponibles
+                    </button>
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 
     {{-- Tarjeta: Lista de Backups --}}
     <div class="card-outline-ops">
@@ -111,6 +200,13 @@
                                         onclick="return confirm('¿Estás seguro de eliminar este backup?')">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
+                                    @can('restore-backup')
+                                        <button type="button" class="btn btn-sm btn-warning"
+                                            wire:click="openRestore('{{ $backup['filename'] }}')"
+                                            title="Restaurar desde este backup">
+                                            <i class="fas fa-rotate-left"></i>
+                                        </button>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -125,6 +221,114 @@
             @endif
         </div>
     </div>
+
+    {{-- Modal de confirmación de restauración (ops-panel) --}}
+    <template x-teleport="body">
+    <div class="ops-panel-overlay" id="modalRestoreConfirm" wire:ignore.self
+         :class="{'is-open': $wire.showRestoreModal}">
+        <div class="ops-panel">
+            <div class="ops-panel__header">
+                <div class="ops-panel__title-wrap">
+                    <span class="ops-panel__eyebrow">Restauración de Base de Datos</span>
+                    <h5 class="ops-panel__title">Confirmar Restauración</h5>
+                </div>
+                <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalRestoreConfirm')" title="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="ops-panel__body">
+                <div class="ops-panel__content">
+                    @if ($selectedBackup)
+                        <div class="form-group mb-3">
+                            <label>Archivo de backup</label>
+                            <code class="d-block p-2 bg-light">{{ $selectedBackup }}</code>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>Nombre del backup</label>
+                            <strong>{{ $selectedBackup ? pathinfo($selectedBackup, PATHINFO_FILENAME) : '—' }}</strong>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Motor detectado en el backup</label>
+                                <span class="badge badge-{{ $detectedBackupDriver === 'pgsql' ? 'danger' : 'primary' }}">
+                                    {{ ucfirst($detectedBackupDriver) }}
+                                </span>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Motor activo actualmente</label>
+                                <span class="badge badge-{{ $currentDriver === 'pgsql' ? 'danger' : 'success' }}">
+                                    {{ ucfirst($currentDriver) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        @if ($detectedBackupDriver !== $currentDriver)
+                            <div class="alert alert-danger mb-3">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <strong>Motor incompatible:</strong> Este backup fue creado con
+                                <strong>{{ ucfirst($detectedBackupDriver) }}</strong> pero la base de datos activa es
+                                <strong>{{ ucfirst($currentDriver) }}</strong>. No se puede restaurar.
+                            </div>
+                        @endif
+
+                        <div class="form-group mb-3">
+                            <label>Tamaño del backup</label>
+                            <span>{{ $selectedBackup ? (function() use ($backups) {
+                                $b = collect($backups)->firstWhere('filename', $selectedBackup);
+                                return $b ? $b['size'] : '—';
+                            })() : '—' }}</span>
+                        </div>
+
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Se creará automáticamente un backup de seguridad del estado actual antes de proceder.
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>
+                                Confirmá escribiendo el nombre del archivo de backup:
+                                <strong>{{ $selectedBackup ? pathinfo($selectedBackup, PATHINFO_FILENAME) : '' }}</strong>
+                                <small class="text-muted"> (sin extensión .zip)</small>
+                            </label>
+                            <input type="text"
+                                   wire:model.live="restoreConfirmationText"
+                                   class="form-control @error('restoreConfirmationText') is-invalid @enderror"
+                                   placeholder="Escribí el nombre exacto aquí"
+                                   autocomplete="off">
+                            @error('restoreConfirmationText')
+                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="ops-panel__footer">
+                <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalRestoreConfirm')">
+                    Cancelar
+                </button>
+                <button type="button"
+                        class="btn btn-danger"
+                        wire:click="startRestore"
+                        disabled
+                        @if ($detectedBackupDriver !== $currentDriver || !$selectedBackup || $restoreConfirmationText !== ($selectedBackup ? pathinfo($selectedBackup, PATHINFO_FILENAME) : ''))
+                            disabled
+                        @endif
+                        wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="startRestore">
+                        <i class="fas fa-rotate-left"></i> Confirmar Restauración
+                    </span>
+                    <span wire:loading wire:target="startRestore">
+                        <i class="fas fa-spinner fa-spin"></i> Iniciando...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+    </template>
 
     {{-- Tarjeta: Info --}}
     <div class="card-outline-ops mt-3">
@@ -141,15 +345,42 @@
                 <li><strong>Almacenamiento:</strong> Máximo 5 GB total.</li>
                 <li><strong>Automático:</strong> Para programar backups diarios, configurar tarea programada en Windows.
                 </li>
+                <li><strong>Restauración:</strong> Solo admins. Requiere confirmación por nombre de archivo. Se crea backup de seguridad automático antes de restaurar.</li>
             </ul>
         </div>
     </div>
 </div>
 
+<div wire:poll.5s="getRestoreStatus" @if ($restoreStatus !== 'idle' && $restoreStatus !== 'completed' && $restoreStatus !== 'failed') visible @endif>
+</div>
+
 @script
     <script>
+        if (!window.cerrarOpsPanel) {
+            window.cerrarOpsPanel = function (id) {
+                const overlay = document.getElementById(id);
+                if (overlay) {
+                    overlay.classList.remove('is-open');
+                }
+                document.body.classList.remove('ops-panel-open');
+            };
+        }
+
         $wire.on('refresh-backups', () => {
             $wire.loadBackups();
+        });
+
+        $wire.on('restore-completed', () => {
+            $wire.getRestoreStatus();
+        });
+
+        $watch('showRestoreModal', (value) => {
+            if (value) {
+                document.getElementById('modalRestoreConfirm')?.classList.add('is-open');
+                document.body.classList.add('ops-panel-open');
+            } else {
+                cerrarOpsPanel('modalRestoreConfirm');
+            }
         });
     </script>
 @endscript

@@ -150,6 +150,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-backup', fn(User $user) => $user->isAdmin());
         Gate::define('create-backup', fn(User $user) => $user->isAdmin());
         Gate::define('delete-backup', fn(User $user) => $user->isAdmin());
+        Gate::define('restore-backup', fn(User $user) => $user->isAdmin());
 
 
         // Registrar políticas 
