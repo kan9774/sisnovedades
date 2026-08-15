@@ -9,7 +9,7 @@ class PalomarPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->HasPermisos('ver_palomar') || $user->isAdmin();
+        return $user->HasPermisos('ver_palomar');
     }
 
     public function view(User $user, Palomar $palomar): bool
@@ -19,16 +19,16 @@ class PalomarPolicy
 
     public function create(User $user): bool
     {
-        return $user->HasPermisos('crear_palomar') || $user->isAdmin();
+        return $user->HasPermisos('crear_palomar');
     }
 
     public function update(User $user, Palomar $palomar): bool
     {
-        return $user->HasPermisos('editar_palomar') || $user->isAdmin();
+        return $user->HasPermisos('editar_palomar');
     }
 
     public function delete(User $user, Palomar $palomar): bool
     {
-        return $user->HasPermisos('eliminar_palomar') || $user->isAdmin();
+        return $user->HasPermisos('eliminar_palomar');
     }
 }

@@ -14,7 +14,7 @@ class OficinaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_oficinas');
+        return $user->HasPermisos('ver_oficinas');
     }
 
     public function view(User $user, Oficina $oficina): bool
@@ -24,12 +24,12 @@ class OficinaPolicy
 
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('crear_oficina');
+        return $user->HasPermisos('crear_oficina');
     }
 
     public function update(User $user, Oficina $oficina): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('editar_oficina');
+        return $user->HasPermisos('editar_oficina');
     }
 
     /**
@@ -38,6 +38,6 @@ class OficinaPolicy
      */
     public function delete(User $user, Oficina $oficina): bool
     {
-        return $user->isAdmin();
+        return $user->HasPermisos('eliminar_oficina');
     }
 }

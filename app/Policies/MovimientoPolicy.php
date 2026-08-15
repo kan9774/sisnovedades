@@ -12,27 +12,27 @@ class MovimientoPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_item');
+        return $user->HasPermisos('ver_item');
     }
 
     public function view(User $user, Movimiento $movimiento): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_item');
+        return $user->HasPermisos('ver_item');
     }
 
     public function registrarEntrada(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('registrar_entrada_inventario');
+        return $user->HasPermisos('registrar_entrada_inventario');
     }
 
     public function registrarSalida(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('registrar_salida_inventario');
+        return $user->HasPermisos('registrar_salida_inventario');
     }
 
     public function registrarTransferencia(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('registrar_transferencia_inventario');
+        return $user->HasPermisos('registrar_transferencia_inventario');
     }
 
     /**
@@ -41,6 +41,6 @@ class MovimientoPolicy
      */
     public function registrarAjuste(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ajustar_stock_inventario');
+        return $user->HasPermisos('ajustar_stock_inventario');
     }
 }

@@ -9,21 +9,21 @@ class OrganismoPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->HasPermisos('ver_organismos');
     }
 
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->HasPermisos('crear_organismo');
     }
 
     public function update(User $user, Organismo $organismo): bool
     {
-        return $user->isAdmin();
+        return $user->HasPermisos('editar_organismo');
     }
 
     public function delete(User $user, Organismo $organismo): bool
     {
-        return $user->isAdmin();
+        return $user->HasPermisos('eliminar_organismo');
     }
 }

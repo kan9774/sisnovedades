@@ -9,12 +9,12 @@ class UbicacionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_ubicacion');
+        return $user->HasPermisos('ver_ubicacion');
     }
 
     public function view(User $user, Ubicacion $ubicacion): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_ubicacion');
+        return $user->HasPermisos('ver_ubicacion');
     }
 
     /**
@@ -24,16 +24,16 @@ class UbicacionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin()|| $user->HasPermisos('crear_ubicacion');
+        return $user->HasPermisos('crear_ubicacion');
     }
 
     public function update(User $user, Ubicacion $ubicacion): bool
     {
-        return $user->isAdmin()|| $user->HasPermisos('editar_ubicacion');
+        return $user->HasPermisos('editar_ubicacion');
     }
 
     public function delete(User $user, Ubicacion $ubicacion): bool
     {
-        return $user->isAdmin()|| $user->HasPermisos('eliminar_ubicacion');
+        return $user->HasPermisos('eliminar_ubicacion');
     }
 }

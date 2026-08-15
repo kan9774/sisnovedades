@@ -9,12 +9,12 @@ class GradoPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_grado');
+        return $user->HasPermisos('ver_grado');
     }
 
     public function view(User $user, Grado $grado): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_grado');
+        return $user->HasPermisos('ver_grado');
     }
 
     /**
@@ -23,16 +23,16 @@ class GradoPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('crear_grado');
+        return $user->HasPermisos('crear_grado');
     }
 
     public function update(User $user, Grado $grado): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('editar_grado');
+        return $user->HasPermisos('editar_grado');
     }
 
     public function delete(User $user, Grado $grado): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('eliminar_grado');
+        return $user->HasPermisos('eliminar_grado');
     }
 }

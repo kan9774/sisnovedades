@@ -14,7 +14,7 @@ class UserPolicy
 
     public function create(User $user): bool
     {
-        return $user->isSuperAdmin()|| $user->HasPermisos('crear_usuario');
+        return $user->HasPermisos('crear_usuario');
     }
 
     public function update(User $user, User $model): bool
@@ -34,7 +34,7 @@ class UserPolicy
             return false;
         }
 
-        return $user->isSuperAdmin() || $user->isAdmin();
+        return $user->isAdmin();
     }
     public function assignPermissions(User $user, User $model): bool
     {

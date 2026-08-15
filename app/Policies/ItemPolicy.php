@@ -10,34 +10,34 @@ class ItemPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_item');
+        return $user->HasPermisos('ver_item');
     }
 
     public function view(User $user, Item $item): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_item');
+        return $user->HasPermisos('ver_item');
     }
 
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('crear_item');
+        return $user->HasPermisos('crear_item');
     }
 
     public function update(User $user, Item $item): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('editar_item');
+        return $user->HasPermisos('editar_item');
     }
 
     public function delete(User $user, Item $item): bool
     {
-        return $user->isAdmin();
+        return $user->HasPermisos('eliminar_item');
     }
     /**
      * Marcar la unidad como en reparación.
      */
     public function marcarEnReparacion(User $user, ItemUnidad $itemUnidad): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('reparar_item_unidad');
+        return $user->HasPermisos('reparar_item_unidad');
     }
 
     /**
@@ -45,6 +45,6 @@ class ItemPolicy
      */
     public function volverDeReparacion(User $user, ItemUnidad $itemUnidad): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('reparar_item_unidad');
+        return $user->HasPermisos('reparar_item_unidad');
     }
 }

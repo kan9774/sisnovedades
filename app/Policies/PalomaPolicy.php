@@ -9,7 +9,7 @@ class PalomaPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->HasPermisos('ver_paloma') || $user->isAdmin();
+        return $user->HasPermisos('ver_paloma');
     }
 
     public function view(User $user, Paloma $paloma): bool
@@ -19,16 +19,16 @@ class PalomaPolicy
 
     public function create(User $user): bool
     {
-        return $user->HasPermisos('crear_paloma') || $user->isAdmin();
+        return $user->HasPermisos('crear_paloma');
     }
 
     public function update(User $user, Paloma $paloma): bool
     {
-        return $user->HasPermisos('editar_paloma') || $user->isAdmin();
+        return $user->HasPermisos('editar_paloma');
     }
 
     public function delete(User $user, Paloma $paloma): bool
     {
-        return $user->HasPermisos('eliminar_paloma') || $user->isAdmin();
+        return $user->HasPermisos('eliminar_paloma');
     }
 }

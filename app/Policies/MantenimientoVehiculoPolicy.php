@@ -9,27 +9,26 @@ class MantenimientoVehiculoPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_mantenimiento');
-
+        return $user->HasPermisos('ver_mantenimiento');
     }
 
     public function view(User $user, MantenimientoVehiculo $mantenimiento): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_mantenimiento');
+        return $user->HasPermisos('ver_mantenimiento');
     }
 
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('crear_mantenimiento_vehiculo');
+        return $user->HasPermisos('crear_mantenimiento_vehiculo');
     }
 
     public function update(User $user, MantenimientoVehiculo $mantenimiento): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('editar_mantenimiento_vehiculo');
+        return $user->HasPermisos('editar_mantenimiento_vehiculo');
     }
 
     public function delete(User $user, MantenimientoVehiculo $mantenimiento): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('eliminar_mantenimiento_vehiculo');
+        return $user->HasPermisos('eliminar_mantenimiento_vehiculo');
     }
 }

@@ -9,12 +9,12 @@ class TallaPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_talla');
+        return $user->HasPermisos('ver_talla');
     }
 
     public function view(User $user, Talla $talla): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_talla');
+        return $user->HasPermisos('ver_talla');
     }
 
     /**
@@ -23,16 +23,16 @@ class TallaPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin()|| $user->HasPermisos('crear_talla');
+        return $user->HasPermisos('crear_talla');
     }
 
     public function update(User $user, Talla $talla): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('editar_talla');
+        return $user->HasPermisos('editar_talla');
     }
 
     public function delete(User $user, Talla $talla): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('eliminar_talla');
+        return $user->HasPermisos('eliminar_talla');
     }
 }

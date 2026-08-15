@@ -9,12 +9,12 @@ class EntregaPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_item');
+        return $user->HasPermisos('ver_item');
     }
 
     public function view(User $user, Entrega $entrega): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_item');
+        return $user->HasPermisos('ver_item');
     }
 
     /**
@@ -26,8 +26,7 @@ class EntregaPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin()
-            || $user->HasPermisos('registrar_transferencia_inventario')
+        return $user->HasPermisos('registrar_transferencia_inventario')
             || $user->HasPermisos('asignar_item_unidad');
     }
 }

@@ -9,12 +9,12 @@ class CategoriaPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_categoria');
+        return $user->HasPermisos('ver_categoria');
     }
 
     public function view(User $user, Categoria $categoria): bool
     {
-        return $user->isAdmin()|| $user->HasPermisos('ver_categoria');
+        return $user->HasPermisos('ver_categoria');
     }
 
     /**
@@ -23,16 +23,16 @@ class CategoriaPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin()|| $user->HasPermisos('crear_categoria');
+        return $user->HasPermisos('crear_categoria');
     }
 
     public function update(User $user, Categoria $categoria): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('editar_categoria');
+        return $user->HasPermisos('editar_categoria');
     }
 
     public function delete(User $user, Categoria $categoria): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('eliminar_categoria');
+        return $user->HasPermisos('eliminar_categoria');
     }
 }

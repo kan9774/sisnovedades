@@ -53,7 +53,7 @@ class NovedadPolicy
             ->where('users.id', $user->id)
             ->exists();
 
-        return $esCapitan || $esOficial || $esEscribiente || $user->isAdmin();
+        return $esCapitan || $esOficial || $esEscribiente;
     }
 
     /**
@@ -68,7 +68,7 @@ class NovedadPolicy
     {
         $guardia = $news->guardia;
 
-        return $guardia->esMiembro($user) || $user->isAdmin();
+        return $guardia->esMiembro($user);
     }
 
     /**
@@ -81,7 +81,7 @@ class NovedadPolicy
     {
         $guardia = $news->guardia;
 
-        return $guardia->esMiembro($user) || $user->isAdmin();
+        return $guardia->esMiembro($user);
     }
     public function tomar(User $user, News $news): bool
     {
@@ -89,6 +89,6 @@ class NovedadPolicy
             return false;
         }
 
-        return $news->office_id === $user->oficina_id || $user->isAdmin();
+        return $news->office_id === $user->oficina_id;
     }
 }

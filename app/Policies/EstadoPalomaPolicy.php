@@ -9,21 +9,21 @@ class EstadoPalomaPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->HasPermisos('ver_estado_paloma') || $user->isAdmin();
+        return $user->HasPermisos('ver_estado_paloma');
     }
 
     public function create(User $user): bool
     {
-        return $user->HasPermisos('crear_estado_paloma') || $user->isAdmin();
+        return $user->HasPermisos('crear_estado_paloma');
     }
 
     public function update(User $user, EstadoPaloma $estado): bool
     {
-        return $user->HasPermisos('editar_estado_paloma') || $user->isAdmin();
+        return $user->HasPermisos('editar_estado_paloma');
     }
 
     public function delete(User $user, EstadoPaloma $estado): bool
     {
-        return $user->HasPermisos('eliminar_estado_paloma') || $user->isAdmin();
+        return $user->HasPermisos('eliminar_estado_paloma');
     }
 }

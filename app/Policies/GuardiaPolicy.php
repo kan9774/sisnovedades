@@ -13,7 +13,7 @@ class GuardiaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->HasPermisos('ver_guardia') || $user->isSuperAdmin() || $user->isAdmin();
+        return $user->HasPermisos('ver_guardia') || $user->isAdmin();
     }
 
     /**
@@ -21,8 +21,7 @@ class GuardiaPolicy
      */
     public function view(User $user, Guard $guard): bool
     {
-        return $user->isSuperAdmin()
-            || $user->isAdmin()
+        return $user->isAdmin()
             || $user->HasPermisos('ver_guardia')
             || $guard->esMiembro($user);
     }
@@ -32,7 +31,7 @@ class GuardiaPolicy
      */
     public function create(User $user): bool
     {
-        return $user->HasPermisos('crear_guardia');
+        return $user->isAdmin() || $user->HasPermisos('crear_guardia');
     }
 
     public function cerrar(User $user, Guard $guardia): bool
@@ -78,7 +77,7 @@ class GuardiaPolicy
      */
     public function viewTrashed(User $user): bool
     {
-        return $user->isSuperAdmin() || $user->isAdmin();
+        return $user->isAdmin();
     }
 
     /**
@@ -86,7 +85,7 @@ class GuardiaPolicy
      */
     public function restore(User $user, Guard $guard): bool
     {
-        return $user->isSuperAdmin() || $user->isAdmin();
+        return $user->isAdmin();
     }
 
     /**
@@ -94,7 +93,8 @@ class GuardiaPolicy
      */
     public function forceDelete(User $user, Guard $guard): bool
     {
-        return $user->isSuperAdmin();
+        // Nadie más que SuperAdmin puede forceDelete (via Gate::before()).
+        return false;
     }
 
     /**
@@ -102,7 +102,9 @@ class GuardiaPolicy
      */
     public function delete(User $user, Guard $guard): bool
     {
-        // Solo Super Admin puede eliminar, y solo si la guardia está cerrada
-        return $user->isSuperAdmin() && $guard->status === 'closed';
+        // Nadie más que SuperAdmin puede eliminar (via Gate::before()).
+        // Este false explícito preserva que ni siquiera un Admin normal
+        // pueda borrar guardias, ni siquiera cerradas.
+        return false;
     }
 }

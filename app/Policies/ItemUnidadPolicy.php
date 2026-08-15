@@ -9,12 +9,12 @@ class ItemUnidadPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_item');
+        return $user->HasPermisos('ver_item');
     }
 
     public function view(User $user, ItemUnidad $itemUnidad): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('ver_item');
+        return $user->HasPermisos('ver_item');
     }
 
     /**
@@ -22,7 +22,7 @@ class ItemUnidadPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('crear_item');
+        return $user->HasPermisos('crear_item');
     }
 
     /**
@@ -30,7 +30,7 @@ class ItemUnidadPolicy
      */
     public function asignar(User $user, ItemUnidad $itemUnidad): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('asignar_item_unidad');
+        return $user->HasPermisos('asignar_item_unidad');
     }
 
     /**
@@ -38,7 +38,7 @@ class ItemUnidadPolicy
      */
     public function marcarEnReparacion(User $user, ItemUnidad $itemUnidad): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('reparar_item_unidad');
+        return $user->HasPermisos('reparar_item_unidad');
     }
 
     /**
@@ -46,6 +46,6 @@ class ItemUnidadPolicy
      */
     public function darDeBaja(User $user, ItemUnidad $itemUnidad): bool
     {
-        return $user->isAdmin() || $user->HasPermisos('dar_baja_item_unidad');
+        return $user->HasPermisos('dar_baja_item_unidad');
     }
 }
