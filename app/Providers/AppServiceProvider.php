@@ -109,6 +109,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureDefaults();
 
+        // Eximir al SuperAdmin de todos los chequeos de autorización
+        Gate::before(function (\App\Models\User $user) {
+            return $user->isSuperAdmin() ? true : null;
+        });
+
         //Gates para el sidebar de AdminLTE
         Gate::define('viewAny-user', fn($user) => $user->isAdmin()|| $user->HasPermisos('ver_usuario'));
         Gate::define('viewAny-rol', fn($user) => $user->isAdmin());
@@ -119,7 +124,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-tipos-vehiculo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_tipos_vehiculo'));
         Gate::define('view_guardias', fn($user) => $user->isAdmin() || $user->isSuperAdmin() || $user->HasPermisos('ver_guardia'));
         Gate::define('ver_destinatarios_pdf', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_destinatarios_pdf'));
-        Gate::define('viewAny-log', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_log'));
+        Gate::define('viewAny-log', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_logs'));
         Gate::define('viewAny-oficina', [OficinaPolicy::class, 'viewAny']);
         Gate::define('viewAny-palomar', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_palomar'));
         Gate::define('viewAny-grado', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_grado'));
