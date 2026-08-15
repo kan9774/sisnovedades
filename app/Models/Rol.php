@@ -19,7 +19,7 @@ class Rol extends Model
             ->useLogName('Roles');
     }
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'seeded_permissions_locked'];
     protected $table = 'rols';
 
     public function permisos(): BelongsToMany

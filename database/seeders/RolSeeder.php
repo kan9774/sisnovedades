@@ -17,15 +17,15 @@ class RolSeeder extends Seeder
         $roles = [
             'escribiente' => [
                 'description' => 'Registra novedades dentro de su guardia asignada',
-                'permisos'    => ['registrar_novedad', 'editar_novedad_propia'],
+                'permisos'    => ['registrar_novedad'],
             ],
             'oficial_de_dia' => [
                 'description' => 'Abre la guardia y supervisa el registro de novedades',
-                'permisos'    => ['crear_guardia', 'registrar_novedad', 'editar_novedad_propia', 'editar_cualquier_novedad', 'cerrar_guardia'],
+                'permisos'    => ['crear_guardia', 'registrar_novedad', 'editar_cualquier_novedad', 'cerrar_guardia'],
             ],
             'capitan_de_servicio' => [
                 'description' => 'Supervisor responsable. Cierra la guardia y tiene permisos totales',
-                'permisos'    => ['crear_guardia', 'cerrar_guardia', 'registrar_novedad', 'editar_novedad_propia', 'editar_cualquier_novedad', 'eliminar_novedad'],
+                'permisos'    => ['crear_guardia', 'cerrar_guardia', 'registrar_novedad', 'editar_cualquier_novedad', 'eliminar_novedad'],
             ],
             'visitante' => [
                 'description' => 'Solo puede ver guardias cerradas y sus novedades',
@@ -49,11 +49,15 @@ class RolSeeder extends Seeder
                 ['description' => $datos['description']]
             );
 
-            if ($nombre === 'admin') {
-                $rol->permisos()->sync($todosLosPermisos);
-            } else {
-                $ids = Permission::whereIn('name', $datos['permisos'])->pluck('id')->toArray();
-                $rol->permisos()->sync($ids);
+            if (! $rol->seeded_permissions_locked) {
+                if ($nombre === 'admin') {
+                    $rol->permisos()->sync($todosLosPermisos);
+                } else {
+                    $ids = Permission::whereIn('name', $datos['permisos'])->pluck('id')->toArray();
+                    $rol->permisos()->sync($ids);
+                }
+
+                $rol->update(['seeded_permissions_locked' => true]);
             }
         }
     }
