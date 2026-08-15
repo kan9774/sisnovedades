@@ -24,9 +24,7 @@ class PermisoSeeder extends Seeder
                 ['name' => 'editar_guardia', 'description' => 'Editar guardias existentes'],
                 ['name' => 'eliminar_guardia', 'description' => 'Eliminar guardias'],
                 ['name' => 'cerrar_guardia', 'description' => 'Cerrar guardias activas'],
-                ['name' => 'asignar_escribientes', 'description' => 'Asignar escribientes a una guardia'],
                 ['name' => 'ver_pdf_guardia', 'description' => 'Ver PDF de la guardia'],
-                ['name' => 'enviar_pdf_guardia', 'description' => 'Enviar PDF de la guardia por correo'],
                 ['name' => 'asignar_destinatarios_pdf', 'description' => 'Asignar destinatarios para PDF de guardia'],
             ],
 
@@ -38,8 +36,6 @@ class PermisoSeeder extends Seeder
                 ['name' => 'eliminar_novedad', 'description' => 'Eliminar novedades'],
                 ['name' => 'confirmar_novedad', 'description' => 'Confirmar novedades'],
                 ['name' => 'tomar_novedad', 'description' => 'Tomar/Atender una novedad'],
-                ['name' => 'editar_novedad_propia', 'description' => 'Editar novedades propias'],
-                ['name' => 'eliminar_novedad_propia', 'description' => 'Eliminar novedades propias'],
             ],
 
             'NovedadPersonal' => [
@@ -73,12 +69,10 @@ class PermisoSeeder extends Seeder
             ],
 
             'SalidaVehiculo' => [
-                ['name' => 'ver_salidas', 'description' => 'Ver listado de salidas de vehículos'],
-                ['name' => 'ver_salida', 'description' => 'Ver detalle de una salida'],
-                ['name' => 'registrar_salida', 'description' => 'Registrar salidas de vehículos'],
-                ['name' => 'editar_salida', 'description' => 'Editar salidas de vehículos'],
-                ['name' => 'eliminar_salida', 'description' => 'Eliminar salidas de vehículos'],
-                ['name' => 'cerrar_salida', 'description' => 'Cerrar/Completar salida de vehículo'],
+                ['name' => 'ver_salida_vehiculo', 'description' => 'Ver listado/detalle de salidas de vehículos'],
+                ['name' => 'crear_salida_vehiculo', 'description' => 'Crear salidas de vehículos'],
+                ['name' => 'editar_salida_vehiculo', 'description' => 'Editar salidas de vehículos'],
+                ['name' => 'eliminar_salida_vehiculo', 'description' => 'Eliminar salidas de vehículos'],
             ],
 
             'BoletaCierre' => [
@@ -229,9 +223,6 @@ class PermisoSeeder extends Seeder
                 ['name' => 'eliminar_usuario', 'description' => 'Eliminar usuarios'],
                 ['name' => 'restaurar_usuario', 'description' => 'Restaurar usuarios eliminados'],
                 ['name' => 'asignar_rol_usuario', 'description' => 'Asignar roles a usuarios'],
-                ['name' => 'asignar_permisos_usuario', 'description' => 'Asignar permisos directos a usuarios'],
-                ['name' => 'bloquear_usuario', 'description' => 'Bloquear/Desbloquear usuarios'],
-                ['name' => 'resetear_password', 'description' => 'Resetear contraseña de usuarios'],
             ],
 
             'Rol' => [
