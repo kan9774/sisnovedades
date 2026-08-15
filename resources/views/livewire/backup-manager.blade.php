@@ -199,7 +199,7 @@
                     <span class="ops-panel__eyebrow">Restauración de Base de Datos</span>
                     <h5 class="ops-panel__title">Confirmar Restauración</h5>
                 </div>
-                <button type="button" class="ops-panel__close" onclick="cerrarOpsPanel('modalRestoreConfirm')" title="Cerrar">
+                <button type="button" class="ops-panel__close" wire:click="$wire.closeRestoreModal" title="Cerrar">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -274,7 +274,7 @@
             </div>
 
             <div class="ops-panel__footer">
-                <button type="button" class="btn btn-outline-secondary" onclick="cerrarOpsPanel('modalRestoreConfirm')">
+                <button type="button" class="btn btn-outline-secondary" wire:click="$wire.closeRestoreModal">
                     Cancelar
                 </button>
                 <button type="button"
@@ -322,16 +322,6 @@
 
 @script
     <script>
-        if (!window.cerrarOpsPanel) {
-            window.cerrarOpsPanel = function (id) {
-                const overlay = document.getElementById(id);
-                if (overlay) {
-                    overlay.classList.remove('is-open');
-                }
-                document.body.classList.remove('ops-panel-open');
-            };
-        }
-
         $wire.on('refresh-backups', () => {
             $wire.loadBackups();
         });
@@ -345,7 +335,8 @@
                 document.getElementById('modalRestoreConfirm')?.classList.add('is-open');
                 document.body.classList.add('ops-panel-open');
             } else {
-                cerrarOpsPanel('modalRestoreConfirm');
+                document.getElementById('modalRestoreConfirm')?.classList.remove('is-open');
+                document.body.classList.remove('ops-panel-open');
             }
         });
     </script>

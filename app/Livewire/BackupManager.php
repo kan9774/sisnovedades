@@ -135,7 +135,7 @@ class BackupManager extends Component
         $this->restoreLogPath = null;
 
         $backupName = pathinfo($filename, PATHINFO_FILENAME);
-        $this->detectedBackupDriver = $this->detectDriverFromFilename($backupName);
+        $this->detectedBackupDriver = $this->detectDriverFromFilename($filename);
         $this->currentDriver = config('database.default', 'mysql');
 
         $this->showRestoreModal = true;

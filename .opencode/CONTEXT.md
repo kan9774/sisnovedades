@@ -14,6 +14,17 @@
 ## Estructura de migraciones
 `CANDIDATAS_LIVEWIRE.md` — tracker con 4 niveles de complejidad + landing components
 
+## Compatibilidad MySQL ↔ PostgreSQL
+- **82 migraciones** revisadas: todas compatibles con ambos motores.
+- **3 migraciones** con SQL crudo que ya tienen el patrón de bifurcación `if (DB::getDriverName() === 'pgsql')`:
+  - `2026_08_01_105323_alter_users_status_to_enum.php` — ENUM → CHECK constraint (pgsql) vs ENUM real (MySQL)
+  - `2026_08_01_162240_alter_users_nullable_for_wizard.php` — `ALTER COLUMN DROP/SET NOT NULL` (pgsql) vs `MODIFY` (MySQL)
+  - `2026_08_03_182443_change_time_to_datetime_on_news_table.php` — `ALTER COLUMN "time" TYPE timestamp USING (CURRENT_DATE + "time")` (pgsql) vs `dateTime()->change()` (MySQL)
+- **25 migraciones** con `$table->enum()`: Laravel convierte a `VARCHAR` + CHECK en PostgreSQL automáticamente.
+- **51 migraciones** con `unsignedInteger`/`unsignedBigInteger`: Laravel mapea a `integer`/`bigInteger` (signed) en PostgreSQL. Sin problema porque los valores no superan límites signed.
+- **2 migraciones** con `->change()`: `alter_documentos_subido_por_set_null.php`, `change_numero_orden_to_string_in_historial_grados_table.php`. Ambas usan Laravel Schema Builder puro, genera `ALTER COLUMN` correcto en pgsql.
+- **⚠️ Rollback frágil**: `change_numero_orden_to_string_in_historial_grados_table.php` down() intenta cast `string → unsignedInteger`. Fallará en pgsql si hay valores como `"016/2026"`.
+
 ## Migraciones completadas ✅
 | # | Componente | Nivel | Rutas | Controlador |
 |---|-----------|-------|-------|-------------|

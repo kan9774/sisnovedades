@@ -11,10 +11,18 @@ return new class extends Migration
     {
         // MySQL permite múltiples NULL en una columna UNIQUE (email), así
         // que sacar el NOT NULL no rompe el índice único existente.
-        DB::statement("ALTER TABLE users MODIFY name VARCHAR(255) NULL");
-        DB::statement("ALTER TABLE users MODIFY last_name VARCHAR(255) NULL");
-        DB::statement("ALTER TABLE users MODIFY email VARCHAR(255) NULL");
-        DB::statement("ALTER TABLE users MODIFY password VARCHAR(255) NULL");
+        // (Postgres se comporta igual: NULLs no chocan entre sí en un índice único.)
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE users ALTER COLUMN name DROP NOT NULL");
+            DB::statement("ALTER TABLE users ALTER COLUMN last_name DROP NOT NULL");
+            DB::statement("ALTER TABLE users ALTER COLUMN email DROP NOT NULL");
+            DB::statement("ALTER TABLE users ALTER COLUMN password DROP NOT NULL");
+        } else {
+            DB::statement("ALTER TABLE users MODIFY name VARCHAR(255) NULL");
+            DB::statement("ALTER TABLE users MODIFY last_name VARCHAR(255) NULL");
+            DB::statement("ALTER TABLE users MODIFY email VARCHAR(255) NULL");
+            DB::statement("ALTER TABLE users MODIFY password VARCHAR(255) NULL");
+        }
 
         Schema::table('users', function (Blueprint $table) {
             // null = todavía a mitad del wizard (solo tiene C.I. y quizás
@@ -29,9 +37,16 @@ return new class extends Migration
             $table->dropColumn('perfil_completo_at');
         });
 
-        DB::statement("ALTER TABLE users MODIFY name VARCHAR(255) NOT NULL");
-        DB::statement("ALTER TABLE users MODIFY last_name VARCHAR(255) NOT NULL");
-        DB::statement("ALTER TABLE users MODIFY email VARCHAR(255) NOT NULL");
-        DB::statement("ALTER TABLE users MODIFY password VARCHAR(255) NOT NULL");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE users ALTER COLUMN name SET NOT NULL");
+            DB::statement("ALTER TABLE users ALTER COLUMN last_name SET NOT NULL");
+            DB::statement("ALTER TABLE users ALTER COLUMN email SET NOT NULL");
+            DB::statement("ALTER TABLE users ALTER COLUMN password SET NOT NULL");
+        } else {
+            DB::statement("ALTER TABLE users MODIFY name VARCHAR(255) NOT NULL");
+            DB::statement("ALTER TABLE users MODIFY last_name VARCHAR(255) NOT NULL");
+            DB::statement("ALTER TABLE users MODIFY email VARCHAR(255) NOT NULL");
+            DB::statement("ALTER TABLE users MODIFY password VARCHAR(255) NOT NULL");
+        }
     }
 };
