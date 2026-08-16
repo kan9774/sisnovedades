@@ -57,26 +57,26 @@
         @endcan
     </div>
 
+    @script
     <script>
-        document.addEventListener('livewire:load', () => {
-            $wire.on('mostrarAlertaCerrar', (count) => {
-                confirmarAccion({
-                    title: 'Cerrar con novedades pendientes',
-                    text: 'No se puede cerrar: quedan ' + count + ' novedad(es) sin resolver (Caso a resolver).',
-                    icon: 'warning',
-                    confirmButtonText: 'Cerrar de todas formas',
-                    confirmButtonColor: '#dc3545',
-                    cancelButtonText: 'Cancelar',
-                    reverseButtons: true,
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $wire.cerrarForzado();
-                    }
-                });
+        $wire.on('mostrarAlertaCerrar', (count) => {
+            confirmarAccion({
+                title: 'Cerrar con novedades pendientes',
+                text: 'No se puede cerrar: quedan ' + count + ' novedad(es) sin resolver (Caso a resolver).',
+                icon: 'warning',
+                confirmButtonText: 'Cerrar de todas formas',
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $wire.cerrarForzado();
+                }
             });
         });
     </script>
+    @endscript
 
 </div>
