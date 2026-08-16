@@ -9,25 +9,14 @@ return [
     |--------------------------------------------------------------------------
     | Default Database Connection Name
     |--------------------------------------------------------------------------
-    |
-    | Here you may specify which of the database connections below you wish
-    | to use as your default connection for database operations. This is
-    | the connection which will be utilized unless another connection
-    | is explicitly specified when you execute a query / statement.
-    |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
     | Database Connections
     |--------------------------------------------------------------------------
-    |
-    | Below are all of the database connections defined for your application.
-    | An example configuration is provided for each database system which
-    | is supported by Laravel. You're free to add / remove connections.
-    |
     */
 
     'connections' => [
@@ -44,12 +33,15 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
+        // ─────────────────────────────────────────────
+        // MySQL LOCAL (Laragon) — conexión de trabajo diario
+        // ─────────────────────────────────────────────
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
+            'database' => env('DB_DATABASE', 'novedades'),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
@@ -63,11 +55,33 @@ return [
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
             'dump' => [
-                'dump_binary_path' => 'C:/tools/mysql/bin',
+                'dump_binary_path' => env('MYSQL_DUMP_BINARY_PATH', 'C:/tools/mysql/bin'),
                 'use_single_transaction' => true,
                 'timeout' => 60 * 5,
                 'add_extra_option' => '--no-tablespaces',
             ],
+        ],
+
+        // ─────────────────────────────────────────────
+        // TiDB Cloud — conexión secundaria (10 GB free), más latencia que Supabase
+        // ─────────────────────────────────────────────
+        'mysql_tidb' => [
+            'driver' => 'mysql',
+            'host' => env('TIDB_DB_HOST'),
+            'port' => env('TIDB_DB_PORT', '4000'),
+            'database' => env('TIDB_DB_DATABASE', 'bcom1'),
+            'username' => env('TIDB_DB_USERNAME'),
+            'password' => env('TIDB_DB_PASSWORD'),
+            'unix_socket' => '',
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                Mysql::ATTR_SSL_CA => env('TIDB_ATTR_SSL_CA'),
+            ]) : [],
         ],
 
         'mariadb' => [
@@ -90,19 +104,45 @@ return [
             ]) : [],
         ],
 
+        // ─────────────────────────────────────────────
+        // Supabase (Postgres) — vía connection pooler (Supavisor)
+        // Uso normal de la app. NO usar para migraciones (ver pgsql_direct).
+        // ─────────────────────────────────────────────
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'url' => env('SUPABASE_DB_URL'),
+            'host' => env('SUPABASE_DB_HOST'),
+            'port' => env('SUPABASE_DB_PORT', '6543'),
+            'database' => env('SUPABASE_DB_DATABASE', 'postgres'),
+            'username' => env('SUPABASE_DB_USERNAME'),
+            'password' => env('SUPABASE_DB_PASSWORD'),
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'sslmode' => env('DB_SSLMODE', 'require'),
+            'dump' => [
+                'dump_binary_path' => env('PG_DUMP_BINARY_PATH', 'C:/Program Files/PostgreSQL/17/bin/'),
+            ],
+        ],
+
+        // ─────────────────────────────────────────────
+        // Supabase (Postgres) — conexión DIRECTA (sin pooler)
+        // Usar para: php artisan migrate, y el script de copia de datos.
+        // El pooler en modo transacción no soporta bien advisory locks / DDL.
+        // ─────────────────────────────────────────────
+        'pgsql_direct' => [
+            'driver' => 'pgsql',
+            'host' => env('SUPABASE_DB_HOST_DIRECT'),
+            'port' => env('SUPABASE_DB_PORT_DIRECT', '5432'),
+            'database' => env('SUPABASE_DB_DATABASE', 'postgres'),
+            'username' => env('SUPABASE_DB_USERNAME_DIRECT', 'postgres'),
+            'password' => env('SUPABASE_DB_PASSWORD'),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'require',
             'dump' => [
                 'dump_binary_path' => env('PG_DUMP_BINARY_PATH', 'C:/Program Files/PostgreSQL/17/bin/'),
             ],
@@ -119,8 +159,6 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
     ],
@@ -129,11 +167,6 @@ return [
     |--------------------------------------------------------------------------
     | Migration Repository Table
     |--------------------------------------------------------------------------
-    |
-    | This table keeps track of all the migrations that have already run for
-    | your application. Using this information, we can determine which of
-    | the migrations on disk haven't actually been run on the database.
-    |
     */
 
     'migrations' => [
@@ -145,11 +178,6 @@ return [
     |--------------------------------------------------------------------------
     | Redis Databases
     |--------------------------------------------------------------------------
-    |
-    | Redis is an open source, fast, and advanced key-value store that also
-    | provides a richer body of commands than a typical key-value system
-    | such as Memcached. You may define your connection settings here.
-    |
     */
 
     'redis' => [

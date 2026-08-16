@@ -1,11 +1,11 @@
 # Candidatas a Migración de Blade → Livewire
 
 > Archivo generado con codebase-memory-mcp — Análisis del grafo de conocimiento del proyecto `novedades`.
-> Última actualización: 2026-08-13
+> Última actualización: 2026-08-15
 
 ## Contexto
 
-El proyecto usa Laravel 13 + Livewire 4 + Alpine.js. Existen **67 componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
+El proyecto usa Laravel 13 + Livewire 4 + Alpine.js. Existen **68 componentes Livewire** implementados con patrones consistentes. Este archivo identifica las vistas Blade que aún dependen de controladores tradicionales y pueden migrarse.
 
 ## Componentes Landing
 
@@ -42,6 +42,7 @@ El proyecto usa Laravel 13 + Livewire 4 + Alpine.js. Existen **67 componentes Li
 | 8 | `Livewire\EstadosPaloma` | 1 — Simple | ✅ MIGRADO | `Route::get('/palomar/estados-paloma', ...)` → `livewire.palomar.estados.layout` | `EstadoPalomaController` ✅ |
 | 9 | `Livewire\Conductores` | 3 — Alta | ✅ MIGRADO | `Route::get('/conductores', ...)` → `livewire.conductores.layout` | `ConductorController` ✅ |
 | 10 | `Livewire\Vehiculos` | 3 — Alta | ✅ MIGRADO | `Route::get('/vehiculos', ...)` → `livewire.vehiculos.layout` | `VehiculoController` (desactivado, no eliminado) |
+| 11 | `Livewire\Palomas` | 3 — Alta | ✅ MIGRADO | `Route::get('/palomar/palomas', ...)` → `livewire.palomas-layout` | `PalomaController` (eliminada del filesystem) |
 
 **Patrón Nivel 1:** `#[Computed]` + `WithPagination` + `UsesBootstrapPagination` + `mount()` con `$this->authorize('viewAny')` + `updatedSearch()` con `$this->resetPage()` + formulario inline con `wire:confirm` para eliminar.
 **Patrón Nivel 2:** `#[Computed]` + sin paginación (->get()) + `mount()` con `$this->authorize('viewAny')` + `updatedSearch()` + modal de formulario con `x-ops-card` + `confirmDelete()` / `executeDelete()` + checkboxes de permisos agrupados por módulo (`agruparPermisosPorModulo` + `formatearNombreModulo`).
@@ -158,8 +159,8 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 |---|-------------|-------------|--------|--------|-------------|-------|
 | 9 | `admin.conductores.*` | `ConductorController` | `Conductor` | index, create, show, edit | ⭐⭐⭐ Alta | ✅ MIGRADO |
 | ~~10~~ | ~~`admin.vehiculos.*`~~ | ~~`VehiculoController`~~ | ~~`Vehiculo`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ~~MIGRADO~~ |
-| ~~11~~ | ~~`admin.palomar.palomares.*`~~ | ~~`PalomarController`~~ | ~~`Palomar`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ✅ MIGRADO — PalomarController (120 líneas) → Livewire\Palomares |
-| 12 | `admin.palomar.palomas.*` | `PalomaController` | `Paloma` | index, create, show, edit | ⭐⭐⭐ Alta | Formulario complejo: padre/madre con validación de sexo, historial de estados, relaciones múltiples |
+| ~~11~~ | ~~`admin.palomar.palomares.*`~~ | ~~`PalomarController`~~ | ~~`Palomar`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ~~MIGRADO~~ |
+| ~~12~~ | ~~`admin.palomar.palomas.*`~~ | ~~`PalomaController`~~ | ~~`Paloma`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ~~MIGRADO — PalomaController eliminado, Livewire\Palomas (389 líneas) + Livewire\Palomas\PalomaShow (33 líneas)~~ |
 | 13 | `admin.palomar.vuelos.*` | `VueloController` | `Vuelo` | index, create, edit, resultados | ⭐⭐⭐ Alta | CRUD + resultados. Lógica de estados de palomas, cálculo tiempo/velocidad, pivot con historial |
 
 **Patrón a seguir:** `PdfDestinatarios` (CRUD completo con asignación de usuarios, `WithPagination`)
@@ -182,10 +183,10 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | Landing (nuevos) | 14 | ~14 archivos |
 | Nivel 1 — Simple | 4 (4 migrados) | ~12 archivos |
 | Nivel 2 — Intermedia | 3 (3 migrados) | ~7 archivos |
-| Nivel 3 — Alta | 5 (2 migrados) | ~25 archivos |
+| Nivel 3 — Alta | 5 (3 migrados) | ~25 archivos |
 | Nivel 4 — Muy alta | 1 (1 migrado) | ~5 archivos |
-| **Total Livewire** | **67** | |
-| **Total migraciones** | **15** (12 migrados) | **~48 archivos** |
+| **Total Livewire** | **68** | |
+| **Total migraciones** | **16** (13 migrados) | **~48 archivos** |
 
 ## Controladores que pueden eliminarse tras migración
 
@@ -203,7 +204,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | ~~`ConductorController`~~ | ~~5 rutas (CRUD completo)~~ | ~~✅ ELIMINADO~~ |
 | `VehiculoController` | 7 rutas (CRUD + export) | ⏳ Desactivado (rutas reemplazadas por Livewire, archivo conservado) |
 | ~~`PalomarController`~~ | ~~6 rutas (CRUD + reporte)~~ | ~~✅ ELIMINADO~~ |
-| `PalomaController` | 6 rutas (CRUD + historial) | ⏳ Pendiente |
+| ~~`PalomaController`~~ | ~~6 rutas (CRUD + historial)~~ | ~~✅ ELIMINADO~~ |
 | `VueloController` | 7 rutas (CRUD + resultados) | ⏳ Pendiente |
 | `UserController` | 6 rutas (CRUD + incompletos) | ⏳ Pendiente |
 | ~~`GuardiaController`~~ | ~~8 rutas (CRUD + cerrar + reactivar)~~ | ~~✅ MIGRADO (reducido a show()/Hoy()/pdf())~~ |
@@ -214,7 +215,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 1. **Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza ✅ **COMPLETADO**
 2. **Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros ✅ **COMPLETADO**
-3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar ✅ migrado, Palomas, Vuelos) — formularios complejos
+3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar ✅ migrado, Palomas ✅ migrado, Vuelos) — formularios complejos
 4. **Sprint 4:** Nivel 4 (Users) — lógica de negocio crítica ✅ Guardias **COMPLETADO**
 5. **Landing:** Componentes interactivos (Tetris ✅, Crucigrama, Sudoku, SopaLetras) ✅ **COMPLETADO**
 
@@ -236,3 +237,5 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 > **Nota (2026-08-12):** Guardias migrado en 4 fases. Fase 4 (esta): `GuardiaAcciones` component reemplaza forms POST a cerrar/reactivar en show.blade.php. `GuardiaController` reducido a 3 métodos (show/Hoy/pdf). Vistas admin/guardias/{create,edit,index}.blade.php eliminadas. Rutas admin.guardias.cerrar/reactivar eliminadas.
 
 > **Nota (2026-08-13):** Palomar migrado. `PalomarController` (120 líneas) reemplazado por `Livewire\Palomares`. Se agregó `PalomarPdfGenerator` como support class con métodos estáticos `generar()` y `nombreArchivo()`, invocado desde ruta clásica `<a href>` (no `wire:click`). Vistas admin/palomar/*.blade.php eliminadas.
+
+> **Nota (2026-08-15):** Palomas migrado. `PalomaController` (181 líneas) reemplazado por `Livewire\Palomas` (389 líneas) + `Livewire\Palomas\PalomaShow` (33 líneas). CRUD completo con modal ops-panel, validación de sexo padre/madre, historial de estados con registro automático. Controlador eliminado del filesystem. Vistas admin/palomar/palomas/*.blade.php eliminadas.

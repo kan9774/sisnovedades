@@ -315,11 +315,15 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             // Livewire: detalle de paloma (datos + historial + vuelos)
             Route::get('palomas/{paloma}', PalomaShow::class)->name('palomas.show');
 
+            // Livewire: listado + CRUD inline
+            Route::get('vuelos', function () {
+                return view('livewire.vuelos.layout');
+            })->name('vuelos.index');
+
             // Rutas personalizadas de vuelos (ANTES del resource, mismo criterio que palomares.reporte)
-            Route::get('vuelos/{vuelo}/resultados', [VueloController::class, 'resultados'])
-                ->name('vuelos.resultados');
-            Route::post('vuelos/{vuelo}/resultados', [VueloController::class, 'guardarResultados'])
-                ->name('vuelos.guardar-resultados');
+            Route::get('vuelos/{vuelo}/resultados', function (\App\Models\Vuelo $vuelo) {
+                return view('livewire.vuelos.resultados', ['vueloId' => $vuelo->id]);
+            })->name('vuelos.resultados');
 
             Route::resource('vuelos', VueloController::class)
                 ->parameters(['vuelos' => 'vuelo']);
