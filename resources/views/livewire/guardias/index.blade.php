@@ -235,13 +235,16 @@
                                                     <input type="text" class="form-control"
                                                         value="{{ $formDateDisplay }}"
                                                         disabled>
+                                                    @error('formDate')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 @else
                                                     <input type="date" wire:model="formDate"
                                                         class="form-control @error('formDate') is-invalid @enderror">
+                                                    @error('formDate')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 @endif
-                                                @error('formDate')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
                                             </div>
                                         </div>
                                     </div>

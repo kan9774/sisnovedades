@@ -20,8 +20,6 @@ class PalomaShow extends Component
         $this->paloma->load([
             'palomar',
             'estado',
-            'padre',
-            'madre',
             'historial.user',
             'vuelos' => fn($q) => $q->orderBy('vuelos.fecha', 'desc')->limit(10),
         ]);

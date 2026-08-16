@@ -444,9 +444,6 @@
         $ausentes = $todasLasPalomas->filter(fn($p) => optional($p->estado)->nombre === 'Ausente')->count();
         $presentes = $total - $ausentes;
 
-        // Estado sanitario: conteo real de palomas en cada estado.
-        $palomasSanas = $todasLasPalomas->where('estado_sanitario', 'Bien')->count();
-        $palomasEnfermas = $todasLasPalomas->where('estado_sanitario', 'Enferma')->count();
     @endphp
 
     @if ($total > 0)

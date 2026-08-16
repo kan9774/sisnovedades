@@ -167,6 +167,7 @@ class Guardias extends Component
         $this->formEscribienteId = $guardia->escribiente->first()?->id;
         $this->formNotes = $guardia->notes;
         $this->formDateDisplay = $guardia->date->format('d/m/Y');
+        $this->formDate = $guardia->date->format('Y-m-d');
 
         $this->showForm = true;
     }

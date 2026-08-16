@@ -26,17 +26,10 @@ use LogsActivity;
     protected $fillable = [
         'palomar_id',
         'anilla',
-        'nombre',
         'fecha_nacimiento',
         'sexo',
-        'color',
-        'raza',
-        'origen',
-        'padre_id',
-        'madre_id',
         'estado_id',
         'observaciones',
-        'estado_sanitario'
     ];
 
     protected $casts = [
@@ -51,16 +44,6 @@ use LogsActivity;
     public function estado(): BelongsTo
     {
         return $this->belongsTo(EstadoPaloma::class, 'estado_id');
-    }
-
-    public function padre(): BelongsTo
-    {
-        return $this->belongsTo(Paloma::class, 'padre_id');
-    }
-
-    public function madre(): BelongsTo
-    {
-        return $this->belongsTo(Paloma::class, 'madre_id');
     }
 
     public function historial(): HasMany

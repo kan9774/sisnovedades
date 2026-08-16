@@ -28,22 +28,14 @@ class Palomas extends Component
     // ── Datos del formulario ──
     public $formPalomarId = '';
     public $formAnilla = '';
-    public $formNombre = '';
     public $formFechaNacimiento = '';
     public $formSexo = 'desconocido';
-    public $formColor = '';
-    public $formRaza = '';
-    public $formOrigen = '';
-    public $formPadreId = '';
-    public $formMadreId = '';
     public $formEstadoId = '';
-    public $formEstadoSanitario = 'Bien';
     public $formObservaciones = '';
 
     // ── Catálogos ──
     public $palomares = [];
     public $estados = [];
-    public $palomasDisponibles = [];
 
     // ── Feedback ──
     public $successMsg = '';
@@ -66,7 +58,6 @@ class Palomas extends Component
     {
         $this->palomares = Palomar::where('activo', true)->get(['id', 'nombre']);
         $this->estados = EstadoPaloma::where('activo', true)->get(['id', 'nombre']);
-        $this->palomasDisponibles = Paloma::whereHas('estado', fn($q) => $q->where('nombre', 'Activa'))->get(['id', 'anilla', 'nombre', 'sexo']);
     }
 
     // ── Consulta con caché ──
@@ -79,7 +70,6 @@ class Palomas extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('anilla', 'like', '%' . $this->search . '%')
-                  ->orWhere('nombre', 'like', '%' . $this->search . '%')
                   ->orWhereHas('palomar', fn($pq) => $pq->where('nombre', 'like', '%' . $this->search . '%'));
             });
         }
@@ -121,20 +111,10 @@ class Palomas extends Component
         $this->formId = $paloma->id;
         $this->formPalomarId = $paloma->palomar_id;
         $this->formAnilla = $paloma->anilla;
-        $this->formNombre = $paloma->nombre ?? '';
         $this->formFechaNacimiento = optional($paloma->fecha_nacimiento)->format('Y-m-d');
         $this->formSexo = $paloma->sexo;
-        $this->formColor = $paloma->color ?? '';
-        $this->formRaza = $paloma->raza ?? '';
-        $this->formOrigen = $paloma->origen ?? '';
-        $this->formPadreId = $paloma->padre_id ?? '';
-        $this->formMadreId = $paloma->madre_id ?? '';
         $this->formEstadoId = $paloma->estado_id;
-        $this->formEstadoSanitario = $paloma->estado_sanitario;
         $this->formObservaciones = $paloma->observaciones ?? '';
-
-        // Recargar catálogos para edit (excluir propia paloma)
-        $this->palomasDisponibles = Paloma::where('id', '!=', $paloma->id)->get(['id', 'anilla', 'nombre', 'sexo']);
 
         $this->showForm = true;
         $this->dispatch('abrir-modal-paloma');
@@ -190,18 +170,6 @@ class Palomas extends Component
                 $this->successMsg = 'Paloma creada correctamente.';
             } else {
                 $paloma = Paloma::findOrFail($this->formId);
-
-                // Evitar autoselección
-                if (($data['padre_id'] ?? null) == $paloma->id) {
-                    $this->errorMsg = 'No puedes seleccionar la misma paloma como padre.';
-                    $this->loading = false;
-                    return;
-                }
-                if (($data['madre_id'] ?? null) == $paloma->id) {
-                    $this->errorMsg = 'No puedes seleccionar la misma paloma como madre.';
-                    $this->loading = false;
-                    return;
-                }
 
                 $estadoAnteriorId = $paloma->estado_id;
                 $paloma->update($data);
@@ -276,16 +244,9 @@ class Palomas extends Component
         return [
             'palomar_id' => $this->formPalomarId,
             'anilla' => $this->formAnilla,
-            'nombre' => $this->formNombre ?: null,
             'fecha_nacimiento' => $this->formFechaNacimiento ?: null,
             'sexo' => $this->formSexo,
-            'color' => $this->formColor ?: null,
-            'raza' => $this->formRaza ?: null,
-            'origen' => $this->formOrigen ?: null,
-            'padre_id' => $this->formPadreId ?: null,
-            'madre_id' => $this->formMadreId ?: null,
             'estado_id' => $this->formEstadoId,
-            'estado_sanitario' => $this->formEstadoSanitario,
             'observaciones' => $this->formObservaciones ?: null,
         ];
     }
@@ -297,16 +258,9 @@ class Palomas extends Component
         $this->formId = null;
         $this->formPalomarId = '';
         $this->formAnilla = '';
-        $this->formNombre = '';
         $this->formFechaNacimiento = '';
         $this->formSexo = 'desconocido';
-        $this->formColor = '';
-        $this->formRaza = '';
-        $this->formOrigen = '';
-        $this->formPadreId = '';
-        $this->formMadreId = '';
         $this->formEstadoId = '';
-        $this->formEstadoSanitario = 'Bien';
         $this->formObservaciones = '';
     }
 
@@ -320,26 +274,11 @@ class Palomas extends Component
         return [
             'formPalomarId' => 'required|exists:palomares,id',
             'formAnilla' => 'required|string|max:50|' . $uniqueAnilla,
-            'formNombre' => 'nullable|string|max:100',
             'formFechaNacimiento' => $this->formTipo === 'create'
                 ? 'nullable|date|before:today'
                 : 'nullable|date',
             'formSexo' => 'required|in:macho,hembra,desconocido',
-            'formColor' => 'nullable|string|max:50',
-            'formRaza' => 'nullable|string|max:100',
-            'formOrigen' => 'nullable|string|max:255',
-            'formPadreId' => ['nullable', 'exists:palomas,id', function ($attribute, $value, $fail) {
-                if ($value && Paloma::find($value)?->sexo !== 'macho') {
-                    $fail('La paloma seleccionada como padre debe tener sexo macho.');
-                }
-            }],
-            'formMadreId' => ['nullable', 'exists:palomas,id', function ($attribute, $value, $fail) {
-                if ($value && Paloma::find($value)?->sexo !== 'hembra') {
-                    $fail('La paloma seleccionada como madre debe tener sexo hembra.');
-                }
-            }],
             'formEstadoId' => 'required|exists:estados_paloma,id',
-            'formEstadoSanitario' => 'required|in:Bien,Enferma',
             'formObservaciones' => 'nullable|string',
         ];
     }
@@ -353,10 +292,7 @@ class Palomas extends Component
             'formSexo.required' => 'El sexo es obligatorio.',
             'formSexo.in' => 'El sexo debe ser macho, hembra o desconocido.',
             'formEstadoId.required' => 'El estado es obligatorio.',
-            'formEstadoSanitario.required' => 'El estado sanitario es obligatorio.',
             'formFechaNacimiento.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
-            'formPadreId.custom' => 'La paloma seleccionada como padre debe ser macho.',
-            'formMadreId.custom' => 'La paloma seleccionada como madre debe ser hembra.',
         ];
     }
 

@@ -45,11 +45,6 @@
                         <div class="col-6 col-sm-4 text-muted"><i class="fas fa-hashtag mr-1"></i> Anilla:</div>
                         <div class="col-6 col-sm-8 font-weight-bold">{{ $paloma->anilla }}</div>
                     </div>
-                    {{-- Nombre --}}
-                    <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                        <div class="col-6 col-sm-4 text-muted"><i class="fas fa-tag mr-1"></i> Nombre:</div>
-                        <div class="col-6 col-sm-8">{{ $paloma->nombre ?? '-' }}</div>
-                    </div>
                     {{-- Palomar --}}
                     <div class="col-12 d-flex flex-wrap py-1 border-bottom">
                         <div class="col-6 col-sm-4 text-muted"><i class="fas fa-home mr-1"></i> Palomar:</div>
@@ -71,21 +66,6 @@
                                 <span class="badge-ops badge-ops-secondary">Desconocido</span>
                             @endif
                         </div>
-                    </div>
-                    {{-- Color --}}
-                    <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                        <div class="col-6 col-sm-4 text-muted"><i class="fas fa-palette mr-1"></i> Color:</div>
-                        <div class="col-6 col-sm-8">{{ $paloma->color ?? '-' }}</div>
-                    </div>
-                    {{-- Raza --}}
-                    <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                        <div class="col-6 col-sm-4 text-muted"><i class="fas fa-paw mr-1"></i> Raza:</div>
-                        <div class="col-6 col-sm-8">{{ $paloma->raza ?? '-' }}</div>
-                    </div>
-                    {{-- Origen --}}
-                    <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                        <div class="col-6 col-sm-4 text-muted"><i class="fas fa-globe-americas mr-1"></i> Origen:</div>
-                        <div class="col-6 col-sm-8">{{ $paloma->origen ?? '-' }}</div>
                     </div>
                     {{-- Fecha Nacimiento --}}
                     <div class="col-12 d-flex flex-wrap py-1 border-bottom">
@@ -127,43 +107,6 @@
                                 </span>
                             @else
                                 <span class="text-muted">Sin estado</span>
-                            @endif
-                        </div>
-                    </div>
-                    {{-- Estado Sanitario --}}
-                    <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                        <div class="col-6 col-sm-4 text-muted"><i class="fas fa-heartbeat mr-1"></i> Estado Sanitario:</div>
-                        <div class="col-6 col-sm-8">
-                            @if ($paloma->estado_sanitario === 'Bien')
-                                <span class="badge-ops badge-ops-success">Bien</span>
-                            @else
-                                <span class="badge-ops badge-ops-danger">Enferma</span>
-                            @endif
-                        </div>
-                    </div>
-                    {{-- Padre --}}
-                    <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                        <div class="col-6 col-sm-4 text-muted"><i class="fas fa-mars mr-1"></i> Padre:</div>
-                        <div class="col-6 col-sm-8">
-                            @if ($paloma->padre)
-                                <a href="{{ route('admin.palomas.show', $paloma->padre_id) }}" style="color: #0d6efd; text-decoration: none;">
-                                    {{ $paloma->padre->anilla }}
-                                </a>
-                            @else
-                                -
-                            @endif
-                        </div>
-                    </div>
-                    {{-- Madre --}}
-                    <div class="col-12 d-flex flex-wrap py-1 border-bottom">
-                        <div class="col-6 col-sm-4 text-muted"><i class="fas fa-venus mr-1"></i> Madre:</div>
-                        <div class="col-6 col-sm-8">
-                            @if ($paloma->madre)
-                                <a href="{{ route('admin.palomas.show', $paloma->madre_id) }}" style="color: #0d6efd; text-decoration: none;">
-                                    {{ $paloma->madre->anilla }}
-                                </a>
-                            @else
-                                -
                             @endif
                         </div>
                     </div>

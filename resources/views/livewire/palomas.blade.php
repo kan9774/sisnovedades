@@ -12,7 +12,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text"><i class="fas fa-search"></i></span>
             </div>
-            <input type="text" class="form-control" wire:model.live.debounce.300ms="search" placeholder="Buscar por anilla, nombre o palomar...">
+            <input type="text" class="form-control" wire:model.live.debounce.300ms="search" placeholder="Buscar por anilla o palomar...">
         </div>
     </div>
 
@@ -37,7 +37,6 @@
             <thead class="thead-ops">
                 <tr>
                     <th>Anilla</th>
-                    <th>Nombre</th>
                     <th>Palomar</th>
                     <th>Sexo</th>
                     <th>Edad</th>
@@ -49,7 +48,6 @@
                 @forelse($palomas as $paloma)
                     <tr>
                         <td><strong>{{ $paloma->anilla }}</strong></td>
-                        <td>{{ $paloma->nombre ?? '-' }}</td>
                         <td>{{ $paloma->palomar->nombre ?? '-' }}</td>
                         <td>
                             @if ($paloma->sexo === 'macho')
@@ -96,7 +94,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
+                        <td colspan="6" class="text-center text-muted py-4">
                             <i class="fas fa-dove fa-2x d-block mb-2" style="opacity: 0.3;"></i>
                             No hay palomas registradas.
                         </td>
@@ -179,13 +177,6 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>Nombre</label>
-                                        <input type="text" class="form-control form-control-sm @error('formNombre') is-invalid @enderror" wire:model="formNombre" placeholder="Ej: Lucero">
-                                        @error('formNombre') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
                                         <label>Sexo <span class="text-danger">*</span></label>
                                         <select class="form-control form-control-sm @error('formSexo') is-invalid @enderror" wire:model="formSexo" required>
                                             <option value="desconocido" {{ old('formSexo', $formSexo) == 'desconocido' ? 'selected' : '' }}>Desconocido</option>
@@ -195,16 +186,9 @@
                                         @error('formSexo') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Color</label>
-                                        <input type="text" class="form-control form-control-sm @error('formColor') is-invalid @enderror" wire:model="formColor" placeholder="Ej: Blanco, Negro, Gris">
-                                        @error('formColor') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
                             </div>
 
-                            {{-- Bloque 2: Nacimiento, Raza, Origen --}}
+                            {{-- Bloque 2: Nacimiento --}}
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -213,63 +197,9 @@
                                         @error('formFechaNacimiento') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Raza</label>
-                                        <input type="text" class="form-control form-control-sm @error('formRaza') is-invalid @enderror" wire:model="formRaza" placeholder="Ej: Stassart, Janssen, Delbar">
-                                        @error('formRaza') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Origen</label>
-                                        <input type="text" class="form-control form-control-sm @error('formOrigen') is-invalid @enderror" wire:model="formOrigen" placeholder="Ej: Argentina, Uruguay">
-                                        @error('formOrigen') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
                             </div>
 
-                            {{-- Bloque 3: Genealogía --}}
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label><i class="fas fa-mars text-primary mr-1"></i> Padre</label>
-                                        <select class="form-control form-control-sm @error('formPadreId') is-invalid @enderror" wire:model="formPadreId">
-                                            <option value="">Seleccionar...</option>
-                                            @foreach ($palomasDisponibles as $p)
-                                                @if ($p->sexo === 'macho')
-                                                    <option value="{{ $p->id }}">{{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
-                                        @error('formPadreId') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label><i class="fas fa-venus text-danger mr-1"></i> Madre</label>
-                                        <select class="form-control form-control-sm @error('formMadreId') is-invalid @enderror" wire:model="formMadreId">
-                                            <option value="">Seleccionar...</option>
-                                            @foreach ($palomasDisponibles as $p)
-                                                @if ($p->sexo === 'hembra')
-                                                    <option value="{{ $p->id }}">{{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
-                                        @error('formMadreId') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group pt-4">
-                                        <div class="custom-control custom-switch">
-                                            <input type="checkbox" class="custom-control-input" id="formEstadoSanitario" wire:model="formEstadoSanitario" value="Bien">
-                                            <label class="custom-control-label" for="formEstadoSanitario">Estado Sanitario: Bien</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Bloque 4: Observaciones --}}
+                            {{-- Bloque 3: Observaciones --}}
                             <div class="form-group">
                                 <label>Observaciones</label>
                                 <textarea class="form-control form-control-sm @error('formObservaciones') is-invalid @enderror" wire:model="formObservaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>
