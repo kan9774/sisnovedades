@@ -33,3 +33,32 @@ window.confirmarAccion = function ({
         return result;
     });
 };
+
+/**
+ * Toast de SweetAlert2 arriba a la derecha, para mensajes de éxito/error
+ * que hoy se muestran con <div class="alert">. No bloquea, se autocierra.
+ * Uso: mostrarToast('success', 'Guardia cerrada correctamente.');
+ *      mostrarToast('error', 'No se pudo completar la acción.');
+ */
+if (!window.mostrarToast) {
+    window.mostrarToast = function (tipo, mensaje) {
+        if (!mensaje) return;
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: tipo === 'error' ? 5000 : 3500,
+            timerProgressBar: true,
+            didOpen: (toastEl) => {
+                toastEl.onmouseenter = Swal.stopTimer;
+                toastEl.onmouseleave = Swal.resumeTimer;
+            }
+        });
+
+        Toast.fire({
+            icon: tipo === 'error' ? 'error' : 'success',
+            title: mensaje
+        });
+    };
+}

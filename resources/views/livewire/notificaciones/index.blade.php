@@ -1,15 +1,4 @@
 <div>
-    @if ($successMsg)
-        <div wire:key="success-{{ md5($successMsg) }}" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => {
-            show = false;
-            $wire.set('successMsg', '')
-        }, 4000)"
-            x-transition class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle"></i> {{ $successMsg }}
-            <button type="button" class="close" wire:click="$set('successMsg', '')">&times;</button>
-        </div>
-    @endif
-
     <x-ops-card title="Notificaciones" icon="bell" eyebrow="{{ $notificaciones->total() }} mensajes">
         <x-slot name="actions">
             <button wire:click="marcarTodasLeidas" class="btn btn-sm btn-outline-secondary">
@@ -76,4 +65,12 @@
             </div>
         @endif
     </x-ops-card>
+
+    @script
+    <script>
+        $wire.$watch('successMsg', (valor) => {
+            mostrarToast('success', valor);
+        });
+    </script>
+    @endscript
 </div>

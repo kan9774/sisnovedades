@@ -1,27 +1,4 @@
 <div>
-    {{-- ALERTAS GLOBALES --}}
-    @if ($successMsg)
-        <div wire:key="success-{{ md5($successMsg) }}" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => {
-            show = false;
-            $wire.set('successMsg', '')
-        }, 4000)"
-            x-transition class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle"></i> {{ $successMsg }}
-            <button type="button" class="close" wire:click="$set('successMsg', '')">&times;</button>
-        </div>
-    @endif
-
-    @if ($errorMsg)
-        <div wire:key="error-{{ md5($errorMsg) }}" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => {
-            show = false;
-            $wire.set('errorMsg', '')
-        }, 5000)"
-            x-transition class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle"></i> {{ $errorMsg }}
-            <button type="button" class="close" wire:click="$set('errorMsg', '')">&times;</button>
-        </div>
-    @endif
-
     <div class="card">
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-layer-group"></i> Centro de Documentación</h3>
@@ -459,6 +436,18 @@
             </div>
         </div>
     @endif
+
+    @script
+    <script>
+        $wire.$watch('successMsg', (valor) => {
+            mostrarToast('success', valor);
+        });
+
+        $wire.$watch('errorMsg', (valor) => {
+            mostrarToast('error', valor);
+        });
+    </script>
+    @endscript
 </div>
 @once
     <script>

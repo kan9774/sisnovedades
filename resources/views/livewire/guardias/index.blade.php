@@ -1,27 +1,4 @@
 <div>
-    {{-- ALERTAS GLOBALES --}}
-    @if ($successMsg)
-        <div wire:key="success-{{ md5($successMsg) }}" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => {
-            show = false;
-            $wire.set('successMsg', '')
-        }, 4000)"
-            x-transition class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-check-circle me-2"></i> {{ $successMsg }}
-            <button type="button" class="close" wire:click="$set('successMsg', '')">&times;</button>
-        </div>
-    @endif
-
-    @if ($errorMsg)
-        <div wire:key="error-{{ md5($errorMsg) }}" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => {
-            show = false;
-            $wire.set('errorMsg', '')
-        }, 5000)"
-            x-transition class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i> {{ $errorMsg }}
-            <button type="button" class="close" wire:click="$set('errorMsg', '')">&times;</button>
-        </div>
-    @endif
-
     <x-ops-card title="Guardias" icon="shield-alt" eyebrow="{{ $guardias->total() ?? 0 }} registros">
         <x-slot name="actions">
             @if ($viewMode === 'papelera')
@@ -473,4 +450,15 @@
         </div>
     </template>
 
+    @script
+    <script>
+        $wire.$watch('successMsg', (valor) => {
+            mostrarToast('success', valor);
+        });
+
+        $wire.$watch('errorMsg', (valor) => {
+            mostrarToast('error', valor);
+        });
+    </script>
+    @endscript
 </div>

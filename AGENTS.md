@@ -70,6 +70,31 @@ class NombreComponent extends Component
 - Mensajes en `$successMsg` / `$errorMsg` (no session flash)
 - Traits: `WithPagination`, `UsesBootstrapPagination`, `WithFileUploads`
 
+### Toast de notificaciones (Fase 2 — migración de alertas Blade)
+Las alertas auto-cerrables (`x-data + x-init + setTimeout + $wire.set`) se eliminaron de las vistas Blade. Ahora se usan watchers Livewire 4 + `window.mostrarToast()` (SweetAlert2 toast arriba a la derecha):
+
+```blade
+{{-- En el blade: NO hay bloques @if alert --}}
+
+@script
+<script>
+    $wire.$watch('successMsg', (valor) => {
+        mostrarToast('success', valor);
+    });
+
+    $wire.$watch('errorMsg', (valor) => {
+        mostrarToast('error', valor);
+    });
+</script>
+@endjs
+```
+
+El helper `window.mostrarToast(tipo, mensaje)` vive en `public/js/confirmaciones.js`. No repetir.
+
+**14 componentes migrados a este patrón:** categorias-documentos, documentos, admin/users, conductores, guardias, palomar/estados, notificaciones (successMsg solo), permisos, organismos, oficinas, palomares, roles, vehiculos, vehiculos/tipos.
+
+**Pendientes de revisión manual:** vuelos/resultados-form.blade.php (sin auto-close), enviar-guardia-email/enviar-guardia-email.blade.php (propiedad `mensajeExito`).
+
 ### Patrón ops-panel
 Modales con `x-ops-card` + `x-teleport="body"` + clase `is-open` (no `x-show`). Usado en BackupManager, GuardiaAcciones, y otros modales de acción.
 
@@ -82,13 +107,13 @@ Modales con `x-ops-card` + `x-teleport="body"` + clase `is-open` (no `x-show`). 
 
 ## Estado de la migración Blade → Livewire
 
-**67 componentes Livewire implementados · 16 migraciones completadas (12 de CRUD + 3 parciales)**
+**69 componentes Livewire implementados · 31 migraciones completadas (27 de CRUD + 3 parciales + 1 landing)**
 
 | Estado | Nivel | Componentes |
 |--------|-------|-------------|
 | ✅ Completado | 1 (Simple) | Oficinas, Organismos, TipoVehiculo, EstadoPaloma |
 | ✅ Completado | 2 (Intermedia) | Permisos, Roles, Notificaciones, Logs |
-| ✅ Parcial | 3 (Alta) | Vehículos, Palomares, Vuelos (resultados) — Pendiente: Palomas |
+| ✅ Completado | 3 (Alta) | Vehículos, Palomares, Palomas, Conductores, Vuelos |
 | ✅ Parcial | 4 (Muy alta) | Guardias (reducido a show/Hoy/pdf) — Pendiente: Users |
 | ✅ Landing | — | 14 componentes (Hero, Navbar, Footer, Crucigrama, Tetris, Sudoku, SopaLetras, etc.) |
 
@@ -124,7 +149,7 @@ Modales con `x-ops-card` + `x-teleport="body"` + clase `is-open` (no `x-show`). 
 - `admin.guardias.pdf.*` — Generación de PDF (renderizado servidor-side)
 - `layouts/*`, `partials/*`, `emails/*` — Templates compartidos
 - `admin.guardias.pdf-preview` — Ruta pública de preview HTML
-- Controladores ya migrados: `OficinaController`, `OrganismoController`, `TipoVehiculoController`, `EstadoPalomaController`, `PermisoController`, `RolController`, `ActivityLogController`, `ConductorController`, `PalomarController` — **eliminar tras migración**
+- Controladores ya migrados: `OficinaController`, `OrganismoController`, `TipoVehiculoController`, `EstadoPalomaController`, `PermisoController`, `RolController`, `ActivityLogController`, `ConductorController`, `PalomarController`, `PalomaController`, `VueloController` — **eliminar tras migración**
 - `VehiculoController` — desactivado (rutas reemplazadas por Livewire), pendiente de borrado manual
 
 ---
