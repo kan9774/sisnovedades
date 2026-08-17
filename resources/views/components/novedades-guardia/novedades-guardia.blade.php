@@ -207,6 +207,9 @@
                                                     </option>
                                                 @endforeach
                                             </select>
+                                            <small class="text-muted d-block mt-1">O escribí uno nuevo:</small>
+                                            <input type="text" wire:model="organismo_nuevo" class="form-control mt-1"
+                                                placeholder="Nuevo organismo...">
                                             @error('destino')
                                                 <span class="invalid-feedback d-block">{{ $message }}</span>
                                             @enderror
