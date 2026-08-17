@@ -18,7 +18,7 @@
                     <tbody>
                         @foreach ($resumenReposicion as $r)
                             <tr>
-                                <td>{{ $r['item']->codigo }} — {{ $r['item']->nombre }}</td>
+                                <td>{{ $r['item']->nombre }}</td>
                                 <td class="text-center">{{ $r['vigente'] }}</td>
                                 <td class="text-center">
                                     @if ($r['vencido'] > 0)
@@ -64,13 +64,13 @@
             <div class="row align-items-center">
                 <div class="col-md-5">
                     <input type="text" wire:model.live.debounce.400ms="busqueda"
-                           class="form-control" placeholder="Buscar por ítem, código{{ $tab === 'individuales' ? ' o N° de serie' : '' }}...">
+                           class="form-control" placeholder="Buscar por ítem{{ $tab === 'individuales' ? ' o N° de serie' : '' }}...">
                 </div>
                 <div class="col-md-4">
                     <select wire:model.live="filtroItemId" class="form-control">
                         <option value="">Todos los ítems</option>
                         @foreach ($items as $item)
-                            <option value="{{ $item->id }}">{{ $item->codigo }} — {{ $item->nombre }}</option>
+                            <option value="{{ $item->id }}">{{ $item->nombre }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -103,7 +103,7 @@
                     <tbody>
                         @forelse ($lotes as $lote)
                             <tr wire:key="lote-{{ $lote->id }}" class="{{ $lote->vencido ? 'table-danger' : '' }}">
-                                <td>{{ $lote->item->codigo }} — {{ $lote->item->nombre }}</td>
+                                <td>{{ $lote->item->nombre }}</td>
                                 <td>{{ $lote->proveedor->nombre ?? '—' }}</td>
                                 <td>{{ $lote->fecha_recibido->format('d/m/Y') }}</td>
                                 <td>
@@ -147,7 +147,7 @@
                     <tbody>
                         @forelse ($unidades as $unidad)
                             <tr wire:key="unidad-{{ $unidad->id }}" class="{{ $unidad->estaVencida() ? 'table-danger' : '' }}">
-                                <td>{{ $unidad->item->codigo }} — {{ $unidad->item->nombre }}</td>
+                                <td>{{ $unidad->item->nombre }}</td>
                                 <td>{{ $unidad->numero_serie ?? "unidad #{$unidad->id}" }}</td>
                                 <td>{{ $unidad->fecha_recibido?->format('d/m/Y') ?? '—' }}</td>
                                 <td>

@@ -31,7 +31,6 @@ class ItemsImport
     private function procesarFila(array $row, int $numeroFila): void
     {
         $validator = Validator::make($row, [
-            'codigo' => 'required|string|unique:items,codigo',
             'nombre' => 'required|string',
             'categoria' => 'required|exists:categorias,nombre',
             'tipo_seguimiento' => 'required|in:cantidad,individual',
@@ -46,7 +45,6 @@ class ItemsImport
         $talla = !empty($row['talla']) ? Talla::where('valor', $row['talla'])->first() : null;
 
         Item::create([
-            'codigo'            => strtoupper(trim($row['codigo'])),
             'nombre'            => strtoupper(trim($row['nombre'])),
             'descripcion'       => $row['descripcion'] ?? null,
             'categoria_id'      => $categoria->id,

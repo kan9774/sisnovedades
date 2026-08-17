@@ -152,6 +152,34 @@ Modales con `x-ops-card` + `x-teleport="body"` + clase `is-open` (no `x-show`). 
 
 ---
 
+## Cambios recientes
+
+### 2026-08-17 — Inventario: eliminación de abreviatura de categoría y código de ítem
+Se eliminó por completo el concepto de "abreviatura de categoría" (`categorias.codigo_abreviatura`) y el campo "código" de ítems (`items.codigo`). La abreviatura autogeneraba códigos automáticos de ítems (ej: `EQC-0001`), funcionalidad que se eliminó por completo.
+
+**Archivo:** `database/migrations/2026_08_17_000001_remove_codigo_abreviatura_categorias_and_codigo_items.php`
+
+**Archivos modificados (12):**
+- `app/Models/Categoria.php` — Quitado `codigo_abreviatura` de `$fillable`, quitados hooks `creating`/`updating` de autogeneración, eliminado método `generarAbreviaturaUnica()`
+- `app/Models/Item.php` — Quitado `codigo` de `$fillable`, eliminado accessor `codigo()` de `Attribute`
+- `app/Livewire/Inventario/CategoriasCatalogo.php` — Quitadas propiedades `codigo_abreviatura` / `editCodigoAbreviatura`, validaciones y uso en `agregar()`/`saveEdit()`; búsqueda solo por `nombre`
+- `app/Livewire/Inventario/ItemsCatalogo.php` — Quitadas propiedades `codigo` / `codigoAuto`, eliminados métodos `updatedCategoriaId()`, `updatedCodigo()`, `generarCodigoSugerido()`; búsqueda solo por `nombre`
+- `app/Imports/ItemsImport.php` — Quitada validación y uso de columna `codigo`
+- `app/Exports/ItemsPlantillaExport.php` — Quitada columna `codigo` de plantilla descargable
+- `app/Exports/ItemUnidadesPlantillaExport.php` — Quitada columna `codigo_item` de plantilla
+- `resources/views/livewire/inventario/categorias-catalogo.blade.php` — Quitados inputs y columna "Abreviatura"
+- `resources/views/livewire/inventario/items-catalogo.blade.php` — Quitada columna "Código", form-group de código, aviso de abreviatura; placeholder actualizado
+- `resources/views/livewire/inventario/lotes-stock.blade.php` — `$item->codigo` → `$item->nombre` en todas las vistas
+- `resources/views/livewire/inventario/vencidos-en-terceros.blade.php` — Idem
+- `resources/views/livewire/inventario/movimientos-inventario.blade.php` — Idem
+- `resources/views/livewire/inventario/unidades-individuales.blade.php` — Idem
+- `resources/views/livewire/inventario/entregas-inventario.blade.php` — Idem
+- `resources/views/livewire/inventario/pdf/comprobante-entrega.blade.php` — Idem
+- `app/Livewire/Inventario/LotesStock.php` — Busqueda solo por `nombre` (quitado `orWhere('codigo')`)
+- `app/Livewire/Inventario/VencidosEnTerceros.php` — Idem
+
+---
+
 ## Qué NO migrar / no tocar
 
 - `web/index.blade.php` — Landing estática

@@ -13,7 +13,6 @@ class Item extends Model
     use HasFactory;
 
     protected $fillable = [
-        'codigo',
         'nombre',
         'descripcion',
         'categoria_id',
@@ -30,13 +29,6 @@ class Item extends Model
         'stock_minimo' => 'integer',
         'vida_util_meses' => 'integer',
     ];
-    protected function codigo(): Attribute
-    {
-        return Attribute::make(
-            set: fn(string $value) => strtoupper(trim($value)),
-        );
-    }
-
     protected function nombre(): Attribute
     {
         return Attribute::make(

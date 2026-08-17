@@ -4,7 +4,7 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <input type="text" wire:model.live.debounce.400ms="busqueda"
-                           class="form-control" placeholder="Buscar por ítem o código...">
+                           class="form-control" placeholder="Buscar por ítem...">
                 </div>
                 <div class="col-md-6">
                     <select wire:model.live="filtroUbicacionId" class="form-control">
@@ -32,7 +32,7 @@
                 <tbody>
                     @forelse ($registros as $r)
                         <tr class="table-danger">
-                            <td>{{ $r['item']->codigo }} — {{ $r['item']->nombre }}</td>
+                            <td>{{ $r['item']->nombre }}</td>
                             <td>{{ $r['ubicacion']->nombre ?? '—' }}</td>
                             <td>{{ $r['numeroSerie'] ?? '—' }}</td>
                             <td class="text-center">{{ $r['cantidad'] }}</td>

@@ -191,7 +191,7 @@
                                     class="form-control @error('altaItemId') is-invalid @enderror">
                                     <option value="">Seleccionar...</option>
                                     @foreach ($items as $item)
-                                        <option value="{{ $item->id }}">{{ $item->codigo }} — {{ $item->nombre }}
+                                        <option value="{{ $item->id }}">{{ $item->nombre }}
                                         </option>
                                     @endforeach
                                 </select>
