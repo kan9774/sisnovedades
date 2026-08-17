@@ -95,6 +95,9 @@ class Vehiculos extends Component
     // ── Papelera ──
     public $vistaPapelera = false;
 
+    // ── Filtro por unidad ──
+    public $unidadFiltroId = null;
+
     // ── Estado del modal de detalle (show) ──
     public $showDetalle = false;
     public $detalleVehiculoId = null;
@@ -125,6 +128,10 @@ class Vehiculos extends Component
                   ->orWhere('modelo', 'like', '%' . $this->search . '%')
                   ->orWhere('vehiculo', 'like', '%' . $this->search . '%');
             });
+        }
+
+        if ($this->unidadFiltroId) {
+            $query->where('unidad_id', $this->unidadFiltroId);
         }
 
         return $query->paginate(15);
@@ -699,6 +706,13 @@ class Vehiculos extends Component
         $this->resetPage();
     }
 
+    // ── FILTRO POR UNIDAD ──
+    public function seleccionarUnidad(?int $unidadId)
+    {
+        $this->unidadFiltroId = $unidadId;
+        $this->resetPage();
+    }
+
     // ── PAPELERA: alternar entre activos y papelera ──
     public function verPapelera()
     {
@@ -883,6 +897,7 @@ class Vehiculos extends Component
         return view('livewire.vehiculos.index', [
             'vehiculos' => $this->vehiculos(),
             'catalogos' => $this->catalogos(),
+            'unidadesTabs' => Unidad::where('activo', true)->where('nombre', '!=', 'C.A.C.O.')->orderBy('nombre')->get(),
         ]);
     }
 }

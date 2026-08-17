@@ -1,18 +1,53 @@
 <div>
     <x-ops-card title="Vehículos" icon="truck" eyebrow="{{ $vehiculos->total() ?? 0 }} registros">
         <x-slot name="actions">
-            @if (!$vistaPapelera)
+            @if ($vistaPapelera)
+                <button wire:click="verActivos" class="btn btn-sm btn-outline-secondary me-1">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            @else
+                @can('viewTrashed', \App\Models\Vehiculo::class)
+                    <button wire:click="verPapelera" class="btn btn-sm btn-outline-secondary me-1">
+                        <i class="fas fa-trash"></i> Papelera
+                    </button>
+                @endcan
                 @can('create', \App\Models\Vehiculo::class)
                     <x-btn-ops variant="primary" icon="plus" wire:click="crear">
                         Nuevo Vehículo
                     </x-btn-ops>
                 @endcan
+                @can('viewAny', \App\Models\Vehiculo::class)
+                    <button wire:click="exportarExcel" class="btn btn-sm btn-outline-success me-1">
+                        <i class="fas fa-file-excel"></i> Exportar Excel
+                    </button>
+                @endcan
             @endif
         </x-slot>
 
-        {{-- PESTAÑAS: Activos / Papelera --}}
-        <x-nav-tabs-ops :tabs="['activos' => 'Vehículos activos', 'papelera' => 'Papelera']" :active="$vistaPapelera ? 'papelera' : 'activos'"
-            wireMethod="{{ $vistaPapelera ? 'verActivos' : 'verPapelera' }}" :livewire="true" />
+        {{-- PESTAÑAS POR UNIDAD --}}
+        <ul class="nav nav-tabs nav-tabs-ops mb-3" id="unidadTabs">
+            <li class="nav-item">
+                <a class="nav-link {{ !$unidadFiltroId ? 'nav-link-ops active' : 'nav-link-ops' }}" wire:click="seleccionarUnidad(null)" style="cursor:pointer">
+                    <i class="fas fa-layer-group"></i> Todas
+                </a>
+            </li>
+            @foreach ($unidadesTabs as $unidad)
+                @php
+                    $iconClass = match (true) {
+                        str_contains(strtolower($unidad->nombre), 'comunicacion') => 'fa-tower-broadcast',
+                        str_contains(strtolower($unidad->nombre), 'logistica') => 'fa-boxes-stacked',
+                        str_contains(strtolower($unidad->nombre), 'comando') || str_contains(strtolower($unidad->nombre), 'caco') => 'fa-star',
+                        str_contains(strtolower($unidad->nombre), 'transporte') => 'fa-truck',
+                        default => 'fa-building-shield',
+                    };
+                @endphp
+                <li class="nav-item">
+                    <a class="nav-link {{ $unidadFiltroId == $unidad->id ? 'nav-link-ops active' : 'nav-link-ops' }}" wire:click="seleccionarUnidad({{ $unidad->id }})" style="cursor:pointer">
+                        <i class="fas {{ $iconClass }}"></i> {{ $unidad->nombre }}
+                    </a>
+                </li>
+            @endforeach
+        </ul>
 
         {{-- BARRA DE BÚSQUEDA --}}
         <div class="row mb-3">

@@ -8,7 +8,17 @@
 
 ## CSS: Bootstrap y Tailwind coexisten
 
-Ambos frameworks están activos. **No mezclar clases de ambos en un mismo componente nuevo.** Verificar qué CSS usa cada vista/componente existente antes de escribir HTML/Blade nuevo. AdminLTE 3.16 se basa sobre Bootstrap — no usar clases de AdminLTE con Tailwind ni viceversa.
+Ambos frameworks están activos. **No mezclar clases de ambos en un mismo componente nuevo.** Verificar qué CSS usa cada vista/componente existente antes de escribir HTML/Blade. AdminLTE 3.16 se basa sobre Bootstrap — no usar clases de AdminLTE con Tailwind ni viceversa.
+
+---
+
+## Iconografía (FontAwesome 6)
+
+Todo elemento interactivo con ícono en AdminLTE —tabs, botones, links, acciones de tabla, badges, etc.— debe usar **FontAwesome 6** (`fa-solid fa-...`, o `fa-regular`/`fa-brands` cuando corresponda) con un ícono representativo. Es el estándar por defecto del proyecto.
+
+- Ícono genérico por defecto: `fa-building-shield`
+- Íconos representativos según el nombre del tab/unidad (ej: `fa-tower-broadcast` para comunicaciones, `fa-truck` para transporte, `fa-boxes-stacked` para logística, `fa-star` para comando)
+- Ícono para "Todas" / vista general: `fa-layer-group`
 
 ---
 
