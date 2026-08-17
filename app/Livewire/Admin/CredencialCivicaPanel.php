@@ -95,7 +95,6 @@ class CredencialCivicaPanel extends Component
         }
 
         $this->cancelarEdicion();
-        unset($this->credenciales);
     }
 
     public function eliminar(int $id): void
@@ -105,8 +104,6 @@ class CredencialCivicaPanel extends Component
         if ($this->editandoId === $id) {
             $this->cancelarEdicion();
         }
-
-        unset($this->credenciales);
         session()->flash('success', 'Credencial cívica eliminada.');
     }
 

@@ -172,7 +172,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             {{-- Bloque 1: Identificación Básica --}}
                             <div class="row">
                                 <div class="col-md-4">
@@ -186,10 +185,7 @@
                                         @error('formSexo') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
-                            </div>
-
                             {{-- Bloque 2: Nacimiento --}}
-                            <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Fecha de nacimiento</label>
@@ -197,9 +193,19 @@
                                         @error('formFechaNacimiento') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
+                                {{-- Bloque 3: Estado Sanitario --}}
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Estado Sanitario <span class="text-danger">*</span></label>
+                                        <select class="form-control form-control-sm @error('formEstadoSanitario') is-invalid @enderror" wire:model="formEstadoSanitario" required>
+                                            <option value="Bien" {{ old('formEstadoSanitario', $formEstadoSanitario) == 'Bien' ? 'selected' : '' }}>Bien</option>
+                                            <option value="Enferma" {{ old('formEstadoSanitario', $formEstadoSanitario) == 'Enferma' ? 'selected' : '' }}>Enferma</option>
+                                        </select>
+                                        @error('formEstadoSanitario') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
                             </div>
-
-                            {{-- Bloque 3: Observaciones --}}
+                            {{-- Bloque 4: Observaciones --}}
                             <div class="form-group">
                                 <label>Observaciones</label>
                                 <textarea class="form-control form-control-sm @error('formObservaciones') is-invalid @enderror" wire:model="formObservaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>

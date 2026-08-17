@@ -82,7 +82,6 @@ class SalidasPendientes extends Component
         }
 
         $this->salidaPendienteId = $salidaId;
-        unset($this->salidaPendiente);
 
         $this->mostrarBoleta = true;
         $this->boleta_hora_entra = '';
@@ -94,7 +93,6 @@ class SalidasPendientes extends Component
     {
         $this->mostrarBoleta = false;
         $this->salidaPendienteId = null;
-        unset($this->salidaPendiente);
     }
 
     public function guardarBoleta()

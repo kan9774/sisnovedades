@@ -56,14 +56,12 @@ class EstadoNovedad extends Component
         DatabaseNotification::where('data->novedad_id', $this->novedad->id)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
-
-        unset($this->novedad);
     }
 
     // Llamado por el polling: trae el estado actual por si otro usuario ya la tomó
     public function refrescar(): void
     {
-        unset($this->novedad);
+        // La propiedad #[Computed] se invalida automáticamente al re-renderizar
     }
 
     // Llamado cuando novedades-guardia reabre o cierra la atención de esta novedad
@@ -72,9 +70,7 @@ class EstadoNovedad extends Component
     #[On('novedad-estado-actualizado')]
     public function onEstadoActualizado(int $novedadId): void
     {
-        if ($novedadId === $this->novedadId) {
-            unset($this->novedad);
-        }
+        // La propiedad #[Computed] se invalida automáticamente al re-renderizar
     }
 
     public function render()

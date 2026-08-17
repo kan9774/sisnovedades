@@ -2,14 +2,19 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return; // SQLite no soporta dropColumn con FK constraints
+        }
+
         Schema::table('vuelos', function (Blueprint $table) {
-            $table->dropForeign(['paloma_id']); // revisa el nombre real de la FK si difiere
+            $table->dropForeign(['paloma_id']);
             $table->dropColumn([
                 'paloma_id',
                 'distancia_km',

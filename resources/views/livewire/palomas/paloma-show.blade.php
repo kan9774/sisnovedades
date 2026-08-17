@@ -110,6 +110,20 @@
                             @endif
                         </div>
                     </div>
+                    {{-- Estado Sanitario --}}
+                    <div class="col-12 d-flex flex-wrap py-1 border-bottom">
+                        <div class="col-6 col-sm-4 text-muted"><i class="fas fa-heartbeat mr-1"></i> Estado Sanitario:</div>
+                        <div class="col-6 col-sm-8">
+                            @if ($paloma->estado_sanitario === 'Bien')
+                                <span class="badge-ops badge-ops-success"><i class="fas fa-check-circle mr-1"></i> Bien</span>
+                            @elseif($paloma->estado_sanitario === 'Enferma')
+                                <span class="badge-ops badge-ops-danger"><i class="fas fa-times-circle mr-1"></i> Enferma</span>
+                            @else
+                                <span class="badge-ops badge-ops-secondary">{{ $paloma->estado_sanitario ?? '-' }}</span>
+                            @endif
+                        </div>
+                    </div>
+
                     {{-- Observaciones --}}
                     @if ($paloma->observaciones)
                         <div class="col-12 d-flex flex-wrap py-1">

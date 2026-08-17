@@ -48,8 +48,9 @@
                         <th>Estado</th>
                         @if ($vistaPapelera)
                             <th>Fecha eliminación</th>
+                        @else
+                            <th>Activo</th>
                         @endif
-                        <th>Activo</th>
                         <th class="text-center" style="width: 120px">Acciones</th>
                     </tr>
                 </thead>
@@ -113,7 +114,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $vistaPapelera ? 7 : 7 }}" class="text-center text-muted py-4">
+                            <td colspan="7" class="text-center text-muted py-4">
                                 <i class="fas fa-truck fa-2x d-block mb-2"></i>
                                 @if ($vistaPapelera)
                                     No hay vehículos en la papelera.

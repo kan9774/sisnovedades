@@ -31,6 +31,7 @@ class Palomas extends Component
     public $formFechaNacimiento = '';
     public $formSexo = 'desconocido';
     public $formEstadoId = '';
+    public $formEstadoSanitario = 'Bien';
     public $formObservaciones = '';
 
     // ── Catálogos ──
@@ -114,6 +115,7 @@ class Palomas extends Component
         $this->formFechaNacimiento = optional($paloma->fecha_nacimiento)->format('Y-m-d');
         $this->formSexo = $paloma->sexo;
         $this->formEstadoId = $paloma->estado_id;
+        $this->formEstadoSanitario = $paloma->estado_sanitario ?? 'Bien';
         $this->formObservaciones = $paloma->observaciones ?? '';
 
         $this->showForm = true;
@@ -247,6 +249,7 @@ class Palomas extends Component
             'fecha_nacimiento' => $this->formFechaNacimiento ?: null,
             'sexo' => $this->formSexo,
             'estado_id' => $this->formEstadoId,
+            'estado_sanitario' => $this->formEstadoSanitario,
             'observaciones' => $this->formObservaciones ?: null,
         ];
     }
@@ -261,6 +264,7 @@ class Palomas extends Component
         $this->formFechaNacimiento = '';
         $this->formSexo = 'desconocido';
         $this->formEstadoId = '';
+        $this->formEstadoSanitario = 'Bien';
         $this->formObservaciones = '';
     }
 
@@ -279,6 +283,7 @@ class Palomas extends Component
                 : 'nullable|date',
             'formSexo' => 'required|in:macho,hembra,desconocido',
             'formEstadoId' => 'required|exists:estados_paloma,id',
+            'formEstadoSanitario' => 'required|in:Bien,Enferma',
             'formObservaciones' => 'nullable|string',
         ];
     }
@@ -292,6 +297,8 @@ class Palomas extends Component
             'formSexo.required' => 'El sexo es obligatorio.',
             'formSexo.in' => 'El sexo debe ser macho, hembra o desconocido.',
             'formEstadoId.required' => 'El estado es obligatorio.',
+            'formEstadoSanitario.required' => 'El estado sanitario es obligatorio.',
+            'formEstadoSanitario.in' => 'El estado sanitario debe ser Bien o Enferma.',
             'formFechaNacimiento.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
         ];
     }

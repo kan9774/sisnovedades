@@ -161,7 +161,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | ~~10~~ | ~~`admin.vehiculos.*`~~ | ~~`VehiculoController`~~ | ~~`Vehiculo`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ~~MIGRADO~~ |
 | ~~11~~ | ~~`admin.palomar.palomares.*`~~ | ~~`PalomarController`~~ | ~~`Palomar`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ~~MIGRADO~~ |
 | ~~12~~ | ~~`admin.palomar.palomas.*`~~ | ~~`PalomaController`~~ | ~~`Paloma`~~ | ~~index, create, show, edit~~ | ~~⭐⭐⭐ Alta~~ | ~~MIGRADO — PalomaController eliminado, Livewire\Palomas (389 líneas) + Livewire\Palomas\PalomaShow (33 líneas)~~ |
-| 13 | `admin.palomar.vuelos.*` | `VueloController` | `Vuelo` | index, create, edit, resultados | ⭐⭐⭐ Alta | CRUD + resultados. Lógica de estados de palomas, cálculo tiempo/velocidad, pivot con historial |
+| 13 | `admin.palomar.vuelos.*` | `VueloController` | `Vuelo` | index, create, edit, resultados | ⭐⭐⭐ Alta | ✅ MIGRADO — `Livewire\Vuelos` (476 líneas) + `Livewire\Vuelos\VuelosResultados` (151 líneas). CRUD + resultados con cálculo tiempo/velocidad. Controller y vistas Blade eliminadas. |
 
 **Patrón a seguir:** `PdfDestinatarios` (CRUD completo con asignación de usuarios, `WithPagination`)
 
@@ -183,10 +183,10 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | Landing (nuevos) | 14 | ~14 archivos |
 | Nivel 1 — Simple | 4 (4 migrados) | ~12 archivos |
 | Nivel 2 — Intermedia | 3 (3 migrados) | ~7 archivos |
-| Nivel 3 — Alta | 5 (3 migrados) | ~25 archivos |
+| Nivel 3 — Alta | 5 (4 migrados) | ~25 archivos |
 | Nivel 4 — Muy alta | 1 (1 migrado) | ~5 archivos |
-| **Total Livewire** | **68** | |
-| **Total migraciones** | **16** (13 migrados) | **~48 archivos** |
+| **Total Livewire** | **69** | |
+| **Total migraciones** | **17** (14 migrados) | **~48 archivos** |
 
 ## Controladores que pueden eliminarse tras migración
 
@@ -205,7 +205,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 | `VehiculoController` | 7 rutas (CRUD + export) | ⏳ Desactivado (rutas reemplazadas por Livewire, archivo conservado) |
 | ~~`PalomarController`~~ | ~~6 rutas (CRUD + reporte)~~ | ~~✅ ELIMINADO~~ |
 | ~~`PalomaController`~~ | ~~6 rutas (CRUD + historial)~~ | ~~✅ ELIMINADO~~ |
-| `VueloController` | 7 rutas (CRUD + resultados) | ⏳ Pendiente |
+| ~~`VueloController`~~ | ~~7 rutas (CRUD + resultados)~~ | ~~✅ ELIMINADO~~ |
 | `UserController` | 6 rutas (CRUD + incompletos) | ⏳ Pendiente |
 | ~~`GuardiaController`~~ | ~~8 rutas (CRUD + cerrar + reactivar)~~ | ~~✅ MIGRADO (reducido a show()/Hoy()/pdf())~~ |
 
@@ -215,7 +215,7 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 
 1. **Sprint 1:** Nivel 1 (Oficinas, Organismos, TipoVehiculo, EstadoPaloma) — ganar confianza ✅ **COMPLETADO**
 2. **Sprint 2:** Nivel 2 (Permisos, Roles, Notificaciones, Logs) — patrones de filtros ✅ **COMPLETADO**
-3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar ✅ migrado, Palomas ✅ migrado, Vuelos) — formularios complejos
+3. **Sprint 3:** Nivel 3 restante (Vehiculos ✅ migrado, Palomar ✅ migrado, Palomas ✅ migrado, Vuelos ✅ migrado) — formularios complejos
 4. **Sprint 4:** Nivel 4 (Users) — lógica de negocio crítica ✅ Guardias **COMPLETADO**
 5. **Landing:** Componentes interactivos (Tetris ✅, Crucigrama, Sudoku, SopaLetras) ✅ **COMPLETADO**
 
@@ -239,3 +239,5 @@ Formularios con muchos campos, validaciones custom, múltiples catálogos depend
 > **Nota (2026-08-13):** Palomar migrado. `PalomarController` (120 líneas) reemplazado por `Livewire\Palomares`. Se agregó `PalomarPdfGenerator` como support class con métodos estáticos `generar()` y `nombreArchivo()`, invocado desde ruta clásica `<a href>` (no `wire:click`). Vistas admin/palomar/*.blade.php eliminadas.
 
 > **Nota (2026-08-15):** Palomas migrado. `PalomaController` (181 líneas) reemplazado por `Livewire\Palomas` (389 líneas) + `Livewire\Palomas\PalomaShow` (33 líneas). CRUD completo con modal ops-panel, validación de sexo padre/madre, historial de estados con registro automático. Controlador eliminado del filesystem. Vistas admin/palomar/palomas/*.blade.php eliminadas.
+
+> **Nota (2026-08-16):** Vuelos migrado. `VueloController` (322 líneas) reemplazado por `Livewire\Vuelos` (476 líneas) + `Livewire\Vuelos\VuelosResultados` (151 líneas). CRUD completo con selección de palomas, cálculo de tiempo/velocidad, historial de estados. Controlador y vistas Blade `admin/palomar/vuelos/*.blade.php` eliminadas.

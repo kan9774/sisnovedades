@@ -93,7 +93,6 @@ class PasePanel extends Component
         }
 
         $this->user->refresh();
-        unset($this->historial);
 
         $this->dispatch('cerrar-modal-pase');
 
@@ -185,7 +184,6 @@ class PasePanel extends Component
         $pase->delete();
 
         $this->user->refresh();
-        unset($this->historial);
 
         session()->flash('success', 'Pase eliminado correctamente.');
     }

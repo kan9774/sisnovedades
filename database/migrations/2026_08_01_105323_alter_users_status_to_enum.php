@@ -18,6 +18,10 @@ return new class extends Migration
             DB::statement("ALTER TABLE users ALTER COLUMN status SET DEFAULT 'active'");
             DB::statement("ALTER TABLE users ALTER COLUMN status SET NOT NULL");
             DB::statement("ALTER TABLE users ADD CONSTRAINT users_status_check CHECK (status IN ('active', 'inactive'))");
+        } elseif (DB::getDriverName() === 'sqlite') {
+            // SQLite: no soporta MODIFY ni ENUM. La columna ya es TEXT con
+            // DEFAULT 'active' desde la migración original, y la validación
+            // de valores permitidos se maneja en el modelo/form request.
         } else {
             // MySQL / MariaDB: mantiene el ENUM real como antes.
             DB::statement("ALTER TABLE users MODIFY status ENUM('active', 'inactive') NOT NULL DEFAULT 'active'");
@@ -31,6 +35,8 @@ return new class extends Migration
             Schema::table('users', function (Blueprint $table) {
                 $table->string('status')->default('active')->change();
             });
+        } elseif (DB::getDriverName() === 'sqlite') {
+            // SQLite: no hay ENUM que revertir, columna ya es TEXT.
         } else {
             DB::statement("ALTER TABLE users MODIFY status VARCHAR(255) NOT NULL DEFAULT 'active'");
         }

@@ -139,7 +139,6 @@ class HistorialEstadoPanel extends Component
         }
 
         $this->user->refresh();
-        unset($this->historial, $this->proximoTipo, $this->altasRestantes);
         $this->dispatch('cerrar-modal-historial-estado');
         session()->flash('success', 'Movimiento registrado correctamente.');
     }

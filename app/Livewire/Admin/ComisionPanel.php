@@ -134,7 +134,6 @@ class ComisionPanel extends Component
         }
 
         $this->user->refresh();
-        unset($this->historial);
 
         $this->dispatch('cerrar-modal-comision-abrir');
 
@@ -191,7 +190,6 @@ class ComisionPanel extends Component
         $comision->delete();
 
         $this->user->refresh();
-        unset($this->historial);
 
         session()->flash('success', 'Comisión eliminada correctamente.');
     }
@@ -211,7 +209,6 @@ class ComisionPanel extends Component
         $vigente->update(['fecha_fin' => $data['fecha_fin']]);
 
         $this->user->refresh();
-        unset($this->historial);
 
         $this->dispatch('cerrar-modal-comision-cerrar');
 

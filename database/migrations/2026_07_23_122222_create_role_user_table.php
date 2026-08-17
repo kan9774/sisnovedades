@@ -19,27 +19,29 @@ return new class extends Migration
         });
 
         // Migrar los roles actuales (users.rol_id) a la tabla pivote antes de borrar la columna.
-        DB::table('users')
-            ->whereNotNull('rol_id')
-            ->orderBy('id')
-            ->select('id', 'rol_id')
-            ->chunk(200, function ($users) {
-                $now = now();
-                $rows = $users->map(fn ($user) => [
-                    'user_id'    => $user->id,
-                    'rol_id'     => $user->rol_id,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ])->all();
+        // En SQLite no existe la columna rol_id con FK, así que solo aplicamos a MySQL/Postgres.
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::table('users')
+                ->whereNotNull('rol_id')
+                ->orderBy('id')
+                ->select('id', 'rol_id')
+                ->chunk(200, function ($users) {
+                    $now = now();
+                    $rows = $users->map(fn ($user) => [
+                        'user_id'    => $user->id,
+                        'rol_id'     => $user->rol_id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ])->all();
 
-                DB::table('role_user')->insert($rows);
+                    DB::table('role_user')->insert($rows);
+                });
+
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropForeign(['rol_id']);
+                $table->dropColumn('rol_id');
             });
-
-        Schema::table('users', function (Blueprint $table) {
-            // Ajustá el nombre si tu FK original no sigue la convención de Laravel.
-            $table->dropForeign(['rol_id']);
-            $table->dropColumn('rol_id');
-        });
+        }
     }
 
     public function down(): void

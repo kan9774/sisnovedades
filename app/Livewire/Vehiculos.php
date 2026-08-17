@@ -743,13 +743,23 @@ class Vehiculos extends Component
         $this->confirmForceDeleteId = $vehiculoId;
     }
 
-    // ── PAPELERA: ejecutar eliminación permanente (forceDelete) ──
+    // ── PAPELERA: ejecutar eliminación permanente (con cascada FK RESTRICT) ──
     public function ejecutarEliminacionPermanente()
     {
         $this->loading = true;
         try {
             $vehiculo = Vehiculo::onlyTrashed()->findOrFail($this->confirmForceDeleteId);
-            $vehiculo->forceDelete();
+
+            DB::transaction(function () use ($vehiculo) {
+                // FK RESTRICT — borrar explícitamente antes de forceDelete()
+                $vehiculo->salidas()->delete();
+
+                // FK CASCADE — se borran automáticamente:
+                // mantenimientos_vehiculo, vehiculo_actas, resumen_vehiculos_diario
+
+                $vehiculo->forceDelete();
+            });
+
             $this->successMsg = 'Vehículo eliminado permanentemente.';
         } catch (\Exception $e) {
             $this->errorMsg = 'Error al eliminar permanentemente: ' . $e->getMessage();
@@ -864,7 +874,7 @@ class Vehiculos extends Component
     #[\Livewire\Attributes\On('rodado-actualizado')]
     public function refrescarCatalogos()
     {
-        unset($this->catalogos);
+        // #[Computed] se invalida automáticamente al re-renderizar
     }
 
     // ── RENDER ──

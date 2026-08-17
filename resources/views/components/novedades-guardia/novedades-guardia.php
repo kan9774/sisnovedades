@@ -149,7 +149,7 @@ new class extends Component
             'office_id'       => 'required|exists:oficinas,id',
             'affair'          => 'required|string|max:255',
             'text'            => 'required|string',
-            'destino'         => 'required|string|max:255',
+            'destino'         => 'nullable|required_if:direction,Expedido|string|max:255',
             'clasification'   => 'required|in:Rutinario,Prioritario,Urgente,Destello',
             'organismo_id'    => 'nullable|exists:organismos,id',
             'organismo_nuevo' => 'nullable|string|max:255',
@@ -177,10 +177,12 @@ new class extends Component
             $organismoId = null;
         }
 
+        $destino = $data['direction'] === 'Expedido' ? $data['destino'] : null;
+
         $payload = [
             'type'            => $data['type'],
             'direction'       => $data['direction'],
-            'destino'         => $data['destino'] ?: null,
+            'destino'         => $destino,
             'office_id'       => $data['office_id'],
             'number'          => $data['number'],
             'time' => $this->calcularFechaHora($data['fecha'], $data['time']),

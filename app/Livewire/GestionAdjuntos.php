@@ -86,7 +86,6 @@ class GestionAdjuntos extends Component
         }
 
         $this->archivos = [];
-        unset($this->adjuntos);
 
         session()->flash('adjunto-success', 'Archivo(s) adjuntado(s) correctamente.');
         $this->dispatch('adjunto-actualizado');
@@ -101,7 +100,6 @@ class GestionAdjuntos extends Component
         Storage::disk('guardias')->delete($adjunto->file_path);
         $adjunto->delete();
 
-        unset($this->adjuntos);
         $this->dispatch('adjunto-actualizado');
     }
 

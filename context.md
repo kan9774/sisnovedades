@@ -34,3 +34,19 @@
 - **app/Providers/AppServiceProvider.php**: gate `restore-backup` (solo admins)
 - **Patrón de modales**: ops-panel con x-teleport="body", `is-open` class (no x-show)
 - **Permisos**: visible solo si `$user->isAdmin()` (gate + check en backend del Job)
+
+### 2026-08-16 — Vuelos migrado de Blade → Livewire
+
+- **app/Livewire/Vuelos.php** (476 líneas) — CRUD completo: index, crear, editar, eliminar
+  - Selección de palomas participantes con checkbox
+  - Anilla de competición por paloma
+  - Lógica de estados: palomas se marcan "En competición"/"En vareo" al crear vuelo
+  - Edición restringida cuando vuelo está finalizado
+  - Eliminación solo si no tiene palomas registradas
+- **app/Livewire/Vuelos/VuelosResultados.php** (151 líneas) — Cargar resultados de vuelo
+  - Formulario por paloma: distancia_km, hora_llegada, posicion, observaciones
+  - Cálculo automático de tiempo_vuelo y velocidad_media
+  - Finaliza vuelo y devuelve palomas a estado anterior
+  - Historial de cambios de estado registrado
+- **routes/web.php**: `VueloController` eliminado, rutas apuntan a Livewire
+- **Files eliminados**: `app/Http/Controllers/VueloController.php`, `resources/views/admin/palomar/vuelos/*.blade.php`

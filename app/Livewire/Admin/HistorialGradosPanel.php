@@ -119,8 +119,6 @@ class HistorialGradosPanel extends Component
             $this->user->update(['grado_id' => $registro->grado_id]);
         }
 
-        unset($this->historial);
-
         $this->cerrarModal();
         $this->dispatch('cerrar-modal-historial-grado');
 
@@ -187,8 +185,6 @@ class HistorialGradosPanel extends Component
             $this->user->update(['grado_id' => $registro->grado_id]);
         }
 
-        unset($this->historial);
-
         $this->cerrarModal();
         $this->dispatch('cerrar-modal-historial-grado');
 
@@ -222,8 +218,6 @@ class HistorialGradosPanel extends Component
                 $this->user->update(['grado_id' => $anterior->grado_id]);
             }
         }
-
-        unset($this->historial);
 
         session()->flash('success', 'Movimiento de historial eliminado.');
     }

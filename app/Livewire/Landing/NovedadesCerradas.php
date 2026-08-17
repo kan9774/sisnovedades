@@ -211,10 +211,6 @@ class NovedadesCerradas extends Component
         $this->showPanel = true;
         $this->panelTab = 'pdf';
         $this->resetPage();
-
-        // Se limpia el caché de los computed dependientes de guardiaId
-        // para forzar su recálculo con el nuevo valor dentro de este mismo request.
-        unset($this->guardiaSeleccionada, $this->adjuntosRecibidos, $this->adjuntosExpedidos);
     }
 
     public function cerrarPanel(): void
@@ -222,8 +218,6 @@ class NovedadesCerradas extends Component
         $this->showPanel = false;
         $this->guardiaId = null;
         $this->panelTab = 'pdf';
-
-        unset($this->guardiaSeleccionada, $this->adjuntosRecibidos, $this->adjuntosExpedidos);
     }
 
     public function cambiarTab(string $tab): void

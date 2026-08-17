@@ -443,6 +443,8 @@
         $reproductoras = $todasLasPalomas->filter(fn($p) => optional($p->estado)->nombre === 'Reproductora')->count();
         $ausentes = $todasLasPalomas->filter(fn($p) => optional($p->estado)->nombre === 'Ausente')->count();
         $presentes = $total - $ausentes;
+        $palomasSanas = $todasLasPalomas->where('estado_sanitario', 'Bien')->count();
+        $palomasEnfermas = $todasLasPalomas->where('estado_sanitario', 'Enferma')->count();
 
     @endphp
 

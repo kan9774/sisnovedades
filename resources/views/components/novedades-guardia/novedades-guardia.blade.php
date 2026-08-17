@@ -179,10 +179,10 @@
                                         @enderror
                                     </div>
                                 </div>
-                                @if ($direction === 'Recibido' || $direction === 'Expedido')
+                                @if ($direction === 'Recibido')
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>{{ $direction === 'Recibido' ? '¿Quién expide?' : '¿A quién se expide?' }}</label>
+                                            <label>¿Quién expide?</label>
                                             <select wire:model="organismo_id" class="form-control">
                                                 <option value="">-- Seleccionar --</option>
                                                 @foreach ($this->organismos as $organismo)
@@ -193,6 +193,23 @@
                                             <small class="text-muted d-block mt-1">O escribí uno nuevo:</small>
                                             <input type="text" wire:model="organismo_nuevo" class="form-control mt-1"
                                                 placeholder="Nuevo organismo...">
+                                        </div>
+                                    </div>
+                                @elseif ($direction === 'Expedido')
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Unidad de destino <span class="text-danger">*</span></label>
+                                            <select wire:model="destino"
+                                                class="form-control @error('destino') is-invalid @enderror">
+                                                <option value="">-- Seleccionar --</option>
+                                                @foreach ($this->organismos as $organismo)
+                                                    <option value="{{ $organismo->name }}">{{ $organismo->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('destino')
+                                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                     </div>
                                 @endif

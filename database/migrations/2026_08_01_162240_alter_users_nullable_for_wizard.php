@@ -17,6 +17,8 @@ return new class extends Migration
             DB::statement("ALTER TABLE users ALTER COLUMN last_name DROP NOT NULL");
             DB::statement("ALTER TABLE users ALTER COLUMN email DROP NOT NULL");
             DB::statement("ALTER TABLE users ALTER COLUMN password DROP NOT NULL");
+        } elseif (DB::getDriverName() === 'sqlite') {
+            // SQLite: columnas ya son flexibles (sin NOT NULL estricto).
         } else {
             DB::statement("ALTER TABLE users MODIFY name VARCHAR(255) NULL");
             DB::statement("ALTER TABLE users MODIFY last_name VARCHAR(255) NULL");
@@ -42,6 +44,8 @@ return new class extends Migration
             DB::statement("ALTER TABLE users ALTER COLUMN last_name SET NOT NULL");
             DB::statement("ALTER TABLE users ALTER COLUMN email SET NOT NULL");
             DB::statement("ALTER TABLE users ALTER COLUMN password SET NOT NULL");
+        } elseif (DB::getDriverName() === 'sqlite') {
+            // SQLite: no hay NOT NULL que restaurar, columnas ya flexibles.
         } else {
             DB::statement("ALTER TABLE users MODIFY name VARCHAR(255) NOT NULL");
             DB::statement("ALTER TABLE users MODIFY last_name VARCHAR(255) NOT NULL");

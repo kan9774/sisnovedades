@@ -6,7 +6,7 @@ use App\Http\Controllers\AdjuntoController;
 use App\Http\Controllers\ForzarCambioPasswordController;
 use App\Http\Controllers\NovedadesController;
 use App\Http\Controllers\GuardiaController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\UnidadController;
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
@@ -18,7 +18,7 @@ use App\Livewire\Palomas\PalomaShow;
 use App\Models\Palomar;
 use App\Support\PalomarPdfGenerator;
 use App\Http\Controllers\VehiculoController;
-use App\Http\Controllers\VueloController;
+
 use App\Livewire\Guardias;
 use App\Models\Documento;
 use App\Models\User;
@@ -193,9 +193,11 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
                 return view('livewire.admin.users.create', ['user' => $user]);
             })->name('create.resume');
 
-            Route::delete('/{id}/incompleto', [UserController::class, 'destroyIncompleto'])
+            Route::delete('/{id}/incompleto', [\App\Livewire\Admin\Users::class, 'destroyIncompleto'])
                 ->name('destroy-incompleto');
-            Route::get('/',                     [UserController::class, 'index'])->name('index');
+            Route::get('/', function () {
+                return view('livewire.admin.users.layout');
+            })->name('index');
             Route::get('/create', function () {
                 \Illuminate\Support\Facades\Gate::authorize('create', \App\Models\User::class);
                 return view('livewire.admin.users.create');
@@ -203,10 +205,9 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             Route::get('/{id}/edit', function ($id) {
                 return view('livewire.admin.users.edit', ['user' => User::findOrFail($id)]);
             })->name('edit');
-            Route::post('/{id}/restore',        [UserController::class, 'restore'])->name('restore');
-            Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])->name('force-delete');
-            Route::delete('/{id}',              [UserController::class, 'destroy'])->name('destroy');
-            Route::get('/userdelete',           [UserController::class, 'UserDelete'])->name('userdelete');
+            Route::post('/{id}/restore',        [\App\Livewire\Admin\Users::class, 'restaurar'])->name('restore');
+            Route::delete('/{id}/force-delete', [\App\Livewire\Admin\Users::class, 'ejecutarEliminacionPermanente'])->name('force-delete');
+            Route::delete('/{id}',              [\App\Livewire\Admin\Users::class, 'confirmarEliminacion'])->name('destroy');
         });
         // Roles — solo admin
         Route::get('/roles', function () {
@@ -325,8 +326,7 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
                 return view('livewire.vuelos.resultados', ['vueloId' => $vuelo->id]);
             })->name('vuelos.resultados');
 
-            Route::resource('vuelos', VueloController::class)
-                ->parameters(['vuelos' => 'vuelo']);
+            // VueloController desactivado — rutas reemplazadas por Livewire\Vuelos
 
             // Estados de paloma (Livewire, formulario inline sin modales)
             Route::get('estados-paloma', function () {

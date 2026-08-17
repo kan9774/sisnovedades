@@ -29,6 +29,7 @@ use LogsActivity;
         'fecha_nacimiento',
         'sexo',
         'estado_id',
+        'estado_sanitario',
         'observaciones',
     ];
 
