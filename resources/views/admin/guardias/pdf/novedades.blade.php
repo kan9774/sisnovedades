@@ -332,7 +332,7 @@
         // Salidas que se originaron en esta guardia
         $misSalidas = $guardia
             ->salidasVehiculos()
-            ->with(['vehiculo', 'conductor', 'boletaCierre'])
+            ->with(['vehiculo', 'conductor', 'boletaCierre', 'tipoCombustible'])
             ->get();
 
         // Salidas originadas en OTRA guardia pero cuya boleta de cierre
@@ -341,11 +341,14 @@
             $q->where('guardia_id', $guardia->id);
         })
             ->where('guardia_id', '!=', $guardia->id)
-            ->with(['vehiculo', 'conductor', 'guardia', 'boletaCierre'])
+            ->with(['vehiculo', 'conductor', 'guardia', 'boletaCierre', 'tipoCombustible'])
             ->get();
 
         $todasSalidas = $misSalidas->concat($retornosDeOtrasGuardias);
 
+        // Agrupamos por el NOMBRE real del tipo de combustible (relación tipoCombustible),
+        // no por tipo_combustible_id: esa columna es un FK numérico hacia
+        // tipos_combustible, nunca va a matchear contra los strings 'gas_oil'/'nafta'.
         $tiposCombustible = [
             'gas_oil' => 'GAS OIL',
             'nafta' => 'NAFTA',
@@ -354,7 +357,17 @@
 
     @foreach ($tiposCombustible as $tipo => $label)
         @php
-            $salidas = $todasSalidas->where('tipo_combustible_id', $tipo)->values();
+            $salidas = $todasSalidas
+                ->filter(function ($salida) use ($tipo) {
+                    $nombre = mb_strtolower((string) optional($salida->tipoCombustible)->nombre);
+
+                    return match ($tipo) {
+                        'nafta' => str_contains($nombre, 'nafta'),
+                        'gas_oil' => str_contains($nombre, 'gas'),
+                        default => false,
+                    };
+                })
+                ->values();
             $totalKms = $salidas->sum('kms_recorridos');
             $totalLts = $salidas->sum('litros');
         @endphp
