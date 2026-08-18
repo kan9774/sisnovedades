@@ -27,8 +27,7 @@ class VencidosEnTerceros extends Component
             ->with(['item', 'ubicacion'])
             ->when($this->filtroUbicacionId, fn ($q) => $q->where('ubicacion_id', $this->filtroUbicacionId))
             ->when($this->busqueda, fn ($q) => $q->whereHas('item', fn ($q) => $q
-                ->where('nombre', 'like', "%{$this->busqueda}%")
-                ->orWhere('codigo', 'like', "%{$this->busqueda}%")))
+                ->where('nombre', 'like', "%{$this->busqueda}%")))
             ->get()
             ->filter(fn (LoteStock $lote) => $lote->vencido)
             ->map(fn (LoteStock $lote) => [
@@ -46,8 +45,7 @@ class VencidosEnTerceros extends Component
             ->with(['item', 'ubicacionActual'])
             ->when($this->filtroUbicacionId, fn ($q) => $q->where('ubicacion_actual_id', $this->filtroUbicacionId))
             ->when($this->busqueda, fn ($q) => $q->whereHas('item', fn ($q) => $q
-                ->where('nombre', 'like', "%{$this->busqueda}%")
-                ->orWhere('codigo', 'like', "%{$this->busqueda}%")))
+                ->where('nombre', 'like', "%{$this->busqueda}%")))
             ->get()
             ->filter(fn (ItemUnidad $u) => $u->estaVencida())
             ->map(fn (ItemUnidad $u) => [

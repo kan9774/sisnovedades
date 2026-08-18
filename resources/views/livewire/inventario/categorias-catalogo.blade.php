@@ -18,7 +18,7 @@
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <input type="text" wire:model.live.debounce.400ms="busqueda"
-                           class="form-control" placeholder="Buscar por nombre o abreviatura...">
+                           class="form-control" placeholder="Buscar por nombre...">
                 </div>
             </div>
         </div>
@@ -28,22 +28,12 @@
             @can('create', \App\Models\Categoria::class)
                 <form wire:submit="agregar">
                     <div class="row align-items-start mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-9">
                             <label class="font-weight-bold">Nombre</label>
                             <input type="text" wire:model="nombre"
                                    class="form-control @error('nombre') is-invalid @enderror"
                                    placeholder="Ej: Uniformes, Herramientas...">
                             @error('nombre') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="col-md-3">
-                            <label class="font-weight-bold">
-                                Abreviatura
-                                <small class="text-muted font-weight-normal">(opcional, se sugiere sola)</small>
-                            </label>
-                            <input type="text" wire:model="codigo_abreviatura" maxlength="6"
-                                   class="form-control text-uppercase @error('codigo_abreviatura') is-invalid @enderror"
-                                   placeholder="Ej: HER, EQC" style="text-transform: uppercase;">
-                            @error('codigo_abreviatura') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-3">
                             <label class="font-weight-bold d-none d-md-block">&nbsp;</label>
@@ -63,7 +53,6 @@
                     <thead class="thead-ops">
                         <tr>
                             <th>Nombre</th>
-                            <th style="width: 15%">Abreviatura</th>
                             <th style="width: 12%" class="text-center">Ítems</th>
                             <th style="width: 12%" class="text-right">Acciones</th>
                         </tr>
@@ -77,12 +66,6 @@
                                         <input type="text" wire:model="editNombre"
                                                class="form-control form-control-sm @error('editNombre') is-invalid @enderror">
                                         @error('editNombre') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
-                                    </td>
-                                    <td>
-                                        <input type="text" wire:model="editCodigoAbreviatura" maxlength="6"
-                                               class="form-control form-control-sm text-uppercase @error('editCodigoAbreviatura') is-invalid @enderror"
-                                               style="text-transform: uppercase;">
-                                        @error('editCodigoAbreviatura') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                                     </td>
                                     <td class="text-center">
                                         <span class="badge badge-secondary">{{ $categoria->items_count }}</span>
@@ -99,7 +82,6 @@
                                 @else
                                     {{-- FILA NORMAL --}}
                                     <td>{{ $categoria->nombre }}</td>
-                                    <td><span class="badge badge-dark">{{ $categoria->codigo_abreviatura ?? '—' }}</span></td>
                                     <td class="text-center">
                                         <span class="badge badge-secondary">{{ $categoria->items_count }}</span>
                                     </td>
@@ -122,7 +104,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">
+                                <td colspan="3" class="text-center text-muted py-4">
                                     No hay categorías que coincidan con la búsqueda.
                                 </td>
                             </tr>

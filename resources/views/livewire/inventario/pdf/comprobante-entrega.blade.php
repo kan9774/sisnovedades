@@ -56,7 +56,7 @@
         <tbody>
             @forelse ($entrega->movimientos as $movimiento)
                 <tr>
-                    <td>{{ $movimiento->item->codigo ?? '—' }} — {{ $movimiento->item->nombre ?? '—' }}</td>
+                    <td>{{ $movimiento->item->nombre ?? '—' }}</td>
                     <td>{{ $movimiento->itemUnidad->numero_serie ?? '—' }}</td>
                     <td style="text-align: center;">{{ $movimiento->cantidad ?? '—' }}</td>
                 </tr>

@@ -66,8 +66,7 @@ class LotesStock extends Component
                 ->whereIn('ubicacion_id', $depositos)
                 ->with(['item', 'ubicacion', 'proveedor'])
                 ->when($this->busqueda, fn ($q) => $q->whereHas('item', fn ($q) => $q
-                    ->where('nombre', 'like', "%{$this->busqueda}%")
-                    ->orWhere('codigo', 'like', "%{$this->busqueda}%")))
+                    ->where('nombre', 'like', "%{$this->busqueda}%")))
                 ->when($this->filtroItemId, fn ($q) => $q->where('item_id', $this->filtroItemId))
                 ->when($this->filtroEstado === 'con_stock', fn ($q) => $q->where('cantidad_actual', '>', 0))
                 ->orderBy('fecha_recibido')
@@ -90,8 +89,7 @@ class LotesStock extends Component
                 ->with('item')
                 ->when($this->busqueda, fn ($q) => $q->where(function ($q) {
                     $q->whereHas('item', fn ($q) => $q
-                        ->where('nombre', 'like', "%{$this->busqueda}%")
-                        ->orWhere('codigo', 'like', "%{$this->busqueda}%"))
+                        ->where('nombre', 'like', "%{$this->busqueda}%"))
                         ->orWhere('numero_serie', 'like', "%{$this->busqueda}%");
                 }))
                 ->when($this->filtroItemId, fn ($q) => $q->where('item_id', $this->filtroItemId))

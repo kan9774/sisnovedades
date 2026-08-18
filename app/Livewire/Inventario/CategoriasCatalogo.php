@@ -14,30 +14,23 @@ class CategoriasCatalogo extends Component
 
     // Alta (fila superior)
     public string $nombre = '';
-    public ?string $codigo_abreviatura = null;
 
     // Edición inline (fila de la tabla)
     public ?int $editingId = null;
     public string $editNombre = '';
-    public ?string $editCodigoAbreviatura = null;
 
     protected function rules(): array
     {
         return [
             'nombre' => 'required|string|max:150|unique:categorias,nombre',
-            'codigo_abreviatura' => 'nullable|string|max:6|alpha_num|unique:categorias,codigo_abreviatura',
         ];
     }
 
     protected array $messages = [
         'nombre.required' => 'El nombre es obligatorio.',
         'nombre.unique' => 'Ya existe una categoría con ese nombre.',
-        'codigo_abreviatura.alpha_num' => 'Solo letras y números, sin espacios ni guiones.',
-        'codigo_abreviatura.unique' => 'Ya existe una categoría con esa abreviatura.',
         'editNombre.required' => 'El nombre es obligatorio.',
         'editNombre.unique' => 'Ya existe una categoría con ese nombre.',
-        'editCodigoAbreviatura.alpha_num' => 'Solo letras y números, sin espacios ni guiones.',
-        'editCodigoAbreviatura.unique' => 'Ya existe una categoría con esa abreviatura.',
     ];
 
     public function mount(): void
@@ -60,12 +53,10 @@ class CategoriasCatalogo extends Component
 
         $datos = $this->validate();
 
-        // Si se deja en blanco, el modelo la autogenera en el evento
-        // `creating` (ver Categoria::generarAbreviaturaUnica).
         Categoria::create($datos);
 
         session()->flash('success', 'Categoría creada.');
-        $this->reset(['nombre', 'codigo_abreviatura']);
+        $this->reset(['nombre']);
         $this->resetErrorBag();
     }
 
@@ -76,7 +67,6 @@ class CategoriasCatalogo extends Component
 
         $this->editingId = $categoria->id;
         $this->editNombre = $categoria->nombre;
-        $this->editCodigoAbreviatura = $categoria->codigo_abreviatura;
         $this->resetErrorBag();
     }
 
@@ -87,12 +77,10 @@ class CategoriasCatalogo extends Component
 
         $datos = $this->validate([
             'editNombre' => 'required|string|max:150|unique:categorias,nombre,' . $this->editingId,
-            'editCodigoAbreviatura' => 'nullable|string|max:6|alpha_num|unique:categorias,codigo_abreviatura,' . $this->editingId,
         ]);
 
         $categoria->update([
             'nombre' => $datos['editNombre'],
-            'codigo_abreviatura' => $datos['editCodigoAbreviatura'],
         ]);
 
         session()->flash('success', 'Categoría actualizada.');
@@ -101,7 +89,7 @@ class CategoriasCatalogo extends Component
 
     public function cancelEdit(): void
     {
-        $this->reset(['editingId', 'editNombre', 'editCodigoAbreviatura']);
+        $this->reset(['editingId', 'editNombre']);
         $this->resetErrorBag();
     }
 
@@ -122,9 +110,7 @@ class CategoriasCatalogo extends Component
     public function render()
     {
         $categorias = Categoria::query()
-            ->when($this->busqueda, fn($q) => $q->where(fn($q2) => $q2
-                ->where('nombre', 'like', "%{$this->busqueda}%")
-                ->orWhere('codigo_abreviatura', 'like', "%{$this->busqueda}%")))
+            ->when($this->busqueda, fn($q) => $q->where('nombre', 'like', "%{$this->busqueda}%"))
             ->withCount('items')
             ->orderBy('nombre')
             ->paginate(15);

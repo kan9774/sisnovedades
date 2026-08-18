@@ -60,7 +60,7 @@ x-on:comprobante-listo.window="window.open($event.detail.url,'_blank')"
                         <select wire:model.live="lineaItemId" class="form-control @error('lineaItemId') is-invalid @enderror">
                             <option value="">Seleccionar...</option>
                             @foreach ($items as $item)
-                                <option value="{{ $item->id }}">{{ $item->codigo }} — {{ $item->nombre }}</option>
+                                <option value="{{ $item->id }}">{{ $item->nombre }}</option>
                             @endforeach
                         </select>
                         @error('lineaItemId') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror

@@ -34,7 +34,7 @@
                         <select wire:model.live="item_id" class="form-control @error('item_id') is-invalid @enderror">
                             <option value="">Seleccionar...</option>
                             @foreach ($items as $item)
-                                <option value="{{ $item->id }}">{{ $item->codigo }} — {{ $item->nombre }}</option>
+                                <option value="{{ $item->id }}">{{ $item->nombre }}</option>
                             @endforeach
                         </select>
                         @error('item_id') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
@@ -148,7 +148,7 @@
                             <select wire:model.live="filtroItemId" class="form-control form-control-sm">
                                 <option value="">Todos los ítems</option>
                                 @foreach ($items as $item)
-                                    <option value="{{ $item->id }}">{{ $item->codigo }}</option>
+                                    <option value="{{ $item->id }}">{{ $item->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>

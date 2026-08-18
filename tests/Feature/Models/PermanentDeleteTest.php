@@ -14,10 +14,13 @@ use App\Models\Unidad;
 use App\Models\Ubicacion;
 use App\Models\User;
 use App\Models\Vehiculo;
+use Illuminate\Support\Facades\DB;
 
 test('permanent delete clears blocking fk tables', function () {
-    // Enable foreign keys (SQLite disables them by default)
-    DB::statement('PRAGMA foreign_keys = ON');
+    // Enable foreign keys (SQLite disables them by default; MySQL enforces by default)
+    if (DB::getDriverName() === 'sqlite') {
+        DB::statement('PRAGMA foreign_keys = ON');
+    }
 
     $user = User::factory()->create([
         'name' => 'Test FK Delete',
@@ -80,7 +83,9 @@ test('permanent delete clears blocking fk tables', function () {
 });
 
 test('permanent delete vehiculo clears salidas_vehiculos (FK RESTRICT)', function () {
-    DB::statement('PRAGMA foreign_keys = ON');
+    if (DB::getDriverName() === 'sqlite') {
+        DB::statement('PRAGMA foreign_keys = ON');
+    }
 
     $tipoVehiculo = TipoVehiculo::firstOrCreate(['nombre' => 'Test Tipo Vehiculo']);
     $unidad = Unidad::firstOrCreate(['nombre' => 'Test Unidad']);
@@ -149,7 +154,9 @@ test('permanent delete vehiculo clears salidas_vehiculos (FK RESTRICT)', functio
 });
 
 test('permanent delete user clears all blocking fk tables', function () {
-    DB::statement('PRAGMA foreign_keys = ON');
+    if (DB::getDriverName() === 'sqlite') {
+        DB::statement('PRAGMA foreign_keys = ON');
+    }
 
     $user = User::factory()->create([
         'name' => 'Test User FK Delete',
@@ -301,6 +308,144 @@ test('permanent delete user clears all blocking fk tables', function () {
     expect(DB::table('user_permission')->where('user_id', $user->id)->count())->toBe(0);
     expect(DB::table('direcciones')->where('user_id', $user->id)->count())->toBe(0);
     expect(DB::table('credenciales_civicas')->where('user_id', $user->id)->count())->toBe(0);
+    expect(DB::table('historial_palomas')->where('user_id', $user->id)->count())->toBe(0);
+    expect(DB::table('entregas')->where('usuario_id', $user->id)->count())->toBe(0);
+    expect(DB::table('movimientos')->where('usuario_id', $user->id)->count())->toBe(0);
+    expect(DB::table('novedades_personal')->where('user_id', $user->id)->count())->toBe(0);
+});
+
+// ── Tests para flujos "incompleto" (perfil_completo_at IS NULL) ──
+
+test('destroy incompleto clears FK RESTRICT tables', function () {
+    if (DB::getDriverName() === 'sqlite') {
+        DB::statement('PRAGMA foreign_keys = ON');
+    }
+
+    $user = User::factory()->create([
+        'name' => 'Test Incompleto FK',
+        'email' => 'test-incompleto-fk-' . time() . '@test.com',
+        'perfil_completo_at' => null,
+    ]);
+
+    $guardId = Guard::create(['date' => now()->format('Y-m-d'), 'captain_id' => $user->id, 'oficer_id' => $user->id, 'status' => 'open'])->id;
+    $palomarId = Palomar::create(['nombre' => 'Test Palomar Incompleto'])->id;
+    $estadoId = EstadoPaloma::firstOrCreate(['nombre' => 'Test Estado Incompleto'], ['color' => 'black'])->id;
+    $palomaId = Paloma::create([
+        'palomar_id' => $palomarId,
+        'anilla' => 'AN-' . time(),
+        'estado_id' => $estadoId,
+    ])->id;
+    $categoriaId = \App\Models\Categoria::firstOrCreate(['nombre' => 'Test Categoria Incompleto'])->id;
+    $itemId = Item::create(['codigo' => 'TEST-ITEM-INC', 'nombre' => 'Test Item Inc', 'categoria_id' => $categoriaId, 'tipo_seguimiento' => 'cantidad'])->id;
+    $ubicacionId = Ubicacion::create(['nombre' => 'Test Ubicacion Inc', 'tipo' => 'deposito'])->id;
+
+    // Insert data in the 4 FK RESTRICT tables (los únicos que limpia destroyIncompleto)
+    DB::table('historial_palomas')->insert([
+        ['paloma_id' => $palomaId, 'user_id' => $user->id, 'evento' => 'cambio_estado', 'fecha_evento' => now(), 'observaciones' => 'test'],
+    ]);
+    DB::table('entregas')->insert([
+        ['tipo' => 'entrega', 'ubicacion_origen_id' => $ubicacionId, 'ubicacion_destino_id' => $ubicacionId, 'usuario_id' => $user->id, 'motivo' => 'test'],
+    ]);
+    DB::table('movimientos')->insert([
+        ['item_id' => $itemId, 'tipo' => 'entrada', 'cantidad' => 1, 'ubicacion_origen_id' => $ubicacionId, 'ubicacion_destino_id' => $ubicacionId, 'usuario_id' => $user->id, 'motivo' => 'test'],
+    ]);
+    DB::table('novedades_personal')->insert([
+        ['guard_id' => $guardId, 'user_id' => $user->id, 'hora' => '10:00:00', 'tipo' => 'test', 'texto' => 'test'],
+    ]);
+
+    // Verify data exists
+    expect(DB::table('historial_palomas')->where('user_id', $user->id)->count())->toBe(1);
+    expect(DB::table('entregas')->where('usuario_id', $user->id)->count())->toBe(1);
+    expect(DB::table('movimientos')->where('usuario_id', $user->id)->count())->toBe(1);
+    expect(DB::table('novedades_personal')->where('user_id', $user->id)->count())->toBe(1);
+
+    // Simulate destroyIncompleto: direct force delete (no soft delete step)
+    DB::transaction(function () use ($user) {
+        // FK RESTRICT / NO ACTION
+        DB::table('historial_palomas')->where('user_id', $user->id)->delete();
+        DB::table('entregas')->where('usuario_id', $user->id)->delete();
+        DB::table('movimientos')->where('usuario_id', $user->id)->delete();
+        DB::table('novedades_personal')->where('user_id', $user->id)->delete();
+
+        // FK CASCADE / SET NULL
+        DB::table('historial_grados')->where('user_id', $user->id)->delete();
+        DB::table('historial_estado')->where('user_id', $user->id)->delete();
+        DB::table('pases')->where('user_id', $user->id)->delete();
+        DB::table('comisiones')->where('user_id', $user->id)->delete();
+
+        $user->forceDelete();
+    });
+
+    // Verify everything was deleted
+    expect(User::withTrashed()->where('id', $user->id)->count())->toBe(0);
+    expect(DB::table('historial_palomas')->where('user_id', $user->id)->count())->toBe(0);
+    expect(DB::table('entregas')->where('usuario_id', $user->id)->count())->toBe(0);
+    expect(DB::table('movimientos')->where('usuario_id', $user->id)->count())->toBe(0);
+    expect(DB::table('novedades_personal')->where('user_id', $user->id)->count())->toBe(0);
+});
+
+test('ejecutar eliminacion permanente incompleto desde papelera limpia FK RESTRICT', function () {
+    if (DB::getDriverName() === 'sqlite') {
+        DB::statement('PRAGMA foreign_keys = ON');
+    }
+
+    $user = User::factory()->create([
+        'name' => 'Test Incompleto Trash FK',
+        'email' => 'test-incompleto-trash-fk-' . time() . '@test.com',
+        'perfil_completo_at' => null,
+    ]);
+
+    $guardId = Guard::create(['date' => now()->format('Y-m-d'), 'captain_id' => $user->id, 'oficer_id' => $user->id, 'status' => 'open'])->id;
+    $palomarId = Palomar::create(['nombre' => 'Test Palomar Trash'])->id;
+    $estadoId = EstadoPaloma::firstOrCreate(['nombre' => 'Test Estado Trash'], ['color' => 'black'])->id;
+    $palomaId = Paloma::create([
+        'palomar_id' => $palomarId,
+        'anilla' => 'AN-' . time(),
+        'estado_id' => $estadoId,
+    ])->id;
+    $categoriaId = \App\Models\Categoria::firstOrCreate(['nombre' => 'Test Categoria Trash'])->id;
+    $itemId = Item::create(['codigo' => 'TEST-ITEM-TRASH', 'nombre' => 'Test Item Trash', 'categoria_id' => $categoriaId, 'tipo_seguimiento' => 'cantidad'])->id;
+    $ubicacionId = Ubicacion::create(['nombre' => 'Test Ubicacion Trash', 'tipo' => 'deposito'])->id;
+
+    // Insert data in FK RESTRICT tables
+    DB::table('historial_palomas')->insert([
+        ['paloma_id' => $palomaId, 'user_id' => $user->id, 'evento' => 'cambio_estado', 'fecha_evento' => now(), 'observaciones' => 'test'],
+    ]);
+    DB::table('entregas')->insert([
+        ['tipo' => 'entrega', 'ubicacion_origen_id' => $ubicacionId, 'ubicacion_destino_id' => $ubicacionId, 'usuario_id' => $user->id, 'motivo' => 'test'],
+    ]);
+    DB::table('movimientos')->insert([
+        ['item_id' => $itemId, 'tipo' => 'entrada', 'cantidad' => 1, 'ubicacion_origen_id' => $ubicacionId, 'ubicacion_destino_id' => $ubicacionId, 'usuario_id' => $user->id, 'motivo' => 'test'],
+    ]);
+    DB::table('novedades_personal')->insert([
+        ['guard_id' => $guardId, 'user_id' => $user->id, 'hora' => '10:00:00', 'tipo' => 'test', 'texto' => 'test'],
+    ]);
+
+    // Soft delete (simula mover a papelera)
+    $user->delete();
+
+    expect(User::onlyTrashed()->where('id', $user->id)->count())->toBe(1);
+
+    // Simulate ejecutarEliminacionPermanenteIncompleto: force delete from trash
+    DB::transaction(function () use ($user) {
+        // FK RESTRICT / NO ACTION
+        DB::table('historial_palomas')->where('user_id', $user->id)->delete();
+        DB::table('entregas')->where('usuario_id', $user->id)->delete();
+        DB::table('movimientos')->where('usuario_id', $user->id)->delete();
+        DB::table('novedades_personal')->where('user_id', $user->id)->delete();
+
+        // FK CASCADE / SET NULL
+        DB::table('historial_grados')->where('user_id', $user->id)->delete();
+        DB::table('historial_estado')->where('user_id', $user->id)->delete();
+        DB::table('pases')->where('user_id', $user->id)->delete();
+        DB::table('comisiones')->where('user_id', $user->id)->delete();
+
+        $user->forceDelete();
+    });
+
+    // Verify everything was deleted
+    expect(User::onlyTrashed()->where('id', $user->id)->count())->toBe(0);
+    expect(User::withTrashed()->where('id', $user->id)->count())->toBe(0);
     expect(DB::table('historial_palomas')->where('user_id', $user->id)->count())->toBe(0);
     expect(DB::table('entregas')->where('usuario_id', $user->id)->count())->toBe(0);
     expect(DB::table('movimientos')->where('usuario_id', $user->id)->count())->toBe(0);

@@ -249,10 +249,18 @@ class Users extends Component
         }
 
         DB::transaction(function () use ($user) {
-            $user->historialGrados()->delete();
-            $user->historialEstados()->delete();
-            $user->pases()->delete();
-            $user->comisiones()->delete();
+            // FK RESTRICT / NO ACTION (requieren borrado explícito)
+            DB::table('historial_palomas')->where('user_id', $user->id)->delete();
+            DB::table('entregas')->where('usuario_id', $user->id)->delete();
+            DB::table('movimientos')->where('usuario_id', $user->id)->delete();
+            DB::table('novedades_personal')->where('user_id', $user->id)->delete();
+
+            // FK CASCADE / SET NULL — borrado explícito por seguridad
+            DB::table('historial_grados')->where('user_id', $user->id)->delete();
+            DB::table('historial_estado')->where('user_id', $user->id)->delete();
+            DB::table('pases')->where('user_id', $user->id)->delete();
+            DB::table('comisiones')->where('user_id', $user->id)->delete();
+
             $user->forceDelete();
         });
 
@@ -282,10 +290,18 @@ class Users extends Component
             $user = User::whereNull('perfil_completo_at')->findOrFail($this->incompletoAEliminarId);
 
             DB::transaction(function () use ($user) {
-                $user->historialGrados()->delete();
-                $user->historialEstados()->delete();
-                $user->pases()->delete();
-                $user->comisiones()->delete();
+                // FK RESTRICT / NO ACTION (requieren borrado explícito)
+                DB::table('historial_palomas')->where('user_id', $user->id)->delete();
+                DB::table('entregas')->where('usuario_id', $user->id)->delete();
+                DB::table('movimientos')->where('usuario_id', $user->id)->delete();
+                DB::table('novedades_personal')->where('user_id', $user->id)->delete();
+
+                // FK CASCADE / SET NULL — borrado explícito por seguridad
+                DB::table('historial_grados')->where('user_id', $user->id)->delete();
+                DB::table('historial_estado')->where('user_id', $user->id)->delete();
+                DB::table('pases')->where('user_id', $user->id)->delete();
+                DB::table('comisiones')->where('user_id', $user->id)->delete();
+
                 $user->forceDelete();
             });
 

@@ -28,7 +28,7 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <input type="text" wire:model.live.debounce.400ms="busqueda" class="form-control"
-                        placeholder="Buscar por código o nombre...">
+                        placeholder="Buscar por nombre...">
                 </div>
                 <div class="col-md-6">
                     <select wire:model.live="filtroCategoriaId" class="form-control">
@@ -45,7 +45,6 @@
             <table class="table table-hover table-ops-hover mb-0">
                 <thead class="thead-ops">
                     <tr>
-                        <th>Código</th>
                         <th>Nombre</th>
                         <th>Categoría</th>
                         <th>Talla</th>
@@ -58,7 +57,6 @@
                 <tbody>
                     @forelse ($items as $item)
                         <tr wire:key="item-{{ $item->id }}">
-                            <td>{{ $item->codigo }}</td>
                             <td>{{ $item->nombre }}</td>
                             <td>{{ $item->categoria->nombre }}</td>
                             <td>{{ $item->talla->valor ?? '—' }}</td>
@@ -87,7 +85,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="7" class="text-center text-muted py-4">
                                 No hay ítems que coincidan con la búsqueda.
                             </td>
                         </tr>
@@ -151,20 +149,6 @@
                             </div>
 
                             <div class="row">
-                                <div class="form-group col-md-4">
-                                    <label>
-                                        Código
-                                        @if ($codigoAuto && $categoria_id)
-                                            <small class="text-muted font-weight-normal">(sugerido)</small>
-                                        @endif
-                                    </label>
-                                    <input type="text" wire:model.live.debounce.400ms="codigo"
-                                        style="text-transform: uppercase"
-                                        class="form-control @error('codigo') is-invalid @enderror">
-                                    @error('codigo')
-                                        <span class="invalid-feedback">{{ $message }}</span>
-                                    @enderror
-                                </div>
                                 <div class="form-group col-md-8">
                                     <label>Nombre</label>
                                     <input type="text" wire:model="nombre" style="text-transform: uppercase"
@@ -174,14 +158,6 @@
                                     @enderror
                                 </div>
                             </div>
-
-                            @if ($categoria_id && $codigoAuto && $codigo === '')
-                                <small class="text-warning d-block mb-2">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    Esta categoría no tiene abreviatura configurada, cargá el código a mano
-                                    (o agregale una abreviatura desde Inventario &gt; Categorías).
-                                </small>
-                            @endif
 
                             <div class="form-group">
                                 <label>Descripción</label>
