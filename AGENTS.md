@@ -40,6 +40,46 @@ Todo elemento interactivo con ícono en AdminLTE —tabs, botones, links, accion
 - **Nivel 3 (Alta):** Formularios complejos + relaciones múltiples + validaciones custom + múltiples catálogos dependientes.
 - **Nivel 4 (Muy alta):** Lógica de negocio crítica (búsquedas multi-campo, `leftJoin` jerárquico, soft delete, force delete, transacciones).
 
+## Reglas de autonomía para agentes de IA (Qwen/otros)
+
+### 🚫 Never do (parada dura, sin excepción)
+- Nunca hacer `forceDelete()` o eliminación permanente de un modelo sin antes
+  verificar y limpiar explícitamente todas las FK con `RESTRICT` que apunten a él
+  (ver lista completa en historial de FKs hacia `users.id` en memoria del proyecto).
+  Bug real: `ejecutarEliminacionPermanente()` rompió por esto en Users.
+- Nunca modificar una migración ya corrida en producción/Supabase. Crear una nueva.
+- Nunca escribir SQL crudo en una migración sin bifurcar por driver
+  (`DB::getDriverName() === 'pgsql'`) si el proyecto sigue siendo dual MySQL/Postgres.
+- Nunca borrar o modificar un test existente para que "pase" sin aprobación explícita.
+- Nunca commitear credenciales, `.env`, ni tocar `APP_URL`/config de conexión a BD.
+- Nunca eliminar código de un controlador "legacy" (ej. GuardiaController,
+  VehiculoController) sin confirmar primero con grep/codebase que 0 rutas o vistas
+  lo siguen referenciando.
+- Nunca reemplazar el patrón de confirmaciones del proyecto (SweetAlert2 vía
+  `confirmarAccion()`) por modales custom nuevos sin que se pida explícitamente.
+
+### ⚠️ Ask first (pausar y confirmar antes de ejecutar)
+- Antes de tocar cualquier migración de base de datos o cambiar un schema.
+- Antes de agregar una dependencia nueva a `composer.json` o `package.json`.
+- Antes de modificar `config/backup.php`, `config/database.php` o cualquier
+  archivo de configuración de conexión.
+- Antes de tocar policies o el sistema de permisos (Spatie) — puede romper
+  reglas de negocio ya validadas (ej. bloqueo de eliminar rol 'admin').
+- Antes de refactorizar lógica de un componente Livewire ya migrado y probado
+  en producción (ej. Guardias, Users) — proponer el cambio primero.
+- Antes de eliminar un archivo `.blade.php` o controlador que parezca sin uso,
+  si no se corrió antes una verificación de referencias vía codebase.
+
+### ✅ Loop obligatorio al terminar cualquier tarea de código
+1. Correr `php artisan test` (o el subset de Pest relevante) y reportar resultado
+   completo (pass/fail), no solo "listo".
+2. Si algún test falla, intentar corregir y volver a correr antes de dar la tarea
+   por terminada — no dejar tests rotos sin avisar explícitamente.
+3. Actualizar `AGENTS.md` con cualquier decisión, bug nuevo o patrón descubierto.
+4. Re-indexar con `codebase` los archivos tocados.
+5. Resumen final: qué se tocó, qué se testeó, qué quedó pendiente/TODO.
+
+
 ### Componente Livewire — Estructura base
 
 ```php
@@ -178,6 +218,19 @@ Se eliminó por completo el concepto de "abreviatura de categoría" (`categorias
 - `app/Livewire/Inventario/LotesStock.php` — Busqueda solo por `nombre` (quitado `orWhere('codigo')`)
 - `app/Livewire/Inventario/VencidosEnTerceros.php` — Idem
 
+### 2026-08-17 — Vehículos: eliminación de controladores huérfanos
+Se eliminaron `VehiculoController` y `MantenimientoVehiculoController` (ambos huérfanos) junto con sus vistas rotas y rutas en `web.php`. El CRUD de vehículos opera 100% vía Livewire (`app/Livewire/Vehiculos.php` + `MantenimientoModal`).
+
+**Archivos eliminados:**
+- `app/Http/Controllers/VehiculoController.php` — 280+ líneas, 0 rutas en web.php
+- `app/Http/Controllers/MantenimientoVehiculoController.php` — 2 rutas en web.php, CRUD migrado a Livewire
+- `resources/views/admin/vehiculos/create.blade.php` — rota (ruta inexistente)
+- `resources/views/admin/vehiculos/edit.blade.php` — rota (ruta inexistente)
+- `resources/views/admin/vehiculos/index.blade.php` — rota (ruta inexistente)
+- `resources/views/admin/vehiculos/show.blade.php` — rota (ruta inexistente)
+- `resources/views/admin/vehiculos/mantenimientos/index.blade.php` — rota (ruta inexistente)
+- `routes/web.php` — quitado import de ambos controllers + 2 rutas de mantenimientos
+
 ---
 
 ## Qué NO migrar / no tocar
@@ -187,8 +240,7 @@ Se eliminó por completo el concepto de "abreviatura de categoría" (`categorias
 - `admin.guardias.pdf.*` — Generación de PDF (renderizado servidor-side)
 - `layouts/*`, `partials/*`, `emails/*` — Templates compartidos
 - `admin.guardias.pdf-preview` — Ruta pública de preview HTML
-- Controladores ya migrados: `OficinaController`, `OrganismoController`, `TipoVehiculoController`, `EstadoPalomaController`, `PermisoController`, `RolController`, `ActivityLogController`, `ConductorController`, `PalomarController`, `PalomaController`, `VueloController` — **eliminar tras migración**
-- `VehiculoController` — desactivado (rutas reemplazadas por Livewire), pendiente de borrado manual
+- Controladores ya migrados y eliminados: `OficinaController`, `OrganismoController`, `TipoVehiculoController`, `EstadoPalomaController`, `PermisoController`, `RolController`, `ActivityLogController`, `ConductorController`, `PalomarController`, `PalomaController`, `VueloController`, `VehiculoController`, `MantenimientoVehiculoController` — todos eliminados y sin referencias residuales.
 
 ---
 

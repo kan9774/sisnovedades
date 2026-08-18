@@ -48,9 +48,13 @@ return new class extends Migration
             $table->string('grade')->nullable()->after('grado_id');
         });
 
-        DB::table('users')
-            ->join('grados', 'users.grado_id', '=', 'grados.id')
-            ->update(['users.grade' => DB::raw('grados.nombre')]);
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('UPDATE users SET grade = grados.nombre FROM grados WHERE users.grado_id = grados.id');
+        } else {
+            DB::table('users')
+                ->join('grados', 'users.grado_id', '=', 'grados.id')
+                ->update(['users.grade' => DB::raw('grados.nombre')]);
+        }
 
         Schema::table('users', function (Blueprint $table) {
             $table->dropConstrainedForeignId('grado_id');

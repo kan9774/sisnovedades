@@ -10,14 +10,12 @@ use App\Http\Controllers\UnidadController;
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\MantenimientoVehiculoController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NovedadPersonalController;
 use App\Http\Controllers\NovedadRanchoController;
 use App\Livewire\Palomas\PalomaShow;
 use App\Models\Palomar;
 use App\Support\PalomarPdfGenerator;
-use App\Http\Controllers\VehiculoController;
 
 use App\Livewire\Guardias;
 use App\Models\Documento;
@@ -277,12 +275,6 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             Route::get('/', function () {
                 return view('livewire.vehiculos.layout');
             })->name('index');
-
-            // Mantenimientos (anidados bajo vehiculo)
-            Route::prefix('{vehiculo}/mantenimientos')->name('mantenimientos.')->group(function () {
-                Route::get('/', [MantenimientoVehiculoController::class, 'index'])->name('index');
-                Route::delete('/{mantenimiento}', [MantenimientoVehiculoController::class, 'destroy'])->name('destroy');
-            });
         });
 
         // Conductores - Livewire

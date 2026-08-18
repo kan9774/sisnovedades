@@ -27,8 +27,15 @@ class Categoria extends Model
         });
 
         static::updating(function (Categoria $categoria) {
-            if ($categoria->isDirty('nombre') && ! $categoria->isDirty('slug')) {
-                $categoria->slug = static::generarSlugUnico($categoria->nombre, $categoria->id);
+            if ($categoria->isDirty('nombre')) {
+                // Only regenerate the slug if it still matches the auto-generated slug
+                // from the original nombre. If the user manually changed the slug to
+                // something different, leave it alone.
+                $originalNombre = $categoria->getOriginal('nombre');
+                $originalAutoSlug = static::generarSlugUnico($originalNombre, $categoria->id);
+                if ($categoria->slug === $originalAutoSlug) {
+                    $categoria->slug = static::generarSlugUnico($categoria->nombre, $categoria->id);
+                }
             }
         });
     }
