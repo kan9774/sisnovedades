@@ -336,6 +336,20 @@ return [
                     'active' => ['admin/pdf-destinatarios*'],
                     'can'    => 'ver_destinatarios_pdf',
                 ],
+                                [
+                    'text'   => 'Unidades Ámbito',
+                    'url'    => 'admin/unidades',
+                    'icon'   => 'fas fa-building',
+                    'active' => ['admin/unidades*'],
+                    'can'    => 'view_guardias',
+                ],
+                                [
+                    'text'   => 'Unidades Ejército',
+                    'url'    => 'admin/organismos',
+                    'icon'   => 'fas fa-landmark',
+                    'active' => ['admin/organismos*'],
+                    'can'    => 'view_guardias',
+                ],
             ],
         ],
 
@@ -360,25 +374,11 @@ return [
                     'can'    => 'viewAny-grado',
                 ],
                 [
-                    'text'   => 'Unidades Ámbito',
-                    'url'    => 'admin/unidades',
-                    'icon'   => 'fas fa-building',
-                    'active' => ['admin/unidades*'],
-                    'can'    => 'viewAny-user', // solo admin
-                ],
-                [
                     'text'   => 'Oficinas',
                     'url'    => 'admin/oficinas',
                     'icon'   => 'fas fa-building',
                     'active' => ['admin/oficinas*'],
                     'can'    => 'viewAny-oficina',
-                ],
-                [
-                    'text'   => 'Unidades Ejército',
-                    'url'    => 'admin/organismos',
-                    'icon'   => 'fas fa-landmark',
-                    'active' => ['admin/organismos*'],
-                    'can'    => 'viewAny-user', // solo admin
                 ],
             ],
         ],

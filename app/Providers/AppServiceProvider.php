@@ -138,6 +138,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-ubicacion', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_ubicacion'));
         Gate::define('viewAny-proveedor', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_proveedores'));
         Gate::define('viewAny-lote', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_item'));
+        Gate::define('viwAny-organismo', fn($user)=> $user->isAdmin() || $user->HasPermisos('ver_organismos'));       
         // Gates de los adjuntos de la Guardia
         Gate::define('upload-attach', function (User $user, News $news) {
             if ($user->isAdmin()) {
