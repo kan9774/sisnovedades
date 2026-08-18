@@ -1,4 +1,6 @@
+{{-- resources/views/components/novedades-guardia/novedades-guardia.blade.php --}}
 <div>
+    {{-- Contenido existente --}}
     @if ($guardia->status === 'open' && $puedeOperarGuardia)
         <div class="d-flex justify-content-end mb-2">
             <x-btn-ops wire:click="abrirCrear" icon="plus-circle" color="info" size="sm" title="Registrar Tráfico">
@@ -59,7 +61,7 @@
                                         <th>Número</th>
                                         <th>Asunto</th>
                                         <th style="width: 130px;">Clasificación</th>
-                                        <th>Oficina</th>
+                                        <th>Oficina / Destino</th>
                                         <th style="width: 100px;">Estado</th>
                                         <th class="text-center" style="width: 110px;">Acciones</th>
                                     </tr>
@@ -107,7 +109,18 @@
                                                     {{ $novedad->clasification }}
                                                 </span>
                                             </td>
-                                            <td>{{ $novedad->oficina->nombre ?? '—' }}</td>
+                                            <td>
+                                                @if ($novedad->direction === 'Expedido')
+                                                    @php
+                                                        $destinosList = is_array($novedad->destino) ? $novedad->destino : [$novedad->destino];
+                                                    @endphp
+                                                    @foreach ($destinosList as $destino)
+                                                        <span class="badge badge-secondary mr-1">{{ $destino }}</span>
+                                                    @endforeach
+                                                @else
+                                                    {{ $novedad->oficina->nombre ?? '—' }}
+                                                @endif
+                                            </td>
                                             <td>
                                                 <livewire:estado-novedad :novedad="$novedad" :guardia="$guardia"
                                                     :compacto="true" :key="'estado-novedad-tabla-' . $novedad->id" />
@@ -117,7 +130,6 @@
                                                     edit="abrirEditar({{ $novedad->id }})"
                                                     delete="eliminar({{ $novedad->id }})" :show-edit="$guardia->status === 'open' && $puedeOperarGuardia"
                                                     :show-delete="$guardia->status === 'open' && $puedeOperarGuardia" size="xs" />
-
                                             </td>
                                         </tr>
                                     @endforeach
@@ -198,19 +210,20 @@
                                 @elseif ($direction === 'Expedido')
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Unidad de destino <span class="text-danger">*</span></label>
-                                            <select wire:model="destino"
-                                                class="form-control @error('destino') is-invalid @enderror">
-                                                <option value="">-- Seleccionar --</option>
-                                                @foreach ($this->organismos as $organismo)
-                                                    <option value="{{ $organismo->name }}">{{ $organismo->name }}
-                                                    </option>
+                                            <label>Unidades de destino <span class="text-danger">*</span></label>
+                                            <select wire:model="destinos" 
+                                                class="form-control @error('destinos') is-invalid @enderror @error('destinos.*') is-invalid @enderror" 
+                                                multiple 
+                                                size="5">
+                                                @foreach ($this->opcionesDestinos as $nombre)
+                                                    <option value="{{ $nombre }}">{{ $nombre }}</option>
                                                 @endforeach
                                             </select>
-                                            <small class="text-muted d-block mt-1">O escribí uno nuevo:</small>
-                                            <input type="text" wire:model="organismo_nuevo" class="form-control mt-1"
-                                                placeholder="Nuevo organismo...">
-                                            @error('destino')
+                                            <small class="text-muted d-block mt-1">Mantén presionada la tecla Ctrl (Windows) o Command (Mac) para seleccionar múltiples opciones.</small>
+                                            @error('destinos')
+                                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                                            @enderror
+                                            @error('destinos.*')
                                                 <span class="invalid-feedback d-block">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -383,11 +396,8 @@
             </div>
         </div>
     </template>
-</div>
 
-
-
-@script
+    @script
     <script>
         if (!window.cerrarOpsPanel) {
             window.cerrarOpsPanel = function(id) {
@@ -408,4 +418,5 @@
             cerrarOpsPanel('modalNovedad');
         });
     </script>
-@endscript
+    @endscript
+</div>

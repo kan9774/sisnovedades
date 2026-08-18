@@ -1,4 +1,5 @@
 <?php
+// app/Livewire/novedades-guardia.php
 
 use App\Models\Guard;
 use App\Models\News;
@@ -24,7 +25,7 @@ new class extends Component
 
     public string $type = '';
     public string $direction = '';
-    public string $destino = '';
+    public array $destinos = []; // ← Cambiar de string a array
     public string $office_id = '';
     public string $number = '';
     public string $time = '';
@@ -38,7 +39,6 @@ new class extends Component
 
     public function mount(Guard $guardia, bool $puedeOperarGuardia = false): void
     {
-
         $this->guardia = $guardia;
         $this->puedeOperarGuardia = $puedeOperarGuardia;
     }
@@ -50,6 +50,12 @@ new class extends Component
     }
 
     #[Computed]
+    public function opcionesDestinos()
+    {
+        return Organismo::orderBy('name')->pluck('name')->toArray();
+    }
+
+    #[Computed]
     public function oficinas()
     {
         return \App\Models\Oficina::where('activo', true)->orderBy('nombre')->get();
@@ -58,18 +64,11 @@ new class extends Component
     #[Computed]
     public function novedadesAgrupadas()
     {
-        // Sin paginación a propósito: agrupar por dirección/tipo/hora solo
-        // tiene sentido viendo el conjunto completo de la guardia (un día),
-        // no fragmentado en páginas de 8. El volumen de una guardia no
-        // amerita paginar.
         $todas = $this->guardia->novedades()
             ->with(['oficina', 'tomadoPor'])
             ->orderBy('time')
             ->get();
 
-        // Orden fijo de subgrupos dentro de cada dirección, para que
-        // Radio siempre aparezca antes que Correo Electrónico y Fax,
-        // sin importar cuál tenga más registros.
         $ordenTipos = ['Radio' => 0, 'Correo Electrónico' => 1, 'Fax' => 2];
 
         return $todas
@@ -89,7 +88,7 @@ new class extends Component
             'editandoId',
             'type',
             'direction',
-            'destino',
+            'destinos',
             'office_id',
             'number',
             'time',
@@ -115,7 +114,7 @@ new class extends Component
         $this->editandoId = $novedad->id;
         $this->type = $novedad->type;
         $this->direction = $novedad->direction;
-        $this->destino = $novedad->destino ?? '';
+        $this->destinos = $novedad->destino ?? [];
         $this->office_id = (string) $novedad->office_id;
         $this->number = $novedad->number;
         $this->time = $novedad->time?->format('H:i') ?? '';
@@ -149,7 +148,8 @@ new class extends Component
             'office_id'       => 'required|exists:oficinas,id',
             'affair'          => 'required|string|max:255',
             'text'            => 'required|string',
-            'destino'         => 'nullable|required_if:direction,Expedido|string|max:255',
+            'destinos'        => 'nullable|required_if:direction,Expedido|array|min:1',
+            'destinos.*'      => 'string|max:255',
             'clasification'   => 'required|in:Rutinario,Prioritario,Urgente,Destello',
             'organismo_id'    => 'nullable|exists:organismos,id',
             'organismo_nuevo' => 'nullable|string|max:255',
@@ -165,7 +165,8 @@ new class extends Component
             'type'          => 'tipo',
             'direction'     => 'dirección',
             'office_id'     => 'oficina',
-            'clasification' => 'clasificación'
+            'clasification' => 'clasificación',
+            'destinos'      => 'destinos',
         ]);
 
         $organismoId = $data['organismo_id'] ?: null;
@@ -177,12 +178,12 @@ new class extends Component
             $organismoId = null;
         }
 
-        $destino = $data['direction'] === 'Expedido' ? $data['destino'] : null;
+        $destinos = $data['direction'] === 'Expedido' ? $data['destinos'] : null;
 
         $payload = [
             'type'            => $data['type'],
             'direction'       => $data['direction'],
-            'destino'         => $destino,
+            'destino'         => $destinos,
             'office_id'       => $data['office_id'],
             'number'          => $data['number'],
             'time' => $this->calcularFechaHora($data['fecha'], $data['time']),
@@ -206,12 +207,10 @@ new class extends Component
             $requiereReabrir = $cambioOficina || $pasaARecibido;
 
             if ($requiereReabrir) {
-                // Cambió de oficina (o ahora sí requiere atención): vuelve a quedar pendiente
                 $payload['estado_atencion'] = 'pendiente';
                 $payload['tomado_por_id']   = null;
                 $payload['tomado_en']       = null;
             } elseif ($pasaAExpedido) {
-                // Ya no le corresponde atención a ninguna oficina
                 $payload['estado_atencion'] = null;
                 $payload['tomado_por_id']   = null;
                 $payload['tomado_en']       = null;
@@ -220,7 +219,6 @@ new class extends Component
             $novedad->update($payload);
 
             if ($requiereReabrir || $pasaAExpedido) {
-                // Invalida las notificaciones viejas: ya no le corresponden a la oficina/estado anterior
                 DatabaseNotification::where('data->novedad_id', $novedad->id)
                     ->whereNull('read_at')
                     ->update(['read_at' => now()]);
@@ -237,7 +235,6 @@ new class extends Component
             }
 
             if ($requiereReabrir || $pasaAExpedido) {
-                // Refresco inmediato del badge de estado para quien está editando (no espera el poll)
                 $this->dispatch('novedad-estado-actualizado', novedadId: $novedad->id);
             }
         } else {
@@ -284,15 +281,13 @@ new class extends Component
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
         $this->dispatch('cerrar-modal-novedad');
     }
+
     private function calcularFechaHora(string $fecha, string $hora): \Carbon\Carbon
     {
         [$horas, $minutos] = explode(':', $hora);
-
-
         return \Carbon\Carbon::createFromFormat('Y-m-d', $fecha)
             ->setTime((int) $horas, (int) $minutos);
     }
-
 
     public function eliminar(int $id): void
     {
@@ -305,19 +300,16 @@ new class extends Component
 
         $this->authorize('delete', $novedad);
 
-        // Si estabas editando justo esta novedad, resetea el ID para evitar que la modal falle
         if ($this->editandoId === $id) {
             $this->editandoId = null;
         }
 
         $novedad->delete();
 
-        // Limpia la propiedad computada para obligar a reagrupar las novedades
         unset($this->novedadesAgrupadas);
 
         $this->dispatch('guardia-contador-actualizado', tipo: 'novedades', guardiaId: $this->guardia->id);
     }
-
 
     public function render()
     {

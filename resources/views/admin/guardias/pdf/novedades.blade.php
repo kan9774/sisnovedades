@@ -11,7 +11,6 @@
             margin-left: 20px;
         }
 
-
         body {
             font-family: Arial, sans-serif;
             font-size: 12px;
@@ -63,6 +62,7 @@
             padding: 3px 4px;
             font-size: 12px;
             font-weight: bold;
+            border: 1px solid #000;
         }
 
         table td {
@@ -70,10 +70,6 @@
             padding: 3px 4px;
             font-size: 12px;
             vertical-align: top;
-        }
-
-        table th {
-            border: 1px solid #000;
         }
 
         table tr {
@@ -91,37 +87,16 @@
             padding: 4px;
         }
 
-        .firma {
-            margin-top: 40px;
-        }
-
-        .firma-lugar {
-            text-align: right;
-            margin-bottom: 30px;
-            margin-right: 20px;
-            font-size: 11px;
-        }
-
-        .firma-contenido {
-            text-align: center;
-            width: 250px;
-            margin: 0 auto;
-        }
-
-        .firma-contenido p {
-            font-size: 11px;
-        }
-
-        .firma-linea {
-            border-top: 1px solid #000;
-            margin-bottom: 4px;
-        }
-
         .firma-tabla {
             page-break-inside: avoid;
             table-layout: fixed;
             width: 100%;
             border-collapse: collapse;
+        }
+
+        .firma-linea {
+            border-top: 1px solid #000;
+            margin-bottom: 4px;
         }
     </style>
 </head>
@@ -235,12 +210,20 @@
                                         $fechaNovedad->format('y')
                                     : $fechaNovedad->format('Hi'))
                                 : '-';
+                            
+                            // Conversión segura de destino (Array / JSON / String)
+                            $destinosList = is_array($novedad->destino)
+                                ? $novedad->destino
+                                : (is_string($novedad->destino) && !empty($novedad->destino)
+                                    ? (json_decode($novedad->destino, true) ?? [$novedad->destino])
+                                    : []);
+                            $destinoTexto = !empty($destinosList) ? implode(', ', $destinosList) : '-';
                         @endphp
                         <tr>
                             <td class="text-center">{{ $i + 1 }}.</td>
                             <td class="text-center">{{ $horaCelda }}</td>
                             <td class="text-center">{{ $novedad->number }}</td>
-                            <td>{{ $novedad->destino ?? '-' }}</td>
+                            <td>{{ $destinoTexto }}</td>
                             <td>{{ $novedad->text }}</td>
                         </tr>
                     @empty
@@ -252,6 +235,7 @@
             </table>
         </div>
     @endforeach
+
     {{-- Novedades de Personal --}}
     @php $novedadesPersonal = $guardia->novedadesPersonal->sortBy('hora'); @endphp
     <div class="seccion">
@@ -327,16 +311,14 @@
             </p>
         @endif
     </div>
+
     {{-- Salidas de Vehículos --}}
     @php
-        // Salidas que se originaron en esta guardia
         $misSalidas = $guardia
             ->salidasVehiculos()
             ->with(['vehiculo', 'conductor', 'boletaCierre', 'tipoCombustible'])
             ->get();
 
-        // Salidas originadas en OTRA guardia pero cuya boleta de cierre
-        // (regreso del vehículo) se registró en esta guardia
         $retornosDeOtrasGuardias = \App\Models\SalidaVehiculo::whereHas('boletaCierre', function ($q) use ($guardia) {
             $q->where('guardia_id', $guardia->id);
         })
@@ -346,9 +328,6 @@
 
         $todasSalidas = $misSalidas->concat($retornosDeOtrasGuardias);
 
-        // Agrupamos por el NOMBRE real del tipo de combustible (relación tipoCombustible),
-        // no por tipo_combustible_id: esa columna es un FK numérico hacia
-        // tipos_combustible, nunca va a matchear contra los strings 'gas_oil'/'nafta'.
         $tiposCombustible = [
             'gas_oil' => 'GAS OIL',
             'nafta' => 'NAFTA',
@@ -415,7 +394,7 @@
                             </td>
                             <td class="text-center">
                                 @if ($salida->boletaCierre)
-                                    <span style="color:green; font-weight:bold;">CERRADA</span><br><small></small>
+                                    <span style="color:green; font-weight:bold;">CERRADA</span>
                                 @elseif ($salida->hora_entra && $salida->kms_entra)
                                     <span style="color:green; font-weight:bold;">CERRADA</span>
                                 @else
@@ -445,9 +424,7 @@
         </div>
     @endforeach
 
-    {{-- ============================================================ --}}
-    {{-- SECCIÓN PALOMAR (total de todas las palomas del sistema)     --}}
-    {{-- ============================================================ --}}
+    {{-- Novedades de Palomar --}}
     @php
         $todasLasPalomas = \App\Models\Paloma::with('estado')->get();
         $total = $todasLasPalomas->count();
@@ -458,7 +435,6 @@
         $presentes = $total - $ausentes;
         $palomasSanas = $todasLasPalomas->where('estado_sanitario', 'Bien')->count();
         $palomasEnfermas = $todasLasPalomas->where('estado_sanitario', 'Enferma')->count();
-
     @endphp
 
     @if ($total > 0)
@@ -565,7 +541,6 @@
                 @endif
             </table>
 
-            {{-- Pie informativo con jerarquías: se mantiene siempre, no es la firma en sí --}}
             <table style="width: 100%; border-collapse: collapse; margin-top: 20px; page-break-inside: avoid;"
                 border="0">
                 <tr>

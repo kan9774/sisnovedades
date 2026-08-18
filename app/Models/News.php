@@ -1,4 +1,5 @@
 <?php
+// app/Models/News.php
 
 namespace App\Models;
 
@@ -11,26 +12,23 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class News extends Model
 {
-
     use LogsActivity;
-
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->useLogName('Novedades'); // 'novedad', 'adjunto', 'salida_vehiculo' según el modelo
+            ->useLogName('Novedades');
     }
 
-    //
     protected $fillable = [
         'guard_id',
         'user_id',
         'type',
         'direction',
         'destino',
-        'office_id',   // ← reemplaza 'office'
+        'office_id',
         'number',
         'time',
         'affair',
@@ -43,6 +41,7 @@ class News extends Model
         'tomado_por_id',
         'tomado_en',
     ];
+
     protected function casts(): array
     {
         return [
@@ -50,15 +49,14 @@ class News extends Model
             'confirmed_at' => 'datetime',
             'time'         => 'datetime',
             'tomado_en'    => 'datetime',
+            'destino'      => 'array', // ← Convertir a array automáticamente
         ];
     }
+
     // Constantes
     const TIPOS = ['Radio', 'Fax', 'Correo Electrónico'];
-
     const DIRECCIONES = ['Recibido', 'Expedido'];
-
     const CLASIFICACIONES = ['Rutinario', 'Prioritario', 'Urgente', 'Destello'];
-
     const CLASIFICACIONES_URGENTES = ['Urgente', 'Destello'];
 
     // Relaciones
@@ -66,46 +64,53 @@ class News extends Model
     {
         return $this->belongsTo(Guard::class, 'guard_id');
     }
+
     public function escribiente(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     public function adjuntos()
     {
         return $this->hasMany(Attach::class, 'news_id');
     }
+
     public function organismo(): BelongsTo
     {
         return $this->belongsTo(Organismo::class, 'organismo_id');
     }
+
     public function logs(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject')->latest();
     }
+
     public function oficina(): BelongsTo
     {
         return $this->belongsTo(Oficina::class, 'office_id');
     }
+
     public function tomadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'tomado_por_id');
     }
-
-
 
     // Scopes
     public function scopeDeGuardia($query, $guard_id)
     {
         return $query->where('guard_id', $guard_id);
     }
+
     public function scopeUrgentes($query)
     {
         return $query->where('clasification', ['Urgente', 'Destello']);
     }
+
     public function scopePendientes($query)
     {
         return $query->where('estado_atencion', 'pendiente');
     }
+
     public function scopeDeGuardiaAbierta($query)
     {
         return $query->whereHas('guardia', fn($q) => $q->where('status', 'open'));
@@ -121,14 +126,17 @@ class News extends Model
     {
         return $this->confirmed === true;
     }
+
     public function esUrgente(): bool
     {
         return in_array($this->clasification, self::CLASIFICACIONES_URGENTES);
     }
+
     public function estaPendiente(): bool
     {
         return $this->estado_atencion === 'pendiente';
     }
+
     public function remitente(): string
     {
         if ($this->direction === 'Expedido') {
@@ -136,5 +144,31 @@ class News extends Model
         }
 
         return $this->organismo->name ?? 'Sin especificar';
+    }
+
+    /**
+     * Obtener los destinos formateados como string
+     */
+    public function destinosFormateados(): string
+    {
+        if (empty($this->destino)) {
+            return '—';
+        }
+        
+        $destinos = is_array($this->destino) ? $this->destino : [$this->destino];
+        return implode(', ', $destinos);
+    }
+
+    /**
+     * Verificar si un destino específico está en la lista
+     */
+    public function tieneDestino(string $destino): bool
+    {
+        if (empty($this->destino)) {
+            return false;
+        }
+        
+        $destinos = is_array($this->destino) ? $this->destino : [$this->destino];
+        return in_array($destino, $destinos);
     }
 }
