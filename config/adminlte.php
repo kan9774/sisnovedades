@@ -336,13 +336,6 @@ return [
                     'active' => ['admin/pdf-destinatarios*'],
                     'can'    => 'ver_destinatarios_pdf',
                 ],
-                                [
-                    'text'   => 'Unidades Ejército',
-                    'url'    => 'admin/organismos',
-                    'icon'   => 'fas fa-landmark',
-                    'active' => ['admin/organismos*'],
-                    'can'    => 'viewAny-organismos', // solo admin
-                ],
             ],
         ],
 
@@ -379,6 +372,13 @@ return [
                     'icon'   => 'fas fa-building',
                     'active' => ['admin/oficinas*'],
                     'can'    => 'viewAny-oficina',
+                ],
+                [
+                    'text'   => 'Unidades Ejército',
+                    'url'    => 'admin/organismos',
+                    'icon'   => 'fas fa-landmark',
+                    'active' => ['admin/organismos*'],
+                    'can'    => 'viewAny-user', // solo admin
                 ],
             ],
         ],
