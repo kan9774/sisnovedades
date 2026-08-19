@@ -49,7 +49,8 @@
                                 @endif
                             </td>
                             <td>{{ $salida->hora_sale?->format('H:i') }}<br><small
-                                    class="text-muted">{{ $salida->guardia->date->format('d/m/Y') }}</small></td>
+                                    class="text-muted">{{ $salida->fecha_sale?->format('d/m/Y') ?? $salida->guardia->date->format('d/m/Y') }}</small>
+                            </td>
                             <td>{{ $salida->hora_entra?->format('H:i') ?? '-' }}</td>
                             <td>
                                 @if ($salida->tiene_boleta)
@@ -184,7 +185,7 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Combustible <span class="text-danger">*</span></label>
                                         <select wire:model.live="tipo_combustible_id"
@@ -199,7 +200,17 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Fecha Salida <span class="text-danger">*</span></label>
+                                        <input type="date" wire:model.live="fecha_sale"
+                                            class="form-control @error('fecha_sale') is-invalid @enderror">
+                                        @error('fecha_sale')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Hora Salida <span class="text-danger">*</span></label>
                                         <input type="time" wire:model.live="hora_sale"
@@ -209,7 +220,7 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Hora Entrada</label>
                                         <input type="time" wire:model.live="hora_entra"
@@ -304,7 +315,8 @@
                                     <strong>Salida #{{ $salida->id }}</strong> —
                                     {{ $salida->vehiculo->matricula ?? '—' }}<br>
                                     Conductor: {{ $salida->conductor->nombre_visible ?? '—' }}<br>
-                                    Salida: {{ $salida->guardia->date->format('d/m/Y') }} a las
+                                    Salida: {{ ($salida->fecha_sale ?? $salida->guardia->date)->format('d/m/Y') }} a
+                                    las
                                     {{ $salida->hora_sale?->format('H:i') }}<br>
                                     @if ($salida->kms_sale)
                                         Km Sale: <strong>{{ $salida->kms_sale }}</strong>

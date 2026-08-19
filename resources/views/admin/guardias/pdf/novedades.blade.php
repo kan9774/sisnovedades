@@ -237,21 +237,43 @@
     @endforeach
 
     {{-- Novedades de Personal --}}
-    @php $novedadesPersonal = $guardia->novedadesPersonal->sortBy('hora'); @endphp
+    @php $novedadesPersonal = $guardia->novedadesPersonal->sortBy([
+        ['fecha', 'asc'],
+        ['hora', 'asc'],
+    ]); @endphp
     <div class="seccion">
         <p class="seccion-titulo">Novedades de Personal.</p>
         <table>
             <thead>
                 <tr>
                     <th style="width:8%">Hora</th>
-                    <th style="width:18%">Tipo</th>
-                    <th style="width:74%">Texto</th>
+                    <th style="width:17%">Tipo</th>
+                    <th style="width:75%">Texto</th>
                 </tr>
             </thead>
             <tbody>
+                @php $fechaAnteriorFila = null; @endphp
                 @forelse($novedadesPersonal as $item)
+                    @php
+                        $esPrimeraDelDia = $item->fecha && (!$fechaAnteriorFila || !$item->fecha->isSameDay($fechaAnteriorFila));
+                        if ($esPrimeraDelDia) {
+                            $fechaAnteriorFila = $item->fecha->copy();
+                        }
+
+                        if ($item->fecha && $esPrimeraDelDia) {
+                            $dia = $item->fecha->format('d');
+                            $horaMin = $item->hora->format('Hi');
+                            $mes = strtoupper($item->fecha->locale('es')->isoFormat('MMM'));
+                            $anio = $item->fecha->format('y');
+                            $horaCelda = $dia . $horaMin . $mes . $anio;
+                        } elseif ($item->hora) {
+                            $horaCelda = $item->hora->format('Hi');
+                        } else {
+                            $horaCelda = '-';
+                        }
+                    @endphp
                     <tr>
-                        <td class="text-center">{{ $item->hora->format('Hi') }}</td>
+                        <td class="text-center">{{ $horaCelda }}</td>
                         <td class="text-center">{{ $item->tipo }}</td>
                         <td>{{ $item->texto }}</td>
                     </tr>
@@ -373,7 +395,7 @@
                     @forelse($salidas as $salida)
                         <tr>
                             <td class="text-center">{{ optional($salida->hora_sale)->format('Hi') }}</td>
-                            <td class="text-center">{{ $salida->guardia->date->format('d/m') }}</td>
+                            <td class="text-center">{{ $salida->fecha_sale?->format('d/m') ?? $salida->guardia->date->format('d/m') }}</td>
                             <td class="text-center">
                                 @if ($salida->boletaCierre)
                                     {{ optional($salida->boletaCierre->hora_entra)->format('Hi') }}
@@ -387,7 +409,7 @@
                                 @if ($salida->boletaCierre)
                                     {{ optional($salida->boletaCierre->fecha_entra)->format('d/m') }}
                                 @elseif ($salida->hora_entra)
-                                    {{ $salida->guardia->date->format('d/m') }}
+                                    {{ $salida->fecha_sale?->format('d/m') ?? $salida->guardia->date->format('d/m') }}
                                 @else
                                     -
                                 @endif

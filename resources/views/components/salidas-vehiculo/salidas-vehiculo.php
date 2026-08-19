@@ -32,6 +32,7 @@ new class extends Component
     public string $vehiculo_id = '';
     public string $conductor_id = '';
     public string $tipo_combustible_id = '';
+    public string $fecha_sale = '';
     public string $hora_sale = '';
     public string $hora_entra = '';
     public string $kms_sale = '';
@@ -145,7 +146,8 @@ new class extends Component
     public function abrirCrear(): void
     {
         $this->resetValidation();
-        $this->reset(['editandoId', 'vehiculo_id', 'conductor_id', 'tipo_combustible_id', 'hora_sale', 'hora_entra', 'kms_sale', 'kms_entra', 'comision']);
+        $this->reset(['editandoId', 'vehiculo_id', 'conductor_id', 'tipo_combustible_id', 'fecha_sale', 'hora_sale', 'hora_entra', 'kms_sale', 'kms_entra', 'comision']);
+        $this->fecha_sale = $this->guardia->date->format('Y-m-d');
         $this->dispatch('abrir-modal-salida');
     }
 
@@ -159,6 +161,7 @@ new class extends Component
         $this->vehiculo_id = (string) $salida->vehiculo_id;
         $this->conductor_id = (string) $salida->conductor_id;
         $this->tipo_combustible_id = (string) $salida->tipo_combustible_id;
+        $this->fecha_sale = $salida->fecha_sale?->format('Y-m-d') ?? $salida->guardia->date->format('Y-m-d');
         $this->hora_sale = $salida->hora_sale?->format('H:i') ?? '';
         $this->hora_entra = $salida->hora_entra?->format('H:i') ?? '';
         $this->kms_sale = (string) ($salida->kms_sale ?? '');
@@ -185,6 +188,7 @@ new class extends Component
             'vehiculo_id'          => 'required|exists:vehiculos,id',
             'conductor_id'         => 'required|exists:conductores,id',
             'tipo_combustible_id'  => 'required|exists:tipos_combustible,id',
+            'fecha_sale'           => 'required|date',
             'hora_sale'            => 'required|date_format:H:i',
             'hora_entra'           => 'nullable|date_format:H:i|after:hora_sale',
             'kms_sale'             => 'nullable|integer|min:0',

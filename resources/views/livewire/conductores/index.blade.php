@@ -659,7 +659,7 @@
                                                     <h6>{{ $salida->vehiculo?->matricula ?? 'N/A' }}</h6>
                                                     <small>
                                                         <i class="fas fa-calendar"></i>
-                                                        {{ $salida->guardia?->date?->format('d/m/Y') ?? '—' }}
+                                                        {{ $salida->fecha_sale?->format('d/m/Y') ?? $salida->guardia?->date?->format('d/m/Y') ?? '—' }}
                                                         &nbsp;·&nbsp;
                                                         <i class="fas fa-clock"></i>
                                                         Sale: {{ $salida->hora_sale ? $salida->hora_sale->format('H:i') : '—' }}

@@ -9,11 +9,11 @@ class NovedadPersonal extends Model
 {
     protected $table = 'novedades_personal';
 
-    protected $fillable = ['guard_id', 'user_id', 'hora', 'tipo', 'texto'];
+    protected $fillable = ['guard_id', 'user_id', 'hora', 'fecha', 'tipo', 'texto'];
 
     protected function casts(): array
     {
-        return ['hora' => 'datetime:H:i'];
+        return ['hora' => 'datetime:H:i', 'fecha' => 'date'];
     }
 
     public function guardia(): BelongsTo

@@ -458,6 +458,45 @@ Todos los componentes con `$wire.$off()` fueron corregidos eliminando las llamad
 
 ## Cambios recientes
 
+### 2026-08-19 — Salidas de vehículos: fecha_sale como columna separada
+
+**Problema:** La fecha de salida de un vehículo se infería de `guardia->date` en todas las vistas.
+No había forma de registrar que un vehículo salió en fecha distinta a la de la guardia (ej: salida nocturna
+que cruza medianoche).
+
+**Solución:** Agregar columna `fecha_sale` (date, nullable) a `salidas_vehiculos`, con fallback
+a `$salida->guardia->date` en todas las vistas. Patrón idéntico a BoletaCierre (`fecha_entra`
+separado de `hora_entra`).
+
+**Patrón de uso en vistas (siempre con fallback):**
+```blade
+{{-- Modelo tiene fecha_sale → usarla; sino → fecha de la guardia --}}
+{{ $salida->fecha_sale?->format('d/m/Y') ?? $salida->guardia->date->format('d/m/Y') }}
+
+{{-- En expresión con ->format() directo (sin nullsafe): --}}
+{{ ($salida->fecha_sale ?? $salida->guardia->date)->format('d/m/Y') }}
+```
+
+**Componente Livewire (salidas-vehiculo.php):**
+- Property: `public string $fecha_sale = '';`
+- `abrirCrear()`: `$this->fecha_sale = $this->guardia->date->format('Y-m-d');` (default editable)
+- `abrirEditar()`: `$this->fecha_sale = $salida->fecha_sale?->format('Y-m-d') ?? $salida->guardia->date->format('Y-m-d');`
+- `$rules` en `guardar()`: `'fecha_sale' => 'required|date',`
+
+**Migración:** `2026_08_19_000000_add_fecha_sale_to_salidas_vehiculos_table.php`
+- `fecha_sale` date nullable after hora_sale
+- Backfill: `UPDATE salidas_vehiculos SET fecha_sale = (SELECT guards.date FROM guards WHERE guards.id = salidas_vehiculos.guardia_id) WHERE fecha_sale IS NULL`
+
+**Archivos modificados (8):**
+- `database/migrations/2026_08_19_000000_add_fecha_sale_to_salidas_vehiculos_table.php` — nueva
+- `app/Models/SalidaVehiculo.php` — `$fillable` + `$casts['fecha_sale' => 'date']`
+- `resources/views/components/salidas-vehiculo/salidas-vehiculo.php` — property, abrirCrear, abrirEditar, rules
+- `resources/views/components/salidas-vehiculo/salidas-vehiculo.blade.php` — input fecha (grid 4x col-md-3), tabla, boleta modal
+- `resources/views/livewire/salidas-pendientes.blade.php` — 2 referencias con fallback
+- `resources/views/admin/guardias/pdf/novedades.blade.php` — 2 referencias con fallback
+- `resources/views/livewire/vehiculos/index.blade.php` — 1 referencia con fallback
+- `resources/views/livewire/conductores/index.blade.php` — 1 referencia con fallback
+
 ### 2026-08-19 — Correos fallidos: polling temporal para corregir race condition post-afterResponse
 
 **Problema:** El evento `novedades-enviadas` se dispara ANTES del closure `afterResponse()`

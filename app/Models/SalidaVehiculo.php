@@ -28,6 +28,7 @@ class SalidaVehiculo extends Model
         'vehiculo_id',
         'conductor_id',
         'tipo_combustible_id',
+        'fecha_sale',
         'hora_sale',
         'hora_entra',
         'kms_sale',
@@ -39,6 +40,7 @@ class SalidaVehiculo extends Model
     ];
 
     protected $casts = [
+        'fecha_sale' => 'date',
         'hora_sale' => 'datetime:H:i',
         'hora_entra' => 'datetime:H:i',
         'kms_recorridos' => 'integer',

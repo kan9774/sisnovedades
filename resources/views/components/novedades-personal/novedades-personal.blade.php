@@ -3,6 +3,10 @@
         <form wire:submit="agregar" class="mb-3">
             <div class="form-row align-items-end">
                 <div class="col-md-2">
+                    <label class="small mb-1">Fecha <small class="text-muted">(solo si cambia el día)</small></label>
+                    <input type="date" wire:model="fecha" class="form-control form-control-sm @error('fecha') is-invalid @enderror">
+                </div>
+                <div class="col-md-2">
                     <label class="small mb-1">Hora</label>
                     <input type="time" wire:model="hora" class="form-control form-control-sm @error('hora') is-invalid @enderror">
                 </div>
@@ -11,7 +15,7 @@
                     <input type="text" wire:model="tipo" class="form-control form-control-sm @error('tipo') is-invalid @enderror"
                         placeholder="Diana, Rancho, Retreta...">
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-3">
                     <label class="small mb-1">Detalle</label>
                     <input type="text" wire:model="texto" class="form-control form-control-sm @error('texto') is-invalid @enderror">
                 </div>
@@ -23,6 +27,7 @@
                 </div>
             </div>
             @error('hora') <small class="text-danger d-block">{{ $message }}</small> @enderror
+            @error('fecha') <small class="text-danger d-block">{{ $message }}</small> @enderror
             @error('tipo') <small class="text-danger d-block">{{ $message }}</small> @enderror
             @error('texto') <small class="text-danger d-block">{{ $message }}</small> @enderror
         </form>
@@ -31,7 +36,7 @@
     <table class="table table-sm table-striped">
         <thead class="thead-ops">
             <tr>
-                <th style="width: 80px;">Hora</th>
+                <th style="width: 90px;">Hora</th>
                 <th style="width: 160px;">Tipo</th>
                 <th>Detalle</th>
                 @if ($guardia->status === 'open' && $puedeOperarGuardia)
@@ -40,10 +45,34 @@
             </tr>
         </thead>
         <tbody>
+            @php $fechaAnteriorFila = null; @endphp
             @forelse ($this->novedades as $item)
+                @php
+                    $esPrimeraDelDia = $item->fecha && (!$fechaAnteriorFila || !$item->fecha->isSameDay($fechaAnteriorFila));
+                    if ($esPrimeraDelDia) {
+                        $fechaAnteriorFila = $item->fecha->copy();
+                    }
+
+                    if ($item->fecha && $esPrimeraDelDia) {
+                        $dia = $item->fecha->format('d');
+                        $horaMin = $item->hora->format('Hi');
+                        $mes = strtoupper($item->fecha->locale('es')->isoFormat('MMM'));
+                        $anio = $item->fecha->format('y');
+                        $horaCelda = $dia . $horaMin . $mes . $anio;
+                    } elseif ($item->hora) {
+                        $horaCelda = $item->hora->format('H:i');
+                    } else {
+                        $horaCelda = '-';
+                    }
+                @endphp
                 @if ($guardia->status === 'open' && $puedeOperarGuardia && $editingId === $item->id)
                     {{-- Fila en modo edición inline --}}
                     <tr wire:key="novedad-personal-edit-{{ $item->id }}">
+                        <td>
+                            <input type="date" wire:model="editFecha"
+                                class="form-control form-control-sm @error('editFecha') is-invalid @enderror">
+                            @error('editFecha') <small class="text-danger d-block">{{ $message }}</small> @enderror
+                        </td>
                         <td>
                             <input type="time" wire:model="editHora"
                                 class="form-control form-control-sm @error('editHora') is-invalid @enderror">
@@ -70,7 +99,7 @@
                 @else
                     {{-- Fila normal --}}
                     <tr wire:key="novedad-personal-{{ $item->id }}">
-                        <td>{{ $item->hora->format('H:i') }}</td>
+                        <td><strong>{{ $horaCelda }}</strong></td>
                         <td>{{ $item->tipo }}</td>
                         <td>{{ $item->texto }}</td>
                         @if ($guardia->status === 'open' && $puedeOperarGuardia)

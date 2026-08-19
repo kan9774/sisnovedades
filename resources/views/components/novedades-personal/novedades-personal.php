@@ -15,12 +15,14 @@ new class extends Component
     public bool $puedeOperarGuardia = false;
 
     public string $hora = '';
+    public string $fecha = '';
     public string $tipo = '';
     public string $texto = '';
 
     // Estado de edición inline
     public ?int $editingId = null;
     public string $editHora = '';
+    public string $editFecha = '';
     public string $editTipo = '';
     public string $editTexto = '';
 
@@ -36,11 +38,18 @@ new class extends Component
 
         $data = $this->validate([
             'hora'  => 'required|date_format:H:i',
+            'fecha' => 'nullable|date_format:Y-m-d',
             'tipo'  => 'required|string|max:100',
             'texto' => 'required|string|max:1000',
         ]);
 
-        $this->guardia->novedadesPersonal()->create([...$data, 'user_id' => auth()->id()]);
+        $fecha = $data['fecha'] ?: $this->inferirFecha();
+
+        $this->guardia->novedadesPersonal()->create([
+            ...$data,
+            'fecha' => $fecha,
+            'user_id' => auth()->id(),
+        ]);
 
         $this->reset(['hora', 'tipo', 'texto']);
         unset($this->novedades); // limpia la caché del computed para que se vea el nuevo registro
@@ -69,17 +78,18 @@ new class extends Component
 
         $this->editingId  = $item->id;
         $this->editHora   = $item->hora->format('H:i');
+        $this->editFecha  = $item->fecha?->format('Y-m-d') ?? '';
         $this->editTipo   = $item->tipo;
         $this->editTexto  = $item->texto;
 
         // limpia errores de validación de otra fila que se haya quedado abierta
-        $this->resetErrorBag(['editHora', 'editTipo', 'editTexto']);
+        $this->resetErrorBag(['editHora', 'editFecha', 'editTipo', 'editTexto']);
     }
 
     public function cancelarEdicion(): void
     {
-        $this->reset(['editingId', 'editHora', 'editTipo', 'editTexto']);
-        $this->resetErrorBag(['editHora', 'editTipo', 'editTexto']);
+        $this->reset(['editingId', 'editHora', 'editFecha', 'editTipo', 'editTexto']);
+        $this->resetErrorBag(['editHora', 'editFecha', 'editTipo', 'editTexto']);
     }
 
     public function guardarEdicion(): void
@@ -92,24 +102,38 @@ new class extends Component
 
         $data = $this->validate([
             'editHora'  => 'required|date_format:H:i',
+            'editFecha' => 'nullable|date_format:Y-m-d',
             'editTipo'  => 'required|string|max:100',
             'editTexto' => 'required|string|max:1000',
         ]);
 
+        $fecha = $data['editFecha'] ?: $this->inferirFecha();
+
         $this->guardia->novedadesPersonal()->whereKey($this->editingId)->update([
             'hora'  => $data['editHora'],
+            'fecha' => $fecha,
             'tipo'  => $data['editTipo'],
             'texto' => $data['editTexto'],
         ]);
 
-        $this->reset(['editingId', 'editHora', 'editTipo', 'editTexto']);
+        $this->reset(['editingId', 'editHora', 'editFecha', 'editTipo', 'editTexto']);
         unset($this->novedades);
     }
 
     #[Computed]
     public function novedades()
     {
-        return $this->guardia->novedadesPersonal()->orderBy('hora')->paginate(8);
+        return $this->guardia->novedadesPersonal()->orderBy('fecha')->orderBy('hora')->paginate(8);
+    }
+
+    private function inferirFecha(): string
+    {
+        $ultimo = $this->guardia->novedadesPersonal()
+            ->orderBy('fecha', 'desc')
+            ->orderBy('hora', 'desc')
+            ->first();
+
+        return $ultimo?->fecha?->format('Y-m-d') ?? $this->guardia->date->format('Y-m-d');
     }
 
     public function render()

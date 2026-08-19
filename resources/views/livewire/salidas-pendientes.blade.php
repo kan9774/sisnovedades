@@ -30,7 +30,7 @@
                         <tr wire:key="salida-{{ $salida->id }}">
                             <td>{{ $index + 1 + ($this->salidasPendientes->currentPage() - 1) * $this->salidasPendientes->perPage() }}
                             </td>
-                            <td>{{ $salida->guardia->date->format('d/m/Y') }}</td>
+                            <td>{{ $salida->fecha_sale?->format('d/m/Y') ?? $salida->guardia->date->format('d/m/Y') }}</td>
                             <td>{{ $salida->vehiculo->matricula }} -
                                 {{ $salida->vehiculo->tipo . ' ' . $salida->vehiculo->marca }}</td>
                             <td>{{ $salida->conductor->primer_apellido }}, {{ $salida->conductor->primer_nombre }}</td>
@@ -82,7 +82,7 @@
                     <div class="modal-body">
                         <div class="alert alert-info">
                             <strong>Fecha de salida:</strong>
-                            {{ $this->salidaPendiente->guardia->date->format('d/m/Y') }}<br>
+                            {{ $this->salidaPendiente->fecha_sale?->format('d/m/Y') ?? $this->salidaPendiente->guardia->date->format('d/m/Y') }}<br>
                             <strong>Hora de salida:</strong> {{ $this->salidaPendiente->hora_sale->format('H:i') }}<br>
                             <strong>Km de salida:</strong> {{ $this->salidaPendiente->kms_sale }}<br>
                             <strong>Conductor:</strong>
