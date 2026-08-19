@@ -49,36 +49,44 @@ return new class extends Migration
             ->get();
 
         foreach ($registros as $registro) {
-            $valor = $registro->destino;
-            $valorJson = null;
+            $destinoArray = $this->decodificarComoArray($registro->destino);
+            $valorJson = json_encode($destinoArray);
 
-            if (!empty($valor)) {
-                // Si ya es un array JSON, mantenerlo
-                if ($this->esJson($valor)) {
-                    $valorJson = $valor;
-                } else {
-                    // Si es un string simple, convertirlo a array JSON
-                    $valorJson = json_encode([$valor]);
-                }
-            }
-
-            if ($valorJson !== null) {
-                DB::table('news')
-                    ->where('id', $registro->id)
-                    ->update(['destino_json' => $valorJson]);
-            }
+            DB::table('news')
+                ->where('id', $registro->id)
+                ->update(['destino_json' => $valorJson]);
         }
     }
 
-    private function esJson(string $string): bool
+    /**
+     * Decodifica un valor legacy de destino y lo normaliza a array.
+     *
+     * Maneja tres formatos legacy:
+     * 1. JSON array válido: ["Batallon 1", "Batallon 2"] → se mantiene
+     * 2. JSON escalar válido (string, int, bool): "105" → ["105"]
+     * 3. String simple o con comas: "Batallon 1, Batallon 2" → ["Batallon 1", "Batallon 2"]
+     *
+     * @see Bug 1 — escalares JSON-válidos no son array
+     * @see Bug 2 — multi-destino legacy separado por coma
+     */
+    private function decodificarComoArray($valor): array
     {
-        json_decode($string);
-        return json_last_error() === JSON_ERROR_NONE;
+        $decoded = json_decode($valor, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        // Bug 2: si contiene comas, separar en múltiples destinos
+        if (is_string($valor) && str_contains($valor, ',')) {
+            return array_map('trim', explode(',', $valor));
+        }
+
+        // Bug 1: escalar JSON-válido o string simple → wrap en array
+        return [(string) $valor];
     }
 
     public function down(): void
     {
-        // Revertir: volver a string
         $driver = DB::getDriverName();
 
         // 1. Agregar columna temporal destino_old
@@ -86,28 +94,17 @@ return new class extends Migration
             $table->string('destino_old')->nullable()->after('destino');
         });
 
-        // 2. Convertir JSON a string (tomar el primer elemento o usar el valor original si era string)
+        // 2. Convertir JSON array → primer elemento (pérdida de multi-destino en rollback)
         $registros = DB::table('news')
             ->select('id', 'destino')
             ->whereNotNull('destino')
             ->get();
 
         foreach ($registros as $registro) {
-            $valor = $registro->destino;
-            $valorOld = null;
-
-            if (!empty($valor)) {
-                if ($this->esJson($valor)) {
-                    $decodificado = json_decode($valor, true);
-                    if (is_array($decodificado) && !empty($decodificado)) {
-                        $valorOld = $decodificado[0];
-                    } elseif (is_string($decodificado)) {
-                        $valorOld = $decodificado;
-                    }
-                } else {
-                    $valorOld = $valor;
-                }
-            }
+            $decodificado = json_decode($registro->destino, true);
+            $valorOld = is_array($decodificado) && !empty($decodificado)
+                ? $decodificado[0]
+                : null;
 
             DB::table('news')
                 ->where('id', $registro->id)

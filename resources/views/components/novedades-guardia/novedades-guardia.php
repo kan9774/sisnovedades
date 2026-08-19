@@ -148,7 +148,14 @@ new class extends Component
             'office_id'       => 'required|exists:oficinas,id',
             'affair'          => 'required|string|max:255',
             'text'            => 'required|string',
-            'destinos'        => 'nullable|required_if:direction,Expedido|array|min:1',
+            'destinos'        => [
+                'array',
+                function ($attribute, $value, $fail) {
+                    if ($this->direction === 'Expedido' && count($value) < 1) {
+                        $fail('Debés seleccionar al menos un destino.');
+                    }
+                },
+            ],
             'destinos.*'      => 'string|max:255',
             'clasification'   => 'required|in:Rutinario,Prioritario,Urgente,Destello',
             'organismo_id'    => 'nullable|exists:organismos,id',

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -13,6 +14,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return; // SQLite no soporta dropColumn con constraints
+        }
+
         // 1) Quitar unique constraint de codigo_abreviatura (se aplica al dropColumn)
         // 2) Quitar columna codigo_abreviatura de categorias
         Schema::table('categorias', function (Blueprint $table) {

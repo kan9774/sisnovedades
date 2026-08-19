@@ -1,4 +1,12 @@
 <div>
+    {{-- Polling temporal: se activa 60s al disparar 'novedades-enviadas'.
+        x-if elimina el elemento del DOM cuando $pollActivo es false,
+        deteniendo wire:poll. Cuando es true, wire:poll.5s="refrecar"
+        refresca la tabla con los fallos recién insertados. --}}
+    <template x-if="$wire.pollActivo">
+        <div wire:poll.5s="refrecar"></div>
+    </template>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="text-muted small mb-0">
             Correos que no pudieron entregarse para esta guardia.
@@ -61,3 +69,16 @@
         </table>
     </div>
 </div>
+
+@script
+<script>
+    $wire.$watch('pollActivo', (activo) => {
+        if (activo) {
+            // Ventana de 60 segundos: al expirar, desactiva el polling.
+            setTimeout(() => {
+                $wire.stopPoll();
+            }, 60000);
+        }
+    });
+</script>
+@endscript

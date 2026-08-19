@@ -120,12 +120,14 @@ class ProcesarRebotesCommand extends Command
             }
 
             DB::table('guardia_correos_fallidos')->insert([
-                'guardia_id' => $envioOriginal->guardia_id,
-                'user_id'    => $envioOriginal->user_id,
-                'email'      => $datos['destinatario'] ?? $envioOriginal->email,
-                'motivo'     => $this->clasificarMotivo($datos['status'], $datos['diagnostico']),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'guardia_id'     => $envioOriginal->guardia_id,
+                'user_id'        => $envioOriginal->user_id,
+                'email'          => $datos['destinatario'] ?? $envioOriginal->email,
+                'motivo'         => $this->clasificarMotivo($datos['status'], $datos['diagnostico']),
+                'con_adjuntos'   => (bool) $envioOriginal->con_adjuntos,
+                'con_zip'        => (bool) $envioOriginal->con_zip,
+                'created_at'     => now(),
+                'updated_at'     => now(),
             ]);
 
             DB::table('guardia_correos_enviados')

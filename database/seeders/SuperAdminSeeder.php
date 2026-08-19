@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Rol;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,7 +24,7 @@ class SuperAdminSeeder extends Seeder
 
         // Crear o actualizar el Super Admin
         $gradoId = \App\Models\Grado::firstOrCreate(['nombre' => 'Sgto.(EC)'])->id;
-        User::updateOrCreate(
+        $user = User::updateOrCreate(
             ['email' => 'superadmin@example.com'],
             [
                 'name' => 'Super',
@@ -32,11 +32,13 @@ class SuperAdminSeeder extends Seeder
                 'grado_id' => $gradoId,
                 'email' => 'superadmin@example.com',
                 'password' => Hash::make('password'),
-                'rol_id' => $rolAdmin->id,
                 'is_super_admin' => true,
                 'status' => 'active',
             ]
         );
+
+        // Asignar rol admin vía pivot table
+        $user->roles()->syncWithoutDetaching($rolAdmin->id);
 
         // También actualizar el admin existente para que sea super admin (opcional)
         $admin = User::where('email', 'admin@example.com')->first();
@@ -44,6 +46,7 @@ class SuperAdminSeeder extends Seeder
             $admin->update([
                 'is_super_admin' => true,
             ]);
+            $admin->roles()->syncWithoutDetaching($rolAdmin->id);
         }
 
         $this->command->info('Super Admin creado:');

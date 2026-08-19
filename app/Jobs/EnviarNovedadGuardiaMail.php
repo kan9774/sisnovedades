@@ -80,12 +80,14 @@ class EnviarNovedadGuardiaMail
 
             if ($messageId) {
                 DB::table('guardia_correos_enviados')->insert([
-                    'guardia_id' => $this->guardia->id,
-                    'user_id'    => $this->usuario->id,
-                    'email'      => $this->usuario->email,
-                    'message_id' => $messageId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'guardia_id'     => $this->guardia->id,
+                    'user_id'        => $this->usuario->id,
+                    'email'          => $this->usuario->email,
+                    'message_id'     => $messageId,
+                    'con_adjuntos'   => $this->incluirAdjuntos,
+                    'con_zip'        => $this->enviarZip,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
                 ]);
             }
 
@@ -102,12 +104,14 @@ class EnviarNovedadGuardiaMail
         $motivo = $this->clasificarMotivo($exception->getMessage());
 
         DB::table('guardia_correos_fallidos')->insert([
-            'guardia_id' => $this->guardia->id,
-            'user_id'    => $this->usuario->id,
-            'email'      => $this->usuario->email,
-            'motivo'     => $motivo,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'guardia_id'     => $this->guardia->id,
+            'user_id'        => $this->usuario->id,
+            'email'          => $this->usuario->email,
+            'motivo'         => $motivo,
+            'con_adjuntos'   => $this->incluirAdjuntos,
+            'con_zip'        => $this->enviarZip,
+            'created_at'     => now(),
+            'updated_at'     => now(),
         ]);
     }
 

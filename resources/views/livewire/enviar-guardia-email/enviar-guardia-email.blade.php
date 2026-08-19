@@ -23,13 +23,11 @@
                 <div class="ops-panel__body" wire:loading.class="opacity-50" wire:target="enviar">
                     <div class="ops-panel__content">
                         @if ($mensajeExito)
-                            <div class="alert {{ $fallidosCount > 0 ? 'alert-warning' : 'alert-success' }} py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="alert alert-info py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <span>{{ $mensajeExito }}</span>
-                                @if ($fallidosCount > 0)
-                                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="irACorreosFallidos()">
-                                        <i class="fas fa-envelope-circle-check"></i> Ver correos fallidos
-                                    </button>
-                                @endif
+                                <button type="button" class="btn btn-sm btn-outline-dark" onclick="irACorreosFallidos()">
+                                    <i class="fas fa-envelope-circle-check"></i> Ver correos fallidos
+                                </button>
                             </div>
                         @endif
 
@@ -284,15 +282,12 @@
             document.body.classList.add('ops-panel-open');
         });
 
-        // El backend hace: $this->dispatch('novedades-enviadas', fallidos: $fallidos);
-        // al final del método enviar(). Si no hubo fallidos, el panel se
-        // cierra solo; si hubo, se deja abierto para que el botón
-        // "Ver correos fallidos" del mensaje siga visible.
-        $wire.on('novedades-enviadas', (event) => {
-            const fallidos = event?.fallidos ?? 0;
-            if (fallidos > 0) {
-                return;
-            }
+        // El backend dispara 'novedades-enviadas' justo antes de enviar los
+        // correos en segundo plano (afterResponse). El panel se cierra al
+        // instante para que el usuario vea el mensaje "Enviando..." y el
+        // botón "Ver correos fallidos" — el badge de la pestaña correos
+        // fallidos (CorreosFallidos) será la fuente de verdad del resultado.
+        $wire.on('novedades-enviadas', () => {
             setTimeout(() => {
                 cerrarOpsPanel('modalEnviarGuardia');
             }, 1200);
