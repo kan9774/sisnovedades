@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\EnviarNovedadGuardiaMail;
+use App\Jobs\EnviarNovedadesGuardiaLoteJob;
 use App\Models\Guard;
 use App\Models\GuardiaPdfDestinatario;
 use App\Models\User;
@@ -151,36 +152,36 @@ new class extends Component
         $this->grupoSeleccionado = null;
         $this->mensajeExito = 'Enviando novedades por correo...';
 
-        // Envío asíncrono (después de responder): para este volumen de
-        // destinatarios (~30) es más confiable que depender de un worker
-        // queue:work permanente. afterResponse() ejecuta el closure una
-        // vez que la respuesta HTTP ya fue enviada al cliente.
-        dispatch(function () use ($usuarios, $nombreRemitente, $pdfContent, $zipContent) {
-            set_time_limit(120);
+                // Log de actividad sincrónico: se registra ANTES de despachar el
+        // job, ya que solo describe la intención de envío (no depende de
+        // que los correos individuales salgan bien o mal).
+        activity('Guardias')
+            ->performedOn($this->guardia)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'destinatarios' => $usuarios->pluck('email'),
+                'modo' => $this->modoSeleccion,
+                'con_adjuntos' => $this->incluirAdjuntos,
+                'con_zip' => $this->enviarZip,
+            ])
+            ->log("Envió las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
 
-            foreach ($usuarios as $usuario) {
-                EnviarNovedadGuardiaMail::dispatchSync(
-                    $this->guardia,
-                    $usuario,
-                    $nombreRemitente,
-                    $this->incluirAdjuntos,
-                    $pdfContent,
-                    $this->enviarZip,
-                    $zipContent,
-                );
-            }
-
-            activity('Guardias')
-                ->performedOn($this->guardia)
-                ->causedBy(Auth::user())
-                ->withProperties([
-                    'destinatarios' => $usuarios->pluck('email'),
-                    'modo' => $this->modoSeleccion,
-                    'con_adjuntos' => $this->incluirAdjuntos,
-                    'con_zip' => $this->enviarZip,
-                ])
-                ->log("Envió las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
-        })->afterResponse();
+        // Envío asíncrono (después de responder): se usa un Job real (no
+        // un closure) porque un closure definido acá capturaría
+        // implícitamente $this (este componente Livewire, una clase
+        // anónima no serializable) — eso rompía la serialización del job
+        // incluso con driver 'sync', tirando la excepción DESPUÉS de que
+        // la respuesta HTTP ya se había enviado (sin error visible, sin
+        // correos salientes). Ver EnviarNovedadesGuardiaLoteJob.
+        dispatch(new EnviarNovedadesGuardiaLoteJob(
+            $this->guardia,
+            $usuarios->pluck('id')->all(),
+            $nombreRemitente,
+            $this->incluirAdjuntos,
+            $pdfContent,
+            $this->enviarZip,
+            $zipContent,
+        ))->afterResponse();
     }
 
     public function render()

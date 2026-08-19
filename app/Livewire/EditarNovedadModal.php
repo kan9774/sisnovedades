@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Guard;
 use App\Models\News;
+use App\Models\Oficina;
 use App\Models\Organismo;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -11,18 +12,29 @@ use Livewire\Component;
 class EditarNovedadModal extends Component
 {
     public News $novedad;
+
     public Guard $guardia;
 
     public string $type = '';
+
     public string $direction = '';
-    public string $destino = '';
+
+    public array $destino = [];   // antes: public string $destino = '';
+
     public string $office_id = '';
+
     public string $number = '';
+
     public string $time = '';
+
     public string $affair = '';
+
     public string $text = '';
+
     public string $clasification = '';
+
     public string $organismo_id = '';
+
     public string $organismo_nuevo = '';
 
     public function mount(News $novedad, Guard $guardia): void
@@ -37,7 +49,7 @@ class EditarNovedadModal extends Component
     {
         $this->type = $this->novedad->type;
         $this->direction = $this->novedad->direction;
-        $this->destino = $this->novedad->destino ?? '';
+        $this->destino = $this->novedad->destino ?? [];   // antes: ?? ''
         $this->office_id = (string) $this->novedad->office_id;
         $this->number = $this->novedad->number;
         $this->time = $this->novedad->time?->format('H:i') ?? '';
@@ -57,7 +69,12 @@ class EditarNovedadModal extends Component
     #[Computed]
     public function oficinas()
     {
-        return \App\Models\Oficina::where('activo', true)->orderBy('nombre')->get();
+        return Oficina::where('activo', true)->orderBy('nombre')->get();
+    }
+     #[Computed]
+    public function opcionesDestinos()
+    {
+        return Organismo::orderBy('name')->pluck('name')->toArray();
     }
 
     public function abrir(): void
@@ -73,16 +90,17 @@ class EditarNovedadModal extends Component
         $this->authorize('update', $this->novedad);
 
         $data = $this->validate([
-            'type'            => 'required|in:Radio,Fax,Correo Electrónico',
-            'direction'       => 'required|in:Recibido,Expedido',
-            'number'          => 'required|string|max:255',
-            'time'            => 'required|date_format:H:i',
-            'office_id'       => 'required|exists:oficinas,id',
-            'affair'          => 'nullable|string|max:255',
-            'text'            => 'required|string',
-            'destino'         => 'nullable|string|max:255',
-            'clasification'   => 'required|in:Rutinario,Prioritario,Urgente,Destello',
-            'organismo_id'    => 'nullable|exists:organismos,id',
+            'type' => 'required|in:Radio,Fax,Correo Electrónico',
+            'direction' => 'required|in:Recibido,Expedido',
+            'number' => 'required|string|max:255',
+            'time' => 'required|date_format:H:i',
+            'office_id' => 'required|exists:oficinas,id',
+            'affair' => 'nullable|string|max:255',
+            'text' => 'required|string',
+            'destino' => 'nullable|array',
+            'destino.*' => 'string|max:255',
+            'clasification' => 'required|in:Rutinario,Prioritario,Urgente,Destello',
+            'organismo_id' => 'nullable|exists:organismos,id',
             'organismo_nuevo' => 'nullable|string|max:255',
         ]);
 
@@ -96,16 +114,16 @@ class EditarNovedadModal extends Component
         }
 
         $payload = [
-            'type'          => $data['type'],
-            'direction'     => $data['direction'],
-            'destino'       => $data['destino'] ?: null,
-            'office_id'     => $data['office_id'],
-            'number'        => $data['number'],
-            'time'          => $data['time'],
-            'affair'        => $data['affair'] ?: null,
-            'text'          => $data['text'],
+            'type' => $data['type'],
+            'direction' => $data['direction'],
+            'destino' => !empty($data['destino']) ? $data['destino'] : null,
+            'office_id' => $data['office_id'],
+            'number' => $data['number'],
+            'time' => $data['time'],
+            'affair' => $data['affair'] ?: null,
+            'text' => $data['text'],
             'clasification' => $data['clasification'],
-            'organismo_id'  => $organismoId,
+            'organismo_id' => $organismoId,
         ];
 
         $this->novedad->update($payload);
