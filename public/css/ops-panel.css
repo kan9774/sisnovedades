@@ -1187,3 +1187,324 @@ body.ops-panel-open {
 .ops-panel--conductor .ops-panel__footer .btn {
     min-width: 100px;
 }
+
+/* x-cloak: evita flash del dropdown antes de que Alpine inicialice */
+[x-cloak] {
+    display: none !important;
+}
+
+/* ==========================================================================
+   Multi-Select (FilamentPHP-style) — usado en Novedades de Guardia
+   ========================================================================== */
+
+.ms-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.ms-trigger {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: 38px;
+    gap: 4px;
+    padding: 4px 32px 4px 8px;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+    user-select: none;
+}
+
+.ms-trigger:hover {
+    border-color: #80bdff;
+}
+
+.ms-trigger.is-open {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+}
+
+.ms-trigger.is-invalid {
+    border-color: #dc3545;
+}
+
+.ms-trigger.is-invalid:focus,
+.ms-trigger.is-open {
+    box-shadow: 0 0 0 .2rem rgba(220, 53, 69, .25);
+}
+
+.ms-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    background: #0B2545;
+    color: #FFD200;
+    border-radius: 4px;
+    font-size: .78rem;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.ms-chip button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: rgba(255, 210, 0, .7);
+    font-size: .65rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background .1s, color .1s;
+    line-height: 1;
+}
+
+.ms-chip button:hover {
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+}
+
+.ms-placeholder {
+    color: #6c757d;
+    font-size: .875rem;
+    pointer-events: none;
+}
+
+.ms-clear-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    background: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    border-radius: 4px;
+    font-size: .72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    margin-left: auto;
+    line-height: 1.3;
+}
+
+.ms-clear-all:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+.ms-toggle-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: .75rem;
+    pointer-events: none;
+    transition: transform .15s;
+}
+
+.ms-trigger.is-open .ms-toggle-icon {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.ms-dropdown {
+    position: absolute;
+    z-index: 1100;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    overflow: hidden;
+    animation: msDropdownFadeIn .12s ease-out;
+}
+
+@keyframes msDropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ms-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.ms-search-wrap i {
+    color: #6c757d;
+    font-size: .8rem;
+    flex-shrink: 0;
+}
+
+.ms-search {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: .85rem;
+    color: #212529;
+    padding: 4px 0;
+}
+
+.ms-search::placeholder {
+    color: #adb5bd;
+}
+
+.ms-options-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+.ms-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background .1s;
+    font-size: .875rem;
+    color: #212529;
+}
+
+.ms-option:hover {
+    background: #f1f3f5;
+}
+
+.ms-option.is-selected {
+    background: rgba(11, 37, 69, .06);
+    font-weight: 600;
+}
+
+.ms-option.is-selected .ms-check {
+    visibility: visible;
+}
+
+.ms-option.is-highlighted {
+    background: rgba(11, 37, 69, .08);
+}
+
+.ms-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ced4da;
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .1s, border-color .1s;
+}
+
+.ms-option.is-selected .ms-checkbox {
+    background: #0B2545;
+    border-color: #0B2545;
+}
+
+.ms-checkbox i {
+    color: #FFD200;
+    font-size: .6rem;
+    visibility: hidden;
+}
+
+.ms-option-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ms-no-results {
+    padding: 16px 12px;
+    text-align: center;
+    color: #adb5bd;
+    font-size: .85rem;
+    font-style: italic;
+}
+
+.ms-dropdown--compact {
+    max-height: 160px;
+}
+
+.ms-dropdown--compact .ms-options-list {
+    max-height: 120px;
+}
+/*
+ * Addendum a ops-panel.css — AGREGAR AL FINAL del archivo existente
+ * (no reemplaza nada, son overrides scopeados a .ops-panel__content
+ * y .ops-modal__body — no toca .form-control fuera de estos contenedores)
+ *
+ * Unifica el look visual de inputs/selects/textareas normales con el
+ * .ms-trigger del multi-select (Novedades de Guardia): mismo radio,
+ * misma altura mínima, y el estado hover que Bootstrap 4.6.1 no trae
+ * de fábrica. El focus ring ya coincidía (ambos usan los tokens
+ * nativos de Bootstrap: #80bdff / rgba(0,123,255,.25)), así que no
+ * se toca — solo se agrega hover + consistencia de tamaño.
+ */
+
+.ops-panel__content .form-control,
+.ops-modal__body .form-control {
+    min-height: 38px;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    transition: border-color .15s, box-shadow .15s;
+    /* Los <input>/<select> nativos no heredan tipografía por defecto en
+       varios navegadores — usan la fuente de sistema del SO, que se ve
+       más fina que el .ms-trigger (un <div> que sí hereda del body).
+       Forzamos herencia explícita para que combinen. */
+    font-family: inherit;
+    font-size: .875rem;
+    font-weight: 400;
+}
+
+.ops-panel__content .form-control:hover,
+.ops-modal__body .form-control:hover {
+    border-color: #80bdff;
+}
+
+.ops-panel__content .form-control:focus,
+.ops-modal__body .form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+}
+
+.ops-panel__content .form-control.is-invalid,
+.ops-modal__body .form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.ops-panel__content .form-control.is-invalid:hover,
+.ops-modal__body .form-control.is-invalid:hover {
+    border-color: #dc3545;
+}
+
+.ops-panel__content .form-control.is-invalid:focus,
+.ops-modal__body .form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 .2rem rgba(220, 53, 69, .25);
+}
+
+/* textarea hereda min-height distinto — no forzar los 38px del input de una línea */
+.ops-panel__content textarea.form-control,
+.ops-modal__body textarea.form-control {
+    min-height: 90px;
+}

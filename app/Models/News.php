@@ -103,7 +103,7 @@ class News extends Model
 
     public function scopeUrgentes($query)
     {
-        return $query->where('clasification', ['Urgente', 'Destello']);
+        return $query->whereIn('clasification', self::CLASIFICACIONES_URGENTES);
     }
 
     public function scopePendientes($query)

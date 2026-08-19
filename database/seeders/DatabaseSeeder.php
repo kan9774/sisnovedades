@@ -36,17 +36,22 @@ class DatabaseSeeder extends Seeder
 
         $rolAdmin = \App\Models\Rol::where('name', 'admin')->first();
         $gradoId = \App\Models\Grado::firstOrCreate(['nombre' => 'Sgto.(EC)'])->id;
-        \App\Models\User::firstOrCreate(
+        $adminUser = \App\Models\User::firstOrCreate(
+            [
+                'email' => 'admin@example.com',
+            ],
             [
                 'name' => 'Admin User',
-                'email' => 'admin@example.com',
-                'grado_id' => $gradoId,
                 'last_name' => 'Admin',
+                'grado_id' => $gradoId,
                 'password' => bcrypt('password'),
-                'rol_id' => $rolAdmin->id,
                 'status' => 'active',
             ],
         );
+
+        if ($rolAdmin && $adminUser) {
+            $adminUser->roles()->syncWithoutDetaching($rolAdmin->id);
+        }
        
     }
 }

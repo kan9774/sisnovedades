@@ -208,26 +208,180 @@
                                         </div>
                                     </div>
                                 @elseif ($direction === 'Expedido')
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Unidades de destino <span class="text-danger">*</span></label>
-                                            <select wire:model="destinos" 
-                                                class="form-control @error('destinos') is-invalid @enderror @error('destinos.*') is-invalid @enderror" 
-                                                multiple 
-                                                size="5">
-                                                @foreach ($this->opcionesDestinos as $nombre)
-                                                    <option value="{{ $nombre }}">{{ $nombre }}</option>
-                                                @endforeach
-                                            </select>
-                                            <small class="text-muted d-block mt-1">Mantén presionada la tecla Ctrl (Windows) o Command (Mac) para seleccionar múltiples opciones.</small>
-                                            @error('destinos')
-                                                <span class="invalid-feedback d-block">{{ $message }}</span>
-                                            @enderror
-                                            @error('destinos.*')
-                                                <span class="invalid-feedback d-block">{{ $message }}</span>
-                                            @enderror
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Unidades de destino <span class="text-danger">*</span></label>
+
+                                        <div
+                                            x-data="{
+                                                options: @js($this->opcionesDestinos),
+                                                selected: @js($this->destinos),
+                                                search: '',
+                                                open: false,
+                                                highlightedIndex: -1,
+
+                                                init() {
+                                                    this.$wire.on('abrir-modal-novedad', () => {
+                                                        this.$nextTick(() => {
+                                                            this.selected = [...this.$wire.destinos];
+                                                        });
+                                                    });
+
+                                                    this.$watch('search', () => {
+                                                        this.highlightedIndex = -1;
+                                                    });
+                                                },
+
+                                                get filtered() {
+                                                    if (!this.search) return this.options;
+                                                    const q = this.search.toLowerCase();
+                                                    return this.options.filter(o => o.toLowerCase().includes(q));
+                                                },
+
+                                                toggle(option) {
+                                                    const idx = this.selected.indexOf(option);
+                                                    if (idx > -1) {
+                                                        this.selected.splice(idx, 1);
+                                                    } else {
+                                                        this.selected.push(option);
+                                                    }
+                                                    this.$wire.set('destinos', this.selected, false);
+                                                },
+
+                                                remove(option) {
+                                                    this.selected = this.selected.filter(s => s !== option);
+                                                    this.$wire.set('destinos', this.selected, false);
+                                                },
+
+                                                clearAll() {
+                                                    this.selected = [];
+                                                    this.$wire.set('destinos', [], false);
+                                                },
+
+                                                toggleDropdown() {
+                                                    if (!this.open) {
+                                                        this.search = '';
+                                                        this.highlightedIndex = -1;
+                                                    }
+                                                    this.open = !this.open;
+                                                },
+
+                                                close() {
+                                                    this.open = false;
+                                                    this.search = '';
+                                                },
+
+                                                onKeyDown(e) {
+                                                    if (!this.open) {
+                                                        if (e.key !== 'Enter' && e.key !== ' ') return;
+                                                        this.toggleDropdown();
+                                                        return;
+                                                    }
+                                                    if (e.key === 'Escape') {
+                                                        this.close();
+                                                        e.preventDefault();
+                                                    } else if (e.key === 'ArrowDown') {
+                                                        e.preventDefault();
+                                                        this.highlightedIndex = Math.min(
+                                                            this.highlightedIndex + 1,
+                                                            this.filtered.length - 1
+                                                        );
+                                                    } else if (e.key === 'ArrowUp') {
+                                                        e.preventDefault();
+                                                        this.highlightedIndex = Math.max(
+                                                            this.highlightedIndex - 1,
+                                                            0
+                                                        );
+                                                    } else if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        if (this.highlightedIndex >= 0 && this.highlightedIndex < this.filtered.length) {
+                                                            this.toggle(this.filtered[this.highlightedIndex]);
+                                                        }
+                                                    }
+                                                }
+                                            }"
+                                            @click.outside="close()"
+                                            class="ms-wrapper"
+                                        >
+                                            {{-- Trigger --}}
+                                            <div
+                                                @click="toggleDropdown()"
+                                                @keydown="onKeyDown"
+                                                tabindex="0"
+                                                class="ms-trigger {{ $errors->has('destinos') || $errors->has('destinos.*') ? 'is-invalid' : '' }}"
+                                                :class="{ 'is-open': open }"
+                                            >
+                                                <template x-if="selected.length > 0">
+                                                    <template x-for="item in selected" :key="item">
+                                                        <span class="ms-chip">
+                                                            <span x-text="item"></span>
+                                                            <button type="button" @click.stop="remove(item)" title="Quitar">
+                                                                <i class="fas fa-xmark"></i>
+                                                            </button>
+                                                        </span>
+                                                    </template>
+                                                </template>
+
+                                                <template x-if="selected.length === 0">
+                                                    <span class="ms-placeholder">Seleccionar unidades...</span>
+                                                </template>
+
+                                                <span x-show="selected.length > 0" class="ms-clear-all" @click.stop="clearAll()" title="Limpiar todo">
+                                                    <i class="fas fa-trash-can"></i> Limpiar
+                                                </span>
+
+                                                <i class="fas fa-chevron-down ms-toggle-icon"></i>
+                                            </div>
+
+                                            {{-- Dropdown --}}
+                                            <div x-show="open" x-cloak
+                                                class="ms-dropdown"
+                                                @click.outside="close()"
+                                            >
+                                                <div class="ms-search-wrap">
+                                                    <i class="fas fa-magnifying-glass"></i>
+                                                    <input
+                                                        type="text"
+                                                        x-model="search"
+                                                        placeholder="Buscar..."
+                                                        class="ms-search"
+                                                        @keydown.stop
+                                                    />
+                                                </div>
+
+                                                <div class="ms-options-list">
+                                                    <template x-for="(option, idx) in filtered" :key="option">
+                                                        <div
+                                                            class="ms-option"
+                                                            :class="{
+                                                                'is-selected': selected.includes(option),
+                                                                'is-highlighted': idx === highlightedIndex
+                                                            }"
+                                                            @click="toggle(option)"
+                                                            @mouseenter="highlightedIndex = idx"
+                                                        >
+                                                            <span class="ms-checkbox">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
+                                                            <span class="ms-option-label" x-text="option"></span>
+                                                        </div>
+                                                    </template>
+
+                                                    <div x-show="filtered.length === 0" class="ms-no-results">
+                                                        No se encontraron organismos
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
+
+                                        @error('destinos')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                        @error('destinos.*')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
                                     </div>
+                                </div>
                                 @endif
                             </div>
 

@@ -52,13 +52,15 @@ class NovedadesSeeder extends Seeder
         ];
 
         foreach ($novedades as $data) {
-            News::create([
-                ...$data,
-                'guard_id' => $guardia->id,
-                'user_id' => $escribiente->id,
-                'confirmed' => false,
-                'confirmed_at' => null,
-            ]);
+            News::firstOrCreate(
+                ['guard_id' => $guardia->id, 'number' => $data['number'], 'type' => $data['type']],
+                [
+                    ...$data,
+                    'user_id' => $escribiente->id,
+                    'confirmed' => false,
+                    'confirmed_at' => null,
+                ]
+            );
         }
 
         $this->command->info('Novedades de prueba creadas.');

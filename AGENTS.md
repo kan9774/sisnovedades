@@ -59,6 +59,7 @@ Todo elemento interactivo con ícono en AdminLTE —tabs, botones, links, accion
   `confirmarAccion()`) por modales custom nuevos sin que se pida explícitamente.
 
 ### ⚠️ Ask first (pausar y confirmar antes de ejecutar)
+- Antes de modificar `phpunit.xml`, `tests/Pest.php` o `.env.testing`.
 - Antes de tocar cualquier migración de base de datos o cambiar un schema.
 - Antes de agregar una dependencia nueva a `composer.json` o `package.json`.
 - Antes de modificar `config/backup.php`, `config/database.php` o cualquier
@@ -78,6 +79,62 @@ Todo elemento interactivo con ícono en AdminLTE —tabs, botones, links, accion
 3. Actualizar `AGENTS.md` con cualquier decisión, bug nuevo o patrón descubierto.
 4. Re-indexar con `codebase` los archivos tocados.
 5. Resumen final: qué se tocó, qué se testeó, qué quedó pendiente/TODO.
+
+---
+
+## Entorno de testing — SQLite in-memory
+
+Desde 2026-08-18, la suite de tests corre sobre SQLite in-memory (`:memory:`), completamente aislada de la BD de desarrollo (`novedades`, MySQL).
+
+### Configuración
+
+| Archivo | Estado |
+|---------|--------|
+| `phpunit.xml` | `<php>` con `DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:` |
+| `config/database.php` | Conexión `sqlite` con `foreign_key_constraints => true` |
+| `.env.testing` | Variables testing (APP_ENV, DB, CACHE, SESSION, QUEUE, MAIL) |
+| `tests/Pest.php` | `RefreshDatabase::class` solo en `Feature` |
+| `tests/Feature/SanityCheckTest.php` | Valida explícitamente `sqlite` + `:memory:` |
+
+### Limitaciones SQLite
+
+- SQLite **no soporta `DROP COLUMN`** cuando hay índices `UNIQUE` sobre la columna.
+  Migraciones que intentan borrar columnas con `unique()` en SQLite deben usar
+  Schema Builder estándar (no SQL crudo) o `return;` para saltar.
+- Migraciones con `DB::statement()` bifurcadas por driver (`sqlite`/`pgsql`/`mysql`)
+  son compatibles. Las que tienen `return;` para SQLite dejan columnas existentes —
+  los modelos auto-generan valores para evitar errores NOT NULL (ej: `Item::boot()`).
+
+### Verificación de integridad
+
+Siempre verificar que la BD MySQL no fue tocada:
+```bash
+php artisan tinker --execute="echo \App\Models\User::count();"  # antes
+php artisan test --no-coverage
+php artisan tinker --execute="echo \App\Models\User::count();"  # después
+```
+Ambos valores deben ser idénticos.
+
+### Resultados actuales
+
+285 tests · 263 passed · 3 failed · 17 errors · 2 skipped
+
+**Errores pre-existentes (no causados por aislamiento):**
+- 8x `no such table: users` — Unit tests sin `RefreshDatabase`
+- 5x `Route [dashboard] not defined` — Rutas inexistentes
+- 2x `last_name` Livewire — Propiedad removida
+- 1x `tipo_combustible` NOT NULL — Factory incompleta
+- 1x `UNIQUE constraint` — Factory duplica nombre
+
+**Fallos pre-existentes:**
+- 2x `SecurityTest` — Assertions de contenido HTML (Passkeys, "Update password")
+- 1x `CategoriaTest` — Espera 2 hijas recursivas, obtiene 1
+
+### Pendiente
+- Migraciones con `return;` para SQLite: verificar que las columnas dejadas
+  no rompan tests. Si es necesario, crear migraciones nuevas solo-SQLite
+  que dropeen las columnas (evitar DROP COLUMN con UNIQUE).
+- Unit tests sin `RefreshDatabase`: agregar trait o migrar a Feature tests.
 
 
 ### Componente Livewire — Estructura base
@@ -253,3 +310,110 @@ Se eliminaron `VehiculoController` y `MantenimientoVehiculoController` (ambos hu
 - `seeded_permissions_locked` en tabla `rols`: si es `true`, el RolSeeder no reasigna permisos automáticamente
 - **Riesgo:** correr `RolSeeder` después de asignar permisos manualmente **borra las asignaciones manuales** (`sync()` reemplaza todo)
 - Nuevo permiso: agregar en `PermisoSeeder` → correr `php artisan db:seed --class=PermisoSeeder` → asignar en panel de Roles → agregar chequeo en Policy o `Gate::define()` en AppServiceProvider
+
+---
+
+## ⚠️ Bug conocido: Livewire 4 — `$wire.$off()` no existe (MethodNotFoundException 500)
+
+### Síntoma
+Error 500 en `POST /livewire-{id}/update`:
+```
+Unable to call component method. Public method [$off] not found on component
+```
+El proxy `$wire` de Livewire 4 interpreta `$wire.$off(...)` como llamada a un método PHP público llamado `off` en el componente → `MethodNotFoundException`.
+
+### Causa raíz
+Livewire 4 **no tiene** `$wire.$off()` como método. En Livewire 4, `$wire` es un proxy de Alpine.js que intercepta llamadas a métodos del componente. `$off` no existe como método interno (a diferencia de `$refresh`, `$set`, `$get`).
+
+### Patrón INCORRECTO (NO usar — causa error 500)
+```blade
+@script
+<script>
+    // ❌ ERROR: $wire.$off() no existe en Livewire 4
+    $wire.$off('abrir-modal');
+    $wire.on('abrir-modal', () => { ... });
+</script>
+@endscript
+```
+
+### Patrón correcto (usar siempre)
+```blade
+@script
+<script>
+    // ✅ Livewire 4 maneja deduplicación de listeners internamente
+    $wire.on('abrir-modal', () => {
+        document.getElementById('miModal').classList.add('is-open');
+    });
+
+    $wire.on('cerrar-modal', () => {
+        cerrarOpsPanel('miModal');
+    });
+</script>
+@endscript
+```
+
+### Componentes corregidos (2026-08-18)
+Todos los componentes con `$wire.$off()` fueron corregidos eliminando las llamadas obsoletas:
+| Componente | Líneas corregidas |
+|------------|-------------------|
+| `novedades-guardia.blade.php` | 567-568 |
+| `salidas-vehiculo.blade.php` | 408-411 |
+| `pase-panel.blade.php` | 169-170 |
+| `historial-grados-panel.blade.php` | 160-161 |
+| `historial-estado-panel.blade.php` | 173-174 |
+| `comision-panel.blade.php` | 227-230 |
+| `enviar-guardia-email.blade.php` | 283-284 |
+| `editar-novedad-modal.blade.php` | 186 |
+| `items-catalogo.blade.php` | 305-308 |
+| `unidades-individuales.blade.php` | 396-399 |
+
+### Componentes NO afectados
+- `backup-manager.blade.php` — Usa `$wire.showRestoreModal` con Alpine `$watch` (patrón reactivo, no JS vainilla)
+- Componentes que usan `showForm` + `:class="{'is-open': $wire.showForm}"` — patrón reactivo de Livewire/Alpine
+
+### Regla para futuros componentes
+**NO usar** `$wire.$off(...)` en Livewire 4 — no existe como método. Simplemente usar `$wire.on('evento', callback)` directamente. Livewire 4 maneja la deduplicación de listeners internamente. Si el componente usa `showForm` reactivo, no hay problema de listeners acumulados.
+
+---
+
+## Cambios recientes
+
+### 2026-08-18 — Novedades Guardia: fix validación `destinos` con array no-nullable
+
+**Bug:** `nullable|required_if:direction,Expedido|array|min:1` en propiedad `public array $destinos = []`.
+`nullable` solo exime cuando el valor es literalmente `null`. Como la propiedad tiene default `[]`,
+nunca llega `null` al validador → `array|min:1` se evalúa incondicionalmente → falla con
+*"al menos 1 elementos"* incluso para `direction='Recibido'` donde el campo es invisible.
+
+**Fix:** reemplazo por closure en `resources/views/components/novedades-guardia/novedades-guardia.php:151-158`:
+```php
+'destinos' => [
+    'array',
+    function ($attribute, $value, $fail) {
+        if ($this->direction === 'Expedido' && count($value) < 1) {
+            $fail('Debés seleccionar al menos un destino.');
+        }
+    },
+],
+```
+
+**Tests:** 3 nuevos tests en `tests/Feature/Livewire/NovedadesGuardiaDestinosTest.php` —
+`Recibido` + `destinos=[]` pasa, `Expedido` + `[]` falla, `Expedido` + `['Bat2','Bat5']` pasa.
+
+**Patrón a evitar:** `nullable|required_if:...|array|min:N` sobre propiedad `array $prop = []`.
+`nullable` no funciona sobre arrays no-nullable. Usar closure para lógica condicional en arrays.
+
+### 2026-08-18 — News: fixes bugs destino JSON + scopeUrgentes
+
+**Migración** `2026_08_18_141214_change_destino_to_json_in_news.php` corregida:
+- **Bug 1:** `esJson()` reemplazado por `decodificarComoArray()` — escalares JSON-válidos (`"105"`, `"true"`, `"null"`) ahora se envuelven en array, no se guardan como int/bool.
+- **Bug 2:** `decodificarComoArray()` incluye split por coma (`"Batallon 1, Batallon 2"` → `["Batallon 1", "Batallon 2"]`). El inventario de datos encontró 0 valores con comas en producción, pero se incluyó como defensa para datos legacy futuros.
+- `down()` simplificado: ya no referencia `esJson()` (que fue eliminado).
+
+**Modelo** `News.php`:
+- **Bug 3:** `scopeUrgentes()` corregido de `where('clasification', ['Urgente', 'Destello'])` a `whereIn('clasification', self::CLASIFICACIONES_URGENTES)`. El `where` con array no filtra por múltiples valores en Eloquent.
+- **Impacto:** `scopeUrgentes()` no tenía llamadores en el código (0 callers), pero queda corregido para uso futuro en dashboards/notificaciones.
+
+**Tests:** 12 nuevos tests (6 Pest + 6 PHPUnit migración), todos passing.
+
+### 2026-08-17 — Inventario: eliminación de abreviatura de categoría y código de ítem

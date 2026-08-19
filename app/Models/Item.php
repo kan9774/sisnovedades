@@ -12,6 +12,16 @@ class Item extends Model
 {
     use HasFactory;
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function (self $item) {
+            if (empty($item->codigo)) {
+                $item->codigo = 'TMP-' . strtoupper(substr(md5(uniqid((string) microtime(true), true)), 0, 8));
+            }
+        });
+    }
+
     protected $fillable = [
         'nombre',
         'descripcion',

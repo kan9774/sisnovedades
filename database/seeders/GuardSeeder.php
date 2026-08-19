@@ -25,17 +25,19 @@ class GuardSeeder extends Seeder
             return;
         }
 
-        // Crear guardia para hoy
-        $guardia = Guard::create([
-            'date' => Carbon::today(),
-            'captain_id' => $capitan->id,
-            'oficer_id' => $oficial->id,
-            'status' => 'open',
-            'notes' => 'Guardia de prueba',
-        ]);
+        // Crear o actualizar guardia para hoy
+        $guardia = Guard::firstOrCreate(
+            ['date' => Carbon::today()],
+            [
+                'captain_id' => $capitan->id,
+                'oficer_id' => $oficial->id,
+                'status' => 'open',
+                'notes' => 'Guardia de prueba',
+            ]
+        );
 
         // Asignar escribientes (relación muchos a muchos)
-        $guardia->escribiente()->attach($escribientes->pluck('id'));
+        $guardia->escribiente()->syncWithoutDetaching($escribientes->pluck('id'));
 
         $this->command->info('Guardia de prueba creada con ID: ' . $guardia->id);
     }

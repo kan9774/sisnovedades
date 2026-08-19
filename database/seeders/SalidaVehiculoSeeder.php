@@ -59,7 +59,10 @@ class SalidaVehiculoSeeder extends Seeder
         ];
 
         foreach ($salidas as $salida) {
-            SalidaVehiculo::create($salida);
+            SalidaVehiculo::firstOrCreate(
+                ['guardia_id' => $salida['guardia_id'], 'hora_sale' => $salida['hora_sale']],
+                $salida
+            );
         }
 
         $this->command->info('Salidas de vehículos de prueba creadas.');
