@@ -251,6 +251,86 @@ Modales con `x-ops-card` + `x-teleport="body"` + clase `is-open` (no `x-show`). 
 
 ## Cambios recientes
 
+### 2026-08-19 — Correos fallidos: persistencia de modo de envío (con_adjuntos / con_zip)
+
+**Problema:** El botón "Reintentar" de `guardia_correos_fallidos` siempre reenviaba el PDF simple,
+sin importar si el envío original fue con adjuntos embebidos o como ZIP, porque esa información
+nunca se guardó en la tabla de fallos.
+
+**Solución:** Agregar columnas `con_adjuntos` (boolean, default false) y `con_zip` (boolean,
+default false) a ambas tablas (`guardia_correos_fallidos` y `guardia_correos_enviados`),
+y propagarlas en los tres puntos de inserción + el reintento.
+
+**Migración:** `database/migrations/2026_08_18_150000_add_envio_mode_to_guardia_correos_tables.php`
+- Agrega `con_adjuntos` + `con_zip` a `guardia_correos_fallidos` (después de `motivo`)
+- Agrega `con_adjuntos` + `con_zip` a `guardia_correos_enviados` (después de `message_id`)
+- Backfill: valores `false` para registros existentes
+
+**Archivos modificados (4):**
+- `app/Jobs/EnviarNovedadGuardiaMail.php` — `registrarFallo()` ahora guarda `$this->incluirAdjuntos` / `$this->enviarZip`; `handle()` guarda los mismos campos en `guardia_correos_enviados`
+- `app/Console/Commands/ProcesarRebotesCommand.php` — Al insertar en `guardia_correos_fallidos` desde rebote IMAP, copia `con_adjuntos`/`con_zip` desde `$envioOriginal`
+- `resources/views/livewire/correos-fallidos/correos-fallidos.php` — `reintentar()` lee `$fallo->con_adjuntos` / `$fallo->con_zip`, regenera PDF/ZIP en el mismo modo y pasa los 7 parámetros a `dispatchSync()`
+
+**Patrón para reintento fiel:**
+```php
+// Leer modo de envío original
+$incluirAdjuntos = (bool) $fallo->con_adjuntos;
+$enviarZip = (bool) $fallo->con_zip;
+
+// Regenerar PDF/ZIP en el mismo modo
+$pdfContent = $incluirAdjuntos
+    ? GuardiaPdfGenerator::generarConAdjuntos($guardia)
+    : GuardiaPdfGenerator::generar($guardia)->output();
+
+$zipContent = $enviarZip
+    ? GuardiaZipGenerator::generar($guardia, $pdfContent)
+    : null;
+
+// Reenviar con los mismos parámetros
+EnviarNovedadGuardiaMail::dispatchSync(
+    $guardia, $usuario, $nombreRemitente,
+    $incluirAdjuntos, $pdfContent,
+    $enviarZip, $zipContent,
+);
+```
+
+**Investigación previa:**
+- `guardia_correos_fallidos`: sin columnas de modo de envío (solo id, guardia_id, user_id, email, motivo, resuelto_at, timestamps)
+- `guardia_correos_enviados`: sin columnas de modo de envío (solo id, guardia_id, user_id, email, message_id, rebotado_en, timestamps)
+- `BadgeCorreosFallidosCount` (`badge-correos-fallidos.php`): escucha `#[On('correos-fallidos-actualizado')]` → invalida `#[Computed] pendientes()` → refresca badge en show.blade.php
+- `BadgeCorreosFallidosCount` NO fue tocado (no existe como archivo independiente; el componente está en `badge-correos-fallidos.php`)
+- `enviar-guardia-email.php` referencia: genera PDF con `GuardiaPdfGenerator::generar($guardia)->output()` (simple) o `::generarConAdjuntos($guardia)` (adjuntos embebidos), y ZIP con `GuardiaZipGenerator::generar($guardia, $pdfContent)`
+
+### 2026-08-18 — Envío de novedades por correo: afterResponse() para evitar timeout HTTP 503
+
+**Problema:** El método `enviar()` del componente `enviar-guardia-email` hacía un `foreach` sobre `$usuarios` llamando `EnviarNovedadGuardiaMail::dispatchSync()` para cada uno, de forma síncrona dentro del mismo request HTTP. Con ~30 destinatarios y adjuntos pesados (~8 MB por correo), el front-end (IIS) cortaba con timeout 503 antes de terminar.
+
+**Solución:** Reemplazar `dispatchSync()` en un `foreach` bloqueante por `dispatch()->afterResponse()`. La respuesta HTTP se envía al navegador ANTES de procesar los N envíos de correo. El PDF y ZIP se generan UNA sola vez antes del `dispatch`, igual que antes.
+
+**¿Por qué `afterResponse()` y no `Queue::push()`?**
+El proyecto ya decidió (ver `EnviarNovedadGuardiaMail.php` docblock) que `ShouldQueue` con `queue:work` es frágil en este entorno. `afterResponse()` ejecuta el closure en el mismo request pero después de que la respuesta HTTP fue entregada — no requiere worker, no requiere tabla "jobs", y no depende de la cola. Para el volumen actual (~30 destinatarios) es suficiente.
+
+**Cambios:**
+- `enviar-guardia-email.php`: `enviar()` ahora dispara `novedades-enviadas` ANTES del closure, limpia el estado, muestra "Enviando novedades por correo...", y dispara `dispatch(fn() { foreach... })->afterResponse()`. Propiedad `$fallidosCount` eliminada.
+- `enviar-guardia-email.blade.php`: Alerta siempre `alert-info`, botón "Ver correos fallidos" siempre visible. Listener `novedades-enviadas` siempre cierra el panel (sin chequeo de `fallidos`).
+- `CorreosFallidos` (no tocado): Ya escucha `#[On('novedades-enviadas')]` para invalidar su caché `Computed`. Es la fuente de verdad del resultado final.
+
+**Patrón a usar para otros envíos masivos:**
+```php
+// 1. Disparar evento de UI antes del closure
+$this->dispatch('envio-iniciado');
+
+// 2. Limpiar estado y mostrar mensaje de "en curso"
+$this->mensajeExito = 'Enviando...';
+
+// 3. Dispatch del closure después de responder
+dispatch(function () use ($datos) {
+    foreach ($datos as $item) {
+        MiJob::dispatchSync($item);
+    }
+})->afterResponse();
+```
+
 ### 2026-08-17 — Inventario: eliminación de abreviatura de categoría y código de ítem
 Se eliminó por completo el concepto de "abreviatura de categoría" (`categorias.codigo_abreviatura`) y el campo "código" de ítems (`items.codigo`). La abreviatura autogeneraba códigos automáticos de ítems (ej: `EQC-0001`), funcionalidad que se eliminó por completo.
 
@@ -377,6 +457,82 @@ Todos los componentes con `$wire.$off()` fueron corregidos eliminando las llamad
 ---
 
 ## Cambios recientes
+
+### 2026-08-19 — Correos fallidos: polling temporal para corregir race condition post-afterResponse
+
+**Problema:** El evento `novedades-enviadas` se dispara ANTES del closure `afterResponse()`
+(linea 304 de este documento). `correos-fallidos.php` escucha ese evento con `#[On]` e
+invalida `#[Computed] fallos`, pero al momento de invalidar aún no existen fallos nuevos
+(en la BD los inserta el afterResponse que corre DESPUÉS de la respuesta HTTP).
+
+**Causa raíz:** `dispatch(...)->afterResponse()` corre después de que la respuesta HTTP
+ya fue enviada al navegador. Un `dispatch()` de evento Livewire normal dentro del closure
+NO puede llegar al front-end porque los eventos viajan en el payload de la respuesta AJAX,
+que para ese momento ya se cerró.
+
+**Solución:** Polling temporal activado por Alpine.js `$watch` + `wire:poll` condicional
+con `x-if`. Ventana de 60 segundos tras `novedades-enviadas`.
+
+** Patrón de implementación:**
+
+```php
+// En el componente que escucha (correos-fallidos.php):
+public bool $pollActivo = false;
+public ?int $pollHasta = null;
+
+#[On('novedades-enviadas')]
+public function refrecar(): void
+{
+    $this->pollActivo = true;
+    $this->pollHasta = (int) floor(now()->addSeconds(60)->timestamp);
+    unset($this->fallos); // invalidar caché para primer poll
+}
+
+public function stopPoll(): void
+{
+    $this->pollActivo = false;
+    $this->pollHasta = null;
+}
+```
+
+```blade
+{{-- En el blade del componente que escucha --}}
+<template x-if="$wire.pollActivo">
+    <div wire:poll.5s="refrecar"></div>
+</template>
+
+@script
+<script>
+    $wire.$watch('pollActivo', (activo) => {
+        if (activo) {
+            setTimeout(() => {
+                $wire.stopPoll();
+            }, 60000);
+        }
+    });
+</script>
+@endscript
+```
+
+**Flujo:**
+1. `enviar()` dispara `novedades-enviadas` → `refrecar()` activa `$pollActivo = true`
+2. Alpine `$watch` detecta cambio → `x-if` renderiza `<div wire:poll.5s="refrecar">`
+3. Cada 5s se hace `$refresh` → `#[Computed] fallos` se re-evalúa con datos frescos de BD
+4. afterResponse() inserta fallos → primer poll posterior los lee
+5. 60s después → `stopPoll()` → `$pollActivo = false` → `x-if` destruye el poll
+
+**Archivos modificados (2):**
+- `resources/views/livewire/correos-fallidos/correos-fallidos.php` — propiedades `$pollActivo`, `$pollHasta`, método `stopPoll()`
+- `resources/views/livewire/correos-fallidos/correos-fallidos.blade.php` — `x-if` + `wire:poll` condicional + `$watch` con timeout
+
+**No se tocó:** `enviar-guardia-email.php` (el dispatch de `novedades-enviadas` ya estaba en el lugar correcto),
+`BadgeCorreosFallidosCount.php` (escucha `correos-fallidos-actualizado`, no `novedades-enviadas`),
+ni ningún archivo de mail/PDF/ZIP.
+
+**Investigación previa:**
+- No hay Laravel Echo/broadcasting (Pusher/Reverb/Soketi) en el proyecto — descartado
+- Patrón `wire:poll` condicional con `@if` ya existe (`estado-novedad.blade.php:1`) pero es estático
+- Se eligió `x-if` + `$watch` porque `wire:poll` se evalúa al render inicial y no reacciona a cambios de estado
 
 ### 2026-08-18 — Novedades Guardia: fix validación `destinos` con array no-nullable
 

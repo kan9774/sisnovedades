@@ -14,14 +14,33 @@ new class extends Component
     public Guard $guardia;
     public bool $soloPendientes = true;
 
+    // Polling temporal: se activa al disparar 'novedades-enviadas' y se
+    // desactiva automáticamente 60 segundos después (ventana suficiente
+    // para que el afterResponse() termine de procesar los N envíos).
+    public bool $pollActivo = false;
+    public ?int $pollHasta = null;
+
     public function mount(Guard $guardia): void
     {
         $this->guardia = $guardia;
     }
+
     #[On('novedades-enviadas')]
     public function refrecar(): void
     {
+        // Activar polling temporal: 60 segundos desde ahora.
+        $this->pollActivo = true;
+        $this->pollHasta = (int) floor(now()->addSeconds(60)->timestamp);
+
+        // Siempre invalidar caché para que el primer poll post-envío
+        // lea los fallos recién insertados por afterResponse().
         unset($this->fallos);
+    }
+
+    public function stopPoll(): void
+    {
+        $this->pollActivo = false;
+        $this->pollHasta = null;
     }
 
     #[Computed]
@@ -48,7 +67,27 @@ new class extends Component
         $usuario = User::findOrFail($fallo->user_id);
         $nombreRemitente = Auth::user()->name . ' ' . Auth::user()->last_name;
 
-        $enviado = EnviarNovedadGuardiaMail::dispatchSync($this->guardia, $usuario, $nombreRemitente);
+        $incluirAdjuntos = (bool) $fallo->con_adjuntos;
+        $enviarZip = (bool) $fallo->con_zip;
+
+        // Regenerar PDF/ZIP en el mismo modo del envío original
+        $pdfContent = $incluirAdjuntos
+            ? \App\Support\GuardiaPdfGenerator::generarConAdjuntos($this->guardia)
+            : \App\Support\GuardiaPdfGenerator::generar($this->guardia)->output();
+
+        $zipContent = $enviarZip
+            ? \App\Support\GuardiaZipGenerator::generar($this->guardia, $pdfContent)
+            : null;
+
+        $enviado = EnviarNovedadGuardiaMail::dispatchSync(
+            $this->guardia,
+            $usuario,
+            $nombreRemitente,
+            $incluirAdjuntos,
+            $pdfContent,
+            $enviarZip,
+            $zipContent,
+        );
 
         if ($enviado) {
             DB::table('guardia_correos_fallidos')->where('id', $id)->update([

@@ -21,7 +21,6 @@ new class extends Component
     public bool $incluirAdjuntos = false;
     public bool $enviarZip = false;
     public string $mensajeExito = '';
-    public int $fallidosCount = 0;
 
     public function mount(Guard $guardia, bool $puedeOperarGuardia = false): void
     {
@@ -79,7 +78,6 @@ new class extends Component
         $this->incluirAdjuntos = false;
         $this->enviarZip = false;
         $this->mensajeExito = '';
-        $this->fallidosCount = 0;
         $this->dispatch('abrir-modal-enviar-guardia');
     }
 
@@ -128,12 +126,6 @@ new class extends Component
 
         $nombreRemitente = Auth::user()->name . ' ' . Auth::user()->last_name;
 
-        // Envío sincrónico (sin cola): para este volumen de destinatarios es
-        // más simple y confiable que depender de un worker (queue:work)
-        // corriendo en segundo plano. Subimos el límite de tiempo por si
-        // el envío de todos los correos tarda más que el máximo por defecto.
-        set_time_limit(120);
-
         // El PDF es el mismo para todos los destinatarios de esta guardia
         // (no depende del usuario) — se genera UNA sola vez acá afuera y
         // se reutiliza en los N envíos, en vez de que cada uno dispare su
@@ -149,43 +141,46 @@ new class extends Component
             ? GuardiaZipGenerator::generar($this->guardia, $pdfContent)
             : null;
 
-        $fallidos = 0;
-
-        foreach ($usuarios as $usuario) {
-            $enviado = EnviarNovedadGuardiaMail::dispatchSync(
-                $this->guardia,
-                $usuario,
-                $nombreRemitente,
-                $this->incluirAdjuntos,
-                $pdfContent,
-                $this->enviarZip,
-                $zipContent,
-            );
-
-            if ($enviado === false) {
-                $fallidos++;
-            }
-        }
-
-        activity('Guardias')
-            ->performedOn($this->guardia)
-            ->causedBy(Auth::user())
-            ->withProperties([
-                'destinatarios' => $usuarios->pluck('email'),
-                'modo' => $this->modoSeleccion,
-                'con_adjuntos' => $this->incluirAdjuntos,
-                'con_zip' => $this->enviarZip,
-            ])
-            ->log("Envió las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
+        // La respuesta HTTP se envía al navegador ANTES de procesar los N
+        // envíos de correo, evitando el timeout HTTP 503 del front-end (IIS).
+        // Los envíos ocurren en segundo plano dentro del mismo request pero
+        // después de que la respuesta ya fue entregada.
+        $this->dispatch('novedades-enviadas');
 
         $this->destinatarios = [];
         $this->grupoSeleccionado = null;
-        $this->fallidosCount = $fallidos;
-        $this->mensajeExito = $fallidos > 0
-            ? "Se enviaron {$usuarios->count()} correo(s), {$fallidos} fallaron."
-            : 'Se enviaron ' . $usuarios->count() . ' correo(s) correctamente.';
+        $this->mensajeExito = 'Enviando novedades por correo...';
 
-        $this->dispatch('novedades-enviadas', fallidos: $fallidos);
+        // Envío asíncrono (después de responder): para este volumen de
+        // destinatarios (~30) es más confiable que depender de un worker
+        // queue:work permanente. afterResponse() ejecuta el closure una
+        // vez que la respuesta HTTP ya fue enviada al cliente.
+        dispatch(function () use ($usuarios, $nombreRemitente, $pdfContent, $zipContent) {
+            set_time_limit(120);
+
+            foreach ($usuarios as $usuario) {
+                EnviarNovedadGuardiaMail::dispatchSync(
+                    $this->guardia,
+                    $usuario,
+                    $nombreRemitente,
+                    $this->incluirAdjuntos,
+                    $pdfContent,
+                    $this->enviarZip,
+                    $zipContent,
+                );
+            }
+
+            activity('Guardias')
+                ->performedOn($this->guardia)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'destinatarios' => $usuarios->pluck('email'),
+                    'modo' => $this->modoSeleccion,
+                    'con_adjuntos' => $this->incluirAdjuntos,
+                    'con_zip' => $this->enviarZip,
+                ])
+                ->log("Envió las novedades de la guardia por correo a {$usuarios->count()} destinatario(s).");
+        })->afterResponse();
     }
 
     public function render()
