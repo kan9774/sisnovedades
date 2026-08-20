@@ -117,7 +117,7 @@ Ambos valores deben ser idénticos.
 
 ### Resultados actuales
 
-285 tests · 263 passed · 3 failed · 17 errors · 2 skipped
+314 tests · 293 passed · 3 failed · 16 errors · 2 skipped
 
 **Errores pre-existentes (no causados por aislamiento):**
 - 8x `no such table: users` — Unit tests sin `RefreshDatabase`
@@ -496,6 +496,34 @@ separado de `hora_entra`).
 - `resources/views/admin/guardias/pdf/novedades.blade.php` — 2 referencias con fallback
 - `resources/views/livewire/vehiculos/index.blade.php` — 1 referencia con fallback
 - `resources/views/livewire/conductores/index.blade.php` — 1 referencia con fallback
+
+### 2026-08-19 — Correos fallidos: fix $messageId null + tests unitarios
+
+**Problema:** `registrarFallo()` en `EnviarNovedadGuardiaMail::handle()` intentaba acceder a `$messageId`
+en el `catch`, pero si `Mail::send()` lanzaba una excepción antes de la línea donde se asigna
+`$messageId = $mailable->messageId`, la variable no existía → PHP Warning que propagaba el error
+al `LoteJob` (EnviarNovedadesGuardiaLoteJob).
+
+**Solución:** Inicializar `$messageId = null` antes del bloque `try`, y pasar `$messageId` al `catch`
+como `?string`. Así el registro en `guardia_correos_fallidos` queda con `message_id = null`
+en vez de propagar el error.
+
+**Migración:** `2026_08_19_000000_add_tipo_message_id_to_guardia_correos_fallidos_table.php`
+- Columna `tipo` (string, 'inmediato' | 'lote', default 'inmediato') en `guardia_correos_fallidos`
+
+**Archivos modificados (4):**
+- `app/Jobs/EnviarNovedadGuardiaMail.php` — `$messageId = null` antes del try, `$messageId` como `?string` en catch
+- `app/Jobs/EnviarNovedadesGuardiaLoteJob.php` — `DB::table('guardia_correos_fallidos')->insert()` ahora pasa `tipo => 'lote'`
+- `resources/views/livewire/correos-fallidos/correos-fallidos.blade.php` — Polling temporal (x-if + wire:poll + $watch) para corregir race condition post-afterResponse
+
+**Tests unitarios (14 tests, 14 passing):**
+- `tests/Feature/Jobs/EnviarNovedadGuardiaMailTest.php`
+- `registrarFallo` con `message_id = null` → persiste registro válido
+- `registrarFallo` con adjuntos/zip → persiste `con_adjuntos`/`con_zip`
+- `registrarFallo` con `message_id` no null → persiste el ID
+- `clasificarMotivo` → 8 escenarios (SMTP connection, timeout, auth, mailbox full, invalid address, unknown, quota exceeded, unauthenticated)
+
+**Estado de la suite:** 314 tests · 293 passed · 3 failed · 16 errors (todos pre-existentes, 0 regresiones)
 
 ### 2026-08-19 — Correos fallidos: polling temporal para corregir race condition post-afterResponse
 
