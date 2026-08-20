@@ -63,8 +63,8 @@
                         <th>Fecha</th>
                         <th>Capitán</th>
                         <th>Oficial de Día</th>
-                        <th>Estado</th>
                         <th>Escribiente</th>
+                        <th>Estado</th>
                         <th class="text-center">Novedades</th>
                         @if ($viewMode === 'papelera')
                             <th class="text-center">Eliminado</th>
