@@ -23,6 +23,7 @@
             <thead>
                 <tr>
                     <th>Fecha del fallo</th>
+                    <th>Tipo</th>
                     <th>Destinatario</th>
                     <th>Motivo</th>
                     <th>Estado</th>
@@ -33,6 +34,13 @@
                 @forelse ($this->fallos as $fallo)
                     <tr>
                         <td class="small">{{ \Carbon\Carbon::parse($fallo->created_at)->format('d/m/Y H:i') }}</td>
+                        <td class="small">
+                            @if ($fallo->tipo === 'rebote')
+                                <span class="badge badge-warning">Rebote</span>
+                            @else
+                                <span class="badge badge-info">Inmediato</span>
+                            @endif
+                        </td>
                         <td class="small">{{ $fallo->email }}</td>
                         <td class="small text-muted" style="max-width: 380px;">
                             {{ Str::limit($fallo->motivo, 100) }}
@@ -60,7 +68,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">
+                        <td colspan="6" class="text-center text-muted py-4">
                             No hay correos fallidos {{ $soloPendientes ? 'pendientes' : 'registrados' }} para esta guardia.
                         </td>
                     </tr>

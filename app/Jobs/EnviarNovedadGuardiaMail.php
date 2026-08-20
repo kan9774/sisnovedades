@@ -27,6 +27,13 @@ class EnviarNovedadGuardiaMail
     use Dispatchable, Queueable;
 
     /**
+     * Message-ID del correo enviado, expuesto para que el caller
+     * (EnviarNovedadesGuardiaLoteJob) pueda registrarlo en la tabla
+     * de fallos si el envío falla.
+     */
+    public ?string $messageId = null;
+
+    /**
      * @param string|null $pdfContent Binario del PDF ya generado (una
      *   sola vez) desde afuera, para no regenerarlo en cada uno de los
      *   N destinatarios de un mismo envío.
@@ -46,6 +53,8 @@ class EnviarNovedadGuardiaMail
 
     public function handle(): bool
     {
+        $messageId = null;
+
         try {
             $mailable = new GuardiaNovedadesMail(
                 $this->guardia,
@@ -79,6 +88,7 @@ class EnviarNovedadGuardiaMail
             $messageId = $mailable->messageId;
 
             if ($messageId) {
+                $this->messageId = $messageId;
                 DB::table('guardia_correos_enviados')->insert([
                     'guardia_id'     => $this->guardia->id,
                     'user_id'        => $this->usuario->id,
@@ -93,13 +103,13 @@ class EnviarNovedadGuardiaMail
 
             return true;
         } catch (Throwable $exception) {
-            $this->registrarFallo($exception);
+            $this->registrarFallo($exception, $messageId);
 
             return false;
         }
     }
 
-    protected function registrarFallo(Throwable $exception): void
+    protected function registrarFallo(Throwable $exception, ?string $messageId = null): void
     {
         $motivo = $this->clasificarMotivo($exception->getMessage());
 
@@ -108,6 +118,8 @@ class EnviarNovedadGuardiaMail
             'user_id'        => $this->usuario->id,
             'email'          => $this->usuario->email,
             'motivo'         => $motivo,
+            'tipo'           => 'inmediato',
+            'message_id'     => $messageId,
             'con_adjuntos'   => $this->incluirAdjuntos,
             'con_zip'        => $this->enviarZip,
             'created_at'     => now(),

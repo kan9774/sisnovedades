@@ -124,6 +124,8 @@ class ProcesarRebotesCommand extends Command
                 'user_id'        => $envioOriginal->user_id,
                 'email'          => $datos['destinatario'] ?? $envioOriginal->email,
                 'motivo'         => $this->clasificarMotivo($datos['status'], $datos['diagnostico']),
+                'tipo'           => 'rebote',
+                'message_id'     => $datos['message_id_original'],
                 'con_adjuntos'   => (bool) $envioOriginal->con_adjuntos,
                 'con_zip'        => (bool) $envioOriginal->con_zip,
                 'created_at'     => now(),
