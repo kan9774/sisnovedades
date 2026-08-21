@@ -18,9 +18,9 @@
                     <div class="custom-file">
                         <input type="file" wire:model="archivos" multiple
                             class="custom-file-input @error('archivos') is-invalid @enderror @error('archivos.*') is-invalid @enderror"
-                            id="archivo-{{ $novedad->id }}" accept=".pdf,.jpg,.jpeg,.png">
+                            id="archivo-{{ $novedad->id }}" accept=".pdf,.jpg,.jpeg,.png,.zip">
                         <label class="custom-file-label" for="archivo-{{ $novedad->id }}">
-                            Agregar archivo(s) (PDF, JPG, PNG — máx. 10MB c/u)
+                            Agregar archivo(s) (PDF, JPG, PNG, ZIP — máx. 50MB c/u)
                         </label>
                     </div>
 

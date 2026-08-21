@@ -340,8 +340,15 @@ return [
                     'text'   => 'Unidades Ámbito',
                     'url'    => 'admin/unidades',
                     'icon'   => 'fas fa-building',
-                    'active' => ['admin/unidades*'],
+                    'active' => ['admin/unidades'],
                     'can'    => 'view_guardias',
+                ],
+                                [
+                    'text'   => 'Unidades por Módulo',
+                    'url'    => 'admin/unidades/modulos',
+                    'icon'   => 'fa-solid fa-table-cells',
+                    'active' => ['admin/unidades/modulos*'],
+                    'can'    => 'viewAny-unidades-modulo',
                 ],
                                 [
                     'text'   => 'Unidades Ejército',
@@ -423,7 +430,7 @@ return [
                     'url'    => 'admin/apoyos',
                     'icon'   => 'fa-solid fa-hands-helping',
                     'active' => ['admin/apoyos'],
-                    'can'    => 'viewAny-apoyo',
+                    'can'    => 'viewAny-tipos-apoyo',
                 ],
                 [
                     'text'   => 'Tipos de Apoyo',

@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Models\CategoriaDocumento;
 use App\Models\Documento;
+use App\Rules\ExtensionPermitida;
+use App\Services\CompresorArchivos;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -16,13 +18,14 @@ class Documentos extends Component
 {
     use WithFileUploads;
 
-    // Extensiones permitidas
-    private array $allowedMimes = [
+    // Extensiones permitidas (validadas por extensión, ver App\Rules\ExtensionPermitida)
+    private array $allowedExtensions = [
         'pdf', 'jpg', 'jpeg', 'png', 'gif',
         'doc', 'docx', 'rtf',
         'xls', 'xlsx',
         'ppt', 'pptx',
         'txt', 'csv',
+        'zip',
     ];
 
     // Estado principal
@@ -136,7 +139,8 @@ class Documentos extends Component
 
     protected function storeDocumento()
     {
-        $archivo = $this->formArchivo;
+        // Compresión best-effort (JPG vía GD, PDF vía Ghostscript si existe)
+        $archivo = CompresorArchivos::comprimir($this->formArchivo);
         $extension = strtolower($archivo->getClientOriginalExtension());
         $nombreOriginal = $archivo->getClientOriginalName();
         $categoria = CategoriaDocumento::findOrFail($this->formCategoriaId);
@@ -223,7 +227,8 @@ class Documentos extends Component
      */
     protected function uploadNewFile(Documento $documento): void
     {
-        $archivo = $this->formArchivo;
+        // Compresión best-effort (JPG vía GD, PDF vía Ghostscript si existe)
+        $archivo = CompresorArchivos::comprimir($this->formArchivo);
         $extension = strtolower($archivo->getClientOriginalExtension());
         $nombreOriginal = $archivo->getClientOriginalName();
         $categoria = CategoriaDocumento::findOrFail($this->formCategoriaId);
@@ -522,8 +527,8 @@ class Documentos extends Component
             'formTitulo' => 'required|string|max:255',
             'formDescripcion' => 'nullable|string',
             'formArchivo' => $this->formTipo === 'create'
-                ? 'required|file|max:10240|mimes:' . implode(',', $this->allowedMimes)
-                : 'nullable|file|max:10240|mimes:' . implode(',', $this->allowedMimes),
+                ? ['required', 'file', 'max:51200', new ExtensionPermitida($this->allowedExtensions)]
+                : ['nullable', 'file', 'max:51200', new ExtensionPermitida($this->allowedExtensions)],
         ];
 
         return $rules;
@@ -535,8 +540,7 @@ class Documentos extends Component
             'formCategoriaId.required' => 'Debes seleccionar una categoría.',
             'formCategoriaId.exists' => 'La categoría seleccionada no existe.',
             'formTitulo.required' => 'El título es obligatorio.',
-            'formArchivo.max' => 'El archivo no puede superar los 10 MB.',
-            'formArchivo.mimes' => 'El formato del archivo no está permitido. Formatos válidos: ' . implode(', ', $this->allowedMimes),
+            'formArchivo.max' => 'El archivo no puede superar los 50 MB.',
         ];
     }
 }

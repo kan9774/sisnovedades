@@ -275,6 +275,11 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
             return view('livewire.unidades.layout');
         })->name('unidades.index');
 
+        // Listas curadas de unidades por módulo - debe ir ANTES del grupo unidades/{unidad}
+        Route::get('/unidades/modulos', function () {
+            return view('livewire.admin.unidades-modulos.layout');
+        })->name('unidades.modulos.index');
+
         // Detalle de unidad (sin migrar, sigue usando UnidadController@show)
         Route::resource('unidades', UnidadController::class)
             ->only(['show'])

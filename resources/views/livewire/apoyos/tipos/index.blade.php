@@ -8,6 +8,73 @@
             @endcan
         </x-slot>
 
+        {{-- FORMULARIO INLINE (crear / editar) --}}
+        @if ($showForm)
+            <div class="card mb-3" wire:loading.class="opacity-50" wire:target="guardar">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">
+                        @if ($formTipo === 'create')
+                            <i class="fas fa-plus-circle text-primary"></i> Nuevo Tipo de Apoyo
+                        @else
+                            <i class="fas fa-edit text-warning"></i> Editar Tipo de Apoyo
+                        @endif
+                    </h6>
+
+                    @if ($errorMsg)
+                        <div class="alert alert-danger">{{ $errorMsg }}</div>
+                    @endif
+
+                    <form wire:submit="guardar" id="form-tipo-apoyo">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre <span class="text-danger">*</span></label>
+                                    <input type="text" wire:model.live="formNombre"
+                                        class="form-control @error('formNombre') is-invalid @enderror"
+                                        placeholder="Ej: Vehículos">
+                                    @error('formNombre')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Color <span class="text-danger">*</span></label>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input type="color" wire:model.live="formColor"
+                                            class="form-control form-control-color @error('formColor') is-invalid @enderror"
+                                            style="width: 60px; height: 45px; padding: 4px; cursor: pointer;">
+                                        <div>
+                                            <code class="text-muted">{{ $formColor }}</code>
+                                        </div>
+                                    </div>
+                                    @error('formColor')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ACCIONES --}}
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <button type="button" class="btn btn-outline-secondary"
+                                    wire:click="cerrarForm"
+                                    wire:loading.attr="disabled" wire:target="guardar" @disabled($loading)>
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-ops-primary"
+                                    wire:loading.attr="disabled" wire:target="guardar" @disabled($loading)>
+                                    <i class="fas fa-save"></i>
+                                    {{ $formTipo === 'create' ? 'Crear' : 'Guardar' }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
+
         {{-- BARRA DE BÚSQUEDA --}}
         <div class="row mb-3">
             <div class="col-md-8">
@@ -93,91 +160,6 @@
             </div>
         @endif
     </x-ops-card>
-
-    {{-- MODAL: FORMULARIO CREAR / EDITAR (ops-panel overlay) --}}
-    <template x-teleport="body">
-    <div class="ops-panel-overlay" id="modalTiposApoyo"
-         x-data
-         x-init="$watch('$wire.showForm', value => {
-             if (value) document.body.classList.add('ops-panel-open');
-             else document.body.classList.remove('ops-panel-open');
-         })"
-         :class="{ 'is-open': $wire.showForm }"
-         wire:click.self="cerrarForm">
-        <div class="ops-panel">
-            <div class="ops-panel__form">
-                <div class="ops-panel__header">
-                    <div class="ops-panel__title-wrap">
-                        <span class="ops-panel__eyebrow">BCOM1 · Administración</span>
-                        <h5 class="ops-panel__title">
-                            {{ $formTipo === 'create' ? 'Nuevo Tipo de Apoyo' : 'Editar Tipo de Apoyo' }}
-                        </h5>
-                    </div>
-                    <button type="button" class="ops-panel__close" wire:click="cerrarForm"
-                        title="Cerrar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <div class="ops-panel__body" wire:loading.class="opacity-50" wire:target="guardar">
-                    <div class="ops-panel__content">
-                        @if ($justSaved)
-                            <div class="text-center py-5">
-                                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                                <h5 class="text-success">{{ $successMsg }}</h5>
-                            </div>
-                        @else
-                            @if ($errorMsg)
-                                <div class="alert alert-danger">{{ $errorMsg }}</div>
-                            @endif
-                            <form wire:submit="guardar" id="form-tipo-apoyo">
-                                <div class="form-group">
-                                    <label>Nombre <span class="text-danger">*</span></label>
-                                    <input type="text" wire:model.live="formNombre"
-                                        class="form-control @error('formNombre') is-invalid @enderror"
-                                        placeholder="Ej: Vehículos">
-                                    @error('formNombre')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Color <span class="text-danger">*</span></label>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <input type="color" wire:model.live="formColor"
-                                            class="form-control form-control-color @error('formColor') is-invalid @enderror"
-                                            style="width: 60px; height: 45px; padding: 4px; cursor: pointer;">
-                                        <div>
-                                            <code class="text-muted">{{ $formColor }}</code>
-                                        </div>
-                                    </div>
-                                    @error('formColor')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </form>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="ops-panel__footer">
-                    @if (!$justSaved)
-                        <button type="button" class="btn btn-outline-secondary"
-                            wire:click="cerrarForm"
-                            wire:loading.attr="disabled" wire:target="guardar" @disabled($loading)>
-                            Cancelar
-                        </button>
-                        <button type="submit" form="form-tipo-apoyo" class="btn btn-ops-primary"
-                            wire:loading.attr="disabled" wire:target="guardar" @disabled($loading)>
-                            <i class="fas fa-save"></i>
-                            {{ $formTipo === 'create' ? 'Crear' : 'Guardar' }}
-                        </button>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-    </template>
 
     {{-- MODAL: CONFIRMAR ELIMINACIÓN --}}
     @if ($confirmDeleteId)

@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             VueloSeeder::class,
             CategoriaDocumentoSeeder::class,
             UnidadSeeder::class,
+            UnidadModuloSeeder::class,
             DepartamentosSeeder::class,
             TipoApoyoSeeder::class,
         ]);
@@ -53,6 +54,6 @@ class DatabaseSeeder extends Seeder
         if ($rolAdmin && $adminUser) {
             $adminUser->roles()->syncWithoutDetaching($rolAdmin->id);
         }
-       
+
     }
 }

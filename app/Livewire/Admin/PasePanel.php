@@ -40,7 +40,7 @@ class PasePanel extends Component
     #[Computed]
     public function unidades()
     {
-        return Unidad::where('activo', true)->orderBy('nombre')->get();
+        return Unidad::curadasPara('pase')->get();
     }
 
     /**

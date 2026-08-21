@@ -358,9 +358,8 @@ class UserForm extends Component
             ? Rol::orderBy('name')->get()
             : Rol::where('name', '!=', 'admin')->orderBy('name')->get();
 
-        $unidades = Unidad::where('activo', true)
+        $unidades = Unidad::curadasPara('usuarios_edicion')
             ->when($this->unidad_id, fn($q) => $q->orWhere('id', $this->unidad_id))
-            ->orderBy('nombre')
             ->get();
 
         $oficinas = Oficina::where('activo', true)

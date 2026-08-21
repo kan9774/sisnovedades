@@ -9,6 +9,7 @@ use App\Models\TipoVehiculo;
 use App\Models\Unidad;
 use App\Models\Vehiculo;
 use App\Models\VehiculoActa;
+use App\Services\CompresorArchivos;
 use App\Traits\UsesBootstrapPagination;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -141,7 +142,7 @@ class Vehiculos extends Component
     public function catalogos()
     {
         return [
-            'unidades' => Unidad::where('activo', true)->orderBy('nombre')->get(),
+            'unidades' => Unidad::curadasPara('vehiculos_form')->get(),
             'tiposVehiculo' => TipoVehiculo::where('activo', true)->orderBy('nombre')->get(),
             'tiposCombustible' => TipoCombustible::where('activo', true)->orderBy('nombre')->get(),
             'tiposLubricante' => TipoLubricante::where('activo', true)->orderBy('nombre')->get(),
@@ -239,13 +240,13 @@ class Vehiculos extends Component
         }
 
         $file = $this->singleActaUpload;
-        $maxSize = 10485760; // 10MB individual
+        $maxSize = 52428800; // 50MB individual
 
         // Nota: esta validación es una segunda barrera server-side. La primera
         // (y la que evita transferir archivos gigantes) va en el JS, antes de
         // llamar a $wire.upload — ver el input en la vista.
         if ($file->getSize() > $maxSize) {
-            $this->addError('singleActaUpload', 'El archivo no puede superar 10MB individualmente.');
+            $this->addError('singleActaUpload', 'El archivo no puede superar 50MB individualmente.');
             $this->singleActaUpload = null;
             return;
         }
@@ -258,10 +259,10 @@ class Vehiculos extends Component
             $tamanoActual += (int) ($acta['tamano_bytes'] ?? 0);
         }
 
-        if ($tamanoActual + $file->getSize() > 10485760) {
+        if ($tamanoActual + $file->getSize() > 52428800) {
             $actualMB = round($tamanoActual / 1048576, 2);
             $nuevoMB = round($file->getSize() / 1048576, 2);
-            $this->addError('singleActaUpload', "El total no puede superar 10MB. Actual: {$actualMB}MB, este archivo: {$nuevoMB}MB.");
+            $this->addError('singleActaUpload', "El total no puede superar 50MB. Actual: {$actualMB}MB, este archivo: {$nuevoMB}MB.");
             $this->singleActaUpload = null;
             return;
         }
@@ -275,6 +276,10 @@ class Vehiculos extends Component
 
         // Guardar dentro de la carpeta de la matrícula (ej: actas/AA_123/)
         $carpeta = 'actas/' . $this->sanitizarMatriculaParaCarpeta($this->formMatricula);
+
+        // Compresión best-effort (JPG vía GD, PDF vía Ghostscript si existe)
+        $file = CompresorArchivos::comprimir($file);
+
         $path = $file->store($carpeta, 'public');
 
         // Guardamos path + nombre real + tamaño ya calculados acá, para no
@@ -356,7 +361,7 @@ class Vehiculos extends Component
             return;
         }
 
-        // Validación manual: máximo 10MB en total
+        // Validación manual: máximo 50MB en total
         $tamanoExistentesBytes = 0;
         foreach ($this->formActasExistentes as $acta) {
             $tamanoExistentesBytes += (int) ($acta['tamano_bytes'] ?? 0);
@@ -365,11 +370,11 @@ class Vehiculos extends Component
         foreach ($this->queuedActaPaths as $acta) {
             $tamanoNuevosBytes += (int) ($acta['tamano_bytes'] ?? 0);
         }
-        $limiteBytes = 10485760; // 10MB
+        $limiteBytes = 52428800; // 50MB
         if ($tamanoExistentesBytes + $tamanoNuevosBytes > $limiteBytes) {
             $actualMB = round($tamanoExistentesBytes / 1048576, 2);
             $nuevosMB = round($tamanoNuevosBytes / 1048576, 2);
-            $this->addError('queuedActaPaths', "El total de archivos no puede superar 10MB. Actual: {$actualMB}MB, intentás agregar {$nuevosMB}MB.");
+            $this->addError('queuedActaPaths', "El total de archivos no puede superar 50MB. Actual: {$actualMB}MB, intentás agregar {$nuevosMB}MB.");
             return;
         }
 
@@ -897,7 +902,7 @@ class Vehiculos extends Component
         return view('livewire.vehiculos.index', [
             'vehiculos' => $this->vehiculos(),
             'catalogos' => $this->catalogos(),
-            'unidadesTabs' => Unidad::where('activo', true)->where('nombre', '!=', 'C.A.C.O.')->orderBy('nombre')->get(),
+            'unidadesTabs' => Unidad::curadasPara('vehiculos_tabs')->get(),
         ]);
     }
 }

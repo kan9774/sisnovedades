@@ -45,7 +45,7 @@ class ComisionPanel extends Component
     #[Computed]
     public function unidades()
     {
-        return Unidad::where('activo', true)->orderBy('nombre')->get();
+        return Unidad::curadasPara('comision')->get();
     }
 
     #[Computed]

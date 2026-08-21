@@ -324,7 +324,7 @@
                                                 <select wire:model="formUnidadId"
                                                     class="form-control form-control-sm @error('formUnidadId') is-invalid @enderror">
                                                     <option value="">-- Seleccionar --</option>
-                                                    @foreach ($catalogos['unidades']->where('nombre', '!=', 'C.A.C.O.') as $unidad)
+                                                    @foreach ($catalogos['unidades'] as $unidad)
                                                         <option value="{{ $unidad->id }}">{{ $unidad->nombre}}
                                                         </option>
                                                     @endforeach
@@ -569,7 +569,7 @@
                                      El input NO usa wire:model: se sube manualmente con
                                      $wire.upload(), que da callbacks de éxito/error propios.
                                      Antes de llamar a $wire.upload validamos el tamaño en el
-                                     navegador, así un archivo de 30MB se rechaza al instante
+                                     navegador, así un archivo de 60MB se rechaza al instante
                                      sin transferir un solo byte. --}}
                                     <div class="row" x-data="{ subiendo: false, errorLocal: null }">
                                         <div class="col-md-12">
@@ -589,9 +589,9 @@
                                                 errorLocal = null;
                                                 const file = $event.target.files[0];
                                                 if (!file) return;
-                                                const maxBytes = 10 * 1024 * 1024;
-                                                if (file.size > maxBytes) {
-                                                    errorLocal = 'El archivo pesa ' + (file.size / 1048576).toFixed(2) + 'MB. El máximo por archivo es 10MB.';
+                                                 const maxBytes = 50 * 1024 * 1024;
+                                                 if (file.size > maxBytes) {
+                                                     errorLocal = 'El archivo pesa ' + (file.size / 1048576).toFixed(2) + 'MB. El máximo por archivo es 50MB.';
                                                     $refs.fileInput.value = '';
                                                     return;
                                                 }
@@ -601,7 +601,7 @@
                                                     () => { subiendo = false; errorLocal = 'Error al subir el archivo. Probá de nuevo.'; $refs.fileInput.value = ''; }
                                                 );
                                             ">
-                                            <small class="text-muted d-block">Máximo 5 archivos, 10MB en total entre
+                                            <small class="text-muted d-block">Máximo 5 archivos, 50MB en total entre
                                                 todos. Formatos: PDF, imágenes, DOC.</small>
                                             <small class="text-danger d-block mt-1" x-show="errorLocal"
                                                 x-text="errorLocal"></small>

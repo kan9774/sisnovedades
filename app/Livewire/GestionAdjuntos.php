@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Attach;
 use App\Models\Guard;
 use App\Models\News;
+use App\Rules\ExtensionPermitida;
+use App\Services\CompresorArchivos;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
@@ -55,7 +57,7 @@ class GestionAdjuntos extends Component
 
         $this->validate([
             'archivos' => ['array', 'max:5'],
-            'archivos.*' => ['file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'archivos.*' => ['file', new ExtensionPermitida(['pdf', 'jpg', 'jpeg', 'png', 'zip']), 'max:51200'],
         ]);
 
         $totalActual = $this->novedad->adjuntos()->count();
@@ -72,6 +74,9 @@ class GestionAdjuntos extends Component
         $directorio = "{$fecha}/{$carpeta}";
 
         foreach ($this->archivos as $archivo) {
+            // Compresión best-effort (JPG vía GD, PDF vía Ghostscript si existe)
+            $archivo = CompresorArchivos::comprimir($archivo);
+
             $nombre = time() . '_' . uniqid() . '_' . basename($archivo->getClientOriginalName());
             $ruta   = $archivo->storeAs($directorio, $nombre, 'guardias');
 

@@ -278,97 +278,105 @@
                                 <div class="alert alert-danger">{{ $errorMsg }}</div>
                             @endif
                             <form wire:submit="guardar" id="form-apoyo">
-                                {{-- Tipo de apoyo --}}
-                                <div class="form-group">
-                                    <label>Tipo de apoyo <span class="text-danger">*</span></label>
-                                    <select wire:model.live="formTipoId"
-                                        class="form-control @error('formTipoId') is-invalid @enderror">
-                                        <option value="">Seleccionar tipo...</option>
-                                        @foreach ($this->tiposApoyo as $tipo)
-                                            <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('formTipoId')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                {{-- FILA 1: Tipo de apoyo | Solicitante --}}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Tipo de apoyo <span class="text-danger">*</span></label>
+                                            <select wire:model.live="formTipoId"
+                                                class="form-control @error('formTipoId') is-invalid @enderror">
+                                                <option value="">Seleccionar tipo...</option>
+                                                @foreach ($this->tiposApoyo as $tipo)
+                                                    <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('formTipoId')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Solicitante <span class="text-danger">*</span></label>
+                                            <select wire:model.live="formOrganismoId"
+                                                class="form-control @error('formOrganismoId') is-invalid @enderror">
+                                                <option value="">Seleccionar organismo...</option>
+                                                @foreach ($this->organismos as $organismo)
+                                                    <option value="{{ $organismo->id }}">{{ $organismo->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('formOrganismoId')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {{-- Solicitante --}}
-                                <div class="form-group">
-                                    <label>Solicitante <span class="text-danger">*</span></label>
-                                    <select wire:model.live="formOrganismoId"
-                                        class="form-control @error('formOrganismoId') is-invalid @enderror">
-                                        <option value="">Seleccionar organismo...</option>
-                                        @foreach ($this->organismos as $organismo)
-                                            <option value="{{ $organismo->id }}">{{ $organismo->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('formOrganismoId')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                {{-- Documento (combobox) --}}
-                                <div class="form-group">
-                                    <label>Documento</label>
-                                    @if ($formDocumentoNovedadId)
-                                        @php $novedad = \App\Models\News::find($formDocumentoNovedadId); @endphp
-                                        <div class="input-group input-group-sm">
-                                            <input type="text" class="form-control bg-light"
-                                                value="Nº {{ $novedad->number ?? '' }} · {{ $novedad->type ?? '' }}" disabled>
-                                            <div class="input-group-append">
-                                                <button type="button" class="btn btn-outline-danger"
-                                                    wire:click="limpiarDocumento" title="Quitar documento">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
+                                {{-- FILA 2: Documento buscador | Documento texto libre --}}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Documento</label>
+                                            @if ($formDocumentoNovedadId)
+                                                @php $novedad = \App\Models\News::find($formDocumentoNovedadId); @endphp
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control bg-light"
+                                                        value="Nº {{ $novedad->number ?? '' }} · {{ $novedad->type ?? '' }}" disabled>
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-outline-danger"
+                                                            wire:click="limpiarDocumento" title="Quitar documento">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <input type="text" wire:model.live.debounce.300ms="formDocumentoBusqueda"
+                                                    class="form-control @error('formDocumentoBusqueda') is-invalid @enderror"
+                                                    placeholder="Buscar por Nº de documento o tipo...">
+                                                @if (strlen($formDocumentoBusqueda) >= 2)
+                                                    @php
+                                                        $resultados = \App\Models\News::where('number', 'like', '%' . $formDocumentoBusqueda . '%')
+                                                            ->orWhere('type', 'like', '%' . $formDocumentoBusqueda . '%')
+                                                            ->limit(5)
+                                                            ->get();
+                                                    @endphp
+                                                    @if ($resultados->count())
+                                                        <div class="list-group mt-1" style="position: relative; z-index: 1050;">
+                                                            @foreach ($resultados as $res)
+                                                                <button type="button"
+                                                                    class="list-group-item list-group-item-action py-2"
+                                                                    wire:click="seleccionarDocumento({{ $res->id }})">
+                                                                    <small>
+                                                                        <strong>Nº {{ $res->number }}</strong> · {{ $res->type }}
+                                                                        @if ($res->organismo)
+                                                                            <span class="text-muted">— {{ $res->organismo->name }}</span>
+                                                                        @endif
+                                                                    </small>
+                                                                </button>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                @endif
+                                                <small class="form-text text-muted">
+                                                    Si no encontrás el documento, completá el campo de texto libre.
+                                                </small>
+                                                @error('formDocumentoBusqueda')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @if (!$formDocumentoNovedadId)
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Documento (texto libre)</label>
+                                                <input type="text" wire:model="formDocumentoTexto"
+                                                    class="form-control"
+                                                    placeholder="Ej: Oficio 123/2026, Radio 45...">
                                             </div>
                                         </div>
-                                    @else
-                                        <input type="text" wire:model.live.debounce.300ms="formDocumentoBusqueda"
-                                            class="form-control @error('formDocumentoBusqueda') is-invalid @enderror"
-                                            placeholder="Buscar por Nº de documento o tipo...">
-                                        @if (strlen($formDocumentoBusqueda) >= 2)
-                                            @php
-                                                $resultados = \App\Models\News::where('number', 'like', '%' . $formDocumentoBusqueda . '%')
-                                                    ->orWhere('type', 'like', '%' . $formDocumentoBusqueda . '%')
-                                                    ->limit(5)
-                                                    ->get();
-                                            @endphp
-                                            @if ($resultados->count())
-                                                <div class="list-group mt-1" style="position: relative; z-index: 1050;">
-                                                    @foreach ($resultados as $res)
-                                                        <button type="button"
-                                                            class="list-group-item list-group-item-action py-2"
-                                                            wire:click="seleccionarDocumento({{ $res->id }})">
-                                                            <small>
-                                                                <strong>Nº {{ $res->number }}</strong> · {{ $res->type }}
-                                                                @if ($res->organismo)
-                                                                    <span class="text-muted">— {{ $res->organismo->name }}</span>
-                                                                @endif
-                                                            </small>
-                                                        </button>
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                        @endif
-                                        <small class="form-text text-muted">
-                                            Si no encontrás el documento, escribí el texto libre abajo.
-                                        </small>
-                                        @error('formDocumentoBusqueda')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
                                     @endif
                                 </div>
-
-                                {{-- Documento texto libre --}}
-                                @if (!$formDocumentoNovedadId)
-                                    <div class="form-group">
-                                        <label>Documento (texto libre)</label>
-                                        <input type="text" wire:model="formDocumentoTexto"
-                                            class="form-control"
-                                            placeholder="Ej: Oficio 123/2026, Radio 45...">
-                                    </div>
-                                @endif
 
                                 {{-- Desde / Hasta --}}
                                 <div class="row">
@@ -394,261 +402,277 @@
                                     </div>
                                 </div>
 
-                                {{-- Por Documento (combobox) --}}
-                                <div class="form-group">
-                                    <label>Por Documento</label>
-                                    @if ($formPorDocumentoNovedadId)
-                                        @php $novedadPor = \App\Models\News::find($formPorDocumentoNovedadId); @endphp
-                                        <div class="input-group input-group-sm">
-                                            <input type="text" class="form-control bg-light"
-                                                value="Nº {{ $novedadPor->number ?? '' }} · {{ $novedadPor->type ?? '' }}" disabled>
-                                            <div class="input-group-append">
-                                                <button type="button" class="btn btn-outline-danger"
-                                                    wire:click="limpiarPorDocumento" title="Quitar documento">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
+                                {{-- FILA 4: Por Documento buscador | Por Documento texto libre --}}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Por Documento</label>
+                                            @if ($formPorDocumentoNovedadId)
+                                                @php $novedadPor = \App\Models\News::find($formPorDocumentoNovedadId); @endphp
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control bg-light"
+                                                        value="Nº {{ $novedadPor->number ?? '' }} · {{ $novedadPor->type ?? '' }}" disabled>
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-outline-danger"
+                                                            wire:click="limpiarPorDocumento" title="Quitar documento">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <input type="text" wire:model.live.debounce.300ms="formPorDocumentoBusqueda"
+                                                    class="form-control"
+                                                    placeholder="Buscar por Nº de documento o tipo...">
+                                                @if (strlen($formPorDocumentoBusqueda) >= 2)
+                                                    @php
+                                                        $resultadosPor = \App\Models\News::where('number', 'like', '%' . $formPorDocumentoBusqueda . '%')
+                                                            ->orWhere('type', 'like', '%' . $formPorDocumentoBusqueda . '%')
+                                                            ->limit(5)
+                                                            ->get();
+                                                    @endphp
+                                                    @if ($resultadosPor->count())
+                                                        <div class="list-group mt-1" style="position: relative; z-index: 1050;">
+                                                            @foreach ($resultadosPor as $res)
+                                                                <button type="button"
+                                                                    class="list-group-item list-group-item-action py-2"
+                                                                    wire:click="seleccionarPorDocumento({{ $res->id }})">
+                                                                    <small>
+                                                                        <strong>Nº {{ $res->number }}</strong> · {{ $res->type }}
+                                                                        @if ($res->organismo)
+                                                                            <span class="text-muted">— {{ $res->organismo->name }}</span>
+                                                                        @endif
+                                                                    </small>
+                                                                </button>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @if (!$formPorDocumentoNovedadId)
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Por Documento (texto libre)</label>
+                                                <input type="text" wire:model="formPorDocumentoTexto"
+                                                    class="form-control"
+                                                    placeholder="Ej: Radio 12...">
                                             </div>
                                         </div>
-                                    @else
-                                        <input type="text" wire:model.live.debounce.300ms="formPorDocumentoBusqueda"
-                                            class="form-control"
-                                            placeholder="Buscar por Nº de documento o tipo...">
-                                        @if (strlen($formPorDocumentoBusqueda) >= 2)
-                                            @php
-                                                $resultadosPor = \App\Models\News::where('number', 'like', '%' . $formPorDocumentoBusqueda . '%')
-                                                    ->orWhere('type', 'like', '%' . $formPorDocumentoBusqueda . '%')
-                                                    ->limit(5)
-                                                    ->get();
-                                            @endphp
-                                            @if ($resultadosPor->count())
-                                                <div class="list-group mt-1" style="position: relative; z-index: 1050;">
-                                                    @foreach ($resultadosPor as $res)
-                                                        <button type="button"
-                                                            class="list-group-item list-group-item-action py-2"
-                                                            wire:click="seleccionarPorDocumento({{ $res->id }})">
-                                                            <small>
-                                                                <strong>Nº {{ $res->number }}</strong> · {{ $res->type }}
-                                                                @if ($res->organismo)
-                                                                    <span class="text-muted">— {{ $res->organismo->name }}</span>
-                                                                @endif
-                                                            </small>
-                                                        </button>
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                        @endif
                                     @endif
                                 </div>
 
-                                {{-- Por Documento texto libre --}}
-                                @if (!$formPorDocumentoNovedadId)
-                                    <div class="form-group">
-                                        <label>Por Documento (texto libre)</label>
-                                        <input type="text" wire:model="formPorDocumentoTexto"
-                                            class="form-control"
-                                            placeholder="Ej: Radio 12...">
-                                    </div>
-                                @endif
+                                {{-- FILA 5: A quien se dispuso (multi-select con buscador, ancho completo) --}}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                        <label>A quien se dispuso <span class="text-danger">*</span></label>
 
-                                {{-- A quien se dispuso (multi-select con buscador) --}}
-                                <div class="form-group">
-                                    <label>A quien se dispuso <span class="text-danger">*</span></label>
-
-                                    <div
-                                        x-data="{
-                                            options: @js($this->unidadesNombres),
-                                            allUnits: @js($this->unidadesDisponibles->pluck('nombre', 'id')->flip()->toArray()),
-                                            selected: [],
-                                            search: '',
-                                            open: false,
-                                            highlightedIndex: -1,
-
-                                            init() {
-                                                const mapIdToName = @js($this->unidadesMap);
-                                                this.selected = @js($this->formUnidades).map(id => mapIdToName[id]).filter(Boolean);
-
-                                                this.$watch('$wire.formUnidades', (ids) => {
-                                                    const currentNames = ids.map(id => mapIdToName[id]).filter(Boolean);
-                                                    const sortedCurrent = [...currentNames].sort().join(',');
-                                                    const sortedSelected = [...this.selected].sort().join(',');
-                                                    if (sortedCurrent !== sortedSelected) {
-                                                        this.selected = currentNames;
-                                                    }
-                                                });
-                                            },
-
-                                            get filtered() {
-                                                if (!this.search) return this.options;
-                                                const q = this.search.toLowerCase();
-                                                return this.options.filter(o => o.toLowerCase().includes(q));
-                                            },
-
-                                            toggle(option) {
-                                                const idx = this.selected.indexOf(option);
-                                                if (idx > -1) {
-                                                    this.selected.splice(idx, 1);
-                                                } else {
-                                                    this.selected.push(option);
-                                                }
-                                                this.syncToWire();
-                                            },
-
-                                            remove(option) {
-                                                this.selected = this.selected.filter(s => s !== option);
-                                                this.syncToWire();
-                                            },
-
-                                            clearAll() {
-                                                this.selected = [];
-                                                this.syncToWire();
-                                            },
-
-                                            syncToWire() {
-                                                const nameToId = this.allUnits;
-                                                const ids = this.selected.map(name => nameToId[name]).filter(Boolean);
-                                                this.$wire.set('formUnidades', ids, false);
-                                            },
-
-                                            toggleDropdown() {
-                                                if (!this.open) {
-                                                    this.search = '';
-                                                    this.highlightedIndex = -1;
-                                                }
-                                                this.open = !this.open;
-                                            },
-
-                                            close() {
-                                                this.open = false;
-                                                this.search = '';
-                                            },
-
-                                            onKeyDown(e) {
-                                                if (!this.open) {
-                                                    if (e.key !== 'Enter' && e.key !== ' ') return;
-                                                    this.toggleDropdown();
-                                                    return;
-                                                }
-                                                if (e.key === 'Escape') {
-                                                    this.close();
-                                                    e.preventDefault();
-                                                } else if (e.key === 'ArrowDown') {
-                                                    e.preventDefault();
-                                                    this.highlightedIndex = Math.min(
-                                                        this.highlightedIndex + 1,
-                                                        this.filtered.length - 1
-                                                    );
-                                                } else if (e.key === 'ArrowUp') {
-                                                    e.preventDefault();
-                                                    this.highlightedIndex = Math.max(
-                                                        this.highlightedIndex - 1,
-                                                        0
-                                                    );
-                                                } else if (e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    if (this.highlightedIndex >= 0 && this.highlightedIndex < this.filtered.length) {
-                                                        this.toggle(this.filtered[this.highlightedIndex]);
-                                                    }
-                                                }
-                                            }
-                                        }"
-                                        @click.outside="close()"
-                                        class="ms-wrapper"
-                                    >
-                                        {{-- Trigger --}}
                                         <div
-                                            @click="toggleDropdown()"
-                                            @keydown="onKeyDown"
-                                            tabindex="0"
-                                            class="ms-trigger @error('formUnidades') is-invalid @enderror"
-                                            :class="{ 'is-open': open }"
-                                        >
-                                            <template x-if="selected.length > 0">
-                                                <template x-for="item in selected" :key="item">
-                                                    <span class="ms-chip">
-                                                        <span x-text="item"></span>
-                                                        <button type="button" @click.stop="remove(item)" title="Quitar">
-                                                            <i class="fas fa-xmark"></i>
-                                                        </button>
-                                                    </span>
-                                                </template>
-                                            </template>
+                                            x-data="{
+                                                options: @js($this->unidadesNombres),
+                                                allUnits: @js($this->unidadesDisponibles->pluck('nombre', 'id')->flip()->toArray()),
+                                                selected: [],
+                                                search: '',
+                                                open: false,
+                                                highlightedIndex: -1,
 
-                                            <template x-if="selected.length === 0">
-                                                <span class="ms-placeholder">Seleccionar unidades...</span>
-                                            </template>
+                                                init() {
+                                                    const mapIdToName = @js($this->unidadesMap);
+                                                    this.selected = @js($this->formUnidades).map(id => mapIdToName[id]).filter(Boolean);
 
-                                            <span x-show="selected.length > 0" class="ms-clear-all" @click.stop="clearAll()" title="Limpiar todo">
-                                                <i class="fas fa-trash-can"></i> Limpiar
-                                            </span>
+                                                    this.$watch('$wire.formUnidades', (ids) => {
+                                                        const currentNames = ids.map(id => mapIdToName[id]).filter(Boolean);
+                                                        const sortedCurrent = [...currentNames].sort().join(',');
+                                                        const sortedSelected = [...this.selected].sort().join(',');
+                                                        if (sortedCurrent !== sortedSelected) {
+                                                            this.selected = currentNames;
+                                                        }
+                                                    });
+                                                },
 
-                                            <i class="fas fa-chevron-down ms-toggle-icon"></i>
-                                        </div>
+                                                get filtered() {
+                                                    if (!this.search) return this.options;
+                                                    const q = this.search.toLowerCase();
+                                                    return this.options.filter(o => o.toLowerCase().includes(q));
+                                                },
 
-                                        {{-- Dropdown --}}
-                                        <div x-show="open" x-cloak
-                                            class="ms-dropdown"
+                                                toggle(option) {
+                                                    const idx = this.selected.indexOf(option);
+                                                    if (idx > -1) {
+                                                        this.selected.splice(idx, 1);
+                                                    } else {
+                                                        this.selected.push(option);
+                                                    }
+                                                    this.syncToWire();
+                                                },
+
+                                                remove(option) {
+                                                    this.selected = this.selected.filter(s => s !== option);
+                                                    this.syncToWire();
+                                                },
+
+                                                clearAll() {
+                                                    this.selected = [];
+                                                    this.syncToWire();
+                                                },
+
+                                                syncToWire() {
+                                                    const nameToId = this.allUnits;
+                                                    const ids = this.selected.map(name => nameToId[name]).filter(Boolean);
+                                                    this.$wire.set('formUnidades', ids, false);
+                                                },
+
+                                                toggleDropdown() {
+                                                    if (!this.open) {
+                                                        this.search = '';
+                                                        this.highlightedIndex = -1;
+                                                    }
+                                                    this.open = !this.open;
+                                                },
+
+                                                close() {
+                                                    this.open = false;
+                                                    this.search = '';
+                                                },
+
+                                                onKeyDown(e) {
+                                                    if (!this.open) {
+                                                        if (e.key !== 'Enter' && e.key !== ' ') return;
+                                                        this.toggleDropdown();
+                                                        return;
+                                                    }
+                                                    if (e.key === 'Escape') {
+                                                        this.close();
+                                                        e.preventDefault();
+                                                    } else if (e.key === 'ArrowDown') {
+                                                        e.preventDefault();
+                                                        this.highlightedIndex = Math.min(
+                                                            this.highlightedIndex + 1,
+                                                            this.filtered.length - 1
+                                                        );
+                                                    } else if (e.key === 'ArrowUp') {
+                                                        e.preventDefault();
+                                                        this.highlightedIndex = Math.max(
+                                                            this.highlightedIndex - 1,
+                                                            0
+                                                        );
+                                                    } else if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        if (this.highlightedIndex >= 0 && this.highlightedIndex < this.filtered.length) {
+                                                            this.toggle(this.filtered[this.highlightedIndex]);
+                                                        }
+                                                    }
+                                                }
+                                            }"
                                             @click.outside="close()"
+                                            class="ms-wrapper"
                                         >
-                                            <div class="ms-search-wrap">
-                                                <i class="fas fa-magnifying-glass"></i>
-                                                <input
-                                                    type="text"
-                                                    x-model="search"
-                                                    placeholder="Buscar..."
-                                                    class="ms-search"
-                                                    @keydown.stop
-                                                />
+                                            {{-- Trigger --}}
+                                            <div
+                                                @click="toggleDropdown()"
+                                                @keydown="onKeyDown"
+                                                tabindex="0"
+                                                class="ms-trigger @error('formUnidades') is-invalid @enderror"
+                                                :class="{ 'is-open': open }"
+                                            >
+                                                <template x-if="selected.length > 0">
+                                                    <template x-for="item in selected" :key="item">
+                                                        <span class="ms-chip">
+                                                            <span x-text="item"></span>
+                                                            <button type="button" @click.stop="remove(item)" title="Quitar">
+                                                                <i class="fas fa-xmark"></i>
+                                                            </button>
+                                                        </span>
+                                                    </template>
+                                                </template>
+
+                                                <template x-if="selected.length === 0">
+                                                    <span class="ms-placeholder">Seleccionar unidades...</span>
+                                                </template>
+
+                                                <span x-show="selected.length > 0" class="ms-clear-all" @click.stop="clearAll()" title="Limpiar todo">
+                                                    <i class="fas fa-trash-can"></i> Limpiar
+                                                </span>
+
+                                                <i class="fas fa-chevron-down ms-toggle-icon"></i>
                                             </div>
 
-                                            <div class="ms-options-list">
-                                                <template x-for="(option, idx) in filtered" :key="option">
-                                                    <div
-                                                        class="ms-option"
-                                                        :class="{
-                                                            'is-selected': selected.includes(option),
-                                                            'is-highlighted': idx === highlightedIndex
-                                                        }"
-                                                        @click="toggle(option)"
-                                                        @mouseenter="highlightedIndex = idx"
-                                                    >
-                                                        <span class="ms-checkbox">
-                                                            <i class="fas fa-check"></i>
-                                                        </span>
-                                                        <span class="ms-option-label" x-text="option"></span>
-                                                    </div>
-                                                </template>
+                                            {{-- Dropdown --}}
+                                            <div x-show="open" x-cloak
+                                                class="ms-dropdown"
+                                                @click.outside="close()"
+                                            >
+                                                <div class="ms-search-wrap">
+                                                    <i class="fas fa-magnifying-glass"></i>
+                                                    <input
+                                                        type="text"
+                                                        x-model="search"
+                                                        placeholder="Buscar..."
+                                                        class="ms-search"
+                                                        @keydown.stop
+                                                    />
+                                                </div>
 
-                                                <div x-show="filtered.length === 0" class="ms-no-results">
-                                                    No se encontraron unidades
+                                                <div class="ms-options-list">
+                                                    <template x-for="(option, idx) in filtered" :key="option">
+                                                        <div
+                                                            class="ms-option"
+                                                            :class="{
+                                                                'is-selected': selected.includes(option),
+                                                                'is-highlighted': idx === highlightedIndex
+                                                            }"
+                                                            @click="toggle(option)"
+                                                            @mouseenter="highlightedIndex = idx"
+                                                        >
+                                                            <span class="ms-checkbox">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
+                                                            <span class="ms-option-label" x-text="option"></span>
+                                                        </div>
+                                                    </template>
+
+                                                    <div x-show="filtered.length === 0" class="ms-no-results">
+                                                        No se encontraron unidades
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        @error('formUnidades')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
+                                        </div>
                                     </div>
-
-                                    @error('formUnidades')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
-                                    @enderror
                                 </div>
 
-                                {{-- Estado --}}
-                                <div class="form-group">
-                                    <label>Estado <span class="text-danger">*</span></label>
-                                    <select wire:model.live="formEstado"
-                                        class="form-control @error('formEstado') is-invalid @enderror">
-                                        @foreach (\App\Models\Apoyo::ESTADOS as $estado)
-                                            <option value="{{ $estado }}">{{ ucfirst(str_replace('_', ' ', $estado)) }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('formEstado')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                {{-- FILA 6: Estado --}}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Estado <span class="text-danger">*</span></label>
+                                            <select wire:model.live="formEstado"
+                                                class="form-control @error('formEstado') is-invalid @enderror">
+                                                @foreach (\App\Models\Apoyo::ESTADOS as $estado)
+                                                    <option value="{{ $estado }}">{{ ucfirst(str_replace('_', ' ', $estado)) }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('formEstado')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {{-- Descripción --}}
-                                <div class="form-group">
-                                    <label>Descripción</label>
-                                    <textarea wire:model="formDescripcion" class="form-control" rows="3"
-                                        placeholder="Detalles del apoyo..."></textarea>
+                                {{-- FILA 7: Descripción --}}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label>Descripción</label>
+                                            <textarea wire:model="formDescripcion" class="form-control" rows="3"
+                                                placeholder="Detalles del apoyo..."></textarea>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         @endif

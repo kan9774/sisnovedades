@@ -7,6 +7,8 @@ use App\Models\Organismo;
 use App\Models\Attach;
 use App\Models\User;
 use App\Notifications\NovedadUrgenteNotification;
+use App\Rules\ExtensionPermitida;
+use App\Services\CompresorArchivos;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -164,7 +166,7 @@ new class extends Component
 
         if (!$this->editandoId) {
             $rules['archivos'] = ['nullable', 'array', 'max:5'];
-            $rules['archivos.*'] = ['file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
+            $rules['archivos.*'] = ['file', new ExtensionPermitida(['pdf', 'jpg', 'jpeg', 'png', 'zip']), 'max:51200'];
         }
 
         $data = $this->validate($rules, [], [
@@ -259,6 +261,9 @@ new class extends Component
                 $directorio = "{$fecha}/{$carpeta}";
 
                 foreach ($this->archivos as $archivo) {
+                    // Compresión best-effort (JPG vía GD, PDF vía Ghostscript si existe)
+                    $archivo = CompresorArchivos::comprimir($archivo);
+
                     $nombre = time() . '_' . uniqid() . '_' . $archivo->getClientOriginalName();
                     $ruta   = $archivo->storeAs($directorio, $nombre, 'guardias');
 

@@ -252,6 +252,505 @@ Modales con `x-ops-card` + `x-teleport="body"` + clase `is-open` (no `x-show`). 
 
 ## Cambios recientes
 
+### 2026-08-21 (ADDENDUM compresión) — Fix ValueError "Path must not be empty" en subidas comprimidas: wrapper `ArchivoComprimido` + barrera `is_file()`
+
+**Addendum de la entrada "Compresión automática de subidas" (más abajo). No se editó esa entrada.**
+
+**Síntoma en producción IIS:** cualquier subida JPG que comprimiera >5% moría con HTTP 500:
+`ValueError: fopen(): Argument #1 ($filename) must not be empty` / "Path must not be empty", con
+frames `FilesystemAdapter.php:fopen` → `UploadedFile.php:putFileAs`. Reproducido 11/11 PASS en CLI.
+
+**Causa raíz:** `envolverSiConviene()` devolvía un `Illuminate\Http\UploadedFile` **plano** sobre el
+temporal de `tempnam()`. Ese objeto hereda `getRealPath()` de `SplFileInfo`, que **re-resuelve la ruta
+vía `realpath()`** en cada llamada. En este servidor IIS `realpath()` devuelve `false` para
+temporales recién escritos aunque el archivo exista (candidatos: barrido AV sobre `.tmp`, ACLs de la
+identidad del app pool, 8.3 names deshabilitados — no identificado definitivamente). La cadena era:
+
+```
+storeAs → putFileAs → fopen($file->getRealPath(), 'r')  // getRealPath()=='' (false coercido)
+        → fopen('') → ValueError → 500
+```
+
+Por eso la verificación previa en CLI pasó y QA no lo vio: en CLI sano `realpath()` resuelve bien;
+la anomalía es del entorno IIS (simulable en CLI solo borrando el temporal entre wrap y store).
+
+**Fix (2 archivos, SOLO el servicio — cero cambios en los 5 componentes Livewire):**
+
+1. `app/Services/ArchivoComprimido.php` (NUEVO) — `final class ArchivoComprimido extends UploadedFile`
+   que congela la ruta literal pasada al constructor y hace override de `getRealPath()` para
+   devolverla SIEMPRE, sin pasar por `realpath()`. Con la ruta nunca vacía, `fopen(false)` es
+   estructuralmente imposible. No necesita overrides extra: `getPathname()` (literal),
+   `getSize()`/`getMimeType()`/`getClientOriginalName()`/`hashName()` funcionan sin cambios
+   (verificado: W1-W9 PASS).
+2. `app/Services/CompresorArchivos.php::envolverSiConviene()` — reemplazado `new UploadedFile(...)`
+   por `new ArchivoComprimido($rutaFinal, $nombreOriginal)` + **barrera fail-open**: `is_file($rutaFinal)`
+   justo antes de envolver; si falla, `Log::warning('CompresorArchivos: temporal inaccesible, se
+   devuelve original sin comprimir.', [...])` y devuelve el ORIGINAL intacto (nunca el envuelto).
+   Firma pública de `comprimir(): UploadedFile` SIN cambios; `ArchivoComprimido` ES un `UploadedFile`
+   (subclase), así los type-hints/IDE/instanceof existentes siguen válidos.
+
+**⚠️ Patrón para el futuro:** cuando se envuelva un archivo reescrito a un temporal del sistema,
+NUNCA usar `UploadedFile` plano si el objeto va a atravesar `store()/storeAs()/putFileAs()` — el
+`getRealPath()` heredado re-resuelve vía `realpath()` y en este IIS puede devolver false. Usar
+`App\Services\ArchivoComprimido` o un override equivalente de `getRealPath()`.
+
+**Nota API:** `League\Flysystem` corre con `strict_types`; el caso residual "temporal borrado entre
+wrap y store" ya no lanza ValueError pero sí puede terminar en warning de `fopen` (ErrorException bajo
+el handler de Laravel). Ventana de microsegundos e imposible tras la barrera `is_file()` salvo borrado
+en pleno vuelo — mismo riesgo pre-existente, sin regresión.
+
+**Verificación (script CLI con app booteada, 35 checks — 13 de regresión de la sesión anterior +
+repro post-fix + contrato del wrapper + barrera): 35 PASS / 0 FAIL.**
+- Repro escenario A post-fix: tras borrar el temporal + `clearstatcache` (anomalía simulada),
+  `getRealPath()` devuelve LA MISMA ruta literal NO vacía (antes: `''`) → trigger del ValueError eliminado.
+- Control B (condición real IIS: archivo existe, solo realpath falla): cadena completa
+  `comprimir()->storeAs()` persiste en disco `guardias` con contenido íntegro.
+- Regresión R1-R13: JPG 5.8MB→1.2MB lado ≤2000px; nombre/extensión/mime conservados;
+  getSize()=filesize real; JPG ya optimizado sin crecimiento; PNG/ZIP/PDF pasan intactos;
+  `puedeComprimirPdf()===false`; JPG corrupto fail-open; storeAs persiste bytes comprimidos íntegros.
+- Barrera F1-F3: `is_file()` falla → original intacto (identidad, nunca `ArchivoComprimido`);
+  `is_file()` ok → envuelve. Confirmación manual W2/W5/W6: `getPathname()`=ruta literal,
+  `getMimeType()`=`image/jpeg` deducido del contenido, `getClientOriginalName()` conservado.
+- `php -l` OK en ambos PHP. Suite Pest sigue NO ejecutable en este servidor (falta pdo_sqlite,
+  limitación pre-existente documentada).
+
+### 2026-08-21 — Compresión automática de subidas: JPG vía Intervention Image v4, PDF vía Ghostscript (detección runtime)
+
+**Objetivo:** comprimir PDF/JPG/JPEG en el momento de la subida, antes de que el archivo llegue a su
+storage final, reusando los puntos de guardado existentes (sin nuevo flujo de archivos).
+
+**Investigación previa (verificada con codebase + grep):**
+- Componentes con subida (`WithFileUploads`): `Documentos`, `GestionAdjuntos`, `novedades-guardia`
+  (componente anónimo), `Vehiculos` (actas), `Landing/Contacto`, `Inventario/ItemsCatalogo`
+  (este último solo xlsx/xls → fuera de alcance).
+- `composer.json` NO tenía ninguna librería de imágenes → se instaló **intervention/image ^4.2**
+  (quedó v4.2.0). Extensión GD disponible en el servidor (fileinfo también).
+- Cero uso previo de Ghostscript/shell_exec/proc_open para PDFs (el único proc_open es
+  BackupManager para backups). Symfony Process ya estaba en composer.json → se usa para invocar gs.
+
+**⚠️ API Intervention Image v4 (NO es la v3 de la documentación vieja):**
+| v3 | v4.2 |
+|----|------|
+| `new ImageManager('gd')` | `new ImageManager(\Intervention\Image\Drivers\Gd\Driver::class)` (FQCN, no string corto) |
+| `$manager->read($path)` | `$manager->decodePath($path)` |
+| `$image->toJpeg(75)` | `(string) $image->encode(new JpegEncoder(quality: 75, progressive: true))` |
+| — | `orient()` y `scaleDown(w, h)` siguen existiendo |
+
+**Servicio nuevo:** `app/Services/CompresorArchivos.php` — API estática única:
+```php
+$archivo = CompresorArchivos::comprimir($archivo); // UploadedFile -> UploadedFile
+```
+- **Fail-open garantizado:** NUNCA lanza ni rechaza; si la compresión falla devuelve el original
+  intacto y loguea warning. La subida jamás se rompe por compresión.
+- **JPG/JPEG:** corrige orientación EXIF (`orient()`), reduce a máx 2000px por lado
+  (`scaleDown`), re-encodea JPEG progresivo calidad 78. Solo reemplaza si el resultado pesa
+  ≤95% del original (nunca crece un archivo ya optimizado).
+- **Guardia anti-OOM:** lee dimensiones con `getimagesize()` (barato) y NO decodifica imágenes
+  >30MP — GD aloja ~4.3 bytes/píxel y un fatal de memoria NO es capturable.
+- **PDF:** Ghostscript `-sDEVICE=pdfwrite -dCompatibilityLevel=1.5 -dPDFSETTINGS=/ebook`
+  (150 dpi) vía Symfony Process, timeout 120s. Valida `%PDF` mágico + ahorro mínimo antes de usar.
+- **Detección gs runtime:** Windows → glob `C:\Program Files\gs\gs*\bin\gswin*c.exe` +
+  probe `gswin64c/gswin32c` en PATH; Unix → `gs`. Cacheada por proceso.
+  Diagnóstico: `CompresorArchivos::puedeComprimirPdf()`.
+- **Mecánica:** el contenido comprimido se escribe a un temp del sistema (fuera de livewire-tmp,
+  no interfiere con la GC de Livewire) y se envuelve en un `UploadedFile` nuevo conservando el
+  nombre original del cliente → los call-sites siguen usando `storeAs()/getSize()/
+  getClientOriginalName()` sin ningún cambio.
+
+**Ghostscript NO está instalado en este servidor IIS (verificado 2026-08-21: ni PATH ni Program
+Files). TODO documentado en el docblock del servicio:** la compresión de PDF queda implementada
+pero inactiva; al instalar Ghostscript (instalador oficial agrega gswin64c.exe al PATH, o
+`apt install ghostscript`) NO hace falta cambiar código — la detección lo habilita sola.
+
+**Componentes integrados (5) — patrón: comprimir justo antes del store final:**
+| Componente | Punto de integración | Disco |
+|------------|---------------------|-------|
+| `Documentos.php` | `storeDocumento()` y `uploadNewFile()` (create y edit) | public |
+| `GestionAdjuntos.php` | dentro del foreach de `subir()` | guardias |
+| `novedades-guardia.php` | dentro del foreach al crear novedad | guardias |
+| `Vehiculos.php` | `updatedSingleActaUpload()` antes de `store()` (actas aceptan pdf/jpg/jpeg/png/bmp/doc/docx) | public |
+| `Landing/Contacto.php` | `enviarSugerencia()` antes de `store()` (reduce también el peso del mail) | public |
+
+Efectos colaterales correctos: `tamanio`/`file_size` quedan grabados con el tamaño COMPRIMIDO
+(usen el `$archivo` retornado, no el original); el thumbnail de Documentos sigue generándose
+(mime image/jpeg preservado); las validaciones de tamaño corren ANTES de comprimir (son techos,
+comprimir solo achica).
+
+**Fuera de alcance (deliberado):** PNG/GIF/BMP (recompresión rara vez ayuda y complica
+transparencia), ItemsCatalogo (Excel), thumbnails de Documentos.
+
+**Verificación (suite Pest NO ejecutable en este servidor — falta pdo_sqlite, limitación
+pre-existente):**
+- `php -l` OK en los 6 PHP (servicio + 5 componentes).
+- Script CLI con app booteada: **13/13 PASS** — JPG grande 188KB→18KB con lado máx 2000px;
+  nombre/extensión/mime conservados; JPG chico sin crecimiento; PNG/ZIP pasan intactos;
+  PDF pasa intacto con `puedeComprimirPdf() === false`; JPG corrupto fail-open;
+  `putFileAs` del Filesystem de Laravel sobre el archivo comprimido OK.
+- `php artisan view:cache` compila todos los blades sin errores (+ `view:clear`).
+- Pint: el repo YA fallaba `pint --test` en código commiteado pre-existente (baseline verificado
+  sobre NovedadService/Apoyos); no se corrió fix para no ensuciar el diff.
+
+**Patrón para futuros componentes con subida:** después de validar y antes del
+`storeAs()/store()`: `$archivo = CompresorArchivos::comprimir($archivo);`. Nada más.
+
+### 2026-08-21 — 'zip' permitido en subidas: reemplazo de `mimes:` por validación por extensión (regla custom `ExtensionPermitida`)
+
+**Objetivo:** permitir archivos .zip en los componentes que validan subida con `mimes:`. La regla
+`mimes:` de Laravel valida por mimetype detectado (`guessExtension()`), y con ZIP los navegadores
+envían mimetypes dispares (`application/zip` vs `application/x-zip-compressed` vs
+`application/octet-stream`), lo que hace que archivos zip válidos fallen la validación de forma
+intermitente según el navegador. Solución: validar por **extensión del nombre original**
+(`getClientOriginalExtension()`), inmune a la discordancia de mimetypes.
+
+**Regla nueva (1 archivo creado):**
+- `app/Rules/ExtensionPermitida.php` — implementa `Illuminate\Contracts\Validation\ValidationRule`
+  (regla invokable). Constructor recibe el array de extensiones permitidas (normaliza a lowercase).
+  Rechaza con mensaje "El formato del archivo no está permitido. Formatos válidos: ...". Guard
+  `instanceof UploadedFile` verificado contra `Livewire\Features\SupportFileUploads\TemporaryUploadedFile`
+  (SÍ es subclase de `Illuminate\Http\UploadedFile` → funciona con uploads de Livewire).
+
+**Componentes migrados (4) — patrón `['file', new ExtensionPermitida([...]), 'max:...']`:**
+| Componente | Antes | Ahora |
+|------------|-------|-------|
+| `app/Livewire/Documentos.php` | `mimes:` + `$allowedMimes` (14 ext) | `$allowedExtensions` (+`zip`, 15 ext); propiedad renombrada (era private, 0 impacto externo); entry `formArchivo.mimes` removido de `mensajesValidacion()` (el mensaje lo lleva la regla) |
+| `app/Livewire/GestionAdjuntos.php` | `mimes:pdf,jpg,jpeg,png` | `ExtensionPermitida(['pdf','jpg','jpeg','png','zip'])` |
+| `resources/views/components/novedades-guardia/novedades-guardia.php` | ídem | ídem |
+| `app/Livewire/Landing/Contacto.php` | `mimes:txt,pdf,doc,docx,jpg,jpeg,png,gif` (5MB público) | `ExtensionPermitida([..., 'zip'])`; se conserva `max:5120` (5MB deliberado por superficie de abuso); entry `sugerencia_adjunto.mimes` removido |
+
+**Blades actualizados (4):** `accept=` ahora incluye `.zip` en gestion-adjuntos.blade.php,
+novedades-guardia.blade.php, documentos/index.blade.php y contacto.blade.php (este último también
+sumó `.jpeg` que faltaba). Textos de UI: label de gestión de adjuntos "(PDF, JPG, PNG, ZIP — máx.
+50MB c/u)" y ayuda de Documentos "Formatos: PDF, DOC, DOCX, TXT, ZIP y más".
+
+**NO se tocó (deliberado):**
+- `Inventario/ItemsCatalogo.php` — `archivoExcel` `mimes:xlsx,xls`: es un importador de Excel; un
+  zip rompería el import con error críptico. El zip no aplica semánticamente.
+- `Http/Requests/StoreDocumentoRequest.php` — sigue huérfano (0 referencias, ver entrada 2026-08-21
+  de límites de subida); no es componente Livewire.
+
+**Trade-off de seguridad documentado:** validar por extensión confía en el nombre del cliente
+(a diferencia del sniffing de contenido de `mimes:`). Mitigaciones vigentes: la regla `file` se
+conserva (valida upload HTTP real), los tamaños siguen limitados, y los nombres se regeneran al
+almacenar (Documentos usa `Str::slug`+timestamp; GestionAdjuntos/novedades usan `time()+uniqid()`).
+
+**Verificación (suite Pest NO ejecutable en este servidor — falta pdo_sqlite, limitación pre-existente):**
+- `php -l` OK en los 5 PHP (regla nueva + 4 componentes).
+- `php artisan view:cache` compila todos los blades sin errores (+ `view:clear`).
+- Script CLI con `Validator` real: 9/9 checks PASS — `.zip` y `.ZIP` pasan; `.zipx`, `.exe`, `.php`
+  rechazados con mensaje listando formatos; jpg/pdf siguen pasando; contenido PK sniffado distinto
+  no afecta (la extensión manda); `TemporaryUploadedFile instanceof Illuminate\Http\UploadedFile` = true.
+
+**Patrón para futuros componentes con subida:** usar `new ExtensionPermitida(['ext1', 'ext2', ...])`
+en lugar de `mimes:` cuando la lista incluya zip (o directamente siempre, por consistencia). La regla
+está en `App\Rules\ExtensionPermitida` y acepta cualquier array de extensiones.
+
+### 2026-08-21 — Límite de subida de archivos: 10MB → 50MB consistente en toda la cadena (PHP → IIS → Livewire → componentes)
+
+**Síntoma:** al subir un archivo mayor a 10MB no se dispara NINGÚN mensaje de validación — la subida
+falla en silencio.
+
+**Diagnóstico (cadena de rechazo silencioso, 4 capas ANTES de las reglas de los componentes):**
+1. **PHP SAPI web** (`upload_max_filesize`/`post_max_size`): si el POST a `/livewire/upload-file`
+   excede el límite, PHP lo rechaza (request vacío → `PostTooLargeException` → HTTP 413).
+2. **IIS `maxAllowedContentLength`**: default ~28.6MB cuando no está definido en web.config →
+   HTTP 404.13 antes de llegar a PHP. `public/web.config` NO lo definía.
+3. **Reglas del endpoint temporal de Livewire** (`config/livewire.php` →
+   `temporary_file_upload.rules`): estaba en `null` → default Livewire `max:12288` (12MB).
+4. **Evento `upload-error`:** ante cualquier rechazo de las capas 1-3, Livewire JS dispara el
+   evento `upload-error`, que **nadie escuchaba en todo el proyecto** (verificado con grep:
+   0 handlers). Resultado: silencio total.
+
+Las reglas `max:10240` de los componentes corren DESPUÉS (cuando el archivo ya llegó a
+`livewire-tmp/`) → para archivos rechazados en las capas 1-3 eran inalcanzables y por eso
+nunca producían mensaje.
+
+**Estado php.ini verificado en este servidor (producción IIS):**
+- IIS FastCGI usa `C:\php8.4\php-cgi.exe` (applicationHost.config) → carga `C:\php8.4\php.ini`,
+  el MISMO del CLI. Valores YA correctos: `upload_max_filesize=50M`, `post_max_size=55M`,
+  `memory_limit=256M`. No hizo falta tocarlo.
+- **Laragon local (otra máquina):** ajustar en `C:\laragon\bin\php\php-<versión>\php.ini`:
+  `upload_max_filesize=50M` + `post_max_size=55M` (post ≥ upload; margen 5MB para el resto del
+  request) y reiniciar Apache desde el menú de Laragon. Verificar con `php -i | grep max_filesize`
+  o un `phpinfo()` vía web (el ini del CLI puede diferir del del Apache módulo).
+
+**Cambios aplicados (8 archivos):**
+- `config/livewire.php` — `temporary_file_upload.rules`: `null` → `'file|max:51200'` (KB = 50MB).
+  Este cambio ya estaba en el working directory sin commitear de una sesión previa; se conserva.
+- `app/Livewire/Documentos.php` — `formArchivo`: `max:10240` → `max:51200` (create y edit) +
+  mensaje custom "El archivo no puede superar los 50 MB."
+- `app/Livewire/GestionAdjuntos.php` — `archivos.*`: `max:10240` → `max:51200`.
+- `resources/views/components/novedades-guardia/novedades-guardia.php` — `archivos.*`:
+  `max:10240` → `max:51200`.
+- `app/Livewire/Vehiculos.php` — actas de vehículo (validación manual en bytes): individual
+  `10485760` → `52428800`, total entre archivos `10485760` → `52428800` (en `updatedSingleActaUpload`
+  y en `guardar()`) + mensajes "10MB" → "50MB".
+- `public/web.config` — agregado `<security><requestFiltering><requestLimits
+  maxAllowedContentLength="57671680" />` (55MB) para cubrir `post_max_size=55M`. Sin esto IIS
+  rechaza >28.6MB con 404.13 aunque PHP esté bien. Si se sube el límite de nuevo, actualizar AMBOS.
+- Textos de UI actualizados a 50MB: `novedades-guardia.blade.php` ("max: 50MB c/u"),
+  `gestion-adjuntos.blade.php`, `documentos/index.blade.php`, `vehiculos/index.blade.php`
+  (incluye la constante JS client-side `maxBytes = 50 * 1024 * 1024` que pre-valida antes de
+  `$wire.upload()`).
+
+**NO se tocó (límites menores deliberados, funcionan correctamente porque ahora la cadena los deja llegar):**
+- `Landing/Contacto.php` — `sugerencia_adjunto` `max:5120` (5MB): formulario PÚBLICO sin auth,
+  se mantiene chico por superficie de abuso.
+- `Inventario/ItemsCatalogo.php` — `archivoExcel` `max:5120` (5MB): import xlsx/xls.
+
+**Hallazgos colaterales (sin tocar, documentados):**
+- `app/Http/Requests/StoreDocumentoRequest.php` es código huérfano (0 referencias vía grep, mismo
+  patrón que los controllers eliminados) y además tiene un bug latente: `max:10485760` son KILOBYTES
+  (= 10GB reales), el comentario dice "10MB máx". Pendiente: eliminar o corregir si algún día se usa.
+- Ventana residual silenciosa: archivos >55MB siguen siendo rechazados por PHP/IIS sin mensaje
+  (el evento `upload-error` sigue sin handlers). Mejora futura: agregar `#[On('upload-error')]`
+  o `$wire.on('upload-error', ...)` en los componentes con subida para mostrar toast.
+
+**Verificación (suite Pest NO ejecutable en este servidor — falta pdo_sqlite, solo pdo_mysql;
+limitación pre-existente documentada):**
+- `php -l` OK en los 4 archivos PHP editados.
+- `simplexml_load_file(web.config)` → XML OK.
+- `php artisan tinker` → `config('livewire.temporary_file_upload.rules')` = `file|max:51200`;
+  `ini_get` = 50M / 55M.
+- `php artisan view:cache` compila todos los blades sin errores (+ `view:clear`).
+- Grep final: 0 referencias restantes a `max:10240`/`10485760`/`10MB` en contexto de subida
+  (solo quedan las intencionales: Contacto/ItemsCatalogo 5MB y un comentario de doc de un Job).
+
+### 2026-08-21 — Pantalla de administración "Unidades por Módulo" (matriz Unidades × Módulos con toggle instantáneo)
+
+**Objetivo:** cerrar el pendiente de la entrada anterior — editar las listas curadas de la pivot
+`unidad_modulo` desde una pantalla, sin correr `UnidadModuloSeeder` a mano.
+
+**Componente Livewire:** `app/Livewire/Admin/UnidadesModulos.php` (namespace `App\Livewire\Admin`,
+convención de paneles admin). Sin paginación: matriz completa de todas las unidades (activas e
+inactivas) × las 9 claves de `UnidadModulo::MODULOS`.
+
+**Funcionalidad:**
+- Matriz con checkboxes por celda; cada checkbox es un switch instantáneo (`wire:click="toggle(unidadId, 'modulo')"`,
+  sin botón Guardar). `toggle()` crea o borra la fila del pivot y hace `unset($this->pivotes)` para
+  invalidar el computed → re-render refleja el estado real.
+- Feedback vía toasts (`successMsg`/`errorMsg` + watchers `$wire.$watch` → `mostrarToast`, patrón Fase 2).
+- Validaciones en `toggle()`: módulo fuera de `UnidadModulo::MODULOS` → errorMsg; unidad inexistente → errorMsg.
+- **Columna "Usos"** (contexto informativo, NO bloquea): contador de registros guardados que referencian
+  cada unidad hoy. Fuentes: Users, Vehículos, Comisiones, Pases, Novedades de Rancho (belongsTo directo,
+  una query agrupada `groupBy('unidad_id')` por tabla) + Apoyos S-4 (pivot `apoyo_unidad` JOIN `apoyos`
+  con `whereNull('apoyos.deleted_at')`). Tooltip con desglose ("33 Pases · 32 Usuarios · ...").
+  Quitar una unidad de un módulo NO borra estos datos — solo afecta selectores futuros.
+- Leyenda al pie con clave técnica + etiqueta + descripción de cada selector.
+- Nota visible: unidades Inactivas nunca aparecen en selectores aunque estén tildadas (el scope
+  `curadasPara` exige `activo=true`); la casilla se conserva para si se reactiva.
+
+**Etiquetas legibles:** nueva const `UnidadModulo::ETIQUETAS` (en paridad con MODULOS) — ej.
+`usuarios_alta` → "Alta de Usuario", `guardias_rancho` → "Rancho de Guardia", `apoyos_asignacion` →
+"Asignación de Apoyos". Las descripciones largas viven solo en la vista (@php $descripciones).
+
+**Policy:** `app/Policies/UnidadModuloPolicy.php` — `viewAny` + `update`, ambos con el permiso único
+`gestionar_unidades_modulo`. SuperAdmin exento vía `Gate::before` global. Registrada en
+AppServiceProvider (`Gate::policy(UnidadModulo::class, UnidadModuloPolicy::class)`) + gate de sidebar
+`Gate::define('viewAny-unidades-modulo', isAdmin || HasPermisos(...))`.
+
+**Permiso nuevo:** `'UnidadModulo' => [gestionar_unidades_modulo]` agregado a PermisoSeeder (módulo
+propio, junto a 'Unidad'). Ejecutado `php artisan db:seed --class=PermisoSeeder` (updateOrCreate,
+no toca roles) + asignado al rol admin vía `syncWithoutDetaching` (NO RolSeeder, que haría sync()
+destructivo). Total permisos: 223 → 224.
+
+**Ruta:** `GET /admin/unidades/modulos` → `livewire.admin.unidades-modulos.layout`, name
+`admin.unidades.modulos.index`. Registrada ANTES del resource `unidades/{unidad}` (mismo patrón que
+`/apoyos/tipos` antes de `apoyos/{apoyo}`) para no ser capturada por `unidades.show`.
+
+**Sidebar:** entrada "Unidades por Módulo" (fa-solid fa-table-cells) dentro de "Guardias y Novedades",
+debajo de "Unidades Ámbito". Ajuste menor: `active` de "Unidades Ámbito" pasó de `['admin/unidades*']`
+a `['admin/unidades']` (exacto) para que no queden ambos resaltados al visitar /admin/unidades/modulos.
+
+**Archivos creados (4):**
+- `app/Livewire/Admin/UnidadesModulos.php`
+- `app/Policies/UnidadModuloPolicy.php`
+- `resources/views/livewire/admin/unidades-modulos/layout.blade.php`
+- `resources/views/livewire/admin/unidades-modulos/index.blade.php`
+
+**Archivos modificados (5):**
+- `app/Models/UnidadModulo.php` — const ETIQUETAS (+18 líneas)
+- `app/Providers/AppServiceProvider.php` — imports + Gate::policy + Gate::define
+- `database/seeders/PermisoSeeder.php` — módulo 'UnidadModulo'
+- `routes/web.php` — ruta /admin/unidades/modulos
+- `config/adminlte.php` — sidebar + fix active de "Unidades Ámbito"
+
+**Verificación (script CLI + transacción/rollback, users=50/unidades=5/pivot=42/permisos=223→224
+antes=después salvo el permiso nuevo intencional):**
+15 checks via `Livewire::test()` + HTML renderizado, todo PASS:
+- Ruta registrada (`admin.unidades.modulos.index` → /admin/unidades/modulos).
+- Render superadmin: 45 checkboxes exactos (5 unidades × 9 módulos), 42 marcados (= filas del pivot).
+- Las 9 etiquetas legibles presentes en headers; badges Activa/Inactiva + badge Usos con tooltip desglose.
+- Baseline `curadasPara('guardias_rancho')` = 5 unidades → toggle OFF: fila pivot borrada, scope devuelve
+  4 y excluye la unidad EN EL MISMO REQUEST (computed invalidado) → toggle ON: restaurada, scope vuelve a 5.
+- Módulo inválido ignorado (errorMsg, pivot intacta); unidad inexistente ignorada.
+- `usosPorUnidad`: estructura correcta, totales reales (#1=77 #2=22 #3=23 #4=14 #5=4).
+- Usuario sin `gestionar_unidades_modulo`: mount bloqueado con 403 "This action is unauthorized",
+  matriz NO renderizada. ⚠️ Nota API: en Livewire 4, `Livewire::test()` NO lanza la
+  AuthorizationException de mount como excepción PHP — renderiza página de error completa;
+  asertar chequeando el HTML (403 + ausencia del contenido), no con try/catch.
+- `php artisan view:cache` compila todos los blades sin errores.
+- Suite Pest NO ejecutable en este servidor (falta pdo_sqlite, limitación pre-existente documentada).
+
+**Pendiente visual:** confirmar en navegador (/admin/unidades/modulos) que tildar/destildar refleja el
+cambio inmediato en los selectores (ej. Rancho de Guardia en guardia abierta).
+
+### 2026-08-21 — Listas curadas de unidades por módulo (pivot unidad_modulo + scope curadasPara)
+
+**Objetivo:** reemplazar el patrón repetido `Unidad::where('activo', true)` (con exclusiones ad-hoc
+por nombre `'C.A.C.O.'` hardcodeadas en 3 lugares) por **listas curadas por módulo** gestionadas en BD.
+Comportamiento visible 100% idéntico al previo (verificado).
+
+**Nuevo schema (migración):**
+- `database/migrations/2026_08_21_000000_create_unidad_modulo_table.php` — tabla pivot `unidad_modulo`
+  (`unidad_id` FK cascade → unidades, `modulo` string, timestamps, unique `(unidad_id, modulo)`,
+  index en `modulo`). Schema Builder estándar → compatible MySQL/Postgres/SQLite.
+
+**Modelo nuevo:**
+- `app/Models/UnidadModulo.php` — const `MODULOS` (fuente única de verdad de las claves válidas),
+  relación `unidad()`.
+
+**Scope nuevo en `Unidad`:**
+```php
+Unidad::curadasPara(string $modulo) // activo=true AND EXISTS(pivot con ese módulo), orderBy nombre
+```
+Relación soporte: `Unidad::unidadModulos()` hasMany. Claves válidas (`UnidadModulo::MODULOS`):
+
+| Clave | Selector | Antes |
+|-------|----------|-------|
+| `usuarios_alta` | UserWizard (computed unidades) | activo=true |
+| `usuarios_edicion` | UserForm render (conserva `orWhere(id)` para la unidad asignada aunque no esté curada/inactiva) | activo=true |
+| `usuarios_registro` | FortifyServiceProvider registerView | activo=true − C.A.C.O. (exclusión estaba en register.blade.php:83) |
+| `vehiculos_form` | Vehiculos@catalogos['unidades'] | activo=true − C.A.C.O. (exclusión estaba en vehiculos/index.blade.php:327) |
+| `vehiculos_tabs` | Vehiculos@render unidadesTabs | activo=true − C.A.C.O. (en query) |
+| `guardias_rancho` | GuardiaController@show | activo=true (C.A.C.O. SÍ incluida — correcto) |
+| `apoyos_asignacion` | Apoyos@unidadesDisponibles ("A quien se dispuso") | activo=true |
+| `pase` | PasePanel@unidades | activo=true |
+| `comision` | ComisionPanel@unidades | activo=true |
+
+Fuera de alcance (NO tocar): "Unidades de destino" de Expedidos en Guardias consulta `organismos`,
+no `unidades`.
+
+**Seeder:** `database/seeders/UnidadModuloSeeder.php` (registrado en DatabaseSeeder después de
+UnidadSeeder). Reproduce EXACTAMENTE el estado previo: todas las unidades activas en los 9 módulos,
+excepto C.A.C.O. en `usuarios_registro`, `vehiculos_form`, `vehiculos_tabs` (const `SIN_CACO`).
+Idempotente (firstOrCreate) — puede re-correrse y toma unidades nuevas creadas a futuro.
+
+**Estado actual BD:** 42 filas pivot (9 módulos × 5 unidades − 3 exclusiones).
+
+**Verificación (13 checks CLI, todo PASS):**
+- Los 9 selectores devuelven lista IDÉNTICA al baseline capturado antes del refactor
+  (misma cantidad, mismos nombres, mismo orden alfabético).
+- Scope respeta `activo=false` (unidad inactiva con pivot NO aparece) y exige pivot
+  (unidad activa sin pivot NO aparece).
+- UserForm: `orWhere(id)` conserva la unidad asignada fuera de la lista curada (semántica intacta).
+- Integridad BD antes=después (users=51, apoyos=2, tipos_apoyo=4, unidades=5).
+- `php artisan view:cache` compila todos los blades sin errores (los 2 edits Blade son seguros).
+- Suite Pest NO ejecutable en este servidor (falta pdo_sqlite, limitación pre-existente documentada);
+  ningún test referenciaba los selectores/exclusiones modificados.
+
+**Pendiente:** pantalla de administración para editar `unidad_modulo` sin seeder (decisión futura);
+al crear/desactivar una unidad nueva, re-correr `php artisan db:seed --class=UnidadModuloSeeder`.
+
+### 2026-08-20 — Apoyos S-4: REVERTIDO el intento de form inline — el form Nuevo/Editar Apoyo vuelve al modal ops-panel
+
+**⚠️ Estado:** El cambio "formulario convertido de modal a INLINE" (ver changelog previo en historial
+de git) se aplicó por error y fue **REVERTIDO**. El formulario de crear/editar Apoyo vuelve a ser un
+**modal ops-panel** (`x-teleport="body"`, overlay con backdrop, centrado, `wire:click.self="cerrarForm"`,
+pantalla de éxito `@if ($justSaved)` dentro del modal) — mismo patrón que TiposApoyo y el resto del proyecto.
+
+**Cómo se revertió (importante para futuros reverts):**
+- El cambio inline **NO estaba commiteado** (working directory sucio sobre `a28ef84`). No aplicó `git revert`.
+- Se ejecutó `git restore app/Livewire/Apoyos.php resources/views/livewire/apoyos/index.blade.php`
+  para volver al estado commiteado (modal + form apilado).
+- **PERO:** la grilla Bootstrap del form (changelog siguiente) TAMPOCO estaba commiteada — vivía solo
+  en el working directory y se perdió con el restore. Fue **reconstruida a mano** dentro del modal,
+  siguiendo la especificación del changelog de abajo (7 filas, cada una su `.row`).
+- Lección: `git restore` es destructivo para cambios no commiteados; antes de restaurar, verificar con
+  `git log --follow <archivo>` qué hay realmente en HEAD vs working directory.
+
+**Fix incluido (defecto latente del código original commiteado):** `$justSaved` nunca se reseteaba,
+así que tras guardar con éxito, reabrir el modal ("Nuevo" o "Editar") mostraba la pantalla de éxito
+en vez del formulario. Ahora `crear()` y `abrirEditar()` resetean `$justSaved = false` (+ `$errorMsg = ''`)
+al abrir. El flujo guardar → pantalla de éxito → cerrar → reabrir muestra el form correctamente.
+
+**Archivos modificados (2):**
+- `app/Livewire/Apoyos.php` — restaurado a HEAD (dispatchs `abrir-modal-apoyos`/`cerrar-modal-apoyos`,
+  propiedad `$justSaved`, sin toggle en `crear()`) + fix de reset de `$justSaved`/`$errorMsg` en
+  `crear()` y `abrirEditar()` (+8 líneas).
+- `resources/views/livewire/apoyos/index.blade.php` — restaurado a HEAD (modal `#modalApoyos` completo)
+  + grilla de 7 filas reconstruida dentro del `<form id="form-apoyo">` (ver entrada siguiente).
+
+**No tocado:** `TiposApoyo.php` y `apoyos/tipos/index.blade.php` — ⚠️ OJO: estos archivos TODAVÍA tienen
+la conversión inline aplicada SIN commitear (mismo patrón que se revirtió en Apoyos). Quedan pendientes
+de decisión: revertir igual o mantener.
+
+**Verificación (script CLI + transacción/rollback, users=50/apoyos=1/tipos=3 antes=después):**
+53 checks via `Livewire::test()` + HTML renderizado, todo PASS:
+- HTML: `id="modalApoyos"` + `x-teleport="body"` + `ops-panel-overlay` presentes; `form-apoyo` DENTRO
+  del bloque del modal; watcher `$watch('$wire.showForm')` + `:class is-open`; submit con
+  `form="form-apoyo"` desde el footer.
+- Grilla: filas 1-7 con labels esperados, `col-md-6` en pares, `ms-wrapper` del multi-select presente.
+- `crear()` x2 sigue abierto (patrón modal, NO toggle). Validación fallida → modal permanece abierto.
+- CREATE exitoso: fila en BD + unidades sync + `registrado_por_id` + pantalla de éxito (`justSaved=true`)
+  dentro del modal.
+- EDIT tras CREATE: `abrirEditar` resetea `justSaved` (muestra el FORM, no el éxito previo), carga
+  tipo/unidades/datos, `guardar()` persiste y deja `justSaved=true`.
+- Vista calendario + confirm-delete operativos. Integridad BD verificada (counts idénticos).
+
+**Notas API Livewire 4 para scripts CLI (costosas de descubrir):**
+- `actingAs()` es ESTÁTICO: `Livewire\Livewire::actingAs($user)->test(Component::class)`.
+- `$t->errors()->has('campo')` — `hasError()` NO existe en Testable.
+- Los params de `call()` son POSICIONALES: `$t->call('abrirEditar', $id)` — pasar `['id' => $id]`
+  lanza TypeError (`array given`) que con `app.debug=false` se enmascara como HTTP 419; la página de
+  error 419 renderiza el layout AdminLTE (con `notificaciones-watcher` adentro) y `$t->instance()`
+  pasa a devolver ESE componente (PropertyNotFoundException confusa). Diagnosticar con
+  `config(['app.debug' => true])` en el proceso CLI.
+
+### 2026-08-20 — Apoyos S-4: formulario Nuevo/Editar Apoyo reorganizado en grilla Bootstrap
+
+> **Nota post-revert:** esta grilla se aplicó originalmente en el working directory junto con la
+> conversión inline (ambos cambios sin commitear). El `git restore` del revert la eliminó y fue
+> **reconstruida a mano** dentro del modal restaurado según la especificación de abajo. La versión
+> actual (modal + grilla) es la que quedó vigente.
+
+**Layout only:** El form del modal ops-panel (`resources/views/livewire/apoyos/index.blade.php`,
+bloque `<form id="form-apoyo">`) pasó de columnas apiladas a grilla responsiva `row`/`col-md-*`
+(mismo grid que el resto del proyecto). Cero cambios de lógica: mismos wire:model, validaciones,
+condicionales y modal (ops-panel/backdrop/ancho intactos).
+
+**Estructura de filas:**
+| Fila | Columnas |
+|------|----------|
+| 1 | Tipo de apoyo \| Solicitante (col-md-6) |
+| 2 | Documento buscador \| Documento texto libre (col-md-6, texto libre respeta su `@if (!$formDocumentoNovedadId)`) |
+| 3 | Desde \| Hasta (col-md-6 — ya existía, no se tocó) |
+| 4 | Por Documento buscador \| Por Documento texto libre (col-md-6, ídem condicional) |
+| 5 | A quien se dispuso multi-select (col-12) |
+| 6 | Estado solo (col-md-6, segunda columna vacía — "Registrado por" NO se muestra en el form, es automático al crear) |
+| 7 | Descripción textarea (col-12) |
+
+**Detalles:**
+- Cada fila es un `.row` propio (NO un único row con cols corridos): si un texto libre se oculta
+  por el condicional de documento seleccionado, la fila colapsa a una sola col-md-6 sin arrastrar
+  campos de la fila siguiente.
+- Único cambio de copy: helper del buscador "escribí el texto libre **abajo**" → "**completá el
+  campo de texto libre**" (en desktop ya no queda abajo sino a la derecha; wording neutral para
+  ambos breakpoints).
+- Mobile: apilado estándar Bootstrap (<768px los col-md-* vuelven a full-width). Sin overrides de
+  `.row`/`.col-*` en ops-panel.css (verificado). `.ms-wrapper` ya tenía `position:relative`, el
+  dropdown del multi-select no cambia de contexto.
+
+**Verificación (script CLI + transacción/rollback, users=50 antes=después):**
+20 checks via `Livewire::test()` + DOMDocument/XPath sobre el HTML renderizado, todo PASS:
+- CREATE: 7 rows exactas con cols/labels esperados por fila.
+- EDIT (apoyo real con documento seleccionado): fila 2 colapsa a 1 col (condicional OK).
+- COND (setear formDocumentoNovedadId en create): texto libre oculto, 7 filas preservadas.
+- Nota API Livewire 4 para scripts CLI: `actingAs()` es ESTÁTICO —
+  `Livewire\Livewire::actingAs($user)->test(Component::class)`, no `->test(...)->actingAs($user)`
+  (devuelve null y revienta con "call() on null").
+
+**Pendiente visual:** confirmar en navegador desktop/mobile (/admin/apoyos → Nuevo Apoyo).
+
 ### 2026-08-20 — Apoyos S-4: reporte por día (click en día del calendario → modal ops-panel)
 
 **Funcionalidad (Fase 4b):** Al hacer click en un día del calendario que tenga al menos un apoyo,

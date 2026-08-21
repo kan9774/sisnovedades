@@ -48,7 +48,7 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::loginView(fn() => view('auth.login'));
         Fortify::registerView(function () {
-            $unidades = Unidad::where('activo', true)->orderBy('nombre')->get();
+            $unidades = Unidad::curadasPara('usuarios_registro')->get();
             $grados   = \App\Models\Grado::where('activo', true)->orderBy('orden')->orderBy('nombre')->get();
 
             return view('auth.register', compact('unidades','grados'));

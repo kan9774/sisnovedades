@@ -90,7 +90,7 @@ class UserWizard extends Component
     #[Computed]
     public function unidades()
     {
-        return Unidad::where('activo', true)->orderBy('nombre')->get();
+        return Unidad::curadasPara('usuarios_alta')->get();
     }
 
     #[Computed]

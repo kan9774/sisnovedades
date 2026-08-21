@@ -221,7 +221,7 @@
 
                                     <input type="file" wire:model="formArchivo"
                                         class="form-control @error('formArchivo') is-invalid @enderror"
-                                        accept=".pdf,.doc,.docx,.txt">
+                                        accept=".pdf,.doc,.docx,.txt,.zip">
                                     <div wire:loading wire:target="formArchivo" class="mt-2 text-muted">
                                         <span class="spinner-border spinner-border-sm mr-1"></span> Subiendo archivo...
                                     </div>
@@ -246,7 +246,7 @@
                                     @endif
 
                                     @if ($formTipo === 'create' && !$formArchivo && !$loading)
-                                        <small class="text-muted">Formatos: PDF, DOC, DOCX, TXT. Máximo 10 MB.</small>
+                                        <small class="text-muted">Formatos: PDF, DOC, DOCX, TXT, ZIP y más. Máximo 50 MB.</small>
                                     @endif
                                 </div>
                             </form>

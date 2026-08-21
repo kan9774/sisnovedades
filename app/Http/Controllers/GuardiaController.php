@@ -14,7 +14,7 @@ class GuardiaController extends Controller
 
         $guardia->load(['capitan.grado', 'oficial.grado', 'escribiente.grado', 'ranchoMenu']);
 
-        $unidadesActivas = \App\Models\Unidad::where('activo', true)->orderBy('nombre')->get();
+        $unidadesActivas = \App\Models\Unidad::curadasPara('guardias_rancho')->get();
         $rancho = $guardia->novedadesRancho->keyBy('unidad_id');
 
         return view('admin.guardias.show', compact(

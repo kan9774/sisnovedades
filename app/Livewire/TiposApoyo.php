@@ -23,7 +23,6 @@ class TiposApoyo extends Component
     public $successMsg = '';
     public $errorMsg = '';
     public $loading = false;
-    public $justSaved = false;
     public $confirmDeleteId = null;
 
     #[Computed]
@@ -53,11 +52,17 @@ class TiposApoyo extends Component
             return;
         }
 
+        // Toggle: si el form inline ya está abierto en modo create, cerrarlo.
+        if ($this->showForm && $this->formTipo === 'create') {
+            $this->cerrarForm();
+            return;
+        }
+
         $this->resetForm();
         $this->formTipo = 'create';
         $this->showForm = true;
         $this->resetErrorBag();
-        $this->dispatch('abrir-modal-tipos-apoyo');
+        $this->errorMsg = '';
     }
 
     public function abrirEditar(int $tipoApoyoId)
@@ -77,7 +82,7 @@ class TiposApoyo extends Component
         $this->formNombre = $tipoApoyo->nombre;
         $this->formColor = $tipoApoyo->color;
         $this->showForm = true;
-        $this->dispatch('abrir-modal-tipos-apoyo');
+        $this->errorMsg = '';
     }
 
     public function cerrarForm()
@@ -86,7 +91,6 @@ class TiposApoyo extends Component
         $this->resetForm();
         $this->resetErrorBag();
         $this->errorMsg = '';
-        $this->dispatch('cerrar-modal-tipos-apoyo');
     }
 
     public function guardar()
@@ -125,8 +129,12 @@ class TiposApoyo extends Component
                 $this->successMsg = 'Tipo de apoyo actualizado correctamente.';
             }
 
-            $this->justSaved = true;
             $this->page = 1;
+
+            // Form inline: al guardar se cierra y vuelve a verse la tabla.
+            // successMsg queda seteado para el toast (watcher en la vista).
+            $this->showForm = false;
+            $this->resetForm();
         } catch (AuthorizationException $e) {
             $this->errorMsg = $e->getMessage();
         } catch (\Exception $e) {

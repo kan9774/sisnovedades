@@ -475,12 +475,12 @@
                                 <div class="form-group">
                                     <label>
                                         Adjuntos
-                                        <small class="text-muted">(opcional, hasta 5 archivos, max: 10MB c/u)</small>
+                                        <small class="text-muted">(opcional, hasta 5 archivos, max: 50MB c/u)</small>
                                     </label>
 
                                     <input type="file" wire:model="archivos" multiple
                                         class="form-control @error('archivos') is-invalid @enderror @error('archivos.*') is-invalid @enderror"
-                                        accept=".pdf,.jpg,.jpeg,.png">
+                                        accept=".pdf,.jpg,.jpeg,.png,.zip">
 
                                     <div wire:loading wire:target="archivos" class="text-muted small mt-2">
                                         <i class="fas fa-spinner fa-spin"></i> Subiendo archivo(s)...

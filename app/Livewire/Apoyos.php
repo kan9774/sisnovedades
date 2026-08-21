@@ -94,7 +94,7 @@ class Apoyos extends Component
     #[Computed]
     public function unidadesDisponibles()
     {
-        return Unidad::where('activo', true)->orderBy('nombre')->get();
+        return Unidad::curadasPara('apoyos_asignacion')->get();
     }
 
     #[Computed]
@@ -129,6 +129,10 @@ class Apoyos extends Component
         $this->formTipo = 'create';
         $this->showForm = true;
         $this->resetErrorBag();
+        // Resetear la pantalla de éxito: reabrir el modal debe mostrar el form,
+        // no el éxito de un guardado anterior.
+        $this->justSaved = false;
+        $this->errorMsg = '';
         $this->dispatch('abrir-modal-apoyos');
     }
 
@@ -162,6 +166,10 @@ class Apoyos extends Component
         $this->formEstado = $apoyo->estado;
         $this->formDescripcion = $apoyo->descripcion ?? '';
         $this->showForm = true;
+        // Resetear la pantalla de éxito: reabrir el modal debe mostrar el form,
+        // no el éxito de un guardado anterior.
+        $this->justSaved = false;
+        $this->errorMsg = '';
         $this->dispatch('abrir-modal-apoyos');
     }
 

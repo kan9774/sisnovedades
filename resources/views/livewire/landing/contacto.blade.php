@@ -163,7 +163,7 @@
                     <div class="form-group">
                         <label for="sugerencia_adjunto">Archivo adjunto (opcional)</label>
                         <input type="file" wire:model="sugerencia_adjunto" class="form-control @error('sugerencia_adjunto') is-invalid @enderror"
-                            id="sugerencia_adjunto" accept=".txt,.pdf,.doc,.docx,.jpg,.png,.gif">
+                            id="sugerencia_adjunto" accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.zip">
                         <div class="form-text">Tamaño máximo: 5MB</div>
                         @error('sugerencia_adjunto')
                             <div class="invalid-feedback">{{ $message }}</div>

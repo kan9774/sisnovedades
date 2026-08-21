@@ -187,6 +187,10 @@ class PermisoSeeder extends Seeder
                 ['name' => 'eliminar_unidad', 'description' => 'Eliminar unidades'],
             ],
 
+            'UnidadModulo' => [
+                ['name' => 'gestionar_unidades_modulo', 'description' => 'Gestionar listas curadas de unidades por módulo'],
+            ],
+
             'TipoVehiculo' => [
                 ['name' => 'ver_tipos_vehiculo', 'description' => 'Ver tipos de vehículo'],
                 ['name' => 'crear_tipo_vehiculo', 'description' => 'Crear tipos de vehículo'],

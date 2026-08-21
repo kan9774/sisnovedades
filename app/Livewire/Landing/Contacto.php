@@ -6,6 +6,8 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Mail\ContactoMail;
 use App\Mail\SugerenciaMail;
+use App\Rules\ExtensionPermitida;
+use App\Services\CompresorArchivos;
 use Illuminate\Support\Facades\Mail;
 
 class Contacto extends Component
@@ -32,7 +34,6 @@ class Contacto extends Component
 
     protected $messages = [
         'sugerencia_adjunto.max' => 'El archivo no puede superar los 5MB.',
-        'sugerencia_adjunto.mimes' => 'Formato de archivo no permitido.',
         'sugerencia_aceptar.accepted' => 'Debés aceptar el uso de tus datos para poder enviar la sugerencia.',
     ];
 
@@ -80,7 +81,7 @@ class Contacto extends Component
             'sugerencia_prioridad' => 'required',
             'sugerencia_tipo' => 'required',
             'sugerencia_mensaje' => 'required|min:10|max:5000',
-            'sugerencia_adjunto' => 'nullable|file|max:5120|mimes:txt,pdf,doc,docx,jpg,jpeg,png,gif',
+            'sugerencia_adjunto' => ['nullable', 'file', 'max:5120', new ExtensionPermitida(['txt', 'pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'zip'])],
             'sugerencia_aceptar' => 'accepted',
         ]);
 
@@ -88,8 +89,11 @@ class Contacto extends Component
         $adjuntoNombreOriginal = null;
 
         if ($this->sugerencia_adjunto) {
-            $adjuntoPath = $this->sugerencia_adjunto->store('sugerencias', 'public');
-            $adjuntoNombreOriginal = $this->sugerencia_adjunto->getClientOriginalName();
+            // Compresión best-effort (JPG vía GD, PDF vía Ghostscript si existe)
+            $adjunto = CompresorArchivos::comprimir($this->sugerencia_adjunto);
+
+            $adjuntoPath = $adjunto->store('sugerencias', 'public');
+            $adjuntoNombreOriginal = $adjunto->getClientOriginalName();
         }
 
         $data = [

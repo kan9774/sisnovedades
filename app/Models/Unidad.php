@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -38,5 +39,23 @@ class Unidad extends Model
     public function usuarios(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function unidadModulos(): HasMany
+    {
+        return $this->hasMany(UnidadModulo::class);
+    }
+
+    /**
+     * Unidades activas curadas para un módulo (tabla pivot unidad_modulo).
+     *
+     * Claves válidas: UnidadModulo::MODULOS.
+     * Devuelve activo=true AND EXISTS(pivot con ese módulo), ordenado por nombre.
+     */
+    public function scopeCuradasPara(Builder $query, string $modulo): void
+    {
+        $query->where('activo', true)
+            ->whereHas('unidadModulos', fn ($q) => $q->where('modulo', $modulo))
+            ->orderBy('nombre');
     }
 }
