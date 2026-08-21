@@ -255,6 +255,16 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
         Route::get('/oficinas', function () {
             return view('livewire.oficinas.layout');
         })->name('oficinas.index');
+        // Apoyos S-4 (listado principal)
+        Route::get('/apoyos', function () {
+            return view('livewire.apoyos.layout');
+        })->name('apoyos.index');
+
+        // Tipos de apoyo (catálogo) - debe ir ANTES del grupo apoyos/{apoyo}
+        Route::get('/apoyos/tipos', function () {
+            return view('livewire.apoyos.tipos.layout');
+        })->name('apoyos.tipos.index');
+
         // Tipos de vehículo (catálogo) - debe ir ANTES del grupo vehiculos/{vehiculo}
         Route::get('/vehiculos/tipos', function () {
             return view('livewire.vehiculos.tipos.layout');

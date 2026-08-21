@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Apoyo;
 use App\Models\Categoria;
 use App\Models\CategoriaDocumento;
 use App\Models\Conductor;
@@ -23,6 +24,7 @@ use App\Models\Proveedor;
 use App\Models\Rol;
 use App\Models\SalidaVehiculo;
 use App\Models\Talla;
+use App\Models\TipoApoyo;
 use App\Models\TipoVehiculo;
 use App\Models\Unidad;
 use App\Models\User;
@@ -31,6 +33,7 @@ use App\Models\Vuelo;
 use App\Observers\NewsObserver;
 use App\Models\Ubicacion;
 use App\Observers\UserObserver;
+use App\Policies\ApoyoPolicy;
 use App\Policies\CategoriaPolicy;
 use App\Policies\CategoriaDocumentoPolicy;
 use App\Policies\ConductorPolicy;
@@ -53,6 +56,7 @@ use App\Policies\ProveedorPolicy;
 use App\Policies\RolPolicy;
 use App\Policies\SalidaVehiculoPolicy;
 use App\Policies\TallaPolicy;
+use App\Policies\TipoApoyoPolicy;
 use App\Policies\TipoVehiculoPolicy;
 use App\Policies\UbicacionPolicy;
 use App\Policies\UnidadPolicy;
@@ -122,6 +126,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewAny-vuelo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_vuelo'));
         Gate::define('viewAny-documento', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_documento'));
         Gate::define('viewAny-tipos-vehiculo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_tipos_vehiculo'));
+        Gate::define('viewAny-tipos-apoyo', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_tipos_apoyo'));
         Gate::define('view_guardias', fn($user) => $user->isAdmin() || $user->isSuperAdmin() || $user->HasPermisos('ver_guardia'));
         Gate::define('ver_destinatarios_pdf', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_destinatarios_pdf'));
         Gate::define('viewAny-log', fn($user) => $user->isAdmin() || $user->HasPermisos('ver_logs'));
@@ -175,6 +180,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(CategoriaDocumento::class, CategoriaDocumentoPolicy::class);
         Gate::policy(MantenimientoVehiculo::class, MantenimientoVehiculoPolicy::class);
         Gate::policy(TipoVehiculo::class, TipoVehiculoPolicy::class);
+        Gate::policy(TipoApoyo::class, TipoApoyoPolicy::class);
+        Gate::policy(Apoyo::class, ApoyoPolicy::class);
         Gate::policy(Unidad::class, UnidadPolicy::class);
         Gate::policy(Item::class, ItemPolicy::class);
         Gate::policy(ItemUnidad::class, ItemUnidadPolicy::class);

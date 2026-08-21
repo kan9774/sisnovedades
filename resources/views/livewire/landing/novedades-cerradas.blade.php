@@ -1,5 +1,5 @@
-<section x-show="seccion === 'novedades-cerradas'" x-cloak x-transition.opacity.duration.300ms
-         class="py-5" wire:key="seccion-novedades-cerradas">
+<section x-show="seccion === 'novedades-cerradas'" x-cloak x-transition.opacity.duration.300ms class="py-5"
+    wire:key="seccion-novedades-cerradas">
     <div class="container">
 
         {{-- ============================================================
@@ -21,21 +21,21 @@
                 <div class="ops-search">
                     <span class="ops-search__prefix"><i class="fas fa-search"></i></span>
                     <input type="text" wire:model.live.debounce.400ms="search"
-                           placeholder="Buscar por texto, número o asunto...">
+                        placeholder="Buscar por texto, número o asunto...">
                     @if ($search)
                         <button type="button" wire:click="$set('search', '')" class="ops-search__clear"
-                                aria-label="Limpiar búsqueda">
+                            aria-label="Limpiar búsqueda">
                             <i class="fas fa-times"></i>
                         </button>
                     @endif
                 </div>
                 <div class="ops-view-toggle">
                     <button type="button" wire:click="cambiarVista('lista')"
-                        class="ops-view-btn @if($vista === 'lista') ops-view-btn-active @endif">
+                        class="ops-view-btn @if ($vista === 'lista') ops-view-btn-active @endif">
                         <i class="fas fa-list"></i> Lista
                     </button>
                     <button type="button" wire:click="cambiarVista('calendario')"
-                        class="ops-view-btn @if($vista === 'calendario') ops-view-btn-active @endif">
+                        class="ops-view-btn @if ($vista === 'calendario') ops-view-btn-active @endif">
                         <i class="fas fa-calendar-alt"></i> Calendario
                     </button>
                 </div>
@@ -52,7 +52,8 @@
                         <i class="fas fa-chevron-left"></i>
                     </button>
                     <span class="ops-calendar__title">{{ strtoupper($this->nombreMesActual()) }}</span>
-                    <button type="button" wire:click="mesSiguiente" class="ops-calendar__nav" aria-label="Mes siguiente">
+                    <button type="button" wire:click="mesSiguiente" class="ops-calendar__nav"
+                        aria-label="Mes siguiente">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                     <button type="button" wire:click="irAHoy" class="ops-calendar__hoy">Hoy</button>
@@ -65,17 +66,18 @@
                 <div class="ops-calendar__grid">
                     @foreach ($diasCalendario as $index => $dia)
                         @if (is_null($dia))
-                            <div class="ops-calendar__day ops-calendar__day--empty" wire:key="dia-vacio-{{ $anio }}-{{ $mes }}-{{ $index }}"></div>
+                            <div class="ops-calendar__day ops-calendar__day--empty"
+                                wire:key="dia-vacio-{{ $anio }}-{{ $mes }}-{{ $index }}"></div>
                         @else
                             @php $guardiaDia = $guardiasDelMes->get($dia); @endphp
                             <button type="button"
                                 wire:key="dia-{{ $anio }}-{{ $mes }}-{{ $dia }}"
-                                @if($guardiaDia) wire:click="verGuardia({{ $guardiaDia->id }})" @else disabled @endif
+                                @if ($guardiaDia) wire:click="verGuardia({{ $guardiaDia->id }})" @else disabled @endif
                                 class="ops-calendar__day
-                                    @if($guardiaDia) ops-calendar__day--closed @endif
-                                    @if($this->esHoy($dia)) ops-calendar__day--today @endif">
+                                    @if ($guardiaDia) ops-calendar__day--closed @endif
+                                    @if ($this->esHoy($dia)) ops-calendar__day--today @endif">
                                 <span class="ops-calendar__day-num">{{ str_pad($dia, 2, '0', STR_PAD_LEFT) }}</span>
-                                @if($guardiaDia)
+                                @if ($guardiaDia)
                                     <span class="ops-calendar__day-dot"></span>
                                 @endif
                             </button>
@@ -108,15 +110,22 @@
                                 </h3>
 
                                 <div class="ops-doc-card__meta">
-                                    <span><i class="fas fa-user-shield"></i> {{ $guardiaItem->capitan->grade }} {{ $guardiaItem->capitan->name }} {{$guardiaItem->capitan->last_name}}</span>
-                                    <span><i class="fas fa-user-tie"></i> {{ $guardiaItem->oficial->grade }} {{ $guardiaItem->oficial->name }} {{$guardiaItem->oficial->last_name}}</span>
-                                    <span><i class="fas fa-newspaper"></i> {{ $guardiaItem->novedades_count }} novedades</span>
-                                    <span><i class="fas fa-clipboard-list"></i> {{ $guardiaItem->novedades_personal_count ?? 0 }} personal</span>
+                                    <span><i class="fas fa-user-shield"></i> {{ $guardiaItem->capitan->grade }}
+                                        {{ $guardiaItem->capitan->name }}
+                                        {{ $guardiaItem->capitan->last_name }}</span>
+                                    <span><i class="fas fa-user-tie"></i> {{ $guardiaItem->oficial->grade }}
+                                        {{ $guardiaItem->oficial->name }}
+                                        {{ $guardiaItem->oficial->last_name }}</span>
+                                    <span><i class="fas fa-newspaper"></i> {{ $guardiaItem->novedades_count }}
+                                        novedades</span>
+                                    <span><i class="fas fa-clipboard-list"></i>
+                                        {{ $guardiaItem->novedades_personal_count ?? 0 }} personal</span>
                                 </div>
                             </div>
 
                             <div class="ops-doc-card__actions">
-                                <button type="button" wire:click="verGuardia({{ $guardiaItem->id }})" class="ops-doc-btn ops-doc-btn--primary">
+                                <button type="button" wire:click="verGuardia({{ $guardiaItem->id }})"
+                                    class="ops-doc-btn ops-doc-btn--primary">
                                     <i class="fas fa-eye"></i> Ver guardia completa
                                 </button>
                             </div>
@@ -139,106 +148,195 @@
              VISTA 2: PANEL DE GUARDIA (se abre al seleccionar)
              ============================================================ --}}
         <div x-show="$wire.showPanel" x-cloak x-transition class="guardia-panel-wrapper"
-             wire:key="guardia-panel-root-container">
+            wire:key="guardia-panel-root-container">
 
-            @if($guardia)
-            {{-- Encapsulado dinámico interno que fuerza la hidratación según la guardia activa --}}
-            <div wire:key="guardia-inner-content-{{ $guardia->id }}">
-                
-                {{-- Header del panel --}}
-                <div class="guardia-panel-header">
-                    <button type="button" wire:click="cerrarPanel" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Volver al listado
-                    </button>
-                    <h4 class="mb-0">
-                        <i class="fas fa-shield-alt"></i>
-                        Guardia del {{ $guardia->date->format('d/m/Y') }}
-                        <small class="text-muted">
-                            — {{ optional($guardia->capitan)->grade }} {{ optional($guardia->capitan)->name }} {{$guardia->capitan->last_name}} (Cap.) /
-                            {{ optional($guardia->oficial)->grade }} {{ optional($guardia->oficial)->name }} {{$guardia->oficial->last_name}} (Of.)
-                        </small>
-                    </h4>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm btn-primary"
-                            onclick="window.open('{{ route('guardias-publicas.pdf-preview', $guardia->id) }}', '_blank')">
-                            <i class="fas fa-download"></i> Descargar PDF
+            @if ($guardia)
+                {{-- Encapsulado dinámico interno que fuerza la hidratación según la guardia activa --}}
+                <div wire:key="guardia-inner-content-{{ $guardia->id }}">
+
+                    {{-- Header del panel --}}
+                    <div class="guardia-panel-header">
+                        <button type="button" wire:click="cerrarPanel" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver al listado
+                        </button>
+                        <h4 class="mb-0">
+                            <i class="fas fa-shield-alt"></i>
+                            Guardia del {{ $guardia->date->format('d/m/Y') }}
+                            <small class="text-muted">
+                                — {{ optional($guardia->capitan)->grade }} {{ optional($guardia->capitan)->name }}
+                                {{ $guardia->capitan->last_name }} (Cap.) /
+                                {{ optional($guardia->oficial)->grade }} {{ optional($guardia->oficial)->name }}
+                                {{ $guardia->oficial->last_name }} (Of.)
+                            </small>
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-primary"
+                                onclick="window.open('{{ route('guardias-publicas.pdf-preview', $guardia->id) }}', '_blank')">
+                                <i class="fas fa-download"></i> Descargar PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Tabs del panel --}}
+                    <div class="guardia-panel-tabs">
+                        <button type="button" wire:click="cambiarTab('pdf')"
+                            class="guardia-tab @if ($panelTab === 'pdf') guardia-tab-active @endif">
+                            <i class="fas fa-file-pdf"></i> PDF Preview
+                        </button>
+                        <button type="button" wire:click="cambiarTab('recibidos')"
+                            class="guardia-tab @if ($panelTab === 'recibidos') guardia-tab-active @endif">
+                            <i class="fas fa-arrow-down"></i> Recibidos
+                            @if (count($adjuntosRecibidos) > 0)
+                                <span
+                                    class="badge badge-count">{{ collect($adjuntosRecibidos)->flatten()->count() }}</span>
+                            @endif
+                        </button>
+                        <button type="button" wire:click="cambiarTab('expedidos')"
+                            class="guardia-tab @if ($panelTab === 'expedidos') guardia-tab-active @endif">
+                            <i class="fas fa-arrow-up"></i> Expedidos
+                            @if (count($adjuntosExpedidos) > 0)
+                                <span
+                                    class="badge badge-count">{{ collect($adjuntosExpedidos)->flatten()->count() }}</span>
+                            @endif
                         </button>
                     </div>
-                </div>
 
-                {{-- Tabs del panel --}}
-                <div class="guardia-panel-tabs">
-                    <button type="button" wire:click="cambiarTab('pdf')"
-                        class="guardia-tab @if($panelTab === 'pdf') guardia-tab-active @endif">
-                        <i class="fas fa-file-pdf"></i> PDF Preview
-                    </button>
-                    <button type="button" wire:click="cambiarTab('recibidos')"
-                        class="guardia-tab @if($panelTab === 'recibidos') guardia-tab-active @endif">
-                        <i class="fas fa-arrow-down"></i> Recibidos
-                        @if(count($adjuntosRecibidos) > 0)
-                            <span class="badge badge-count">{{ collect($adjuntosRecibidos)->flatten()->count() }}</span>
-                        @endif
-                    </button>
-                    <button type="button" wire:click="cambiarTab('expedidos')"
-                        class="guardia-tab @if($panelTab === 'expedidos') guardia-tab-active @endif">
-                        <i class="fas fa-arrow-up"></i> Expedidos
-                        @if(count($adjuntosExpedidos) > 0)
-                            <span class="badge badge-count">{{ collect($adjuntosExpedidos)->flatten()->count() }}</span>
-                        @endif
-                    </button>
-                </div>
-
-                {{-- ============================================================
+                    {{-- ============================================================
                      TAB: PDF PREVIEW
                      ============================================================ --}}
-                <div x-show="$wire.panelTab === 'pdf'" class="guardia-panel-content">
-                    {{-- Usamos una key única ligada al ID para asegurar que destruya y cargue el nuevo iframe --}}
-                    <iframe wire:key="pdf-preview-frame-{{ $guardia->id }}"
+                    <div x-show="$wire.panelTab === 'pdf'" class="guardia-panel-content">
+                        {{-- Usamos una key única ligada al ID para asegurar que destruya y cargue el nuevo iframe --}}
+                        <iframe wire:key="pdf-preview-frame-{{ $guardia->id }}"
                             src="{{ route('guardias-publicas.pdf-preview', $guardia->id) }}"
                             class="guardia-pdf-frame guardia-pdf-frame--desktop"
                             title="Preview de guardia del {{ $guardia->date->format('d/m/Y') }}">
-                    </iframe>
+                        </iframe>
 
-                    <div class="guardia-pdf-mobile-fallback">
-                        <i class="fas fa-file-pdf"></i>
-                        <p>La vista previa completa no está disponible en móvil.</p>
-                        <a href="{{ route('guardias-publicas.pdf-preview', $guardia->id) }}"
-                           target="_blank" class="btn btn-primary">
-                            <i class="fas fa-external-link-alt"></i> Abrir PDF completo
-                        </a>
+                        <div class="guardia-pdf-mobile-fallback">
+                            <i class="fas fa-file-pdf"></i>
+                            <p>La vista previa completa no está disponible en móvil.</p>
+                            <a href="{{ route('guardias-publicas.pdf-preview', $guardia->id) }}" target="_blank"
+                                class="btn btn-primary">
+                                <i class="fas fa-external-link-alt"></i> Abrir PDF completo
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                {{-- ============================================================
+                    {{-- ============================================================
                      TAB: RECIBIDOS (con adjuntos)
                      ============================================================ --}}
-                <div x-show="$wire.panelTab === 'recibidos'" class="guardia-panel-content guardia-adjuntos-content">
-                    @if (count($adjuntosRecibidos) > 0)
-                        @foreach ($adjuntosRecibidos as $tipo => $adjuntos)
-                            <div class="adjunto-seccion" wire:key="recibidos-tipo-{{ $guardia->id }}-{{ $tipo }}">
-                                <h5 class="adjunto-seccion-titulo">
-                                    <i class="fas {{ $this->tipoIcon($tipo) }}"></i>
-                                    {{ $tipo }} — Recibidos
-                                </h5>
+                    <div x-show="$wire.panelTab === 'recibidos'"
+                        class="guardia-panel-content guardia-adjuntos-content">
+                        @if (count($adjuntosRecibidos) > 0)
+                            @foreach ($adjuntosRecibidos as $tipo => $adjuntos)
+                                <div class="adjunto-seccion"
+                                    wire:key="recibidos-tipo-{{ $guardia->id }}-{{ $tipo }}">
+                                    <h5 class="adjunto-seccion-titulo">
+                                        <i class="fas {{ $this->tipoIcon($tipo) }}"></i>
+                                        {{ $tipo }} — Recibidos
+                                    </h5>
 
-                                <div class="adjunto-novedades">
+                                    <div class="adjunto-novedades">
+                                        @php
+                                            $novedadesTipo = $guardia->novedades ?? collect();
+                                            $novedadesTipo = $novedadesTipo
+                                                ->where('direction', 'Recibido')
+                                                ->where('type', $tipo);
+                                        @endphp
+                                        @foreach ($novedadesTipo as $novedad)
+                                            <div class="adjunto-novedad-item"
+                                                wire:key="recibido-novedad-{{ $novedad->id }}">
+                                                <div class="adjunto-novedad-header">
+                                                    <span class="adjunto-novedad-num">
+                                                        Nº {{ $novedad->number }}
+                                                        @if ($novedad->affair)
+                                                            — {{ $novedad->affair }}
+                                                        @endif
+                                                    </span>
+                                                    <span class="adjunto-novedad-hora">
+                                                        <i class="fas fa-clock"></i>
+                                                        {{ \Carbon\Carbon::parse($novedad->time)->format('Hi') }}
+                                                    </span>
+                                                    @if ($novedad->organismo)
+                                                        <span class="adjunto-novedad-organismo">
+                                                            <i class="fas fa-building"></i>
+                                                            {{ $novedad->organismo->name }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+
+                                                <div class="adjunto-novedad-texto">
+                                                    {{ $novedad->text }}
+                                                </div>
+
+                                                @if ($novedad->adjuntos->count() > 0)
+                                                    <div class="adjunto-lista">
+                                                        <small class="text-muted"><i class="fas fa-paperclip"></i>
+                                                            Adjuntos:</small>
+                                                        @foreach ($novedad->adjuntos as $adj)
+                                                            <button type="button"
+                                                                wire:click="abrirAdjunto({{ $adj->id }})"
+                                                                wire:key="recibido-adjunto-{{ $adj->id }}"
+                                                                class="adjunto-item">
+                                                                <i
+                                                                    class="fas {{ $this->tipoAdjuntoIcon($adj->file_type) }}"></i>
+                                                                <span>{{ $adj->file_name }}</span>
+                                                                <small>{{ number_format($adj->file_size / 1024, 1) }}
+                                                                    KB</small>
+                                                            </button>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <p>No hay adjuntos en la carpeta de Recibidos para esta guardia.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- ============================================================
+                     TAB: EXPEDIDOS (con adjuntos)
+                     ============================================================ --}}
+                    <div x-show="$wire.panelTab === 'expedidos'"
+                        class="guardia-panel-content guardia-adjuntos-content">
+                        @if (count($adjuntosExpedidos) > 0)
+                            @foreach ($adjuntosExpedidos as $tipo => $adjuntos)
+                                <div class="adjunto-seccion"
+                                    wire:key="expedidos-tipo-{{ $guardia->id }}-{{ $tipo }}">
+                                    <h5 class="adjunto-seccion-titulo">
+                                        <i class="fas {{ $this->tipoIcon($tipo) }}"></i>
+                                        {{ $tipo }} — Expedidos
+                                    </h5>
+
                                     @php
                                         $novedadesTipo = $guardia->novedades ?? collect();
-                                        $novedadesTipo = $novedadesTipo->where('direction', 'Recibido')->where('type', $tipo);
+                                        $novedadesTipo = $novedadesTipo
+                                            ->where('direction', 'Expedido')
+                                            ->where('type', $tipo);
                                     @endphp
                                     @foreach ($novedadesTipo as $novedad)
-                                        <div class="adjunto-novedad-item" wire:key="recibido-novedad-{{ $novedad->id }}">
+                                        <div class="adjunto-novedad-item"
+                                            wire:key="expedido-novedad-{{ $novedad->id }}">
                                             <div class="adjunto-novedad-header">
                                                 <span class="adjunto-novedad-num">
                                                     Nº {{ $novedad->number }}
-                                                    @if($novedad->affair) — {{ $novedad->affair }} @endif
+                                                    @if ($novedad->affair)
+                                                        — {{ $novedad->affair }}
+                                                    @endif
                                                 </span>
                                                 <span class="adjunto-novedad-hora">
-                                                    <i class="fas fa-clock"></i> {{ \Carbon\Carbon::parse($novedad->time)->format('Hi') }}
+                                                    <i class="fas fa-clock"></i>
+                                                    {{ \Carbon\Carbon::parse($novedad->time)->format('Hi') }}
                                                 </span>
-                                                @if ($novedad->organismo)
-                                                    <span class="adjunto-novedad-organismo">
-                                                        <i class="fas fa-building"></i> {{ $novedad->organismo->name }}
+                                                @if ($novedad->destino)
+                                                    <span class="adjunto-novedad-destino">
+                                                        <i class="fas fa-paper-plane"></i>{{ $novedad->destinosFormateados() }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -249,14 +347,18 @@
 
                                             @if ($novedad->adjuntos->count() > 0)
                                                 <div class="adjunto-lista">
-                                                    <small class="text-muted"><i class="fas fa-paperclip"></i> Adjuntos:</small>
+                                                    <small class="text-muted"><i class="fas fa-paperclip"></i>
+                                                        Adjuntos:</small>
                                                     @foreach ($novedad->adjuntos as $adj)
-                                                        <button type="button" wire:click="abrirAdjunto({{ $adj->id }})"
-                                                                wire:key="recibido-adjunto-{{ $adj->id }}"
-                                                                class="adjunto-item">
-                                                            <i class="fas {{ $this->tipoAdjuntoIcon($adj->file_type) }}"></i>
+                                                        <button type="button"
+                                                            wire:click="abrirAdjunto({{ $adj->id }})"
+                                                            wire:key="expedido-adjunto-{{ $adj->id }}"
+                                                            class="adjunto-item">
+                                                            <i
+                                                                class="fas {{ $this->tipoAdjuntoIcon($adj->file_type) }}"></i>
                                                             <span>{{ $adj->file_name }}</span>
-                                                            <small>{{ number_format($adj->file_size / 1024, 1) }} KB</small>
+                                                            <small>{{ number_format($adj->file_size / 1024, 1) }}
+                                                                KB</small>
                                                         </button>
                                                     @endforeach
                                                 </div>
@@ -264,136 +366,74 @@
                                         </div>
                                     @endforeach
                                 </div>
+                            @endforeach
+                        @else
+                            <div class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <p>No hay adjuntos en la carpeta de Expedidos para esta guardia.</p>
                             </div>
-                        @endforeach
-                    @else
-                        <div class="text-center py-5 text-muted">
-                            <i class="fas fa-inbox fa-3x mb-3"></i>
-                            <p>No hay adjuntos en la carpeta de Recibidos para esta guardia.</p>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
+
                 </div>
-
-                {{-- ============================================================
-                     TAB: EXPEDIDOS (con adjuntos)
-                     ============================================================ --}}
-                <div x-show="$wire.panelTab === 'expedidos'" class="guardia-panel-content guardia-adjuntos-content">
-                    @if (count($adjuntosExpedidos) > 0)
-                        @foreach ($adjuntosExpedidos as $tipo => $adjuntos)
-                            <div class="adjunto-seccion" wire:key="expedidos-tipo-{{ $guardia->id }}-{{ $tipo }}">
-                                <h5 class="adjunto-seccion-titulo">
-                                    <i class="fas {{ $this->tipoIcon($tipo) }}"></i>
-                                    {{ $tipo }} — Expedidos
-                                </h5>
-
-                                @php
-                                    $novedadesTipo = $guardia->novedades ?? collect();
-                                    $novedadesTipo = $novedadesTipo->where('direction', 'Expedido')->where('type', $tipo);
-                                @endphp
-                                @foreach ($novedadesTipo as $novedad)
-                                    <div class="adjunto-novedad-item" wire:key="expedido-novedad-{{ $novedad->id }}">
-                                        <div class="adjunto-novedad-header">
-                                            <span class="adjunto-novedad-num">
-                                                Nº {{ $novedad->number }}
-                                                @if($novedad->affair) — {{ $novedad->affair }} @endif
-                                            </span>
-                                            <span class="adjunto-novedad-hora">
-                                                <i class="fas fa-clock"></i> {{ \Carbon\Carbon::parse($novedad->time)->format('Hi') }}
-                                            </span>
-                                            @if ($novedad->destino)
-                                                <span class="adjunto-novedad-destino">
-                                                    <i class="fas fa-paper-plane"></i> {{ $novedad->destino }}
-                                                </span>
-                                            @endif
-                                        </div>
-
-                                        <div class="adjunto-novedad-texto">
-                                            {{ $novedad->text }}
-                                        </div>
-
-                                        @if ($novedad->adjuntos->count() > 0)
-                                            <div class="adjunto-lista">
-                                                <small class="text-muted"><i class="fas fa-paperclip"></i> Adjuntos:</small>
-                                                @foreach ($novedad->adjuntos as $adj)
-                                                    <button type="button" wire:click="abrirAdjunto({{ $adj->id }})"
-                                                            wire:key="expedido-adjunto-{{ $adj->id }}"
-                                                            class="adjunto-item">
-                                                        <i class="fas {{ $this->tipoAdjuntoIcon($adj->file_type) }}"></i>
-                                                        <span>{{ $adj->file_name }}</span>
-                                                        <small>{{ number_format($adj->file_size / 1024, 1) }} KB</small>
-                                                    </button>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="text-center py-5 text-muted">
-                            <i class="fas fa-inbox fa-3x mb-3"></i>
-                            <p>No hay adjuntos en la carpeta de Expedidos para esta guardia.</p>
-                        </div>
-                    @endif
-                </div>
-
-            </div>
             @endif
         </div>
 
         {{-- ============================================================
              MODAL: VISTA DE ADJUNTO INDIVIDUAL
              ============================================================ --}}
-        @if($guardia)
-        <div x-show="$wire.showAdjunto" x-cloak x-transition.opacity
-             class="adjunto-modal-overlay"
-             @keydown.escape.window="$wire.cerrarAdjunto()">
-            <div class="adjunto-modal-backdrop" wire:click="cerrarAdjunto"></div>
-            <div class="adjunto-modal-panel" x-transition.scale.95>
-                <div class="adjunto-modal-header">
-                    <div>
-                        <strong>{{ $adjuntoData['name'] ?? '' }}</strong>
-                        <span class="adjunto-modal-meta">
-                            {{ $adjuntoData['novedad_number'] ?? '' }} — {{ $adjuntoData['novedad_direction'] ?? '' }}
-                        </span>
+        @if ($guardia)
+            <div x-show="$wire.showAdjunto" x-cloak x-transition.opacity class="adjunto-modal-overlay"
+                @keydown.escape.window="$wire.cerrarAdjunto()">
+                <div class="adjunto-modal-backdrop" wire:click="cerrarAdjunto"></div>
+                <div class="adjunto-modal-panel" x-transition.scale.95>
+                    <div class="adjunto-modal-header">
+                        <div>
+                            <strong>{{ $adjuntoData['name'] ?? '' }}</strong>
+                            <span class="adjunto-modal-meta">
+                                {{ $adjuntoData['novedad_number'] ?? '' }} —
+                                {{ $adjuntoData['novedad_direction'] ?? '' }}
+                            </span>
+                        </div>
+                        <button type="button" wire:click="cerrarAdjunto" aria-label="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <button type="button" wire:click="cerrarAdjunto" aria-label="Cerrar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="adjunto-modal-body">
-                    @if ($adjuntoData['is_image'] ?? false)
-                        <img src="{{ $adjuntoData['url'] ?? '#' }}" class="adjunto-preview-img" alt="Adjunto">
-                    @elseif ($adjuntoData['is_pdf'] ?? false)
-                        <iframe wire:key="adjunto-preview-{{ $adjuntoData['id'] ?? 'none' }}"
-                                src="{{ $adjuntoData['url'] ?? '#' }}" class="adjunto-preview-frame adjunto-preview-frame--desktop"></iframe>
-                        <div class="adjunto-pdf-mobile-fallback">
-                            <i class="fas fa-file-pdf"></i>
-                            <p>La vista previa completa no está disponible en móvil.</p>
-                            <a href="{{ $adjuntoData['url'] ?? '#' }}" target="_blank" class="btn btn-primary">
-                                <i class="fas fa-external-link-alt"></i> Abrir PDF completo
-                            </a>
-                        </div>
-                    @else
-                        <div class="adjunto-preview-not-supported">
-                            <i class="fas fa-file"></i>
-                            <p>Este tipo de archivo no se puede previsualizar.</p>
-                            <a href="{{ $adjuntoData['url'] ?? '#' }}" target="_blank" class="btn btn-primary mt-3">
-                                <i class="fas fa-download"></i> Descargar archivo
-                            </a>
-                        </div>
-                    @endif
-                </div>
-                <div class="adjunto-modal-footer">
-                    <a href="{{ $adjuntoData['url'] ?? '#' }}" target="_blank" class="btn btn-primary">
-                        <i class="fas fa-download"></i> Descargar
-                    </a>
-                    <button type="button" wire:click="cerrarAdjunto" class="btn btn-secondary">
-                        Cerrar
-                    </button>
+                    <div class="adjunto-modal-body">
+                        @if ($adjuntoData['is_image'] ?? false)
+                            <img src="{{ $adjuntoData['url'] ?? '#' }}" class="adjunto-preview-img" alt="Adjunto">
+                        @elseif ($adjuntoData['is_pdf'] ?? false)
+                            <iframe wire:key="adjunto-preview-{{ $adjuntoData['id'] ?? 'none' }}"
+                                src="{{ $adjuntoData['url'] ?? '#' }}"
+                                class="adjunto-preview-frame adjunto-preview-frame--desktop"></iframe>
+                            <div class="adjunto-pdf-mobile-fallback">
+                                <i class="fas fa-file-pdf"></i>
+                                <p>La vista previa completa no está disponible en móvil.</p>
+                                <a href="{{ $adjuntoData['url'] ?? '#' }}" target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-external-link-alt"></i> Abrir PDF completo
+                                </a>
+                            </div>
+                        @else
+                            <div class="adjunto-preview-not-supported">
+                                <i class="fas fa-file"></i>
+                                <p>Este tipo de archivo no se puede previsualizar.</p>
+                                <a href="{{ $adjuntoData['url'] ?? '#' }}" target="_blank"
+                                    class="btn btn-primary mt-3">
+                                    <i class="fas fa-download"></i> Descargar archivo
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="adjunto-modal-footer">
+                        <a href="{{ $adjuntoData['url'] ?? '#' }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Descargar
+                        </a>
+                        <button type="button" wire:click="cerrarAdjunto" class="btn btn-secondary">
+                            Cerrar
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
         @endif
 
     </div>

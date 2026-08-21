@@ -39,7 +39,7 @@
                     <div class="form-group">
                         <label>Cédula</label>
                         <div class="input-group" style="max-width: 220px;">
-                            <input type="text" wire:model.live="ci" maxlength="8"
+                            <input type="text" wire:model.live="ci" maxlength="7"
                                 class="form-control @error('ci') is-invalid @enderror" placeholder="1234567">
                             <div class="input-group-append">
                                 <span class="input-group-text">

@@ -412,6 +412,29 @@ return [
             ],
         ],
 
+        // Apoyos S-4
+        [
+            'text'   => 'Apoyos S-4',
+            'icon'   => 'fa-solid fa-hands-holding-circle',
+            'can'    => 'viewAny-tipos-apoyo',
+            'submenu' => [
+                [
+                    'text'   => 'Apoyos',
+                    'url'    => 'admin/apoyos',
+                    'icon'   => 'fa-solid fa-hands-helping',
+                    'active' => ['admin/apoyos'],
+                    'can'    => 'viewAny-apoyo',
+                ],
+                [
+                    'text'   => 'Tipos de Apoyo',
+                    'url'    => 'admin/apoyos/tipos',
+                    'icon'   => 'fa-solid fa-tags',
+                    'active' => ['admin/apoyos/tipos*'],
+                    'can'    => 'viewAny-tipos-apoyo',
+                ],
+            ],
+        ],
+
         // INVENTARIO - NUEVO MÓDULO
         [
             'text'   => 'Inventario',

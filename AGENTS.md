@@ -198,7 +198,7 @@ Las alertas auto-cerrables (`x-data + x-init + setTimeout + $wire.set`) se elimi
 
 El helper `window.mostrarToast(tipo, mensaje)` vive en `public/js/confirmaciones.js`. No repetir.
 
-**14 componentes migrados a este patrón:** categorias-documentos, documentos, admin/users, conductores, guardias, palomar/estados, notificaciones (successMsg solo), permisos, organismos, oficinas, palomares, roles, vehiculos, vehiculos/tipos.
+**15 componentes migrados a este patrón:** categorias-documentos, documentos, admin/users, conductores, guardias, palomar/estados, notificaciones (successMsg solo), permisos, organismos, oficinas, palomares, roles, vehiculos, vehiculos/tipos, apoyos.
 
 **Pendientes de revisión manual:** vuelos/resultados-form.blade.php (sin auto-close), enviar-guardia-email/enviar-guardia-email.blade.php (propiedad `mensajeExito`).
 
@@ -214,21 +214,22 @@ Modales con `x-ops-card` + `x-teleport="body"` + clase `is-open` (no `x-show`). 
 
 ## Estado de la migración Blade → Livewire
 
-**69 componentes Livewire implementados · 31 migraciones completadas (27 de CRUD + 3 parciales + 1 landing)**
+**70 componentes Livewire implementados · 32 migraciones completadas (28 de CRUD + 3 parciales + 1 landing)**
 
 | Estado | Nivel | Componentes |
 |--------|-------|-------------|
 | ✅ Completado | 1 (Simple) | Oficinas, Organismos, TipoVehiculo, EstadoPaloma |
-| ✅ Completado | 2 (Intermedia) | Permisos, Roles, Notificaciones, Logs |
+| ✅ Completado | 2 (Intermedia) | Permisos, Roles, Notificaciones, Logs, TiposApoyo |
 | ✅ Completado | 3 (Alta) | Vehículos, Palomares, Palomas, Conductores, Vuelos |
 | ✅ Parcial | 4 (Muy alta) | Guardias (reducido a show/Hoy/pdf) — Pendiente: Users |
+| ✅ Completado | 3 (Alta) | **Apoyos S-4** — CRUD TiposApoyo + CRUD Apoyos + Toggle Tabla/Calendario + Reporte por día (click en día → modal ops-panel) |
 | ✅ Landing | — | 14 componentes (Hero, Navbar, Footer, Crucigrama, Tetris, Sudoku, SopaLetras, etc.) |
 
 ---
 
 ## Modelos clave, Policies y bloqueo de eliminación
 
-**31 Policies** registradas en `AppServiceProvider` via `Gate::policy()`. **~173 permisos** en 30 módulos, 6 roles.
+**33 Policies** registradas en `AppServiceProvider` via `Gate::policy()`. **~181 permisos** en 32 módulos, 6 roles.
 
 ### Bloqueo de eliminación
 - **Rol `admin`:** no se puede eliminar (`RolPolicy::delete`)
@@ -250,6 +251,233 @@ Modales con `x-ops-card` + `x-teleport="body"` + clase `is-open` (no `x-show`). 
 ---
 
 ## Cambios recientes
+
+### 2026-08-20 — Apoyos S-4: reporte por día (click en día del calendario → modal ops-panel)
+
+**Funcionalidad (Fase 4b):** Al hacer click en un día del calendario que tenga al menos un apoyo,
+se abre un modal ops-panel (`x-teleport="body"`, mismo patrón que el form) con el detalle de los
+apoyos de ese día. Días sin apoyos: sin click, cursor normal.
+
+**Componente (`app/Livewire/Apoyos.php`):**
+- Propiedad `?string $diaSeleccionado = null` (string 'Y-m-d', null = modal cerrado)
+- `seleccionarDia(string $fecha)` — valida el formato antes de setear; fecha inválida se ignora
+- `cerrarReporteDia()` — limpia la selección (overlay self-click + botón Cerrar)
+- `#[Computed] apoyosDelMes()` — **la query mensual se movió aquí**; `apoyosPorDia()` ahora la
+  consume (`$apoyos = $this->apoyosDelMes`) con su lógica de agrupamiento intacta. Eager loads
+  ampliados a `['tipo', 'organismo', 'unidades']` para el reporte. Resultado: UNA sola query por
+  request compartida entre grilla y modal (verificado con query log: abrir el modal dispara 0 queries nuevas).
+- `#[Computed] apoyosDelDiaSeleccionado()` — filtra EN PHP sobre `apoyosDelMes` (sin reconsultar),
+  comparando por día truncado (`desde.startOfDay() <= dia <= hasta.startOfDay()`), ordenado por tipo+id
+- `tituloDiaSeleccionado()` — "Lunes 24 de agosto de 2026" vía `translatedFormat('l j \d\e F \d\e Y')`
+  + ucfirst manual (no existe `mb_ucfirst`)
+- `posicionEnRango(Apoyo $apoyo): ?array` — devuelve `['actual' => X, 'total' => Y]` para apoyos
+  multi-día, null si es de un solo día. Usa `diffInDays` con `(int) round(...)` (Carbon 3 lo devuelve float)
+- Helper privado estático `parsearFechaDia(?string): ?Carbon` — **Carbon 3: `createFromFormat()` LANZA
+  excepción ante entrada inválida, no devuelve false** como `DateTime::createFromFormat`. Todos los
+  parseos de `$diaSeleccionado` pasan por este helper (protege contra tampering vía `wire:set` directo)
+- `abrirEditar()` ahora hace `$this->diaSeleccionado = null;` — al editar desde el reporte se cierra
+  ese modal antes de abrir el form (evita overlays apilados)
+
+**Vista (`resources/views/livewire/apoyos/index.blade.php`):**
+- Celdas de día con apoyos: `wire:click="seleccionarDia('YYYY-MM-DD')"` + `title` tooltip.
+  Fecha generada con `sprintf('%04d-%02d-%02d', ...)`. Días vacíos/offset: sin click
+- Modal nuevo `#modalReporteDia`: watcher Alpine sobre `$wire.diaSeleccionado` toggling
+  `ops-panel-open` en body + `:class="{ 'is-open': ... }"` + `wire:click.self="cerrarReporteDia"`
+- Cada apoyo en card: swatch color tipo, Solicitante, Período Desde—Hasta, badge "día X de Y"
+  (solo multi-día), unidades en badges, Descripción, estado badge, footer con botón Editar
+  (`@can('update', $apoyo)`)
+
+**CSS (`public/css/ops-panel.css`):** hover reforzado en `.apoyos-calendar__day--has:hover`
+(inset ring rgba(11,37,69,.18) + day-num #0B2545). El cursor pointer ya existía.
+
+**Verificación (sin suite Pest — este servidor no tiene pdo_sqlite):**
+Script CLI con transacción + rollback (cero residuo: users=50, apoyos=1, tipos=3, unidades=5
+antes y después). 50 checks via `Livewire::test()` (ciclo de vida completo), todos PASS:
+- Día con 1 apoyo propio + otro de tipo distinto → 2 cards, swatches, badges, unidades, descripción
+- Apoyo multi-día 23→27 sep → posiciones 1..5 de 5 correctas en cada día; indicador "día 3 de 5" en HTML
+- Día gap (22) y día sin apoyos (10) → colección vacía + empty-state
+- Reuso: warm cache `apoyosPorDia` → acceder `apoyosDelDiaSeleccionado` dispara 0 queries
+- Robustez: 'garbage-input' ignorado, tampering `wire:set('diaSeleccionado','basura')` no explota
+- Editar desde modal → cierra reporte, abre form con datos y unidades correctas
+- Smoke con dato real (apoyo 24→29 ago): "día 1 de 6", título "Lunes 24 de agosto de 2026"
+
+### 2026-08-20 — Apoyos S-4: fix loop infinito en vista Calendario (HTTP 500 FastCGI timeout)
+
+**Síntoma:** Al cambiar a vista Calendario en `/admin/apoyos`, el servidor devolvía HTTP 500
+"El proceso FastCGI superó el tiempo de espera de la actividad configurada". Timeout real de PHP.
+
+**Causa raíz (2 bugs encadenados):**
+
+1. **Loop infinito por CarbonImmutable** (`app/Livewire/Apoyos.php` — `apoyosPorDia()`):
+   `AppServiceProvider::configureDefaults()` ejecuta `Date::use(CarbonImmutable::class)`, por lo que
+   TODOS los casts `datetime` de Eloquent devuelven `Carbon\CarbonImmutable`. El loop del calendario
+   hacía `$current->addDay();` como *statement*: con Carbon mutable eso avanza el objeto, pero con
+   **CarbonImmutable devuelve una instancia nueva que se descarta** y `$current` queda congelado →
+   `while ($current->lte($diaFin))` nunca se vuelve falso → loop infinito.
+   - Los datos de BD estaban bien (1 apoyo, rango razonable de 6 días). No era un problema de datos.
+   - Solo explotaba en vista Calendario porque el loop solo corre ahí (`apoyosPorDia` computed).
+   - Podía parecer intermitente: si el apoyo empezaba antes del día 1 del mes, `$diaInicio` tomaba
+     `$inicioMes->copy()` (mutable vía `Carbon::create`) y el loop terminaba.
+
+2. **`isoLocale()` eliminado en Carbon 3** (`nombreMesActual()`): estaba enmascarado por el loop
+   infinito (el proceso moría antes de llegar al render de la vista). `isoLocale('es')` no existe en
+   nesbot/carbon 3.x — reemplazado por `->locale('es')->translatedFormat('F Y')`.
+
+**Fix aplicado (`app/Livewire/Apoyos.php`):**
+```php
+// ANTES (loop infinito con CarbonImmutable):
+$current->addDay();
+
+// DESPUÉS (compatible mutable + immutable):
+$current = $current->addDay();
+```
+Más salvaguarda defensiva: si el loop supera 366 iteraciones por apoyo, corta y loguea
+`Log::warning('Apoyos@apoyosPorDia: rango de fechas excesivo, loop cortado.', [...])` con
+apoyo_id/desde/hasta — un dato mal cargado a futuro no vuelve a colgar el servidor.
+
+**⚠️ Patrón crítico para TODO el proyecto (Date::use(CarbonImmutable::class) activo):**
+Los casts `datetime` de Eloquent devuelven **CarbonImmutable**. NUNCA usar `->addDay()`,
+`->subMonth()`, `->startOfDay()`, etc. como statement esperando mutación sobre fechas que vienen
+de un modelo. Siempre reasignar: `$fecha = $fecha->addDay();`. Los objetos creados vía
+`\Carbon\Carbon::parse()` / `Carbon::create()` / `createFromFormat()` siguen siendo mutables
+(`Date::use` solo afecta al factory de Laravel: casts, helper `now()`, facade `Date`).
+
+**Verificación (sin suite Pest — este servidor no tiene pdo_sqlite, ver Pendiente):**
+- Reproducción del bug: script CLI con la lógica exacta colgó (>400 iteraciones en rango de 6 días).
+- Post-fix: `apoyosPorDia()` marca correctamente días 24–29 (29ms), rango largo de 15 días marca
+  1–15 (3ms), rango jul→oct se clampa bien a los 30 días de septiembre (5ms). Apoyo de prueba creado
+  dentro de transacción con rollback (cero residuo: users=50, apoyos=1, tipos=3 antes y después).
+- Toggle Tabla↔Calendario x3 ciclos + mesAnterior/mesSiguiente/irAHoy vía `Livewire::test()`
+  (ciclo de vida completo): grid e indicadores presentes, todo <100ms.
+
+### 2026-08-20 — Apoyos S-4: migraciones, modelos y seeder
+
+**Módulo nuevo:** Sistema de apoyos operativos (S-4) para gestión de apoyos de unidades militares.
+
+**Migraciones (3):**
+- `2026_08_20_000000_create_tipos_apoyo_table.php` — tabla `tipos_apoyo` (id, nombre unique, color hex)
+- `2026_08_20_000001_create_apoyos_table.php` — tabla `apoyos` (13 FKs, estado, softDeletes)
+- `2026_08_20_000002_create_apoyo_unidad_table.php` — pivot `apoyo_unidad` (apoyo_id + unidad_id, PK compuesta)
+
+**Modelos (2):**
+- `app/Models/TipoApoyo.php` — HasFactory + LogsActivity, `$table = 'tipos_apoyo'`, relación `apoyos()` hasMany
+- `app/Models/Apoyo.php` — HasFactory + SoftDeletes + LogsActivity, 6 relaciones belongsTo (tipo, organismo, documentoNovedad, porDocumentoNovedad, cumplidoPor, registradoPor), relación `unidades()` belongsToMany via pivot
+
+**Seeder:**
+- `database/seeders/TipoApoyoSeeder.php` — 3 tipos iniciales: Vehículos (#28a745), Amplificación (#007bff), Antenistas (#dc3545)
+- Registrado en `DatabaseSeeder.php`
+
+**FKs verificadas:** `organismos` (tabla existente), `unidades` (tabla existente), `news` (tabla existente), `users` (tabla existente). Todas con restricciones apropiadas (restrict/nullOnDelete).
+
+**Pendiente:** CRUD principal de Apoyos (fase siguiente — formulario con relaciones múltiples).
+
+### 2026-08-20 — Apoyos S-4: CRUD de Tipos de Apoyo
+
+**Componente Livewire:** `app/Livewire/TiposApoyo.php` — Nivel 2 (Intermedia) con ops-panel modal.
+
+**Funcionalidad:**
+- Listado con tabla (nombre, color swatch visual, cantidad de apoyos asociados)
+- Crear/editar en modal ops-panel (x-teleport="body", CSS ops-panel.css)
+- Formulario: nombre (unique) + color (input type="color", hex)
+- Eliminación con modal de confirmación (bloqueo si tiene apoyos asociados)
+
+**Archivos creados (4):**
+- `app/Livewire/TiposApoyo.php` — Componente CRUD completo
+- `app/Policies/TipoApoyoPolicy.php` — 5 métodos (viewAny/view/create/update/delete) con permisos `*_tipo_apoyo`
+- `resources/views/livewire/apoyos/tipos/layout.blade.php` — Layout wrapper
+- `resources/views/livewire/apoyos/tipos/index.blade.php` — Vista con ops-panel modal + tabla + paginación
+
+**Archivos modificados (4):**
+- `app/Providers/AppServiceProvider.php` — Import + Gate::policy + Gate::define('viewAny-tipos-apoyo')
+- `database/seeders/PermisoSeeder.php` — 4 permisos: ver_tipos_apoyo, crear_tipo_apoyo, editar_tipo_apoyo, eliminar_tipo_apoyo
+- `routes/web.php` — Ruta `GET /admin/apoyos/tipos` → `livewire.apoyos.tipos.layout`
+- `config/adminlte.php` — Sidebar "Apoyos S-4" con submenu "Tipos de Apoyo" (fa-solid fa-tags)
+
+**Pendiente:** CRUD principal de Apoyos (fase siguiente).
+
+### 2026-08-20 — Apoyos S-4: CRUD principal de Apoyos
+
+**Componente Livewire:** `app/Livewire/Apoyos.php` — Nivel 3 (Alta) con ops-panel modal, relaciones múltiples, combobox de búsqueda y lógica de estado.
+
+**Funcionalidad:**
+- Listado con tabla (Tipo swatch, Solicitante, Desde, Hasta, Unidades badges, Estado badge, Registrado por + initials)
+- Filtros: TipoApoyo select, Estado select, búsqueda por texto (Solicitante/Documento)
+- Paginación 15 registros
+- Formulario crear/editar en ops-panel modal (x-teleport="body", full-screen)
+- Combobox de búsqueda para Documento y Por Documento contra tabla `news` (wire:model.live.debounce.300ms)
+  - Si se selecciona resultado: guarda `*_novedad_id`, limpia `*_texto`
+  - Si no hay match: permite texto libre en `*_texto`, `*_novedad_id` queda null
+- Select múltiple (checkbox-list) contra `unidades` (solo activos) — **ACTUALIZADO a multi-select con buscador (ms-* CSS classes)**
+- Al cambiar estado a "cumplido": setea automáticamente `cumplido_por_id = auth()->id()` y `cumplido_at = now()`
+- Al cambiar de "cumplido" a otro estado: limpia `cumplido_por_id` y `cumplido_at`
+- `registrado_por_id = auth()->id()` automático al crear (no visible en form)
+- Eliminación con modal de confirmación (soft delete)
+- Iniciales en tabla de listado vía `User::initials()` (calculado, no almacenado en DB)
+
+**Archivos creados (4):**
+- `app/Livewire/Apoyos.php` — Componente CRUD completo (listado + crear/editar + eliminar)
+- `app/Policies/ApoyoPolicy.php` — 5 métodos con permisos `*_apoyo`
+- `resources/views/livewire/apoyos/layout.blade.php` — Layout wrapper
+- `resources/views/livewire/apoyos/index.blade.php` — Vista con ops-panel modal + tabla + filtros + comboboxes + multi-select (ms-* classes)
+
+**Archivos modificados (4):**
+- `app/Providers/AppServiceProvider.php` — Import Apoyo + ApoyoPolicy + Gate::policy
+- `database/seeders/PermisoSeeder.php` — 4 permisos: ver_apoyos, crear_apoyo, editar_apoyo, eliminar_apoyo
+- `routes/web.php` — Ruta `GET /admin/apoyos` → `livewire.apoyos.layout`
+- `config/adminlte.php` — Submenu "Apoyos" (fa-solid fa-hands-helping) arriba de "Tipos de Apoyo"
+
+**Pendiente:** Click-en-día → reporte (Fase 4b).
+
+### 2026-08-20 — Apoyos S-4: corrección modal + multi-select con buscador
+
+**Problema 1 (Modal):** El modal "Nuevo Apoyo" se renderizaba pegado al lado izquierdo de la pantalla sin backdrop, porque `.ops-panel` tenía `style="max-width: 720px;"` inline. El `.ops-panel-overlay` usa `display: block` (no flex), así que un panel de 720px queda alineado a la izquierda. TiposApoyo funcionaba bien porque `.ops-panel` no tenía restricción de ancho.
+
+**Solución 1:** Eliminar `style="max-width: 720px;"` del `.ops-panel`. El panel vuelve a ocupar 100% width/height (como define `ops-panel.css`), con `.ops-panel__content` centrado a 900px max-width automáticamente.
+
+**Problema 2 (Multi-select):** El campo "A quien se dispuso" usaba un checkbox-list simple sin buscador, a diferencia del patrón multi-select con buscador (ms-* CSS classes) que ya existe en Guardias/Expedidos para "Unidades de destino".
+
+**Solución 2:** Reemplazar el checkbox-list por el mismo patrón Alpine.js + CSS ms-* del componente `novedades-guardia.blade.php:215-375`, adaptado para usar IDs numéricos en vez de strings. Se agregaron 3 computed properties a `Apoyos.php` (`unidadesNombres`, `unidadesMap`, `unidadesOpciones`) para mapear entre IDs y nombres. El componente de Guardias NO fue modificado.
+
+**Archivos modificados (2):**
+- `resources/views/livewire/apoyos/index.blade.php` — Quitado `max-width: 720px` del `.ops-panel`, reemplazado checkbox-list por multi-select Alpine.js (ms-* pattern)
+- `app/Livewire/Apoyos.php` — Agregados computed `unidadesNombres`, `unidadesMap`, `unidadesOpciones` para soporte del multi-select
+
+**Patrón multi-select reusado de:** `resources/views/components/novedades-guardia/novedades-guardia.blade.php:215-375` (sin modificar)
+
+**Pendiente:** Click-en-día → reporte (Fase 4b).
+
+### 2026-08-20 — Apoyos S-4: toggle tabla/calendario + vista calendario visual
+
+**Funcionalidad:** Vista de calendario alternativa a la tabla de listado de Apoyos, con navegación mensual y indicadores de color por tipo de apoyo.
+
+**PASO 1 — Toggle:**
+- Propiedad `$vistaActual` (string: `'tabla'` | `'calendario'`, default `'tabla'`)
+- Botones pill `btn-group btn-group-sm` sobre el listado (FontAwesome 6 icons)
+- Al estar en modo calendario: ocultar filtros de Tipo/Estado/búsqueda
+- Eyebrow dinámico: muestra total de registros (tabla) o nombre del mes (calendario)
+
+**PASO 2 — Vista de calendario:**
+- Grilla de 7 columnas (Lun-Dom), header con gradiente ops (#0B2545) + borde #FFD200
+- Navegación mes anterior/siguiente + botón "Hoy" (visible solo si no estamos en el mes actual)
+- Cada celda muestra número de día + puntos de color por cada Tipo distinto presente ese día
+- Usa `color` de `TipoApoyo` para los indicadores (ej: verde=Vehículos, rojo=Antenistas)
+- Límite de 4 indicadores visibles por celda, luego "+N" para los restantes
+- Celdas vacías para días sin apoyos
+- Día actual resaltado con borde dorado (#FFD200)
+- Leyenda de tipos activos debajo del calendario
+
+**PASO 3 — Query eficiente:**
+- Una sola query por mes: `Apoyo::with('tipo')->where('desde', '<=', finMes)->where('hasta', '>=', inicioMes)`
+- Agrupación por día en PHP: itera el rango [desde→hasta] de cada apoyo y asigna a cada día del mes
+- Un apoyo que dura varios días aparece marcado en TODOS esos días (no solo inicio)
+- `#[Computed]` para cachear `apoyosPorDia` y `diasCalendario`
+
+**Archivos modificados (3):**
+- `app/Livewire/Apoyos.php` — Props `$vistaActual`/`$mes`/`$anio`, métodos `cambiarVista()`/`mesAnterior()`/`mesSiguiente()`/`irAHoy()`/`nombreMesActual()`, computed `apoyosPorDia()`, helpers `diasCalendario()`/`esHoy()`, render condicional
+- `resources/views/livewire/apoyos/index.blade.php` — Toggle btn-group, sección calendario con grilla + indicadores + leyenda, tabla envuelta en `@if ($vistaActual === 'tabla')`
+- `public/css/ops-panel.css` — Agregados estilos `.apoyos-calendar__*` (header, nav, weekdays, grid, day, dot, indicators, more, legend)
+
+**Pendiente:** Click-en-día → reporte (Fase 4b).
 
 ### 2026-08-19 — Correos fallidos: persistencia de modo de envío (con_adjuntos / con_zip)
 

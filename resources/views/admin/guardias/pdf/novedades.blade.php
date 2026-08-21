@@ -210,12 +210,12 @@
                                         $fechaNovedad->format('y')
                                     : $fechaNovedad->format('Hi'))
                                 : '-';
-                            
+
                             // Conversión segura de destino (Array / JSON / String)
                             $destinosList = is_array($novedad->destino)
                                 ? $novedad->destino
                                 : (is_string($novedad->destino) && !empty($novedad->destino)
-                                    ? (json_decode($novedad->destino, true) ?? [$novedad->destino])
+                                    ? json_decode($novedad->destino, true) ?? [$novedad->destino]
                                     : []);
                             $destinoTexto = !empty($destinosList) ? implode(', ', $destinosList) : '-';
                         @endphp
@@ -237,10 +237,7 @@
     @endforeach
 
     {{-- Novedades de Personal --}}
-    @php $novedadesPersonal = $guardia->novedadesPersonal->sortBy([
-        ['fecha', 'asc'],
-        ['hora', 'asc'],
-    ]); @endphp
+    @php $novedadesPersonal = $guardia->novedadesPersonal->sortBy([['fecha', 'asc'], ['hora', 'asc']]); @endphp
     <div class="seccion">
         <p class="seccion-titulo">Novedades de Personal.</p>
         <table>
@@ -255,7 +252,8 @@
                 @php $fechaAnteriorFila = null; @endphp
                 @forelse($novedadesPersonal as $item)
                     @php
-                        $esPrimeraDelDia = $item->fecha && (!$fechaAnteriorFila || !$item->fecha->isSameDay($fechaAnteriorFila));
+                        $esPrimeraDelDia =
+                            $item->fecha && (!$fechaAnteriorFila || !$item->fecha->isSameDay($fechaAnteriorFila));
                         if ($esPrimeraDelDia) {
                             $fechaAnteriorFila = $item->fecha->copy();
                         }
@@ -395,7 +393,8 @@
                     @forelse($salidas as $salida)
                         <tr>
                             <td class="text-center">{{ optional($salida->hora_sale)->format('Hi') }}</td>
-                            <td class="text-center">{{ $salida->fecha_sale?->format('d/m') ?? $salida->guardia->date->format('d/m') }}</td>
+                            <td class="text-center">
+                                {{ $salida->fecha_sale?->format('d/m') ?? $salida->guardia->date->format('d/m') }}</td>
                             <td class="text-center">
                                 @if ($salida->boletaCierre)
                                     {{ optional($salida->boletaCierre->hora_entra)->format('Hi') }}
@@ -503,8 +502,9 @@
             <table class="firma-tabla" border="0">
                 <tr>
                     <td colspan="3" style="text-align: right; padding-right: 60px; border: none; font-size: 11px;">
-                        Cuartel en Peñarol,
-                        {{ $guardia->date->copy()->addDay()->format('d') }}0830{{ strtoupper($guardia->date->copy()->addDay()->format('My')) }}.
+                        @php $fechaDoc = $guardia->date->copy()->addDay()->locale('es'); @endphp
+                        Montevideo, {{ $fechaDoc->translatedFormat('d') }} 0830 de
+                        {{ ucfirst($fechaDoc->translatedFormat('F')) }} de {{ $fechaDoc->translatedFormat('Y') }}.
                     </td>
                 </tr>
 

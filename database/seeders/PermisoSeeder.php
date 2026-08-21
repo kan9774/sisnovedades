@@ -215,6 +215,20 @@ class PermisoSeeder extends Seeder
                 ['name' => 'eliminar_tipo_rodado', 'description' => 'Eliminar tipos de rodado'],
             ],
 
+            'TipoApoyo' => [
+                ['name' => 'ver_tipos_apoyo', 'description' => 'Ver tipos de apoyo'],
+                ['name' => 'crear_tipo_apoyo', 'description' => 'Crear tipos de apoyo'],
+                ['name' => 'editar_tipo_apoyo', 'description' => 'Editar tipos de apoyo'],
+                ['name' => 'eliminar_tipo_apoyo', 'description' => 'Eliminar tipos de apoyo'],
+            ],
+
+            'Apoyo' => [
+                ['name' => 'ver_apoyos', 'description' => 'Ver listado de apoyos'],
+                ['name' => 'crear_apoyo', 'description' => 'Crear nuevos apoyos'],
+                ['name' => 'editar_apoyo', 'description' => 'Editar apoyos existentes'],
+                ['name' => 'eliminar_apoyo', 'description' => 'Eliminar apoyos'],
+            ],
+
             'User' => [
                 ['name' => 'ver_usuarios', 'description' => 'Ver listado de usuarios'],
                 ['name' => 'ver_usuario', 'description' => 'Ver detalle de un usuario'],

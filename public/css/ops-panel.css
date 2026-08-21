@@ -1508,3 +1508,191 @@ body.ops-panel-open {
 .ops-modal__body textarea.form-control {
     min-height: 90px;
 }
+
+/* ==========================================================================
+   Calendario de Apoyos S-4 — grid mensual con indicadores por tipo
+   ========================================================================== */
+
+.apoyos-calendar {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.apoyos-calendar__header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    padding: .85rem 1rem;
+    background: linear-gradient(135deg, #0B2545 0%, #0F3460 100%);
+    border-bottom: 3px solid #FFD200;
+}
+
+.apoyos-calendar__nav {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    border-radius: 6px;
+    width: 34px;
+    height: 34px;
+    font-size: .85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+
+.apoyos-calendar__nav:hover {
+    background: rgba(255, 210, 0, 0.18);
+    border-color: #FFD200;
+    color: #FFD200;
+}
+
+.apoyos-calendar__title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: .04em;
+    min-width: 180px;
+    text-align: center;
+}
+
+.apoyos-calendar__hoy {
+    background: rgba(255, 210, 0, 0.15);
+    border: 1px solid #FFD200;
+    color: #FFD200;
+    border-radius: 6px;
+    padding: .3rem .75rem;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.apoyos-calendar__hoy:hover {
+    background: #FFD200;
+    color: #0B2545;
+}
+
+.apoyos-calendar__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.apoyos-calendar__weekdays span {
+    text-align: center;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: .55rem 0;
+}
+
+.apoyos-calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.apoyos-calendar__day {
+    min-height: 72px;
+    padding: .35rem;
+    border-right: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background .12s;
+}
+
+.apoyos-calendar__day:nth-child(7n) {
+    border-right: none;
+}
+
+.apoyos-calendar__day--empty {
+    background: #fafbfc;
+}
+
+.apoyos-calendar__day--has {
+    background: #f8fffe;
+    cursor: pointer;
+}
+
+.apoyos-calendar__day--has:hover {
+    background: #eef9f6;
+    box-shadow: inset 0 0 0 2px rgba(11, 37, 69, 0.18);
+}
+
+.apoyos-calendar__day--has:hover .apoyos-calendar__day-num {
+    color: #0B2545;
+}
+
+.apoyos-calendar__day--today {
+    background: rgba(255, 210, 0, 0.08) !important;
+    box-shadow: inset 0 0 0 2px #FFD200;
+}
+
+.apoyos-calendar__day-num {
+    display: block;
+    font-size: .78rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: .25rem;
+}
+
+.apoyos-calendar__day--today .apoyos-calendar__day-num {
+    color: #0B2545;
+    font-weight: 800;
+}
+
+.apoyos-calendar__indicators {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.apoyos-calendar__dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
+}
+
+.apoyos-calendar__more {
+    font-size: .62rem;
+    font-weight: 700;
+    color: #6c757d;
+    line-height: 10px;
+    padding: 0 2px;
+}
+
+.apoyos-calendar__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    padding: .65rem 1rem;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.apoyos-calendar__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .75rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.apoyos-calendar__legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
+}
