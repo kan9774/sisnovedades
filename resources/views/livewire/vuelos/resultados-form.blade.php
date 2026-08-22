@@ -54,7 +54,7 @@
                         @foreach ($vuelo->palomas as $paloma)
                             <tr>
                                 <td><strong>{{ $paloma->anilla }}</strong></td>
-                                <td>{{ $paloma->nombre ?? '-' }}</td>
+                                <td>-</td>
                                 <td>{{ $paloma->pivot->anilla_competicion ?? '-' }}</td>
                                 <td>
                                     <input type="number" step="0.01" min="0"

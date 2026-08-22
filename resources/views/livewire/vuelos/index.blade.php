@@ -12,7 +12,7 @@
                 <select wire:model.live="palomaFilter" class="form-control">
                     <option value="">Todas las palomas</option>
                     @foreach($palomasActivas as $p)
-                        <option value="{{ $p->id }}">{{ $p->anilla }} - {{ $p->nombre ?? 'S/N' }}</option>
+                        <option value="{{ $p->id }}">{{ $p->anilla }}</option>
                     @endforeach
                 </select>
             </div>
@@ -195,7 +195,7 @@
                                                         wire:click="togglePaloma({{ $paloma->id }})">
                                                 </td>
                                                 <td>{{ $paloma->anilla }}</td>
-                                                <td>{{ $paloma->nombre ?? '-' }}</td>
+                                                <td>-</td>
                                                 <td><span class="badge-ops badge-ops-secondary">{{ $paloma->estado->nombre ?? '-' }}</span></td>
                                                 <td>
                                                     <input type="text"

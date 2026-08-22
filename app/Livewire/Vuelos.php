@@ -52,11 +52,29 @@ class Vuelos extends Component
     // ── Vuelo para edición (estado finalizado check en blade) ──
     public $vuelo = null;
 
-    // ── mount: autorización de acceso + cargar catálogos ──
+    // ── mount: autorización de acceso + cargar catálogos + parámetros de query ──
     public function mount()
     {
         $this->authorize('viewAny', Vuelo::class);
         $this->cargarCatalogos();
+
+        // Abrir formulario de alta pre-seleccionando una paloma (desde paloma-show)
+        $palomaId = request()->query('paloma_id');
+        if ($palomaId) {
+            $this->palomaFilter = (string) $palomaId;
+            $this->selectedPalomaIds = [(int) $palomaId => (int) $palomaId];
+            $this->resetForm();
+            $this->formFormTipo = 'create';
+            // Reestablecer la paloma pre-seleccionada (resetForm la borra)
+            $this->selectedPalomaIds = [(int) $palomaId => (int) $palomaId];
+            $this->showForm = true;
+        }
+
+        // Abrir formulario de edición (desde paloma-show)
+        $vueloEditId = request()->query('vuelo_edit_id');
+        if ($vueloEditId) {
+            $this->abrirEditar((int) $vueloEditId);
+        }
     }
 
     // ── Cargar catálogos una vez ──
@@ -65,7 +83,7 @@ class Vuelos extends Component
         $this->palomasActivas = Paloma::whereHas('estado', fn($q) => $q->where('nombre', 'Activa'))
             ->with('estado')
             ->orderBy('anilla')
-            ->get(['id', 'anilla', 'nombre', 'estado_id']);
+            ->get(['id', 'anilla', 'estado_id']);
     }
 
     // ── Consulta con caché ──

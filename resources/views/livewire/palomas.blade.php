@@ -240,4 +240,52 @@
         </div>
     </div>
 </template>
+
+{{-- MODAL: CONFIRMAR ELIMINACIÓN (ops-panel overlay) --}}
+<template x-teleport="body">
+    <div class="ops-panel-overlay" id="confirmDeleteModal" x-data x-init="$watch('$wire.confirmDeleteId', value => {
+        if (value) document.body.classList.add('ops-panel-open');
+        else document.body.classList.remove('ops-panel-open');
+    })"
+        :class="{ 'is-open': $wire.confirmDeleteId }"
+        wire:click.self="confirmDeleteId = null">
+        <div class="ops-panel ops-panel--sm">
+            <div class="ops-panel__form">
+                <div class="ops-panel__header">
+                    <div class="ops-panel__title-wrap">
+                        <span class="ops-panel__eyebrow">Confirmar</span>
+                        <h5 class="ops-panel__title">Eliminar paloma</h5>
+                    </div>
+                    <button type="button" class="ops-panel__close" wire:click="confirmDeleteId = null" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ops-panel__body">
+                    <div class="ops-panel__content">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                        </div>
+                        <p class="text-center mb-0">¿Está seguro que desea eliminar esta paloma?</p>
+                    </div>
+                </div>
+
+                <div class="ops-panel__footer">
+                    <button type="button" class="btn btn-outline-secondary" wire:click="confirmDeleteId = null"
+                        wire:loading.attr="disabled">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-ops-danger"
+                        wire:click="ejecutarEliminacion"
+                        wire:loading.attr="disabled">
+                        @if ($loading)
+                            <span class="spinner-border spinner-border-sm mr-1"></span>
+                        @endif
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
 </div>

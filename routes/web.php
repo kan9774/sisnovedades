@@ -333,6 +333,18 @@ Route::middleware(['auth', 'verified.if-enabled', 'require.password-change'])->g
                 return view('livewire.vuelos.resultados', ['vueloId' => $vuelo->id]);
             })->name('vuelos.resultados');
 
+                // Eliminar vuelo (POST — usado desde paloma-show.blade.php)
+                Route::delete('vuelos/{vuelo}', function (\App\Models\Vuelo $vuelo) {
+                    try {
+                        abort_unless($vuelo->palomas()->count() === 0, 409, 'No se puede eliminar: el vuelo tiene palomas registradas.');
+                        $vuelo->palomas()->detach();
+                        $vuelo->delete();
+                        return redirect()->back()->with('success', 'Vuelo eliminado correctamente.');
+                    } catch (\Exception $e) {
+                        return redirect()->back()->with('error', 'Error al eliminar: ' . $e->getMessage());
+                    }
+                })->name('vuelos.destroy');
+
             // VueloController desactivado — rutas reemplazadas por Livewire\Vuelos
 
             // Estados de paloma (Livewire, formulario inline sin modales)

@@ -191,7 +191,7 @@
         <div class="col-lg-8 col-md-7">
             <x-ops-card title="Vuelos registrados" icon="plane" eyebrow="Actividad" :eyebrowCount="$paloma->vuelos->count()">
                 <x-slot:actions>
-                    <a href="{{ route('admin.vuelos.create', ['paloma_id' => $paloma->id]) }}" class="btn-ops btn-ops-success btn-sm">
+                    <a href="{{ route('admin.vuelos.index') }}?paloma_id={{ $paloma->id }}" wire:navigate class="btn-ops btn-ops-success btn-sm">
                         <i class="fas fa-plus-circle"></i> Registrar Vuelo
                     </a>
                 </x-slot:actions>
@@ -252,16 +252,17 @@
                                     <td>{{ $vuelo->pivot->posicion ?? '-' }}</td>
                                     <td class="text-center align-middle">
                                         <div class="ops-actions">
-                                            <a href="{{ route('admin.vuelos.edit', $vuelo) }}" class="btn-ops btn-ops-warning btn-ops-icon" title="Editar vuelo">
+                                            <a href="{{ route('admin.vuelos.index') }}?vuelo_edit_id={{ $vuelo->id }}" wire:navigate class="btn-ops btn-ops-warning btn-ops-icon" title="Editar vuelo">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <form action="{{ route('admin.vuelos.destroy', $vuelo) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar este vuelo?')">
-                                                @csrf @method('DELETE')
-                                                <button class="btn-ops btn-ops-danger btn-ops-icon" title="Eliminar vuelo">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn-ops btn-ops-danger btn-ops-icon" title="Eliminar vuelo">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                     </td>
                                 </tr>
                             @empty

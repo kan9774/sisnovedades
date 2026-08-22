@@ -108,7 +108,7 @@
             @forelse($palomar->palomas as $paloma)
                 <tr>
                     <td>{{ $paloma->anilla }}</td>
-                    <td>{{ $paloma->nombre ?? '-' }}</td>
+                    <td>-</td>
                     <td>{{ ucfirst($paloma->sexo) }}</td>
                     <td>
                         <span class="badge" style="background-color: {{ optional($paloma->estado)->color ?? '#6c757d' }};">
