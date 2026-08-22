@@ -202,6 +202,7 @@ class UserWizard extends Component
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['exists:rols,id'],
         ]);
+        $validated['fecha_nacimiento'] = $validated['fecha_nacimiento'] ?: null;
 
         DB::transaction(function () use ($validated) {
             $this->user->update([

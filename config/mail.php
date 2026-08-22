@@ -96,7 +96,20 @@ return [
             ],
             'retry_after' => 60,
         ],
-        
+
+        // Mailer secundario para pruebas de estrés contra el webmail real
+        // (mismo dominio que bounce_imap: webmail.ejercito.mil.uy),
+        // sin usar la cuenta de Gmail que emplea producción/guardia.
+        'test_webmail' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_HOST_TEST_WEBMAIL'),
+            'port' => env('MAIL_PORT_TEST_WEBMAIL', 587),
+            'encryption' => env('MAIL_ENCRYPTION_TEST_WEBMAIL', 'tls'),
+            'username' => env('MAIL_USERNAME_TEST_WEBMAIL'),
+            'password' => env('MAIL_PASSWORD_TEST_WEBMAIL'),
+            'timeout' => null,
+        ],
+
     ],
 'bounce_imap' => [
             'host'       => env('BOUNCE_IMAP_HOST', 'webmail.ejercito.mil.uy'),
